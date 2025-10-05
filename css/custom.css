@@ -823,7 +823,8 @@ header.main-header .header-sticky.active {
 
 .hero {
   position: relative;
-  background: url("../images/hero-bg-image.png") no-repeat;
+  background-color: #ffffff;
+  /* background: url("../images/hero-bg-image.png") no-repeat; */
   background-position: center center;
   background-size: cover;
   padding: 215px 0 100px;
