@@ -458,3 +458,126 @@
 	flowmap_deformation();
 	
 })(jQuery);
+
+
+
+
+
+const menu = document.querySelector(".menu"),
+  menuMain = menu.querySelector(".menu-main"),
+  goBack = menu.querySelector(".go-back"),
+  menuTrigger = document.querySelector(".mobile-menu-trigger"),
+  closeMenu = menu.querySelector(".mobile-menu-close");
+let subMenu;
+function toggleMenu() {
+  menu.classList.toggle("active"),
+    document.querySelector(".menu-overlay").classList.toggle("active");
+}
+function showSubMenu(e) {
+  (subMenu = e.querySelector(".sub-menu")).classList.add("active"),
+    (subMenu.style.animation = "slideLeft 0.5s ease forwards");
+  let t = e.querySelector("i").parentNode.childNodes[0].textContent;
+  (menu.querySelector(".current-menu-title").innerHTML = t),
+    menu.querySelector(".mobile-menu-head").classList.add("active");
+}
+function hideSubMenu() {
+  (subMenu.style.animation = "slideRight 0.5s ease forwards"),
+    setTimeout(() => {
+      subMenu.classList.remove("active");
+    }, 300),
+    (menu.querySelector(".current-menu-title").innerHTML = ""),
+    menu.querySelector(".mobile-menu-head").classList.remove("active");
+}
+function setupTabInteraction() {
+  let e = document.querySelectorAll(".tab-menu .nav-link");
+  document.querySelectorAll(".tab-content .tab-pane"),
+    e.forEach((e) => {
+      let t = e.cloneNode(!0);
+      e.parentNode.replaceChild(t, e);
+    });
+  let t = window.innerWidth >= 992;
+  function n() {
+    let e = window.location.hash;
+    if (e) {
+      let t = document.querySelector(`.tab-menu .nav-link[href="${e}"]`),
+        n = document.querySelector(e);
+      t &&
+        n &&
+        (document
+          .querySelectorAll(".tab-menu .nav-link, .tab-content .tab-pane")
+          .forEach((e) => e.classList.remove("active", "show")),
+        t.classList.add("active"),
+        n.classList.add("active", "show"),
+        setTimeout(() => {
+          n.scrollIntoView({ behavior: "smooth" });
+        }, 100));
+    }
+  }
+  document.querySelectorAll(".tab-menu .nav-link").forEach((e) => {
+    e.addEventListener(t ? "mouseenter" : "click", function (e) {
+      e.preventDefault(),
+        document
+          .querySelectorAll(".tab-menu .nav-link, .tab-content .tab-pane")
+          .forEach((e) => e.classList.remove("active", "show")),
+        this.classList.add("active");
+      let t = this.getAttribute("href"),
+        n = document.querySelector(t);
+      n && n.classList.add("active", "show");
+    });
+  }),
+    n(),
+    window.addEventListener("hashchange", n);
+}
+menuMain.addEventListener("click", (e) => {
+  if (
+    menu.classList.contains("active") &&
+    e.target.closest(".menu-item-has-children")
+  ) {
+    let t = e.target.closest(".menu-item-has-children");
+    showSubMenu(t);
+  }
+}),
+  goBack.addEventListener("click", () => {
+    hideSubMenu();
+  }),
+  menuTrigger.addEventListener("click", () => {
+    toggleMenu();
+  }),
+  closeMenu.addEventListener("click", () => {
+    toggleMenu();
+  }),
+  document.querySelector(".menu-overlay").addEventListener("click", () => {
+    toggleMenu();
+  }),
+  (window.onresize = function () {
+    this.innerWidth > 991 && menu.classList.contains("active") && toggleMenu();
+  }),
+  window.addEventListener("DOMContentLoaded", setupTabInteraction),
+  window.addEventListener("resize", setupTabInteraction),
+  document.addEventListener("DOMContentLoaded", function () {
+    let e = document.querySelector(".counter-wrapper-box");
+    if (!e) return;
+    let t = document.querySelectorAll(".t-counter"),
+      n = !1,
+      r = new IntersectionObserver(
+        (e) => {
+          e.forEach((e) => {
+            e.isIntersecting &&
+              (n ||
+                (t.forEach((e) => {
+                  let t = parseInt(e.getAttribute("data-count")),
+                    n = t / 187.5,
+                    r = 0,
+                    a = setInterval(() => {
+                      (r += n) >= t && (clearInterval(a), (r = t)),
+                        (e.textContent = Math.floor(r));
+                    }, 16);
+                }),
+                (n = !0)),
+              r.unobserve(e.target));
+          });
+        },
+        { threshold: 0.5 }
+      );
+    r.observe(e);
+  });

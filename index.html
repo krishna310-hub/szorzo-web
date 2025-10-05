@@ -13,7 +13,7 @@
 	<!-- Page Title -->
     <title>Szorzo - Global M & A Partner</title>
 	<!-- Favicon Icon -->
-	<link rel="shortcut icon" type="image/x-icon" href="images/loader.webp">
+	<link rel="shortcut icon" type="image/x-icon" href="images/favicon.png">
 	<!-- Google Fonts Css-->
 	<link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
@@ -30,6 +30,9 @@
 	<link href="css/animate.css" rel="stylesheet">
     <!-- Magnific Popup Core Css File -->
 	<link rel="stylesheet" href="css/magnific-popup.css">
+	<link rel="stylesheet" href="css/remixicon.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
 	<!-- Mouse Cursor Css File -->
 	<link rel="stylesheet" href="css/mousecursor.css">
 	<!-- Main Custom Css -->
@@ -41,32 +44,186 @@
 	<div class="preloader">
 		<div class="loading-container">
 			<div class="loading"></div>
-			<div id="loading-icon"><img src="images/loader.webp" alt=""></div>
+			<div id="loading-icon"><img src="images/loader.png" alt="Loader"></div>
 		</div>
 	</div>
 	<!-- Preloader End -->
 
     <!-- Header Start -->
-	<header class="main-header">
+	<header class="header" id="sticky-menu">
+    <div class="container-fluid">
+        <div class="row v-center align-items-center">
+            <div class="header-item item-left header-logo m-0">
+                <div class="logo">
+                    <a class="navbar-brand" href="index.html">
+						<img src="images/logo-bg.png" alt="Logo" width="230px">
+					</a>
+
+                </div>
+            </div>
+            <div class="header-item item-center">
+                <div class="menu-overlay"></div>
+                <nav class="menu">
+                    <div class="mobile-menu-head">
+                        <div class="go-back"><i class="fa fa-angle-left"></i></div>
+                        <div class="current-menu-title"></div>
+                        <div class="mobile-menu-close">&times;</div>
+                    </div>
+                    <ul class="menu-main mb-0">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li class="menu-item-has-children">
+                            <a>About Us <i class="ri-arrow-down-s-line"></i></a>
+                            <div class="sub-menu single-column-menu">
+                                <ul>
+                                    <li><a href="who-we-are.html">Who we are</a></li>
+                                    <li><a href="industries.html">Industries</a></li>
+                                    <li><a href="careers.html">Careers</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="menu-item-has-children">
+                            <a>Services <i class="ri-arrow-down-s-line"></i></a>
+                            <div class="sub-menu mega-menu mega-menu-column-4">
+                                <div class="list-item">
+                                    <h4 class="title"> <a
+                                            href="penetration-testing.html">Penetration Testing</a>
+                                    </h4>
+                                    <ul>
+                                        <li><a href="penetration-testing.html#WebApplication">Web
+                                                Application Penetration Testing</a></li>
+                                        <li><a href="penetration-testing.html#Cloud">Cloud
+                                                Penetration Testing</a></li>
+                                        <li><a href="penetration-testing.html#MobileApplication">Mobile
+                                                Application Penetration Testing</a></li>
+                                        <li><a href="penetration-testing.html#API">API Penetration
+                                                Testing</a></li>
+                                        <li><a href="penetration-testing.html#Network">Network
+                                                Penetration Testing</a></li>
+                                        <li><a href="penetration-testing.html#InternalExternal">Internal
+                                                & External Penetration Testing</a></li>
+                                    </ul>
+                                    <h4 class="title"> <a
+                                            href="application-security.html">Application
+                                            Security</a>
+                                    </h4>
+                                    <ul>
+                                        <li><a href="application-security.html#SecureCodeReviews">Secure
+                                                Code Reviews
+                                            </a></li>
+                                        <li><a
+                                                href="application-security.html#DynamicApplicationTesting">Dynamic
+                                                Application
+                                                Testing (DAST)</a></li>
+                                        <li><a
+                                                href="application-security.html#CloudApplicationSecurityAssessment">Cloud
+                                                Application
+                                                Security Assessment</a></li>
+                                    </ul>
+                                </div>
+                                <div class="list-item">
+
+                                    <h4 class="title"><a href="security-audit.html">Security
+                                            Audit</a></h4>
+                                    <ul>
+                                        <li><a href="security-audit.html#IDPSAudits">Intrusion
+                                                Detection
+                                                and Prevention System
+                                                (IDPS) Audits</a></li>
+                                        <li><a href="security-audit.html#FirewallSecurityAudit">Firewall
+                                                Security
+                                                Audit </a></li>
+                                        <li><a
+                                                href="security-audit.html#IncidentResponsePlanningandAudits">Incident
+                                                Response
+                                                Planning and Audits</a></li>
+                                    </ul>
+                                    <h4 class="title"> <a href="cloud-security.html">Cloud
+                                            Security</a>
+                                    </h4>
+                                    <ul>
+                                        <li><a href="cloud-security.html#CloudSecurityAudit">Cloud
+                                                Security Audit
+                                            </a></li>
+                                        <li><a
+                                                href="cloud-security.html#CloudSecurityandCloudAssessment">Cloud
+                                                Security &
+                                                Cloud Assessment</a></li>
+                                        <li><a href="cloud-security.html#ContainerSecurity">Container
+                                                Security</a></li>
+                                    </ul>
+                                </div>
+                                <div class="list-item">
+                                    <h4 class="title"><a
+                                            href="compliance-and-data-protection.html">Compliance &
+                                            Data Protection</a></h4>
+                                    <ul>
+                                        <li><a
+                                                href="compliance-and-data-protection.html#ISO-271001">ISO
+                                                27001</a></li>
+                                        <li><a href="compliance-and-data-protection.html#SOC-2">SOC
+                                                2</a></li>
+                                        <li><a
+                                                href="compliance-and-data-protection.html#HIPAA">HIPAA</a>
+                                        </li>
+                                        <li><a
+                                                href="compliance-and-data-protection.html#EU-GDPR">EU-GDPR</a>
+                                        </li>
+                                        <li><a href="compliance-and-data-protection.html#PCI">PCI
+                                                DSS, PCI SSF,
+                                                PCI ASV</a></li>
+                                        <li><a
+                                                href="compliance-and-data-protection.html#CCPA">CCPA</a>
+                                        </li>
+                                        <li><a
+                                                href="compliance-and-data-protection.html#PIPEDA">PIPEDA</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="list-item header-cta">
+                                    <img src="images/robot-human-bg.jpg" alt="Szorzo" />
+                                    <div class="cta-content">
+                                        <h2>Boost Your Security with  Szorzo</h2>
+                                         <a href="contact.html" class="btn-default">Get Started</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="blogs.html">Blog</a>
+                        </li>
+                        <li>
+                            <a href="contact-us.html">Contact Us</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="header-item item-right">
+                
+                <div class="d-none d-lg-block">
+                   <div class="header-btn">
+                            <a href="contact.html" class="btn-default">Get Started</a>
+                        </div>
+                </div>
+                <div class="mobile-menu-trigger">
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+	<!-- <header class="main-header">
 		<div class="header-sticky">
 			<nav class="navbar navbar-expand-lg">
 				<div class="container-fluid">
-					<!-- Logo Start -->
 					<a class="navbar-brand" href="index.html">
 						<img src="images/logo-bg.png" alt="Logo" width="230px">
 					</a>
-					<!-- Logo End -->
-
-					<!-- Main Menu Start -->
 					<div class="collapse navbar-collapse main-menu">
                         <div class="nav-menu-wrapper">
                             <ul class="navbar-nav mr-auto" id="menu">
                                 <li class=""><a class="nav-link" href="index.html">Home</a>
-                                    <!-- <ul>
-                                        <li class="nav-item"><a class="nav-link" href="index-2.html">Home - Main</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="index-image.html">Home - Image</a></li>
-                                        <li class="nav-item"><a class="nav-link" href="index-video.html">Home - Video</a></li>
-                                    </ul> -->
                                 </li>                                
                                 <li class="nav-item"><a class="nav-link" href="services.html">Our Solutions</a></li>
                                 <li class="nav-item"><a class="nav-link" href="about.html">About Us</a>
@@ -89,20 +246,16 @@
                                 <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>                   
                             </ul>
                         </div>
-                        
-                        <!-- Header Btn Start -->
                         <div class="header-btn">
                             <a href="contact.html" class="btn-default">Get Started</a>
                         </div>
-                        <!-- Header Btn End -->
 					</div>
-					<!-- Main Menu End -->
 					<div class="navbar-toggle"></div>
 				</div>
 			</nav>
 			<div class="responsive-menu"></div>
 		</div>
-	</header>
+	</header> -->
 	<!-- Header End -->
 
     <!-- Hero Section Start -->
