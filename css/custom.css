@@ -7043,3 +7043,9 @@ header.main-header .header-sticky.active {
   list-style: none;
 }
 /* mega menu css end */
+.page-header-home-bg.new-bg-image{
+  background: url(../images/robot-human-bg.jpg);
+}
+.hero.new-page-section-hero{
+  padding: 290px 0 10px;
+}
