@@ -2520,6 +2520,7 @@ header.main-header .header-sticky.active {
   position: relative;
   background: url("../images/bg-12.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
+  margin-top: -150px;
   z-index: 1;
 }
 
