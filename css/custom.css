@@ -896,7 +896,7 @@ header.main-header .header-sticky.active {
 }
 
 .hero-section-content {
-  margin-left: 5.99vw;
+  margin-left: 1vw;
 }
 
 .hero-content {
@@ -1690,7 +1690,7 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .how-it-work {
-  padding: 100px 0;
+  padding: 70px 0;
 }
 
 .work-step-item {
@@ -2192,7 +2192,7 @@ header.main-header .header-sticky.active {
 }
 
 .footer-links h3 {
-  font-size: 20px;
+  font-size: 15px;
   color: var(--white-color);
   text-transform: capitalize;
   margin-bottom: 30px;
@@ -2209,6 +2209,7 @@ header.main-header .header-sticky.active {
   text-transform: capitalize;
   line-height: 1.5em;
   margin-bottom: 15px;
+  font-size: 15px;
 }
 
 .footer-links ul li:last-child {
@@ -2329,7 +2330,7 @@ header.main-header .header-sticky.active {
   background: linear-gradient(
     90deg,
     var(--accent-secondary-color) 0%,
-    var(--accent-color) 50%,
+    var(--accent-color) 0%,
     var(--accent-secondary-color) 100%
   );
   background-size: 200% auto;
@@ -2365,9 +2366,10 @@ header.main-header .header-sticky.active {
 
 .page-header-maas-bg {
   position: relative;
-  background: url("../images/bg-4.jpg") no-repeat center center/cover;
+  background: url("../images/bg-19.jpg") no-repeat center center/cover;
   margin-top: -150px;
   padding: 230px 0 115px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2384,9 +2386,10 @@ header.main-header .header-sticky.active {
 
 .page-header-ma-bg {
   position: relative;
-  background: url("../images/bg-5.jpg") no-repeat center center/cover;
+  background: url("../images/bg-12.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2403,9 +2406,10 @@ header.main-header .header-sticky.active {
 
 .page-header-oc-bg {
   position: relative;
-  background: url("../images/bg-6.jpg") no-repeat center center/cover;
+  background: url("../images/bg-18.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2422,9 +2426,10 @@ header.main-header .header-sticky.active {
 
 .page-header-oi-bg {
   position: relative;
-  background: url("../images/bg-7.jpg") no-repeat center center/cover;
+  background: url("../images/pink-rhino.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2444,6 +2449,7 @@ header.main-header .header-sticky.active {
   background: url("../images/bg-8.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2463,6 +2469,7 @@ header.main-header .header-sticky.active {
   background: url("../images/bg-9.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2482,6 +2489,7 @@ header.main-header .header-sticky.active {
   background: url("../images/bg-10.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2501,6 +2509,7 @@ header.main-header .header-sticky.active {
   background: url("../images/bird-ai.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2517,8 +2526,9 @@ header.main-header .header-sticky.active {
 
 .page-header-contact-us-bg {
   position: relative;
-  background: url("../images/bg-16.jpg") no-repeat center center/cover;
+  background: url("../images/bg-14.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
+  height: 710px;
   margin-top: -150px;
   z-index: 1;
 }
@@ -2536,9 +2546,10 @@ header.main-header .header-sticky.active {
 
 .page-header-home-bg {
   position: relative;
-  background: url("../images/bg-12.jpg") no-repeat center center/cover;
+  background: url("../images/bg-20.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
+  height: 710px;
   z-index: 1;
 }
 
@@ -2550,6 +2561,26 @@ header.main-header .header-sticky.active {
   width: 100%;
   height: 100%;
   /* background: rgba(0, 0, 0, 0.5); */
+  z-index: -1;
+}
+
+.page-header-ef-bg {
+  position: relative;
+  background: url("../images/bg-21.jpg") no-repeat center center/cover;
+  padding: 230px 0 115px;
+  margin-top: -150px;
+  height: 710px;
+  z-index: 1;
+}
+
+.page-header-ef-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   z-index: -1;
 }
 
@@ -7066,4 +7097,25 @@ header.main-header .header-sticky.active {
 }
 .hero.new-page-section-hero{
   padding: 290px 0 10px;
+}
+
+.black-card {
+    background: rgba(0, 0, 0, 0.6); /* semi-transparent black */
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 550px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin-top: -80px;
+}
+
+.black-card h1,
+.black-card h3,
+.black-card p {
+    color: white;
+    margin: 0 0 15px 0;
+}
+
+.black-card span {
+    color: var(--accent-color); /* match your theme highlight */
 }
