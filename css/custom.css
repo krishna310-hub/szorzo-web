@@ -451,7 +451,8 @@ body {
 }
 
 .section-title h1 span,
-.section-title h2 span {
+.section-title h2 span,
+.member-info-counter-item h2 span {
   background: linear-gradient(
     to right,
     var(--accent-secondary-color) 0%,
@@ -2497,7 +2498,7 @@ header.main-header .header-sticky.active {
 
 .page-header-about-us-bg {
   position: relative;
-  background: url("../images/bg-11.jpg") no-repeat center center/cover;
+  background: url("../images/bird-ai.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   z-index: 1;
@@ -2548,7 +2549,7 @@ header.main-header .header-sticky.active {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  /* background: rgba(0, 0, 0, 0.5); */
   z-index: -1;
 }
 
@@ -7032,7 +7033,7 @@ header.main-header .header-sticky.active {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.3);
+  /* background: rgba(0, 0, 0, 0.3); */
   z-index: 0;
 }
 
