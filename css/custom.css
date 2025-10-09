@@ -41,7 +41,7 @@
 /************************************/
 /*** 	 01. Global Variables	  ***/
 /************************************/
-
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 :root {
   --primary-color: #111111;
   --secondary-color: #f0f2f4;
@@ -52,7 +52,8 @@
   --divider-color: #1111111a;
   --dark-divider-color: #ffffff10;
   --error-color: rgb(230, 87, 87);
-  --default-font: "Manrope", sans-serif;
+  --default-font: "Oswald", sans-serif;
+  /* --default-font: "Manrope", sans-serif; */
 }
 
 /************************************/
@@ -1703,7 +1704,7 @@ header.main-header .header-sticky.active {
 }
 
 .work-step-item {
-  text-align: center;
+  text-align: start;
   height: calc(100% - 30px);
   margin-bottom: 30px;
 }
@@ -7207,4 +7208,7 @@ header.main-header .header-sticky.active {
 }
 .menu-main a:hover::after {
     width: 100%;
+}
+.work-step-content{
+  text-align: start;
 }
