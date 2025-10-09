@@ -1690,7 +1690,7 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .how-it-work {
-  padding: 70px 0;
+  padding:70px 0;
 }
 
 .work-step-item {
@@ -1724,7 +1724,20 @@ header.main-header .header-sticky.active {
 }
 
 .work-step-content p {
-  margin: 0;
+  position: relative;
+  padding-left: 20px; /* space for bullet */
+  margin-bottom: 8px;
+}
+
+.work-step-content p::before {
+  content: "->"; /* bullet symbol */
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--accent-color); /* or use white/black as needed */
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 1;
 }
 
 .how-it-work-list {
@@ -2366,7 +2379,7 @@ header.main-header .header-sticky.active {
 
 .page-header-maas-bg {
   position: relative;
-  background: url("../images/bg-19.jpg") no-repeat center center/cover;
+  background: url("../images/bg-26.jpg") no-repeat center center/cover;
   margin-top: -150px;
   padding: 230px 0 115px;
   height: 710px;
@@ -2406,7 +2419,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oc-bg {
   position: relative;
-  background: url("../images/bg-18.jpg") no-repeat center center/cover;
+  background: url("../images/bg-34.jpg") no-repeat center 10%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2426,7 +2439,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oi-bg {
   position: relative;
-  background: url("../images/pink-rhino.jpg") no-repeat center center/cover;
+  background: url("../images/bg-35.jpg") no-repeat center 1%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2506,7 +2519,7 @@ header.main-header .header-sticky.active {
 
 .page-header-about-us-bg {
   position: relative;
-  background: url("../images/bird-ai.jpg") no-repeat center center/cover;
+  background: url("../images/pink-rhino.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2526,7 +2539,7 @@ header.main-header .header-sticky.active {
 
 .page-header-contact-us-bg {
   position: relative;
-  background: url("../images/bg-14.jpg") no-repeat center center/cover;
+  background: url("../images/bg-24.jpg") no-repeat center 10%/cover;
   padding: 230px 0 115px;
   height: 710px;
   margin-top: -150px;
@@ -2546,7 +2559,7 @@ header.main-header .header-sticky.active {
 
 .page-header-home-bg {
   position: relative;
-  background: url("../images/bg-20.jpg") no-repeat center center/cover;
+  background: url("../images/bg-33.jpg") no-repeat center 25%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2560,13 +2573,13 @@ header.main-header .header-sticky.active {
   left: 0;
   width: 100%;
   height: 100%;
-  /* background: rgba(0, 0, 0, 0.5); */
+  /* background: rgba(0, 0, 0, 0.1); */
   z-index: -1;
 }
 
 .page-header-ef-bg {
   position: relative;
-  background: url("../images/bg-21.jpg") no-repeat center center/cover;
+  background: url("../images/bg-36.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -7100,13 +7113,14 @@ header.main-header .header-sticky.active {
 }
 
 .black-card {
-    background: rgba(0, 0, 0, 0.6); /* semi-transparent black */
-    padding: 30px;
+    background: rgba(0, 0, 0, 0.1); 
+    padding: 20px;
     border-radius: 20px;
-    max-width: 550px;
+    max-width: 900px;
     color: white;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    margin-top: -80px;
+    margin-top: 100px;
+    margin-left: -90px;
 }
 
 .black-card h1,
@@ -7117,5 +7131,37 @@ header.main-header .header-sticky.active {
 }
 
 .black-card span {
+    color: var(--accent-color); 
+}
+
+.white-card {
+    /* background: rgba(112, 110, 110, 0.6);  */
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 550px;
+    color: white;
+    /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
+    margin-top: -80px;
+}
+
+.white-card h1,
+.white-card h3,
+.white-card p {
+    color: white;
+    margin: 0 0 15px 0;
+}
+
+.white-card span {
     color: var(--accent-color); /* match your theme highlight */
+}
+
+.page-header-ma-bg .white-card {
+  max-width: 700px;
+}
+
+.page-header-oc-bg .white-card {
+  max-width: 1300px;
+  /* background: rgba(0, 0, 0, 0); */
+  /* background: rgba(65, 65, 65, 0.6); */
+  text-align: center;
 }
