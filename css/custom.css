@@ -273,8 +273,8 @@ body {
 }
 
 .btn-default:hover {
-   color: var(--white-color) !important;
-   border-radius: 100px !important;
+  color: var(--white-color) !important;
+  border-radius: 100px !important;
   background-position: right center;
 }
 
@@ -1699,7 +1699,7 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .how-it-work {
-  padding:70px 0;
+  padding: 70px 0;
 }
 
 .work-step-item {
@@ -1740,11 +1740,11 @@ header.main-header .header-sticky.active {
 }
 
 .work-step-content p::before {
-  content: "->"; /* bullet symbol */
+  content: "->";
   position: absolute;
-  left: 0;
-  top: 0;
-  color: var(--accent-color); /* or use white/black as needed */
+  left: -6px;
+  top: 3px;
+  color: var(--accent-color);
   font-weight: bold;
   font-size: 20px;
   line-height: 1;
@@ -2389,7 +2389,8 @@ header.main-header .header-sticky.active {
 
 .page-header-maas-bg {
   position: relative;
-  background: url("../images/cartoon-ai-robot-scene.jpg") no-repeat center center/cover;
+  background: url("../images/cartoon-ai-robot-scene.jpg") no-repeat center
+    center/cover;
   margin-top: -150px;
   padding: 230px 0 115px;
   height: 710px;
@@ -2429,7 +2430,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oc-bg {
   position: relative;
-  background: url("../images/robot-human-bg.jpg") no-repeat center 10%/cover;
+  background: url("../images/robot-human-bg.jpg") no-repeat center 10% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2449,7 +2450,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oi-bg {
   position: relative;
-  background: url("../images/bg-37.jpg") no-repeat center 50%/cover;
+  background: url("../images/bg-37.jpg") no-repeat center 50% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2549,7 +2550,7 @@ header.main-header .header-sticky.active {
 
 .page-header-contact-us-bg {
   position: relative;
-  background: url("../images/bg-24.jpg") no-repeat center 10%/cover;
+  background: url("../images/bg-24.jpg") no-repeat center 10% / cover;
   padding: 230px 0 115px;
   height: 710px;
   margin-top: -150px;
@@ -2564,12 +2565,13 @@ header.main-header .header-sticky.active {
   width: 100%;
   height: 100%;
   /* background: rgba(0, 0, 0, 0.5); */
+  background: rgb(0 0 0 / 40%); 
   z-index: -1;
 }
 
 .page-header-home-bg {
   position: relative;
-  background: url("../images/bg-37.png") no-repeat center 17%/cover;
+  background: url("../images/bg-38.jpeg") no-repeat center 17% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -6484,7 +6486,7 @@ header.main-header .header-sticky.active {
   opacity: 0;
   left: 50%;
   visibility: hidden;
-  transform:translate(-50%, 10px) ;
+  transform: translate(-50%, 10px);
 }
 
 @media (min-width: 992px) {
@@ -7115,54 +7117,54 @@ header.main-header .header-sticky.active {
   list-style: none;
 }
 /* mega menu css end */
-.page-header-home-bg.new-bg-image{
+.page-header-home-bg.new-bg-image {
   background: url(../images/robot-human-bg.jpg);
 }
-.hero.new-page-section-hero{
+.hero.new-page-section-hero {
   padding: 290px 0 10px;
 }
 
 .black-card {
-    background: rgba(0, 0, 0, 0.3); 
-    padding: 20px;
-    border-radius: 20px;
-    max-width: 700px;
-    color: white;
-    /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); */
-    margin-top: 0px;
-    margin-left: -90px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  border-radius: 20px;
+  max-width: 700px;
+  color: white;
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); */
+  margin-top: 0px;
+  margin-left: -90px;
 }
 
 .black-card h1,
 .black-card h3,
 .black-card p {
-    color: rgb(255, 255, 255);
-    margin: 0 0 15px 0;
+  color: rgb(255, 255, 255);
+  margin: 0 0 15px 0;
 }
 
 .black-card span {
-    color: var(--accent-color); 
+  color: var(--accent-color);
 }
 
 .white-card {
-    background: rgba(0, 0, 0, 0.3); 
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 550px;
-    color: white;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    margin-top: -80px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 550px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-top: -80px;
 }
 
 .white-card h1,
 .white-card h3,
 .white-card p {
-    color: white;
-    margin: 0 0 15px 0;
+  color: white;
+  margin: 0 0 15px 0;
 }
 
 .white-card span {
-    color: var(--accent-color); /* match your theme highlight */
+  color: var(--accent-color); /* match your theme highlight */
 }
 
 .page-header-ma-bg .white-card {
@@ -7178,4 +7180,31 @@ header.main-header .header-sticky.active {
   /* background: rgba(0, 0, 0, 0); */
   /* background: rgba(65, 65, 65, 0.6); */
   text-align: center;
+}
+
+.white-card.marketing-service-card{
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 20px;
+    max-width: 550px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-top: -20px;
+}
+.menu-main a{
+  position: relative;
+}
+.menu-main a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--accent-color);
+    /* background: linear-gradient(90deg, var(--accent-secondary-color) 0%, var(--accent-color) 0%, var(--accent-secondary-color) 100%); */
+    transition: width 0.3s;
+}
+.menu-main a:hover::after {
+    width: 100%;
 }
