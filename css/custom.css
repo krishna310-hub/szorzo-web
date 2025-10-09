@@ -1741,7 +1741,7 @@ header.main-header .header-sticky.active {
 }
 
 .work-step-content p::before {
-  content: "->";
+  content: "=>";
   position: absolute;
   left: -6px;
   top: 3px;
@@ -2572,7 +2572,7 @@ header.main-header .header-sticky.active {
 
 .page-header-home-bg {
   position: relative;
-  background: url("../images/bg-38.jpeg") no-repeat center 17% / cover;
+  background: url("../images/bg-38.jpg") no-repeat center 17% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2588,6 +2588,10 @@ header.main-header .header-sticky.active {
   height: 100%;
   /* background: rgba(0, 0, 0, 0.1); */
   z-index: -1;
+}
+
+.page-header-home-bg .black-card {
+  max-width: 600px;
 }
 
 .page-header-ef-bg {
