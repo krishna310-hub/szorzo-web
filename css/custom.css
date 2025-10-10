@@ -1375,7 +1375,6 @@ header.main-header .header-sticky.active {
 }
 
 .feature-item {
-  background: #c62620; /* optional for visibility */
   border-radius: 10px;
   padding: 30px 0 0px;
   text-align: center;
@@ -2423,7 +2422,7 @@ header.main-header .header-sticky.active {
 
 .page-header-ma-bg {
   position: relative;
-  background: url("../images/bg-12.jpg") no-repeat center 50%/cover;
+  background: url("../images/bg-54.jpg") no-repeat center 35%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2443,7 +2442,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oc-bg {
   position: relative;
-  background: url("../images/robot-human-bg.jpg") no-repeat center 10% / cover;
+  background: url("../images/bg-60.jpg") no-repeat center 53% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2463,7 +2462,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oi-bg {
   position: relative;
-  background: url("../images/bg-37.jpg") no-repeat center 50% / cover;
+  background: url("../images/bg-61.jpg") no-repeat center 5%/ cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2543,7 +2542,7 @@ header.main-header .header-sticky.active {
 
 .page-header-about-us-bg {
   position: relative;
-  background: url("../images/pink-rhino.jpg") no-repeat center center/cover;
+  background: url("../images/bg-51.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2561,9 +2560,13 @@ header.main-header .header-sticky.active {
   z-index: -1;
 }
 
+.page-header-about-us-bg .white-card {
+  max-width: 1500px;
+}
+
 .page-header-contact-us-bg {
   position: relative;
-  background: url("../images/bg-24.jpg") no-repeat center 10% / cover;
+  background: url("../images/bg-52.jpg") no-repeat center 50% / cover;
   padding: 230px 0 115px;
   height: 710px;
   margin-top: -150px;
@@ -2578,7 +2581,6 @@ header.main-header .header-sticky.active {
   width: 100%;
   height: 100%;
   /* background: rgba(0, 0, 0, 0.5); */
-  background: rgb(0 0 0 / 40%); 
   z-index: -1;
 }
 
@@ -2608,7 +2610,7 @@ header.main-header .header-sticky.active {
 
 .page-header-ef-bg {
   position: relative;
-  background: url("../images/bg-42.jpg") no-repeat center 5%/cover;
+  background: url("../images/bg-59.jpg") no-repeat center 80%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -3219,7 +3221,7 @@ header.main-header .header-sticky.active {
 .service-solution-box,
 .service-result-box,
 .service-tools-box {
-  margin-top: 60px;
+  margin-top: 10px;
 }
 
 .service-solution-list {
@@ -3336,7 +3338,7 @@ header.main-header .header-sticky.active {
 
 .service-result-image,
 .service-result-content {
-  width: calc(50% - 15px);
+  width: calc(120% - 15px);
 }
 
 .service-result-image figure {
@@ -7185,7 +7187,7 @@ header.main-header .header-sticky.active {
 }
 
 .white-card {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.1);
   padding: 30px;
   border-radius: 20px;
   max-width: 550px;
@@ -7206,17 +7208,17 @@ header.main-header .header-sticky.active {
 }
 
 .page-header-ma-bg .white-card {
-  max-width: 700px;
+  max-width: 1300px;
 }
 
 .page-header-oi-bg .white-card {
-  max-width: 1200px;
+  max-width: 800px;
 }
 
 .page-header-oc-bg .white-card {
-  max-width: 1300px;
+  max-width: 700px;
   /* background: rgba(0, 0, 0, 0); */
-  /* background: rgba(65, 65, 65, 0.6); */
+  background: rgba(65, 65, 65, 0.3);
   text-align: center;
 }
 
