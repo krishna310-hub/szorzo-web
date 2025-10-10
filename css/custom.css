@@ -1375,7 +1375,7 @@ header.main-header .header-sticky.active {
 }
 
 .feature-item {
-  background: #f7f7f7; /* optional for visibility */
+  background: #c62620; /* optional for visibility */
   border-radius: 10px;
   padding: 30px 0 0px;
   text-align: center;
@@ -2423,7 +2423,7 @@ header.main-header .header-sticky.active {
 
 .page-header-ma-bg {
   position: relative;
-  background: url("../images/bg-33.jpg") no-repeat center 25%/cover;
+  background: url("../images/bg-12.jpg") no-repeat center 50%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2922,7 +2922,7 @@ header.main-header .header-sticky.active {
 }
 
 .page-services .service-item {
-  border: 1px solid var(--divider-color);
+  border: 10px solid var(--divider-color);
   border-radius: 20px;
   padding: 30px;
   transition: all 0.3s ease-in-out;
@@ -7136,7 +7136,7 @@ header.main-header .header-sticky.active {
 
 .page-header-demo-2 {
   position: relative;
-  background: url("../images/bg-44.jpg") no-repeat center 80% / cover;
+  background: url("../images/bg-48.jpg") no-repeat center 50% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
