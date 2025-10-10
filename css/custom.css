@@ -7180,6 +7180,10 @@ header.main-header .header-sticky.active {
   color: var(--accent-color);
 }
 
+.page-header-demo-2 .black-card {
+  max-width: 550px;
+}
+
 .white-card {
   background: rgba(0, 0, 0, 0.3);
   padding: 30px;
