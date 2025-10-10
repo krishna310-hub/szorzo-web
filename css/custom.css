@@ -451,7 +451,19 @@ body {
   cursor: none;
 }
 
-.section-title h1 span,
+.section-title h1 span {
+  background: linear-gradient(
+    to right,
+    var(--accent-secondary-color) 0%,
+    var(--accent-color) 50%,
+    var(--accent-secondary-color) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  /* -webkit-text-fill-color: transparent; */
+  transition: all 0.4s ease-in-out;
+}
+
 .section-title h2 span,
 .member-info-counter-item h2 span {
   background: linear-gradient(
@@ -2572,7 +2584,7 @@ header.main-header .header-sticky.active {
 
 .page-header-home-bg {
   position: relative;
-  background: url("../images/bg-38.jpg") no-repeat center 17% / cover;
+  background: url("../images/bg-39.jpg") no-repeat center 10% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -7121,10 +7133,27 @@ header.main-header .header-sticky.active {
 .sub-menu ul li {
   list-style: none;
 }
-/* mega menu css end */
-.page-header-home-bg.new-bg-image {
-  background: url(../images/robot-human-bg.jpg);
+
+.page-header-demo-2 {
+  position: relative;
+  background: url("../images/bg-41.jpg") no-repeat center 80% / cover;
+  padding: 230px 0 115px;
+  margin-top: -150px;
+  height: 710px;
+  z-index: 1;
 }
+
+.page-header-demo-2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background: rgba(0, 0, 0, 0.1); */
+  z-index: -1;
+}
+
 .hero.new-page-section-hero {
   padding: 290px 0 10px;
 }
