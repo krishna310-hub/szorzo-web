@@ -2628,6 +2628,10 @@ header.main-header .header-sticky.active {
   z-index: -1;
 }
 
+.page-header-ef-bg .white-card {
+  background: rgba(65, 65, 65, 0.3);
+}
+
 .our-approach {
   padding: 100px 0;
 }
