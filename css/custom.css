@@ -375,6 +375,7 @@ body {
   background-size: cover;
   border-radius: 30px;
   margin: 0 auto;
+  margin-top: -40px;
 }
 
 .dark-section {
@@ -412,7 +413,7 @@ body {
 
 .section-title.section-title-center {
   width: 100%;
-  max-width: 700px;
+  max-width: 1000px;
   text-align: center;
   margin: 0 auto;
 }
@@ -432,6 +433,7 @@ body {
   background-size: 18px auto;
   padding-left: 26px;
   margin-bottom: 20px;
+  font-size: x-large;
 }
 
 .section-title h1 {
@@ -444,7 +446,7 @@ body {
 }
 
 .section-title h2 {
-  font-size: 48px;
+  font-size: 60px;
   font-weight: 600;
   letter-spacing: -0.03em;
   margin-bottom: 0;
@@ -1214,7 +1216,7 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .about-us {
-  padding: 60px 0 1px;
+  padding: 60px 0 0px;
 }
 
 .about-us .section-title.section-title-center {
@@ -2422,7 +2424,7 @@ header.main-header .header-sticky.active {
 
 .page-header-ma-bg {
   position: relative;
-  background: url("../images/bg-54.jpg") no-repeat center 35%/cover;
+  background: url("../images/bg-64.jpg") no-repeat center 35%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2442,7 +2444,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oc-bg {
   position: relative;
-  background: url("../images/bg-60.jpg") no-repeat center 53% / cover;
+  background: url("../images/bg-62.jpg") no-repeat center 53% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2462,7 +2464,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oi-bg {
   position: relative;
-  background: url("../images/bg-61.jpg") no-repeat center 5%/ cover;
+  background: url("../images/bg-65.jpg") no-repeat center 5%/ cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2566,7 +2568,7 @@ header.main-header .header-sticky.active {
 
 .page-header-contact-us-bg {
   position: relative;
-  background: url("../images/bg-52.jpg") no-repeat center 50% / cover;
+  background: url("../images/bg-66.jpg") no-repeat center 50% / cover;
   padding: 230px 0 115px;
   height: 710px;
   margin-top: -150px;
@@ -2924,7 +2926,7 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .page-services {
-  padding: 50px 0 30px;
+  padding: 30px 0 30px;
 }
 
 .page-services .service-item {
@@ -3812,7 +3814,8 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .page-project-single {
-  padding: 10px 0;
+  /* padding: 10px 0; */
+  margin-top: -40px;
 }
 
 .project-category-list {
@@ -4093,7 +4096,7 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .page-team-single {
-  padding: 70px 0;
+  padding: 40px 0;
 }
 
 .team-single-image {
@@ -7212,7 +7215,9 @@ header.main-header .header-sticky.active {
 }
 
 .page-header-ma-bg .white-card {
-  max-width: 1300px;
+  max-width: 800px;
+  max-height: 400px;
+  background: rgba(65, 65, 65, 0.3);
 }
 
 .page-header-oi-bg .white-card {
@@ -7220,10 +7225,11 @@ header.main-header .header-sticky.active {
 }
 
 .page-header-oc-bg .white-card {
-  max-width: 700px;
+  max-width: 1300px;
   /* background: rgba(0, 0, 0, 0); */
   background: rgba(65, 65, 65, 0.3);
   text-align: center;
+  max-height: 350px;
 }
 
 .white-card.marketing-service-card{
@@ -7258,9 +7264,60 @@ header.main-header .header-sticky.active {
 .black-card{
   margin-left: 0px !important;
 }
-.page-header-about-us-bg{
+.page-header-about-us-bg .white-card{
     margin-left: 0px;
+    height: 100px;
+
 }
 .page-header-maas-bg .col-lg-9{
   margin-left: 0px;
+}
+
+.service-box {
+  background-color: transparent;
+  border-radius: 20px;
+  border: 2px solid white;
+  padding: 40px 25px;
+  text-align: center;
+  color: white;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.service-box:hover {
+  background-color: white;
+  color: black;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.service-box .icon-box img {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 20px;
+  transition: filter 0.3s ease;
+}
+
+.service-box:hover .icon-box img {
+  filter: brightness(0) invert(0); 
+}
+
+.service-box-content h3 {
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+@media (max-width: 992px) {
+  .service-box {
+    margin-bottom: 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .service-box-content h3 {
+    font-size: 16px;
+  }
 }
