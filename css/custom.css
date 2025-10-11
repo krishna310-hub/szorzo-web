@@ -2424,7 +2424,7 @@ header.main-header .header-sticky.active {
 
 .page-header-ma-bg {
   position: relative;
-  background: url("../images/bg-68.jpg") no-repeat center 35%/cover;
+  background: url("../images/bg-72.jpg") no-repeat center 30%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2464,7 +2464,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oi-bg {
   position: relative;
-  background: url("../images/bg-65.jpg") no-repeat center 5%/ cover;
+  background: url("../images/bg-75.jpg") no-repeat center 5%/ cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2562,8 +2562,12 @@ header.main-header .header-sticky.active {
   z-index: -1;
 }
 
-.page-header-about-us-bg .white-card {
-  max-width: 1500px;
+.page-header-about-us-bg .white-card{
+  margin-top: 80px;
+  margin-left: 600px;
+  max-width: 800px;
+  margin-right: -100px;
+  height: 400px;
 }
 
 .page-header-contact-us-bg {
@@ -7217,7 +7221,7 @@ header.main-header .header-sticky.active {
 .page-header-ma-bg .white-card {
   max-width: 800px;
   max-height: 400px;
-  background: rgba(65, 65, 65, 0.3);
+  /* background: rgba(65, 65, 65, 0.3); */
 }
 
 .page-header-oi-bg .white-card {
@@ -7264,11 +7268,7 @@ header.main-header .header-sticky.active {
 .black-card{
   margin-left: 0px !important;
 }
-.page-header-about-us-bg .white-card{
-    margin-left: 0px;
-    height: 100px;
 
-}
 .page-header-maas-bg .col-lg-9{
   margin-left: 0px;
 }
