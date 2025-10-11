@@ -7251,3 +7251,6 @@ header.main-header .header-sticky.active {
 .work-step-content{
   text-align: start;
 }
+.black-card.home-main-box{
+  margin-left: 0px !important;
+}
