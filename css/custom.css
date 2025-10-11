@@ -7251,6 +7251,12 @@ header.main-header .header-sticky.active {
 .work-step-content{
   text-align: start;
 }
-.black-card.home-main-box{
+.black-card{
   margin-left: 0px !important;
+}
+.page-header-about-us-bg{
+    margin-left: 0px;
+}
+.page-header-maas-bg .col-lg-9{
+  margin-left: 0px;
 }
