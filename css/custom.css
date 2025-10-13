@@ -2424,7 +2424,7 @@ header.main-header .header-sticky.active {
 
 .page-header-ma-bg {
   position: relative;
-  background: url("../images/bg-77.jpg") no-repeat center 30%/cover;
+  background: url("../images/bg-68.jpg") no-repeat center 30%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2544,7 +2544,7 @@ header.main-header .header-sticky.active {
 
 .page-header-about-us-bg {
   position: relative;
-  background: url("../images/bg-12.jpg") no-repeat center center/cover;
+  background: url("../images/bg-48.jpg") no-repeat center center/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2564,7 +2564,7 @@ header.main-header .header-sticky.active {
 
 .page-header-about-us-bg .white-card{
   margin-top: 80px;
-  margin-left: 600px;
+  margin-left: -100px;
   max-width: 800px;
   margin-right: -100px;
   height: 400px;
@@ -7149,7 +7149,7 @@ header.main-header .header-sticky.active {
 
 .page-header-demo-2 {
   position: relative;
-  background: url("../images/bg-48.jpg") no-repeat center 50% / cover;
+  background: url("../images/bg-12.jpg") no-repeat center 50% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
