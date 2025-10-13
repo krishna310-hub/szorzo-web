@@ -2403,7 +2403,7 @@ header.main-header .header-sticky.active {
 
 .page-header-maas-bg {
   position: relative;
-  background: url("../images/cartoon-ai-robot-scene.jpg") no-repeat center
+  background: url("../images/bg-58.webp") no-repeat center
     center/cover;
   margin-top: -150px;
   padding: 230px 0 115px;
@@ -2444,7 +2444,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oc-bg {
   position: relative;
-  background: url("../images/bg-62.jpg") no-repeat center 53% / cover;
+  background: url("../images/bg-62.webp") no-repeat center 53% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2464,7 +2464,7 @@ header.main-header .header-sticky.active {
 
 .page-header-oi-bg {
   position: relative;
-  background: url("../images/bg-75.jpg") no-repeat center 5%/ cover;
+  background: url("../images/bg-75.webp") no-repeat center 5%/ cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -2617,7 +2617,7 @@ header.main-header .header-sticky.active {
 
 .page-header-ef-bg {
   position: relative;
-  background: url("../images/bg-59.jpg") no-repeat center 80%/cover;
+  background: url("../images/bg-59.webp") no-repeat center 80%/cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
@@ -7150,7 +7150,7 @@ header.main-header .header-sticky.active {
 
 .page-header-demo-2 {
   position: relative;
-  background: url("../images/bg-12.jpg") no-repeat center 50% / cover;
+  background: url("../images/bg-12.webp") no-repeat center 50% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
   height: 710px;
