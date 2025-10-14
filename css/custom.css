@@ -7438,6 +7438,15 @@ header.main-header .header-sticky.active {
     height: 400px;
   }
   .our-value{
-    height: 100%;
+    height: 100% !important;
   }
+  .our-value-content{
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 991px) {
+    .header .menu .mobile-menu-head  .go-back, .site-header .menu-block .mobile-menu-head .current-menu-title {
+        visibility: visible;
+    }
 }
