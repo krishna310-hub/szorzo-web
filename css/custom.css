@@ -4101,7 +4101,7 @@ header.main-header .header-sticky.active {
 /************************************/
 
 .page-team-single {
-  padding: 40px 0;
+  padding: 40px 0 0px;
 }
 
 .team-single-image {
@@ -7329,6 +7329,7 @@ header.main-header .header-sticky.active {
 	background-position: center center;
 	background-size: cover;
 	padding: 100px 0;
+  height: 900px;
 }
 
 .our-value-image-box{
