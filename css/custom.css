@@ -6859,7 +6859,7 @@ header.main-header .header-sticky.active {
   .header .menu .mobile-menu-head .mobile-menu-close,
   .header .menu > ul > li > a i {
     height: 50px;
-    width: 50px;
+    width: 10px;
     line-height: 50px;
     text-align: center;
   }
@@ -7396,4 +7396,33 @@ header.main-header .header-sticky.active {
 
 .our-value-item-content h3{
   font-size: 18px;
+}
+
+/* industries support */
+
+.industries-support {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px 60px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-secondary-color) 0%,
+    var(--accent-color) 140%
+  );
+  padding: 40px;
+}
+
+/* Apply only for mobile menu */
+@media (max-width: 991px) {
+    .menu-main li a {
+        color: black !important;
+    }
+
+    .menu-main li a:hover {
+        color: #333 !important;
+    }
+
+    .menu-item-has-children > a {
+        color: black !important;
+    }
 }
