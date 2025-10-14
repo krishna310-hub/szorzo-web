@@ -7437,16 +7437,33 @@ header.main-header .header-sticky.active {
     margin-right: 0px;
     height: 400px;
   }
-  .our-value{
+  .our-value {
     height: 100% !important;
   }
-  .our-value-content{
+  .our-value-content {
     width: 100% !important;
+  }
+  .page-header-about-us-bg {
+    position: relative;
+    background: url(../images/bg-80.jpg) no-repeat center calc(50% - 75px);
+    background-size: cover;
+    padding: 230px 0 115px;
+    margin-top: -150px;
+    height: 100%;
+    z-index: 1;
+  }
+  .page-header-about-us-bg .white-card {
+    margin-top: 0px;
+    margin-left: 0px;
+    max-width: 800px;
+    margin-right: 0px;
+    height: 100%;
   }
 }
 
 @media (max-width: 991px) {
-    .header .menu .mobile-menu-head  .go-back, .site-header .menu-block .mobile-menu-head .current-menu-title {
-        visibility: visible;
-    }
+  .header .menu .mobile-menu-head .go-back,
+  .site-header .menu-block .mobile-menu-head .current-menu-title {
+    visibility: visible;
+  }
 }
