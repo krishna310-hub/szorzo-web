@@ -2654,7 +2654,7 @@ header.main-header .header-sticky.active {
 
 .approach-image img {
   width: 100%;
-  aspect-ratio: 1 / 0.741;
+  aspect-ratio: 1 / 0.950;
   object-fit: cover;
   border-radius: 20px;
 }
