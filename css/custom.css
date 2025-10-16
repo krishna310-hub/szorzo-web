@@ -7470,7 +7470,7 @@ header.main-header .header-sticky.active {
 
 .industries-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(150px, 1fr));
   gap: 20px;
   justify-items: center;
   align-items: stretch;
@@ -7511,6 +7511,11 @@ header.main-header .header-sticky.active {
 @media (max-width: 576px) {
   .industry-box-content h3 {
     font-size: 16px;
+  }
+  .industries-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    padding: 0 10px;
   }
 }
 
