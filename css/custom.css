@@ -7531,5 +7531,54 @@ header.main-header .header-sticky.active {
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
+}
+
+/* career list page css starts */
+.career-list-section {
+  background-color: #fff;
+}
+
+.career-card {
+  transition: background-color 0.3s ease;
+}
+
+.career-card:hover {
+  background-color: #fafafa;
+}
+
+.career-tag {
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  padding: 4px 12px;
+  font-size: 14px;
+  color: #333;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.skill-tag {
+     background-color: rgb(237 27 36 / 10%);
+    border-radius: 25px;
+    padding: 4px 12px;
+    font-size: 14px;
+    color: #ed1b23;
+    font-weight: 500;
+}
+
+.career-apply-btn {
+  font-size: 20px;
+  text-decoration: none;
+  color: #000;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.career-apply-btn:hover {
+  color: var(--accent-color);
+  transform: translateX(2px);
 }
