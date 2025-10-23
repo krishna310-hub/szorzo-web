@@ -173,7 +173,7 @@
   <!-- Page Header Start -->
   <div class="page-header-careers-bg">
     <div class="container">
-      <div class="col-lg-12" style="width: 157%;">
+      <div class="col-lg-12" style="width: 10%; margin-top: 300px;">
         <div class="page-header-box">
           <h1 class="wow fadeInUp" data-cursor="-opaque"><span>CAREERS</span></h1>
         </div>
@@ -201,8 +201,9 @@
   <section class="career-list-section pb-5">
     <div class="container">
       <!-- Search Box -->
-      <div class="mb-4 text-center">
-        <input type="text" id="career-search" class="form-control w-50 mx-auto" placeholder="Search job title...">
+      <div class="mb-4 text-center d-flex justify-content-center gap-3">
+        <input type="text" id="career-search-title" class="form-control w-25" placeholder="Search job title...">
+        <input type="text" id="career-search-location" class="form-control w-25" placeholder="Search by Location">
       </div>
 
       <!-- Career Cards -->
@@ -1040,11 +1041,11 @@
 
 <script>
   $(document).ready(function() {
-      const itemsPerPage = 10;
+      const itemsPerPage = 5;
       let currentPage = 1;
 
       function paginateAndFilter() {
-          const searchValue = $('#career-search').val().toLowerCase();
+          const searchValue = $('#career-search-title').val().toLowerCase();
           const $items = $('#career-list .career-card');
           const filteredItems = $items.filter(function() {
               return $(this).find('h3').text().toLowerCase().includes(searchValue);
@@ -1077,7 +1078,7 @@
 
       paginateAndFilter();
 
-      $('#career-search').on('keyup', function() {
+      $('#career-search-title').on('keyup', function() {
           currentPage = 1;
           paginateAndFilter();
       });
