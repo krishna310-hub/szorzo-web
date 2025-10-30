@@ -7739,8 +7739,8 @@ html {
 
 .resume-upload-box:hover,
 .resume-upload-box.dragover {
-  background-color: #f0f4ff;
-  border-color: #007bff;
+  background-color: #fbf8f8;
+  border-color: #cc1f1f;
 }
 
 .resume-upload-box input[type="file"] {
