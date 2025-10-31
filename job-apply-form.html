@@ -34,6 +34,10 @@
     <!-- Main Custom Css -->
     <link href="css/custom.css" rel="stylesheet" media="screen" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- country flag -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.min.css"/>
+    <!-- bootstrap css -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
 
 <body>
@@ -200,14 +204,14 @@
     <section class="career-list-section pb-5">
         <div class="application-container">
             <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item">
-                <a href="careers.html" class="text-decoration-none text-danger">Job Listing</a>
-              </li>
-              <li class="breadcrumb-item active" aria-current="page">Job Details</li>
-              <li class="breadcrumb-item active" aria-current="page">Job Application</li>
-            </ol>
-          </nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="careers.html" class="text-decoration-none text-danger">Job Listing</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Job Details</li>
+                    <li class="breadcrumb-item active" aria-current="page">Job Application</li>
+                </ol>
+            </nav>
             <!-- <h2 class="text-center text-danger fw-bold mb-4">Autofill Application</h2> -->
             <!-- <p class="text-center text-muted mb-4">Upload your resume or fill the details below to apply</p> -->
 
@@ -224,12 +228,22 @@
                     <input type="file" id="resumeUpload" name="resume" accept=".doc,.docx,.pdf,.odt,.rtf" required />
                 </div>
 
+                <p id="resumeName" class="mt-2 fw-semibold text-success"></p>
+
                 <!-- Basic Info -->
                 <div class="form-section-title">Basic Information</div>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">First Name</label>
-                        <input type="text" name="first_name" class="form-control" required />
+                        <div class="input-group">
+                            <select name="prefix" class="form-select" style="max-width: 100px;">
+                                <option value="">- None -</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Mrs">Mrs</option>
+                            </select>
+                            <input type="text" name="first_name" class="form-control" placeholder="" required />
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Last Name</label>
@@ -275,11 +289,196 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Current Job Title</label>
-                        <input type="text" name="job_title" class="form-control" />
+                        <select name="" class="form-select">
+                            <option value="none">- None -</option>
+                            <option value="fresher">Fresher</option>
+                            <option value="project_lead">Project-Lead</option>
+                            <option value="project_manager">Project-Manager</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Skill Set</label>
                         <input type="text" name="skills" class="form-control" placeholder="search and add skills" />
+                    </div>
+                </div>
+
+                <!-- Educational Details -->
+                <div class="form-section-title">
+                    <p>Educational Details</p>
+                </div>
+                <div id="educationContainer" class="mb-3"></div>
+                <button type="button" id="addEducation" class="btn btn-link text-decoration-none p-0 text-primary" style="font-weight: bold;">+ Add More</button>
+
+                <!-- Template (hidden) -->
+                <div id="educationTemplate" class="education-item border rounded p-3 mb-3 d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold">Education <span class="edu-index"></span></span>
+                        <button type="button" class="btn btn-link text-danger p-0 delete-education">Delete</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Institute / School</label>
+                        <input type="text" name="institute[]" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Major / Department</label>
+                        <input type="text" name="major[]" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Degree</label>
+                        <input type="text" name="degree[]" class="form-control" />
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                        <label class="form-label">From Month</label>
+                        <select name="from_month[]" class="form-select">
+                            <option value="" selected disabled>Month</option>
+                            <option>January</option>
+                            <option>February</option>
+                            <option>March</option>
+                            <option>April</option>
+                            <option>May</option>
+                            <option>June</option>
+                            <option>July</option>
+                            <option>August</option>
+                            <option>September</option>
+                            <option>October</option>
+                            <option>November</option>
+                            <option>December</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                        <label class="form-label">From Year</label>
+                        <select name="from_year[]" class="form-select">
+                            <option value="" selected disabled>Year</option>
+                            <!-- Add years dynamically via jQuery -->
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                        <label class="form-label">To Month</label>
+                        <select name="to_month[]" class="form-select">
+                            <option value="" selected disabled>Month</option>
+                            <option>January</option>
+                            <option>February</option>
+                            <option>March</option>
+                            <option>April</option>
+                            <option>May</option>
+                            <option>June</option>
+                            <option>July</option>
+                            <option>August</option>
+                            <option>September</option>
+                            <option>October</option>
+                            <option>November</option>
+                            <option>December</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                        <label class="form-label">To Year</label>
+                        <select name="to_year[]" class="form-select">
+                            <option value="" selected disabled>Year</option>
+                        </select>
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="currently_pursuing[]"
+                        value="1"
+                        />
+                        <label class="form-check-label">Currently pursuing</label>
+                    </div>
+                </div>
+
+                <!-- Experience details -->
+                <div class="form-section-title">
+                    <p class="fw-bold mb-1">Experience Details</p>
+                </div>
+                <div id="experienceContainer" class="mb-3"></div>
+                <button type="button" id="addExperience" class="btn btn-link text-decoration-none p-0 text-primary" style="font-weight: bold;">+ Add More</button>
+
+                <!-- Template (hidden) -->
+                <div id="experienceTemplate" class="experience-item border rounded p-3 mb-3 d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold">Experience <span class="exp-index"></span></span>
+                        <button type="button" class="btn btn-link text-danger p-0 delete-experience">Delete</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Occupation / Title</label>
+                        <input type="text" name="occupation[]" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Company</label>
+                        <input type="text" name="company[]" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Summary</label>
+                        <textarea name="summary[]" class="form-control" rows="3" placeholder="Briefly describe your role..."></textarea>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <label class="form-label">Work Duration</label>
+                        <div class="col-md-3">
+                        <select name="from_month[]" class="form-select">
+                            <option value="" selected disabled>Month</option>
+                            <option>January</option>
+                            <option>February</option>
+                            <option>March</option>
+                            <option>April</option>
+                            <option>May</option>
+                            <option>June</option>
+                            <option>July</option>
+                            <option>August</option>
+                            <option>September</option>
+                            <option>October</option>
+                            <option>November</option>
+                            <option>December</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                        <select name="from_year[]" class="form-select from-year">
+                            <option value="" selected disabled>Year</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                        <select name="to_month[]" class="form-select to-month">
+                            <option value="" selected disabled>Month</option>
+                            <option>January</option>
+                            <option>February</option>
+                            <option>March</option>
+                            <option>April</option>
+                            <option>May</option>
+                            <option>June</option>
+                            <option>July</option>
+                            <option>August</option>
+                            <option>September</option>
+                            <option>October</option>
+                            <option>November</option>
+                            <option>December</option>
+                        </select>
+                        </div>
+                        <div class="col-md-3">
+                        <select name="to_year[]" class="form-select to-year">
+                            <option value="" selected disabled>Year</option>
+                        </select>
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input
+                        class="form-check-input current-work"
+                        type="checkbox"
+                        name="currently_working[]"
+                        value="1"
+                        />
+                        <label class="form-check-label">I currently work here</label>
                     </div>
                 </div>
 
@@ -290,34 +489,34 @@
                         <label class="form-label">LinkedIn</label>
                         <input type="url" name="linkedin" class="form-control" />
                     </div>
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                         <label class="form-label">Facebook</label>
                         <input type="url" name="facebook" class="form-control" />
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Twitter</label>
                         <input type="url" name="twitter" class="form-control" />
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Attachments -->
-                <div class="form-section-title">Attachments</div>
+                <!-- <div class="form-section-title">Attachments</div>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label class="form-label">Photo</label>
                         <input type="file" class="form-control" name="photo" accept="image/*" />
                     </div>
-                    <!-- <div class="col-md-6">
+                    <div class="col-md-6">
                         <label class="form-label">Resume (optional)</label>
                         <input type="file" class="form-control" name="resume2" accept=".doc,.docx,.pdf" />
-                    </div> -->
-                </div>
+                    </div>
+                </div> -->
 
                 <!-- CAPTCHA (Placeholder) -->
-                <div class="form-section-title">CAPTCHA Verification</div>
+                <!-- <div class="form-section-title">CAPTCHA Verification</div>
                 <div class="mb-4">
                     <input type="text" class="form-control" placeholder="Type CAPTCHA text here" required />
-                </div>
+                </div> -->
 
                 <!-- Submit -->
                 <div class="text-center">
@@ -590,10 +789,137 @@
     <script src="js/function.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- jQuery Pagination Plugin -->
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/simplePagination.js/1.6/jquery.simplePagination.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplePagination.js/1.6/simplePagination.css" />
 </body>
 
 </html>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  (function() {
+    emailjs.init("qzM7zFyME-gcCpcTx");
+  })();
+
+  document.getElementById("jobApplicationForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const form = this;
+    const formData = new FormData(form);
+    const formObject = {};
+    formData.forEach((value, key) => (formObject[key] = value));
+
+    formObject.date = new Date().toLocaleString();
+
+    formObject.resume = formData.get("resume")?.name || "Not uploaded";
+    formObject.photo = formData.get("photo")?.name || "Not uploaded";
+
+    try {
+      await emailjs.send("service_vgvjh57", "template_88fm9wo", formObject);
+      alert("✅ Application submitted successfully!");
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      alert("❌ Failed to send. Please try again later.");
+    }
+  });
+
+  // Resume selected name 
+  const resumeInput = document.getElementById("resumeUpload");
+  const resumeDropZone = document.getElementById("resumeDropZone");
+
+  const fileNameDisplay = document.createElement("p");
+  fileNameDisplay.classList.add("mt-2", "fw-semibold", "text-success");
+  resumeDropZone.appendChild(fileNameDisplay);
+
+  resumeInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      fileNameDisplay.textContent = `Selected: ${file.name}`;
+    } else {
+      fileNameDisplay.textContent = "";
+    }
+  });
+
+  resumeDropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    resumeDropZone.classList.add("border", "border-danger", "bg-light");
+  });
+
+  resumeDropZone.addEventListener("dragleave", () => {
+    resumeDropZone.classList.remove("border", "border-danger", "bg-light");
+  });
+
+  resumeDropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    resumeDropZone.classList.remove("border", "border-danger", "bg-light");
+    const file = e.dataTransfer.files[0];
+    resumeInput.files = e.dataTransfer.files;
+    fileNameDisplay.textContent = file ? `Selected: ${file.name}` : "";
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    // Function to populate year dropdowns
+    function populateYears(select) {
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= 1980; y--) {
+        select.append(`<option value="${y}">${y}</option>`);
+      }
+    }
+
+    // Add Education section
+    let eduCount = 0;
+    $("#addEducation").on("click", function () {
+      eduCount++;
+      const newEdu = $("#educationTemplate").clone().removeAttr("id").removeClass("d-none");
+      newEdu.find(".edu-index").text(eduCount);
+      newEdu.find('select[name="from_year[]"]').each(function () {
+        populateYears($(this));
+      });
+      newEdu.find('select[name="to_year[]"]').each(function () {
+        populateYears($(this));
+      });
+      $("#educationContainer").append(newEdu);
+    });
+
+    // Delete Education section
+    $(document).on("click", ".delete-education", function () {
+      $(this).closest(".education-item").remove();
+    });
+  });
+</script>
+
+<script>
+  $(document).ready(function () {
+    // Populate year dropdowns
+    function populateYears(select) {
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= 1980; y--) {
+        select.append(`<option value="${y}">${y}</option>`);
+      }
+    }
+
+    // Add Experience Section
+    let expCount = 0;
+    $("#addExperience").on("click", function () {
+      expCount++;
+      const newExp = $("#experienceTemplate").clone().removeAttr("id").removeClass("d-none");
+      newExp.find(".exp-index").text(expCount);
+      populateYears(newExp.find(".from-year"));
+      populateYears(newExp.find(".to-year"));
+      $("#experienceContainer").append(newExp);
+    });
+
+    // Delete Experience Section
+    $(document).on("click", ".delete-experience", function () {
+      $(this).closest(".experience-item").remove();
+    });
+
+    // Disable 'To' fields if 'Currently Working' is checked
+    $(document).on("change", ".current-work", function () {
+      const section = $(this).closest(".experience-item");
+      const disabled = $(this).is(":checked");
+      section.find(".to-month, .to-year").prop("disabled", disabled);
+    });
+  });
+</script>

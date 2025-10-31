@@ -7752,3 +7752,26 @@ html {
   font-size: 1.1rem;
   cursor: pointer;
 }
+
+.resume-upload-box {
+  border: 2px dashed #dc3545;
+  border-radius: 10px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.resume-upload-box:hover {
+  background-color: #fff6f6;
+}
+/* Fix Bootstrap conflicts */
+  .iti__country-list {
+    list-style: none;
+    padding-left: 0 !important;
+    margin: 0 !important;
+  }
+  .iti__flag-container {
+    z-index: 9999 !important;
+  }
+  .iti {
+    width: 100%;
+  }
