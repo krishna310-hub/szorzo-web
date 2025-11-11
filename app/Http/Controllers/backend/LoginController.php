@@ -19,7 +19,7 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        
+
         if (Auth::attempt($credentials)) {
             session(['locked' => false]);
             $request->session()->regenerate();
@@ -36,6 +36,6 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login'); 
+        return redirect()->route('login');
     }
 }

@@ -17,6 +17,7 @@
                                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                                         <div class="flex-grow-1">
                                             @php
+                                                date_default_timezone_set('Asia/Kolkata');
                                                 $hour = date('H');
 
                                                 if ($hour >= 5 && $hour < 12) {
@@ -1269,11 +1270,11 @@
                     <div class="col-sm-6">
                         <script>
                             document.write(new Date().getFullYear())
-                        </script> © Velzon.
+                        </script> © SZORZO.
                     </div>
                     <div class="col-sm-6">
                         <div class="text-sm-end d-none d-sm-block">
-                            Design & Develop by Themesbrand
+                            Design & Develop by SZORZO
                         </div>
                     </div>
                 </div>

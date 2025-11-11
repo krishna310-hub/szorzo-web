@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>@yield('title', 'Login | Glow Unlock')</title>
+    <title>@yield('title', 'Login | SZORZO')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
@@ -28,7 +28,7 @@
                                 <div class="row g-0">
                                     <div class="col-lg-6">
                                         <div id="qoutescarouselIndicators" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="3000">
-                                        
+
                                         <!-- Indicators -->
                                         <div class="carousel-indicators">
                                             @foreach ($sliders as $index => $slider)
@@ -84,9 +84,9 @@
                                     <div class="col-lg-6">
                                         <div class="p-lg-5 p-4">
                                             <div>
-                                                <h5 class="text-primary">Welcome Back !</h5>
-                                                <p class="text-muted">Sign in to continue to 
-                                                    {{ $settings['app_name'] ?? 'Dubda Butchers' }}.</p>
+                                                <h4 class="text-danger">Welcome Back !</h4>
+                                                <p class="text-muted">Sign in to continue to
+                                                    {{ $settings['app_name'] ?? 'SZORZO' }}.</p>
                                             </div>
 
                                             <div class="mt-4">
@@ -175,8 +175,7 @@
                                 <p class="mb-0">©
                                     <script>
                                         document.write(new Date().getFullYear())
-                                    </script> All rights reserved. by <i
-                                        class="mdi mdi-heart text-danger"></i> {{ config('app.name') }}
+                                    </script> All rights reserved. by Szorzo
                                 </p>
                             </div>
                         </div>

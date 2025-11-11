@@ -82,8 +82,8 @@
                                 @can('read', \App\Models\User::class)
                                     <li class="nav-item ">
                                         <a href="{{ route('admin.user.index') }}" class="nav-link {{ request()->is('admin/users/user*','users*') ? 'active' : '' }}" data-key="t-settings"> Users </a>
-                                    </li>   
-                                @endcan                         
+                                    </li>
+                                @endcan
                                 {{-- <li class="nav-item">
                                     <a href="apps-chat.html" class="nav-link" data-key="t-settings"> Permission </a>
                                 </li> --}}
@@ -91,14 +91,14 @@
                         </div>
                     </li>
                 @endif
-                @if(auth()->user()->can('generalSetting', \App\Models\Setting::class) || auth()->user()->can('emailSetting', \App\Models\Setting::class) || 
+                @if(auth()->user()->can('generalSetting', \App\Models\Setting::class) || auth()->user()->can('emailSetting', \App\Models\Setting::class) ||
                 auth()->user()->can('socialSetting', \App\Models\Setting::class))
                     {{-- <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-settings">Settings</span></li> --}}
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/settings') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
                             <i class="ri-settings-2-line"></i> <span data-key="t-settings">Settings</span>
                         </a>
-                    </li> 
+                    </li>
                 @endif
             </ul>
         </div>
