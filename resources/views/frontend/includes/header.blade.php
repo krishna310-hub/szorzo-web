@@ -89,9 +89,24 @@
                             <a href="{{ route('contact') }}" style="font-size: large; color: white; font-weight: bold;">Contact
                                 Us</a>
                         </li>
-                        <li>
-                            <a href="{{ route('careers') }}"
-                                style="font-size: large; color: white; font-weight: bold;">Careers</a>
+                        <li class="menu-item-has-children">
+                            <a style="font-size: large; color: white; font-weight: bold;">Careers</a>
+                            <div class="sub-menu mega-menu mega-menu-column-2">
+                                <div class="list-item">
+                                    <ul>
+                                        <li>
+                                            <a href="https://szorzo.zohorecruit.in/jobs/Careers">
+                                                Current Job Openings
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ route('careers') }}">
+                                                Candidate Registration Form
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </li>
                     </ul>
                 </nav>

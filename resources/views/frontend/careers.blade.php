@@ -1,5 +1,9 @@
 @extends('frontend.includes.master')
 @section('content')
+  {{-- <iframe frameborder="0" style="height:1000px;width:100%;border:none;" 
+    src="https://szorzo.zohorecruit.in/forms/7f23c828680a33a6c4c84788bc0d2c428fae72cec5e2d93cdcef2463d62301de">
+  </iframe> --}}
+
 <!-- Page Header Start -->
   <div class="page-header-careers-bg">
     <div class="container">
@@ -13,7 +17,7 @@
   <!-- Page Header End -->
 
   <!-- Page Header Start -->
-  <div class="mt-5">
+  {{-- <div class="mt-5">
     <div class="container">
       <div class="col-lg-12">
         <div class="marketing-service-card">
@@ -25,10 +29,12 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> --}}
   <!-- Page Header End -->
-
-  <div class="col-lg-8" style="margin-left: 250px;">
+  <iframe frameborder="0" style="height:200vh;width:100%;border:none;" 
+    src="https://szorzo.zohorecruit.in/forms/7f23c828680a33a6c4c84788bc0d2c428fae72cec5e2d93cdcef2463d62301de">
+  </iframe>
+  {{-- <div class="col-lg-8" style="margin-left: 250px;">
     <div class="team-single-content">
         <div class="team-member-info">
             <div class="section-title" style="text-align: center;">
@@ -37,9 +43,9 @@ Come join our community of AI-aware employees and thrive at SZORZO. Together, le
             </div>
         </div>
     </div>
-  </div>
+  </div> --}}
 
-  <section class="career-list-section pb-5">
+  {{-- <section class="career-list-section pb-5">
     <div class="container">
       <div class="row">
         <div class="col-md-4 mb-4">
@@ -529,5 +535,5 @@ Come join our community of AI-aware employees and thrive at SZORZO. Together, le
                 });
             });
         </script>
-    @endsection
+    @endsection --}}
 @endsection
