@@ -22,7 +22,9 @@ class HomeController extends Controller
     public function careers(){
         return view('frontend.careers');
     }
-
+    public function careersList(){
+        return view('frontend.careers-list');
+    }
     public function enterpriceFormation(){
         return view('frontend.services.enterprice');
     }

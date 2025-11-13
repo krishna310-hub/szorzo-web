@@ -15,6 +15,7 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/about-us','aboutUs')->name('about.us');
     Route::get('/contact','contact')->name('contact');
     Route::get('/careers','careers')->name('careers');
+    Route::get('/careers/list','careersList')->name('careers.list');
 
     //Enterprise Transformation 
     //Enterprice

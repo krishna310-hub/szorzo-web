@@ -95,7 +95,10 @@
                                 <div class="list-item">
                                     <ul>
                                         <li>
-                                            <a href="https://szorzo.zohorecruit.in/jobs/Careers">
+                                            {{-- <a href="https://szorzo.zohorecruit.in/jobs/Careers">
+                                                Current Job Openings
+                                            </a> --}}
+                                            <a href="{{ route('careers.list') }}">
                                                 Current Job Openings
                                             </a>
                                         </li>

@@ -1,8 +1,5 @@
 @extends('frontend.includes.master')
 @section('content')
-  {{-- <iframe frameborder="0" style="height:1000px;width:100%;border:none;" 
-    src="https://szorzo.zohorecruit.in/forms/7f23c828680a33a6c4c84788bc0d2c428fae72cec5e2d93cdcef2463d62301de">
-  </iframe> --}}
 
 <!-- Page Header Start -->
   <div class="page-header-careers-bg">
