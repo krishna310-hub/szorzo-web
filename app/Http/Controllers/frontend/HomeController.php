@@ -56,4 +56,8 @@ class HomeController extends Controller
     public function postMergerIntegration(){
         return view('frontend.services.operations');
     }
+
+    public function itInfrastructureService(){
+        return view('frontend.services.it.it-infrastructure-service');
+    }
 }

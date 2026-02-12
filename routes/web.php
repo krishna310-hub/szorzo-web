@@ -17,7 +17,7 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/careers','careers')->name('careers');
     Route::get('/careers/list','careersList')->name('careers.list');
 
-    //Enterprise Transformation 
+    //Enterprise Transformation
     //Enterprice
     Route::get('/enterprice/formation','enterpriceFormation')->name('enterprice.formation');
     Route::get('/marketing/service','marketingService')->name('marketing.service');
@@ -30,6 +30,8 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/valuation-and-deal-structuring','valuationDealStructuring')->name('valuation.deal.structuring');
     Route::get('/negotiation-and-deal-execution','negotiationDealExecution')->name('negotiation.deal.execution');
     Route::get('/post-merger-integration','postMergerIntegration')->name('post.merger.integration');
+    // Technology and Engineering Services
+    Route::get('/it/it-infrastructure-service','itInfrastructureService')->name('it.it.infrastruture.service');
 });
 
 Route::group(['controller' => LoginController::class], function () {

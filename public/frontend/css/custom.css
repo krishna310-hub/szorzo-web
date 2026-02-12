@@ -7265,6 +7265,12 @@ header.main-header .header-sticky.active {
   /* background: rgba(65, 65, 65, 0.3); */
 }
 
+.page-header-it-bg .white-card {
+  max-width: 800px;
+  max-height: 400px;
+  /* background: rgba(65, 65, 65, 0.3); */
+}
+
 .page-header-oi-bg .white-card {
   max-width: 800px;
 }

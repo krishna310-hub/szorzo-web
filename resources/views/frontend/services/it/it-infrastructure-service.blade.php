@@ -1,7 +1,7 @@
 @extends('frontend.includes.master')
 @section('content')
-<!-- Page Header Start -->
-    <div class="page-header-ma-bg">
+    <!-- Page Header Start -->
+    <div class="page-header-it-bg">
         <div class="container">
             <div class="col-lg-12" style="margin-top: 150px; margin-left: -140px;">
                 <div class="white-card">
@@ -10,7 +10,8 @@
                             Merger and Acquisition<span> Advisory Services</span>
                         </h1>
                         <div style="color: white;" class="section-title-content wow fadeInUp" data-wow-delay="0.2s">
-                            <p style="font-weight: bold; font-size: x-large; text-align: justify;">SZORZO supports global clients
+                            <p style="font-weight: bold; font-size: x-large; text-align: justify;">SZORZO supports global
+                                clients
                                 with comprehensive M&A advisory
                                 services, including cross-border
                                 deal sourcing, valuation, due
@@ -30,14 +31,14 @@
     <!-- Page Header End -->
 
     <!-- Page Services Start -->
-    <div class="page-services">
+    {{-- <div class="page-services">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-6">
                     <!-- Service Item Start -->
                     <div class="service-item wow fadeInUp">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-1.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-1.svg') }}" alt="">
                         </div>
                         <div class="service-item-content">
                             <h3>Deal sourcing & Target Identification</h3>
@@ -50,7 +51,7 @@
                     <!-- Service Item Start -->
                     <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-2.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-2.svg') }}" alt="">
                         </div>
                         <div class="service-item-content">
                             <h3>Valuation & Financial Modelling</h3>
@@ -63,7 +64,7 @@
                     <!-- Service Item Start -->
                     <div class="service-item wow fadeInUp" data-wow-delay="0.4s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-3.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-3.svg') }}" alt="">
                         </div>
                         <div class="service-item-content">
                             <h3>Due Diligence Management</h3>
@@ -76,7 +77,7 @@
                     <!-- Service Item Start -->
                     <div class="service-item wow fadeInUp" data-wow-delay="0.6s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-4.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-4.svg') }}" alt="">
                         </div>
                         <div class="service-item-content">
                             <h3>Deal Structuring & Negotiation</h3>
@@ -89,7 +90,7 @@
                     <!-- Service Item Start -->
                     <div class="service-item wow fadeInUp" data-wow-delay="0.8s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-5.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-5.svg') }}" alt="">
                         </div>
                         <div class="service-item-content">
                             <h3>Post-Merger Integration Planning</h3>
@@ -99,18 +100,20 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <!-- Page Services End -->
 
     <!-- How It Work Section Start -->
-    <div class="how-it-work bg-section">
+    {{-- <div class="how-it-work bg-section">
         <div class="container">
             <div class="row section-row align-items-center">
                 <div class="col-lg-12">
                     <!-- Section Title Start -->
                     <div class="section-title section-title-center">
-                        <h3 class="wow fadeInUp" style="font-size: x-large;">Connecting Capital, Strategy, and Opportunity Globally</h3>
-                        <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">MERGER & ACQUISITION <span style="font-weight: bold;"><br>ADVISORY SERVICES</span></h2>
+                        <h3 class="wow fadeInUp" style="font-size: x-large;">Connecting Capital, Strategy, and
+                            Opportunity Globally</h3>
+                        <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">MERGER & ACQUISITION <span
+                                style="font-weight: bold;"><br>ADVISORY SERVICES</span></h2>
                     </div>
                     <!-- Section Title End -->
                 </div>
@@ -121,7 +124,7 @@
                     <!-- Work Step Item Start -->
                     <div class="work-step-item wow fadeInUp" style="margin-left: 100px;">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-work-step-1.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-work-step-1.svg') }}" alt="">
                         </div>
                         <div class="work-step-content">
                             <h3>Market Entry Strategy</h3>
@@ -139,7 +142,7 @@
                     <!-- Work Step Item Start -->
                     <div class="work-step-item wow fadeInUp" style="margin-left: 80px;" data-wow-delay="0.2s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-work-step-2.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-work-step-2.svg') }}" alt="">
                         </div>
                         <div class="work-step-content">
                             <h3>Business Expansion Advisory</h3>
@@ -157,7 +160,7 @@
                     <!-- Work Step Item Start -->
                     <div class="work-step-item wow fadeInUp" style="margin-left: 40px;" data-wow-delay="0.4s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-work-step-3.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-work-step-3.svg') }}" alt="">
                         </div>
                         <div class="work-step-content">
                             <h3>Strategic Advisory Services</h3>
@@ -170,10 +173,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <!-- How It Work Section End -->
 
-    <div class="page-project-single">
+    {{-- <div class="page-project-single">
         <div class="container">
             <div class="row">
 
@@ -182,8 +185,10 @@
 
                         <div class="project-entry">
                             <div class="project-performance-box">
-                                <h2 class="wow fadeInUp">Our Key M&A Service <span style="font-weight: bold;">Offerings</span></h2>
-                                <p class="wow fadeInUp" data-wow-delay="0.2s" style="font-size: x-large;">We provide end-to-end M&A advisory services to
+                                <h2 class="wow fadeInUp">Our Key M&A Service <span
+                                        style="font-weight: bold;">Offerings</span></h2>
+                                <p class="wow fadeInUp" data-wow-delay="0.2s" style="font-size: x-large;">We provide
+                                    end-to-end M&A advisory services to
                                     global companies looking to establish, acquire, or
                                     expand their footprint in India & any other global
                                     locations.</p>
@@ -226,7 +231,8 @@
                                                 <li>Identification of Companies (SMEs, Startups, Large Enterprises)</li>
                                                 <li>In-depth commercial, operational & financial analysis</li>
                                                 <li>SWOT analysis and strategic fit assessment</li>
-                                                <li class="mb-5">Management team profiling and cultural compatibility</li>
+                                                <li class="mb-5">Management team profiling and cultural compatibility
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
@@ -267,7 +273,8 @@
                                                 <li>Business and asset valuation (DCF, comparables, market approach)</li>
                                                 <li>Structuring transactions for tax efficiency and compliance</li>
                                                 <li>Evaluation of funding options (debt, equity, hybrid instruments)</li>
-                                                <li class="mb-5">Advice on foreign exchange regulations (FEMA, RBI approvals)</li>
+                                                <li class="mb-5">Advice on foreign exchange regulations (FEMA, RBI
+                                                    approvals)</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -287,7 +294,8 @@
                                             <ul>
                                                 <li>Preparation of information memorandums & term sheets</li>
                                                 <li>Support in SPA, SHA, and definitive agreement negotiations</li>
-                                                <li>Assistance with regulatory filings and clearances (SEBI, RBI, MCA, etc.)</li>
+                                                <li>Assistance with regulatory filings and clearances (SEBI, RBI, MCA, etc.)
+                                                </li>
                                                 <li>End-to-end transaction management and coordination</li>
                                             </ul>
                                         </div>
@@ -322,5 +330,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 @endsection
