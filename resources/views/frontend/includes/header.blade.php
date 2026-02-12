@@ -42,14 +42,14 @@
                                         <li><a href="{{ route('org.capacity.ass') }}">Organization Capacity Assessment</a></li>
                                         <li><a href="{{ route('opt.infra.off') }}">Operations and Infrastructure Offerings</a></li>
                                     </ul>
-                                    <h4 class="title"> <a href="">IT Infrastructure Services</a></h4>
+                                    {{-- <h4 class="title"> <a href="">IT Infrastructure Services</a></h4>
                                     <ul>
                                         <li><a href="#">Data Center - Design, Built & Maintain</a></li>
                                         <li><a href="#">Data Center - Managed Services</a></li>
                                         <li><a href="#">IT Infrastructure - Design, Built & Maintain</a></li>
                                         <li><a href="#">Cyber Security - Security Operations Center</a></li>
                                         <li><a href="#">Certification & Compliance</a></li>
-                                    </ul>
+                                    </ul> --}}
                                 </div>
                                 <div class="list-item">
                                     <h4 class="title"> <a href="{{ route('strategic.advisory') }}">Merger & Acquisition
