@@ -91,6 +91,7 @@
                                 <li><a href="#">IT Infrastructure - Design, Built & Maintain</a></li>
                                 <li><a href="#">Cyber Security - Security Operations Center</a></li>
                                 <li><a href="#">Certification & Compliance</a></li>
+                                <li><a href="#">Hardware + Software Integration</a></li>
                             </ul>
                         </div>
                         <!-- Footer Links End -->
