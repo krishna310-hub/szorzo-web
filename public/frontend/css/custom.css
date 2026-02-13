@@ -2543,7 +2543,7 @@ header.main-header .header-sticky.active {
 
 .page-header-about-us-bg {
   position: relative;
-  background: url("../images/bg-80.jpg") no-repeat center calc(50% - 75px);
+  background: url("../images/bg-88.jpg") no-repeat center calc(10% - 75px);
   background-size: cover;
   padding: 230px 0 115px;
   margin-top: -150px;
@@ -2558,16 +2558,16 @@ header.main-header .header-sticky.active {
   left: 0;
   width: 100%;
   height: 100%;
-  /* background: rgba(0, 0, 0, 0.5); */
+  background: rgba(0, 0, 0, 0.1);
   z-index: -1;
 }
 
 .page-header-about-us-bg .white-card {
-  margin-top: 80px;
+  margin-top: 100px;
   margin-left: -100px;
-  max-width: 800px;
+  max-width: 1000px;
   margin-right: -100px;
-  height: 400px;
+  height: 300px;
 }
 
 .page-header-contact-us-bg {
@@ -7375,7 +7375,7 @@ header.main-header .header-sticky.active {
   background-position: center center;
   background-size: cover;
   padding: 100px 0;
-  height: 900px;
+  /* height: 900px; */
 }
 
 .our-value-image-box {
@@ -7780,4 +7780,97 @@ html {
   }
   .iti {
     width: 100%;
+  }
+
+  .page-header-data-center-design-bg {
+    position: relative;
+    background: url(../images/bg-84.jpg) no-repeat center calc(25% - 0px);
+    background-size: cover;
+    padding: 230px 0 115px;
+    margin-top: -150px;
+    height: 100%;
+    z-index: 1;
+  }
+  .page-header-data-center-design-bg .white-card {
+    margin-top: 150px;
+    margin-left: 0px;
+    max-width: 1300px;
+    margin-right: 0px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .page-header-cyber-security-bg {
+    position: relative;
+    background: url(../images/bg-85.jpg) no-repeat center calc(-10% - 75px);
+    background-size: cover;
+    padding: 230px 0 115px;
+    margin-top: -150px;
+    height: 100%;
+    z-index: 1;
+  }
+  .page-header-cyber-security-bg .white-card {
+    margin-top: 30px;
+    margin-left: -100px;
+    max-width: 800px;
+    margin-right: 0px;
+    max-height: 360px;
+  }
+
+  .page-header-it-infrastructure-bg {
+    position: relative;
+    background: url(../images/bg-86.jpg) no-repeat center calc(0% - 150px);
+    background-size: cover;
+    padding: 230px 0 115px;
+    margin-top: -150px;
+    height: 100%;
+    z-index: 1;
+  }
+  .page-header-it-infrastructure-bg .white-card {
+    margin-top: 50px;
+    margin-bottom: 30px;
+    margin-left:20px;
+    max-width: 800px;
+    margin-right: 0px;
+    height: 60%;
+  }
+
+  .page-header-certificate-compliance-bg {
+    position: relative;
+    background: url(../images/bg-87.jpg) no-repeat center calc(20% - 150px);
+    background-size: cover;
+    padding: 230px 0 115px;
+    margin-top: -150px;
+    height: 100%;
+    z-index: 1;
+  }
+  .page-header-certificate-compliance-bg .white-card {
+    margin-top: 150px;
+    margin-left: -130px;
+    max-width: 1300px;
+    margin-right: 0px;
+    max-height: 250px;
+  }
+
+  .page-header-it-managed-services-bg {
+    position: relative;
+    background: url(../images/bg-87.jpg) no-repeat center calc(0% - 0px);
+    background-size: cover;
+    padding: 230px 0 115px;
+    margin-top: -150px;
+    height: 100%;
+    z-index: 1;
+  }
+  .page-header-it-managed-services-bg .white-card {
+    margin-top: 155px;
+    margin-left: -130px;
+    max-width: 1300px;
+    margin-right: 0px;
+    max-height: 400px;
+
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }

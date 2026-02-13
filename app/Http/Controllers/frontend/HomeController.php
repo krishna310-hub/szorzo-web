@@ -57,7 +57,19 @@ class HomeController extends Controller
         return view('frontend.services.operations');
     }
 
-    public function itInfrastructureService(){
-        return view('frontend.services.it.it-infrastructure-service');
+    public function dataCenterDesign(){
+        return view('frontend.services.it.data-center-design');
+    }
+    public function dataCenterManagedService(){
+        return view('frontend.services.it.data-center-managed-service');
+    }
+    public function itInfrastructure(){
+        return view('frontend.services.it.it-infrastructure');
+    }
+    public function cyberSecurity(){
+        return view('frontend.services.it.cyber-security');
+    }
+    public function certificateCompliance(){
+        return view('frontend.services.it.certificate-compliance');
     }
 }

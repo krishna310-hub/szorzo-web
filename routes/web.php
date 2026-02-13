@@ -30,8 +30,12 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/valuation-and-deal-structuring','valuationDealStructuring')->name('valuation.deal.structuring');
     Route::get('/negotiation-and-deal-execution','negotiationDealExecution')->name('negotiation.deal.execution');
     Route::get('/post-merger-integration','postMergerIntegration')->name('post.merger.integration');
-    // Technology and Engineering Services
-    Route::get('/it/it-infrastructure-service','itInfrastructureService')->name('it.it.infrastruture.service');
+    // IT Infrastructure Services
+    Route::get('/it/data-center-design','dataCenterDesign')->name('data.center.design');
+    Route::get('/it/data-center-managed-service','dataCenterManagedService')->name('data.center.managed.service');
+    Route::get('/it/it-infrastructure','itInfrastructure')->name('it.infrastructure');
+    Route::get('/it/cyber-security','cyberSecurity')->name('cyber.security');
+    Route::get('/it/certificate-compliance','certificateCompliance')->name('certificate.compliance');
 });
 
 Route::group(['controller' => LoginController::class], function () {

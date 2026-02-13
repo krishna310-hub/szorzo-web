@@ -42,14 +42,6 @@
                                         <li><a href="{{ route('org.capacity.ass') }}">Organization Capacity Assessment</a></li>
                                         <li><a href="{{ route('opt.infra.off') }}">Operations and Infrastructure Offerings</a></li>
                                     </ul>
-                                    {{-- <h4 class="title"> <a href="">IT Infrastructure Services</a></h4>
-                                    <ul>
-                                        <li><a href="#">Data Center - Design, Built & Maintain</a></li>
-                                        <li><a href="#">Data Center - Managed Services</a></li>
-                                        <li><a href="#">IT Infrastructure - Design, Built & Maintain</a></li>
-                                        <li><a href="#">Cyber Security - Security Operations Center</a></li>
-                                        <li><a href="#">Certification & Compliance</a></li>
-                                    </ul> --}}
                                 </div>
                                 <div class="list-item">
                                     <h4 class="title"> <a href="{{ route('strategic.advisory') }}">Merger & Acquisition
@@ -70,11 +62,20 @@
                                 <div class="list-item">
                                     <h4 class="title"> <a href="">Technology & Engineering Services</a></h4>
                                     <ul>
-                                        <li><a href="#">IT Services</a></li>
-                                        <li><a href="#">Cyber Security</a></li>
-                                        <li><a href="#">Engineering Services</a></li>
-                                        {{-- <li><a href="{{ route('it.it.infrastruture.service') }}">IT Infrastructure Service</a></li> --}}
+                                        <li><a href="#">Data Center - Design, Built & Maintain</a></li>
+                                        <li><a href="#">Data Center - Managed Services</a></li>
+                                        <li><a href="#">IT Infrastructure - Design, Built & Maintain</a></li>
+                                        <li><a href="#">Cyber Security - Security Operations Center</a></li>
+                                        <li><a href="#">Certification & Compliance</a></li>
                                     </ul>
+                                    {{-- <h4 class="title"> <a href="">IT Infrastructure Services</a></h4>
+                                    <ul>
+                                        <li><a href="{{ route('data.center.design') }}">Data Center - Design, Built & Maintain</a></li>
+                                        <li><a href="{{ route('data.center.managed.service') }}">Data Center - Managed Services</a></li>
+                                        <li><a href="{{ route('it.infrastructure') }}">IT Infrastructure - Design, Built & Maintain</a></li>
+                                        <li><a href="{{ route('cyber.security') }}">Cyber Security - Security Operations Center</a></li>
+                                        <li><a href="{{ route('certificate.compliance') }}">Certification & Compliance</a></li>
+                                    </ul> --}}
                                 </div>
                                 <div class="list-item header-cta">
                                     <img src="{{ asset('frontend/images/rhino-white.jpg') }}" alt="Szorzo" />
@@ -98,15 +99,12 @@
                             <a href="{{ route('contact') }}" style="font-size: large; color: white; font-weight: bold;">Contact
                                 Us</a>
                         </li>
-                        <li class="menu-item-has-children">
+                        {{-- <li class="menu-item-has-children">
                             <a style="font-size: large; color: white; font-weight: bold;">Careers</a>
                             <div class="sub-menu mega-menu mega-menu-column-2">
                                 <div class="list-item">
                                     <ul>
                                         <li>
-                                            {{-- <a href="https://szorzo.zohorecruit.in/jobs/Careers">
-                                                Current Job Openings
-                                            </a> --}}
                                             <a href="{{ route('careers.list') }}">
                                                 Current Job Openings
                                             </a>
@@ -119,7 +117,7 @@
                                     </ul>
                                 </div>
                             </div>
-                        </li>
+                        </li> --}}
                     </ul>
                 </nav>
             </div>

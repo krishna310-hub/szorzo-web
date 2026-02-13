@@ -86,9 +86,11 @@
                         <div class="footer-links">
                             <h3>Technology & Engineering Services</h3>
                             <ul>
-                                <li><a href="#">IT Services</a></li>
-                                <li><a href="#">Cyber Security</a></li>
-                                <li><a href="#">Engineering Services</a></li>
+                                <li><a href="#">Data Center - Design, Built & Maintain</a></li>
+                                <li><a href="#">Data Center - Managed Services</a></li>
+                                <li><a href="#">IT Infrastructure - Design, Built & Maintain</a></li>
+                                <li><a href="#">Cyber Security - Security Operations Center</a></li>
+                                <li><a href="#">Certification & Compliance</a></li>
                             </ul>
                         </div>
                         <!-- Footer Links End -->

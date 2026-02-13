@@ -192,8 +192,8 @@
 
     <div class="our-value">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-xl-6" style="margin-top: 10px;">
+            <div class="align-items-center">
+                {{-- <div class="col-xl-6" style="margin-top: 10px;">
                     <div class="our-value-image-box wow fadeInUp" data-wow-delay="0.2s">
                         <div class="our-value-img-1">
                             <figure class="image-anime">
@@ -201,10 +201,10 @@
                             </figure>
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
-                <div class="col-xl-6" style="margin-top: -180px;">
-                    <div class="our-value-content" style="width: 700px;">
+                <div class="col-xl-6" style="">
+                    <div class="our-value-content" style="width: 1300px;">
                         <div class="section-title">
                             <h3 class="wow fadeInUp">Logo Concept & Symbolism</h3>
                             <h2 class="text-anime-style-2" data-cursor="-opaque">Why the <span
@@ -266,7 +266,7 @@
                     </div>
                 </div>
 
-                <div class="col-xl-12 section-title" style="margin-top: -300px; margin-left: 680px;">
+                <div class="col-xl-12 section-title">
                     <h2 class="text-anime-style-2" data-cursor="-opaque" style="font-size: 40px;"><span
                             style="font-weight: bold;">"Strength in Motion. Vision with Impact"</span></h2>
                 </div>
