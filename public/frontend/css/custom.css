@@ -2549,7 +2549,7 @@ header.main-header .header-sticky.active {
   margin-top: -150px;
   height: 100%;
   z-index: 1;
-}
+} 
 
 .page-header-about-us-bg::before {
   content: "";
