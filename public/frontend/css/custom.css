@@ -2423,10 +2423,10 @@ header.main-header .header-sticky.active {
 
 .page-header-ma-bg {
   position: relative;
-  background: url("../images/bg-68.jpg") no-repeat center 30% / cover;
+  background: url("../images/bg-68.jpg") no-repeat center 0% / cover;
   padding: 230px 0 115px;
   margin-top: -150px;
-  height: 710px;
+  height: 800px;
   z-index: 1;
 }
 
@@ -2543,11 +2543,11 @@ header.main-header .header-sticky.active {
 
 .page-header-about-us-bg {
   position: relative;
-  background: url("../images/bg-88.jpg") no-repeat center calc(10% - 75px);
-  background-size: cover;
+  background: url("../images/modern-businessman-working-with-digital-global-technology.jpg") no-repeat center calc(-30% - 75px);
+  background-size: 100%;
   padding: 230px 0 115px;
   margin-top: -150px;
-  height: 710px;
+  height: 100%;
   z-index: 1;
 }
 
@@ -2563,9 +2563,9 @@ header.main-header .header-sticky.active {
 }
 
 .page-header-about-us-bg .white-card {
-  margin-top: 100px;
-  margin-left: -100px;
-  max-width: 1000px;
+  margin-top: 160px;
+  margin-left: -110px;
+  max-width: 1300px;
   margin-right: -100px;
   height: 300px;
 }
@@ -7784,20 +7784,20 @@ html {
 
   .page-header-data-center-design-bg {
     position: relative;
-    background: url(../images/bg-84.jpg) no-repeat center calc(25% - 0px);
+    background: url(../images/dynamic-data-visualization-3d.jpg) no-repeat center calc(030% - 0px);
     background-size: cover;
-    padding: 230px 0 115px;
+    padding: 130px 0 220px;
     margin-top: -150px;
     height: 100%;
     z-index: 1;
   }
   .page-header-data-center-design-bg .white-card {
-    margin-top: 150px;
-    margin-left: 0px;
-    max-width: 1300px;
+    margin-top: 0px;
+    margin-left: -130px;
+    max-width: 700px;
     margin-right: 0px;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3);
+    max-height: 435px;
+    background: rgba(0, 0, 0, 0.1);
     color: white;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
@@ -7821,9 +7821,9 @@ html {
 
   .page-header-it-infrastructure-bg {
     position: relative;
-    background: url(../images/bg-86.jpg) no-repeat center calc(0% - 150px);
+    background: url(../images/futuristic-business-office-space.jpg) no-repeat center calc(0% - 150px);
     background-size: cover;
-    padding: 230px 0 115px;
+    padding: 245px 0 0px;
     margin-top: -150px;
     height: 100%;
     z-index: 1;
@@ -7839,26 +7839,26 @@ html {
 
   .page-header-certificate-compliance-bg {
     position: relative;
-    background: url(../images/bg-87.jpg) no-repeat center calc(20% - 150px);
-    background-size: cover;
-    padding: 230px 0 115px;
+    background: url(../images/3d-cartoon-portrait-person-practicing-law-related-profession.jpg) no-repeat center 20%;
+    background-size: 100% auto;
+    padding: 100px 0 250px;
     margin-top: -150px;
     height: 100%;
     z-index: 1;
   }
   .page-header-certificate-compliance-bg .white-card {
-    margin-top: 150px;
-    margin-left: -130px;
-    max-width: 1300px;
+    margin-top: 80px;
+    margin-left: -110px;
+    max-width: 550px;
     margin-right: 0px;
-    max-height: 250px;
+    max-height: 460px;
   }
 
   .page-header-it-managed-services-bg {
     position: relative;
-    background: url(../images/bg-87.jpg) no-repeat center calc(0% - 0px);
+    background: url(../images/cybersecurity-concept-secure-data-transfer.jpg) no-repeat center -80px;
     background-size: cover;
-    padding: 230px 0 115px;
+    padding: 230px 0 80px;
     margin-top: -150px;
     height: 100%;
     z-index: 1;
@@ -7866,7 +7866,7 @@ html {
   .page-header-it-managed-services-bg .white-card {
     margin-top: 155px;
     margin-left: -130px;
-    max-width: 1300px;
+    max-width: 1500px;
     margin-right: 0px;
     max-height: 400px;
 
