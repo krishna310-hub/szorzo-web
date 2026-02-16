@@ -7489,7 +7489,7 @@ header.main-header .header-sticky.active {
   .our-value-content {
     width: 100% !important;
   }
-  .page-header-about-us-bg {
+  /* .page-header-about-us-bg {
     position: relative;
     background: url(../images/bg-80.jpg) no-repeat center calc(50% - 75px);
     background-size: cover;
@@ -7504,7 +7504,7 @@ header.main-header .header-sticky.active {
     max-width: 800px;
     margin-right: 0px;
     height: 100%;
-  }
+  } */
 }
 
 @media (max-width: 991px) {
