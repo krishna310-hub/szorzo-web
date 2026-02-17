@@ -7821,7 +7821,7 @@ textarea {
 }
 
 .company-support-scrolling-ticker {
-    background: #fbfbfb;
+    background: #ffffff;
     padding: 40px 0;
     margin-bottom: 60px;
 }
@@ -7856,6 +7856,38 @@ textarea {
 .scrolling-content span img:hover {
     transform: scale(1.1);
 }
+
+.company-support-scrolling-box .logo-large {
+    height: 130px;
+    width: auto;
+    object-fit: contain;
+}
+.company-support-scrolling-box .logo-large-6 {
+    height: 90px;
+    width: auto;
+    object-fit: contain;
+}
+.company-support-scrolling-box .logo-large-8 {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+.company-support-scrolling-box .logo-large-9 {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+.company-support-scrolling-box .logo-large-10 {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+.company-support-scrolling-box .logo-large-11 {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+}
+
 
 /* Animation */
 @keyframes scroll {

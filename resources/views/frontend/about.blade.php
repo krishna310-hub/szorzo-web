@@ -540,14 +540,14 @@
                     <span><img src="{{ asset('frontend/images/company-supports-logo-1.png') }}" alt="Company Logo"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-2.png') }}" alt="Company Logo"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-3.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-4.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-4.png') }}" alt="Company Logo" class="logo-large"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-5.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-6.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-6.png') }}" alt="Company Logo" class="logo-large-6"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-7.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supporters-logo-8.svg') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-9.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-10.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-11.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supporters-logo-8.svg') }}" alt="Company Logo" class="logo-large-8"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-9.png') }}" alt="Company Logo" class="logo-large-9"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-10.png') }}" alt="Company Logo" class="logo-large-10"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-11.png') }}" alt="Company Logo" class="logo-large-11"></span>
                 </div>
 
                 <!-- Duplicate for smooth infinite scroll -->
@@ -555,14 +555,14 @@
                     <span><img src="{{ asset('frontend/images/company-supports-logo-1.png') }}" alt="Company Logo"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-2.png') }}" alt="Company Logo"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-3.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-4.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-4.png') }}" alt="Company Logo" class="logo-large"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-5.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-6.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-6.png') }}" alt="Company Logo" class="logo-large-6"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-7.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supporters-logo-8.svg') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-9.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-10.png') }}" alt="Company Logo"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-11.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supporters-logo-8.svg') }}" alt="Company Logo" class="logo-large-8"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-9.png') }}" alt="Company Logo" class="logo-large-9"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-10.png') }}" alt="Company Logo" class="logo-large-10"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-11.png') }}" alt="Company Logo" class="logo-large-11"></span>
                 </div>
             </div>
         </div>
