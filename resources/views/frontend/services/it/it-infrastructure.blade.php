@@ -7,13 +7,15 @@
                 <div class="white-card">
                     <div class="section-title">
                         <h1 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">
-                            <span>IT </span> Infrastructure
+                            <span>IT </span> Infrastructure - Design, Build & Maintain
                         </h1>
                         <div style="color: white;" class="section-title-content wow fadeInUp" data-wow-delay="0.2s">
-                            <p style="font-weight: bold; font-size: x-large; text-align: justify;">Szorzo delivers
-                                end-to-end IT infrastructure solutions that align technology with business goals. From
-                                consultation and design to integration and deployment, we build secure and scalable
-                                ecosystems that accelerate digital transformation and enable operational excellence.</p>
+                            <p style="font-weight: bold; font-size: x-large; text-align: justify;">Transforming IT into a
+                                Strategic Asset <br>
+                                Szorzo designs and deploys intelligent IT infrastructure that powers digital transformation.
+                                We create secure, scalable, and high-performance environments that support enterprise
+                                workloads across on-premises, hybrid, and multi-cloud ecosystems.
+                            </p>
                         </div>
                     </div>
                 </div>

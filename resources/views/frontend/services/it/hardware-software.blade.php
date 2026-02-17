@@ -10,11 +10,12 @@
                             <span>Hardware </span> + Software
                         </h1>
                         <div style="color: white;" class="section-title-content wow fadeInUp" data-wow-delay="0.2s">
-                            <p style="font-weight: bold; font-size: x-large; text-align: justify;">At Szorzo, we design and
-                                build next-generation data centers that support mission-critical workloads with maximum
-                                uptime and efficiency. From architecture planning to deployment and modernization, we create
-                                scalable environments that grow with your business while ensuring security, resilience, and
-                                optimized energy utilization.</p>
+                            <p style="font-weight: bold; font-size: x-large; text-align: justify;">Seamless Technology
+                                Ecosystems <br>
+                                We integrate best-in-class hardware and software platforms to create unified,
+                                high-performing enterprise environments. Szorzo ensures compatibility, scalability, and
+                                optimal performance across your technology landscape.
+                            </p>
                         </div>
                     </div>
                 </div>

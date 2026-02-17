@@ -7,14 +7,16 @@
                 <div class="white-card">
                     <div class="section-title">
                         <h1 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">
-                            <span>Data Center </span> Design, Build & Maintain
+                            <span>Data Center </span>- Design, Build & Maintain
                         </h1>
                         <div style="color: white;" class="section-title-content wow fadeInUp" data-wow-delay="0.2s">
-                            <p style="font-weight: bold; font-size: x-large; text-align: justify;">At Szorzo, we design and
-                                build next-generation data centers that support mission-critical workloads with maximum
-                                uptime and efficiency. From architecture planning to deployment and modernization, we create
-                                scalable environments that grow with your business while ensuring security, resilience, and
-                                optimized energy utilization.</p>
+                            <p style="font-weight: bold; font-size: x-large; text-align: justify;">Build the Foundation of
+                                Digital Resilience <br>
+                                At Szorzo, we design, build, and maintain high-performance data centers engineered for
+                                scalability, efficiency, and uninterrupted operations. From greenfield development to
+                                modernization of legacy facilities, we deliver secure, compliant, and energy-optimized data
+                                center environments tailored to your business growth.
+                            </p>
                         </div>
                     </div>
                 </div>

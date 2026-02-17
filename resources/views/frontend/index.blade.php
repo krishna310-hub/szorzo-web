@@ -247,6 +247,35 @@
         </div>
     </div>
 
+    <div class="company-support-section">
+        <div class="section-title" style="justify-items: center;">
+            <h2 class="text-anime-style-2" data-cursor="-opaque"><span style="font-weight: bold;">Partner Companies</span></h2>
+        </div>
+
+        <div class="company-support-scrolling-ticker">
+            <div class="company-support-scrolling-box">
+                <div class="scrolling-content">
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-1.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-2.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-3.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-4.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-5.png') }}" alt="Company Logo"></span>
+                </div>
+
+                <!-- Duplicate for smooth infinite scroll -->
+                <div class="scrolling-content">
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-1.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-2.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-3.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-4.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/company-supports-logo-5.png') }}" alt="Company Logo"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <br>
+
     <!-- <div class="our-testimonials">
         <div class="container">
             <div class="row">
