@@ -62,7 +62,7 @@
                         <!-- Approach Image Start -->
                         <div class="approach-image">
                             <figure class="image-anime reveal">
-                                <img src="{{ asset('frontend/images/loader.webp')}}" alt="">
+                                <img src="{{ asset('frontend/images/loader.webp') }}" alt="">
                             </figure>
                         </div>
                         <!-- Approach Image End -->
@@ -76,7 +76,7 @@
                         <!-- Mission Vission Item Start -->
                         <div class="mission-vision-item wow fadeInUp">
                             <div class="icon-box">
-                                <img src="{{ asset('frontend/images/icon-mission.svg')}}" alt="">
+                                <img src="{{ asset('frontend/images/icon-mission.svg') }}" alt="">
                             </div>
                             <div class="mission-vision-item-content">
                                 <h3 style="font-size: x-large;">Our mission</h3>
@@ -96,7 +96,7 @@
                         <!-- Mission Vission Item Start -->
                         <div class="mission-vision-item wow fadeInUp" data-wow-delay="0.2s">
                             <div class="icon-box">
-                                <img src="{{ asset('frontend/images/icon-vision.svg')}}" alt="">
+                                <img src="{{ asset('frontend/images/icon-vision.svg') }}" alt="">
                             </div>
                             <div class="mission-vision-item-content">
                                 <h3 style="font-size: x-large;">Our vision</h3>
@@ -130,7 +130,8 @@
                             <div class="section-title">
                                 <h3 class="wow fadeInUp" style="font-size: x-large;">INTERESTING FACTS OF SZORZO</h3>
                                 <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">Building Brands
-                                    <span>Forever</span></h2>
+                                    <span>Forever</span>
+                                </h2>
                             </div>
                             <div class="team-member-info-counters">
                                 <div class="member-info-counter-item">
@@ -284,7 +285,8 @@
                     </div>
                     <div class="industries-grid" style="margin-left: -50px;">
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/computer-headset-settings.gif')}}"
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/industry-icons/computer-headset-settings.gif') }}"
                                     alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">IT & BPM</span></h2>
@@ -292,161 +294,185 @@
                         </div>
                         <div class="industry-box">
                             <div class="icon-box" style="margin-top: 20px;"> <img
-                                    src="{{ asset('frontend/images/industry-icons/helpdesk.gif')}}" alt=""> </div>
+                                    src="{{ asset('frontend/images/industry-icons/helpdesk.gif') }}" alt="">
+                            </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Services</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/infrastructure.gif')}}" alt="">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/industry-icons/infrastructure.gif') }}" alt="">
                             </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Infrastructure</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/car.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/car.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Automobiles</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/factory.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/factory.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Manufacturing</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/bank.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/bank.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Banking</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
                             <div class="icon-box" style="margin-top: 20px;"> <img
-                                    src="{{ asset('frontend/images/industry-icons/health-checkup.gif')}}" alt=""> </div>
+                                    src="{{ asset('frontend/images/industry-icons/health-checkup.gif') }}" alt="">
+                            </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Healthcare</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/book-airplane.gif')}}" alt="">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/industry-icons/book-airplane.gif') }}" alt="">
                             </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Aviation</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/pill.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/pill.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Pharmaceuticals</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
                             <div class="icon-box" style="margin-top: 20px;"> <img
-                                    src="{{ asset('frontend/images/industry-icons/ecg-monitor.gif')}}" alt=""> </div>
+                                    src="{{ asset('frontend/images/industry-icons/ecg-monitor.gif') }}" alt="">
+                            </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Medical Devices</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/shopping-cart.gif')}}" alt="">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/industry-icons/shopping-cart.gif') }}" alt="">
                             </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">FMCG</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/music.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/music.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Media & Entertainment</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/e-com.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/e-com.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">E-Commerce</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/wallet.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/wallet.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Financial Services</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
                             <div class="icon-box" style="margin-top: 20px;"> <img
-                                    src="{{ asset('frontend/images/industry-icons/graduation-cap.gif')}}" alt=""> </div>
+                                    src="{{ asset('frontend/images/industry-icons/graduation-cap.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Education & Training</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/tank.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/tank.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Defence Manufacturing</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/uranus.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/uranus.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Science & Technology</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
                             <div class="icon-box" style="margin-top: 20px;"> <img
-                                    src="{{ asset('frontend/images/industry-icons/renewable-energy.gif')}}" alt=""> </div>
+                                    src="{{ asset('frontend/images/industry-icons/renewable-energy.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Renewable Energy</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/gear-wrench.gif')}}" alt="">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/industry-icons/gear-wrench.gif') }}" alt="">
                             </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Auto Components</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/digger.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/digger.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Metals & Mining</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/oil-pump.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/oil-pump.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Oil & Gas</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/profile.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/profile.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Consumer Durables</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box" style="margin-top: 20px;"> <img src="{{ asset('frontend/images/industry-icons/msme.gif')}}"
-                                    alt=""> </div>
+                            <div class="icon-box" style="margin-top: 20px;"> <img
+                                    src="{{ asset('frontend/images/industry-icons/msme.gif') }}" alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">MSME</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/ring.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/ring.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Gems & Jewellery</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/power-lines.gif')}}" alt="">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/industry-icons/power-lines.gif') }}" alt="">
                             </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Power</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/growing-seed.gif')}}" alt="">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/industry-icons/growing-seed.gif') }}" alt="">
                             </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Agriculture & Allied Industries</span>
@@ -454,38 +480,44 @@
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/location.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/location.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Real Estate</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/protection.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/industry-icons/protection.gif') }}" alt="">
+                            </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Insurance</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/piston.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/piston.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Engineering & Capital Goods</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/incubator.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/incubator.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Biotechnology</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box" style="margin-top: 20px;"> <img src="{{ asset('frontend/images/industry-icons/cheque.gif')}}"
-                                    alt=""> </div>
+                            <div class="icon-box" style="margin-top: 20px;"> <img
+                                    src="{{ asset('frontend/images/industry-icons/cheque.gif') }}" alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Retail</span></h2>
                             </div>
                         </div>
                         <div class="industry-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/chip.gif')}}" alt=""> </div>
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/industry-icons/chip.gif') }}"
+                                    alt=""> </div>
                             <div class="industry-box-content section-title">
                                 <h2 style="font-size: 17px; letter-spacing: 1px;">Electronics System Design &
                                     Manufacturing</span></h2>
@@ -496,4 +528,33 @@
             </div>
         </div>
     </div>
+
+    <div class="company-support-section">
+        <div class="section-title" style="justify-items: center;">
+            <h2 class="text-anime-style-2" data-cursor="-opaque"><span style="font-weight: bold;">Partner Companies</span></h2>
+        </div>
+
+        <div class="company-support-scrolling-ticker">
+            <div class="company-support-scrolling-box">
+                <div class="scrolling-content">
+                    <span><img src="frontend/images/company-supports-logo-1.png" alt="Company Logo"></span>
+                    <span><img src="frontend/images/company-supports-logo-2.png" alt="Company Logo"></span>
+                    <span><img src="frontend/images/company-supports-logo-3.png" alt="Company Logo"></span>
+                    <span><img src="frontend/images/company-supports-logo-4.png" alt="Company Logo"></span>
+                    <span><img src="frontend/images/company-supports-logo-5.png" alt="Company Logo"></span>
+                </div>
+
+                <!-- Duplicate for smooth infinite scroll -->
+                <div class="scrolling-content">
+                    <span><img src="frontend/images/company-supports-logo-1.png" alt="Company Logo"></span>
+                    <span><img src="frontend/images/company-supports-logo-2.png" alt="Company Logo"></span>
+                    <span><img src="frontend/images/company-supports-logo-3.png" alt="Company Logo"></span>
+                    <span><img src="frontend/images/company-supports-logo-4.png" alt="Company Logo"></span>
+                    <span><img src="frontend/images/company-supports-logo-5.png" alt="Company Logo"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <br>
 @endsection

@@ -72,4 +72,7 @@ class HomeController extends Controller
     public function certificateCompliance(){
         return view('frontend.services.it.certificate-compliance');
     }
+    public function hardwareSoftware(){
+        return view('frontend.services.it.hardware-software');
+    }
 }

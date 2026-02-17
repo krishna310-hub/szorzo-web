@@ -36,6 +36,7 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/it/it-infrastructure','itInfrastructure')->name('it.infrastructure');
     Route::get('/it/cyber-security','cyberSecurity')->name('cyber.security');
     Route::get('/it/certificate-compliance','certificateCompliance')->name('certificate.compliance');
+    Route::get('/it/hardware-software','hardwareSoftware')->name('hardware.software');
 });
 
 Route::group(['controller' => LoginController::class], function () {
