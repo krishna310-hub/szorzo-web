@@ -537,7 +537,7 @@
         <div class="company-support-scrolling-ticker">
             <div class="company-support-scrolling-box">
                 <div class="scrolling-content">
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-1.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/affluent_tech_logo.jpg') }}" alt="Company Logo" class="logo-large-1"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-2.png') }}" alt="Company Logo"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-3.png') }}" alt="Company Logo"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-4.png') }}" alt="Company Logo" class="logo-large"></span>
@@ -547,12 +547,13 @@
                     <span><img src="{{ asset('frontend/images/company-supporters-logo-8.svg') }}" alt="Company Logo" class="logo-large-8"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-9.png') }}" alt="Company Logo" class="logo-large-9"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-10.png') }}" alt="Company Logo" class="logo-large-10"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-11.png') }}" alt="Company Logo" class="logo-large-11"></span>
+                    <span><img src="{{ asset('frontend/images/images 1.png') }}" alt="Company Logo" class="logo-large-11"></span>
+                    <span><img src="{{ asset('frontend/images/cyient.png') }}" alt="Company Logo" class="logo-large-12"></span>
                 </div>
 
                 <!-- Duplicate for smooth infinite scroll -->
                 <div class="scrolling-content">
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-1.png') }}" alt="Company Logo"></span>
+                    <span><img src="{{ asset('frontend/images/affluent_tech_logo.jpg') }}" alt="Company Logo" class="logo-large-1"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-2.png') }}" alt="Company Logo"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-3.png') }}" alt="Company Logo"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-4.png') }}" alt="Company Logo" class="logo-large"></span>
@@ -562,7 +563,8 @@
                     <span><img src="{{ asset('frontend/images/company-supporters-logo-8.svg') }}" alt="Company Logo" class="logo-large-8"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-9.png') }}" alt="Company Logo" class="logo-large-9"></span>
                     <span><img src="{{ asset('frontend/images/company-supports-logo-10.png') }}" alt="Company Logo" class="logo-large-10"></span>
-                    <span><img src="{{ asset('frontend/images/company-supports-logo-11.png') }}" alt="Company Logo" class="logo-large-11"></span>
+                    <span><img src="{{ asset('frontend/images/images 1.png') }}" alt="Company Logo" class="logo-large-11"></span>
+                    <span><img src="{{ asset('frontend/images/cyient.png') }}" alt="Company Logo" class="logo-large-12"></span>
                 </div>
             </div>
         </div>

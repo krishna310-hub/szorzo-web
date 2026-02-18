@@ -142,6 +142,11 @@ body {
     max-width: 1300px;
 }
 
+.service-container {
+    padding-right: 50px;
+    padding-left: 50px;
+}
+
 .container,
 .container-fluid,
 .container-lg,
@@ -7857,6 +7862,11 @@ textarea {
     transform: scale(1.1);
 }
 
+.company-support-scrolling-box .logo-large-1 {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
 .company-support-scrolling-box .logo-large {
     height: 130px;
     width: auto;
@@ -7887,6 +7897,11 @@ textarea {
     width: auto;
     object-fit: contain;
 }
+.company-support-scrolling-box .logo-large-12 {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
 
 
 /* Animation */
@@ -7897,5 +7912,9 @@ textarea {
     to {
         transform: translateX(-100%);
     }
+}
+
+.services-body {
+    padding: 50px 0px;
 }
 
