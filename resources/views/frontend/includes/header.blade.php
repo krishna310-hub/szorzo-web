@@ -60,7 +60,7 @@
                                     </ul>
                                 </div>
                                 <div class="list-item">
-                                    <h4 class="title"> <a href="">Technology & Engineering Services</a></h4>
+                                    {{-- <h4 class="title"> <a href="">Technology & Engineering Services</a></h4>
                                     <ul>
                                         <li><a href="#">Data Center - Design, Built & Maintain</a></li>
                                         <li><a href="#">Data Center - Managed Services</a></li>
@@ -68,8 +68,8 @@
                                         <li><a href="#">Cyber Security - Security Operations Center</a></li>
                                         <li><a href="#">Certification & Compliance</a></li>
                                         <li><a href="#">Hardware + Software Integration</a></li>
-                                    </ul>
-                                    {{-- <h4 class="title"> <a href="">IT Infrastructure Services</a></h4>
+                                    </ul> --}}
+                                    <h4 class="title"> <a href="">IT Infrastructure Services</a></h4>
                                     <ul>
                                         <li><a href="{{ route('data.center.design') }}">Data Center - Design, Built & Maintain</a></li>
                                         <li><a href="{{ route('data.center.managed.service') }}">Data Center - Managed Services</a></li>
@@ -77,7 +77,7 @@
                                         <li><a href="{{ route('cyber.security') }}">Cyber Security - Security Operations Center</a></li>
                                         <li><a href="{{ route('certificate.compliance') }}">Certification & Compliance</a></li>
                                         <li><a href="{{ route('hardware.software') }}">Hardware + Software Integration</a></li>
-                                    </ul> --}}
+                                    </ul>
                                 </div>
                                 <div class="list-item header-cta">
                                     <img src="{{ asset('frontend/images/rhino-white.jpg') }}" alt="Szorzo" />
