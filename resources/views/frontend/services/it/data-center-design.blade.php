@@ -31,7 +31,6 @@
                 <div class="col-lg-12">
                     <!-- Section Title Start -->
                     <div class="section-title section-title-center">
-                        {{-- <h3 class="wow fadeInUp" style="font-size: x-large;">Enabling Business Foundations Globally</h3> --}}
                         <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">Data Center <span
                                 style="font-weight: bold;">- Design, Build & Maintain</span></h2>
                     </div>
@@ -51,9 +50,9 @@
             <div class="row">
                 <div class="col-lg-3 col-md-6">
                     <!-- Work Step Item Start -->
-                    <div class="service-work-step-item wow fadeInUp">
+                    <div class="work-step-item wow fadeInUp">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/industrial-designer-digital-art.jpg') }}" alt="">
+                            <img src="{{ asset('frontend/images/icon-work-step-1.svg') }}" alt="">
                         </div>
                         <div class="work-step-content text-start">
                             <h3>Strategic Planning & Design</h3>
@@ -68,9 +67,9 @@
 
                 <div class="col-lg-3 col-md-6">
                     <!-- Work Step Item Start -->
-                    <div class="service-work-step-item wow fadeInUp" data-wow-delay="0.2s">
+                    <div class="work-step-item wow fadeInUp" data-wow-delay="0.2s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/3d-cartoon-scene-depicting-variety-people-multitasking.jpg') }}" alt="">
+                            <img src="{{ asset('frontend/images/icon-work-step-2.svg') }}" alt="">
                         </div>
                         <div class="work-step-content text-start">
                             <h3>Build & Deployment </h3>
@@ -85,9 +84,9 @@
 
                 <div class="col-lg-3 col-md-6">
                     <!-- Work Step Item Start -->
-                    <div class="service-work-step-item wow fadeInUp" data-wow-delay="0.4s">
+                    <div class="work-step-item wow fadeInUp" data-wow-delay="0.4s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/colorful-3d-arrow-circle-refresh-cycle-update-symbol.jpg') }}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-7.svg') }}" alt="">
                         </div>
                         <div class="work-step-content text-start">
                             <h3>Operations & Maintenance</h3>
@@ -102,9 +101,9 @@
 
                 <div class="col-lg-3 col-md-6">
                     <!-- Work Step Item Start -->
-                    <div class="service-work-step-item wow fadeInUp" data-wow-delay="0.4s">
+                    <div class="work-step-item wow fadeInUp" data-wow-delay="0.4s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="">
+                            <img src="{{ asset('frontend/images/icon-work-step-4.svg') }}" alt="">
                         </div>
                         <div class="work-step-content text-start">
                             <h3>Why Szorzo? </h3>
@@ -117,7 +116,7 @@
                     <!-- Work Step Item End -->
                 </div>
 
-                <div class="service-single-content">
+                <div class="service-single-content mt-5">
                     <div class="service-entry">
                         <h2 class="text-anime-style-2">Engineering Mission-Critical <span>Infrastructure for Global
                                 Enterprises</span></h2>
@@ -152,7 +151,7 @@
                     <!-- Work Step Item Start -->
                     <div class="work-step-item wow fadeInUp">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-6.svg') }}" alt="">
+                            <img src="{{ asset('frontend/images/icon-work-step-2.svg') }}" alt="">
                         </div>
                         <div class="work-step-content text-start">
                             <h3>Engineering & Deployment</h3>
@@ -199,7 +198,7 @@
                     <!-- Work Step Item End -->
                 </div>
 
-                <div class="service-single-content">
+                <div class="service-single-content mt-5">
                     <div class="service-entry">
                         <div class="service-benefits-box">
                             <h2 class="text-anime-style-2">Engineering Mission-Critical <span>Infrastructure</span></h2>
@@ -249,7 +248,7 @@
                     <!-- Work Step Item Start -->
                     <div class="work-step-item wow fadeInUp">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-work-step-3.svg') }}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-7.svg') }}" alt="">
                         </div>
                         <div class="work-step-content text-start">
                             <h3>Operations & Maintenance</h3>

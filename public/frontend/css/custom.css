@@ -2533,7 +2533,7 @@ header.main-header .header-sticky.active {
 
 .page-header-contact-us-bg {
     position: relative;
-    background: url("../images/bg-70.jpg") no-repeat center 50% / cover;
+    background: url("../images/SL.112119.25250.08.jpg") no-repeat center 50% / cover;
     padding: 230px 0 115px;
     height: 710px;
     margin-top: -150px;
@@ -2547,7 +2547,6 @@ header.main-header .header-sticky.active {
     left: 0;
     width: 100%;
     height: 100%;
-    /* background: rgba(0, 0, 0, 0.5); */
     z-index: -1;
 }
 
@@ -7934,6 +7933,21 @@ textarea {
 
 /* Hover Effect */
 .service-work-step-item:hover .icon-box img {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+.service-work-step-item .icon-box-1 img {
+    width: 100%;
+    max-width: 800px;
+    max-height: 350px;
+    transition: transform 0.4s ease, filter 0.4s ease;
+    margin-bottom: 30px;
+    border-radius: 15px;
+}
+
+/* Hover Effect */
+.service-work-step-item:hover .icon-box-1 img {
     transform: scale(1.1);
     filter: brightness(1.1);
 }
