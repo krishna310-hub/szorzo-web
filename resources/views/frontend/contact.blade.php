@@ -4,7 +4,7 @@
     <div class="page-header-contact-us-bg">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-6" style="margin-left: 0px; margin-top: 290px;">
+                <div class="col-lg-6" style="margin-top: 20px;">
                     <!-- Page Header Box Start -->
                     <div class="page-header-box">
                         <h1 style="color: white; margin-top: 70px;" class="wow fadeInUp" data-cursor="-opaque">Contact
