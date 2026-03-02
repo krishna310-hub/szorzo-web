@@ -84,14 +84,14 @@
                     <div class="col-lg-3 col-md-6">
                         <!-- Footer Links Start -->
                         <div class="footer-links">
-                            <h3>Technology & Engineering Services</h3>
+                            <h3>IT Infrastructure Services</h3>
                             <ul>
-                                <li><a href="#">Data Center - Design, Built & Maintain</a></li>
-                                <li><a href="#">Data Center - Managed Services</a></li>
-                                <li><a href="#">IT Infrastructure - Design, Built & Maintain</a></li>
-                                <li><a href="#">Cyber Security - Security Operations Center</a></li>
-                                <li><a href="#">Certification & Compliance</a></li>
-                                <li><a href="#">Hardware + Software Integration</a></li>
+                                <li><a href="{{ route('data.center.design') }}">Data Center - Design, Built & Maintain</a></li>
+                                <li><a href="{{ route('data.center.managed.service') }}">Data Center - Managed Services</a></li>
+                                <li><a href="{{ route('it.infrastructure') }}">IT Infrastructure - Design, Built & Maintain</a></li>
+                                <li><a href="{{ route('cyber.security') }}">Cyber Security - Security Operations Center</a></li>
+                                <li><a href="{{ route('certificate.compliance') }}">Certification & Compliance</a></li>
+                                <li><a href="{{ route('hardware.software') }}">Hardware + Software Integration</a></li>
                             </ul>
                         </div>
                         <!-- Footer Links End -->
