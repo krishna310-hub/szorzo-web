@@ -101,6 +101,9 @@
                             <a href="{{ route('contact') }}" style="font-size: large; color: white; font-weight: bold;">Contact
                                 Us</a>
                         </li>
+                        {{-- <li>
+                            <a href="{{route('szorzo.ai')}}" style="font-size: large; color: white; font-weight: bold;">SZORZO AI</a>
+                        </li> --}}
                         {{-- <li class="menu-item-has-children">
                             <a style="font-size: large; color: white; font-weight: bold;">Careers</a>
                             <div class="sub-menu mega-menu mega-menu-column-2">
