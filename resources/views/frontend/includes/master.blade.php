@@ -10,7 +10,7 @@
         <meta name="keywords" content="">
         <meta name="author" content="Awaiken">
         <!-- Page Title -->
-        <title>SZORZO India's #1 GCC Launchpad | Global M&A Partner</title>
+        <title>SZORZO India's #1 GCC Launchpad | Global AI Partner</title>
         <!-- Favicon Icon -->
         <link rel="shortcut icon" type="image/x-icon" href="{{ asset('frontend/images/favicon.png') }}">
         <link rel="icon" href="{{ asset('frontend/images/favicon.png') }}" type="image/png">
