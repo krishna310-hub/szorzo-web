@@ -267,7 +267,7 @@
                     <div class="section-head col-sm-12">
                         <div class="section-title text-center">
                             <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">Why <span
-                                    style="font-weight: bold;"> SZORZO ?</span>
+                                    style="font-weight: bold;"> SZORZO AI ?</span>
                             </h2>
                         </div>
                         <div class="section-title section-title-center">
