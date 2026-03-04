@@ -27,13 +27,13 @@
                     </div>
                     <ul class="menu-main mb-0">
                         <li>
-                            <a href="{{route('index')}}" style="font-size: large; color: white; font-weight: bold;">Home</a>
+                            <a href="{{route('index')}}" style="font-size: large; color: white; font-weight: bold;">HOME</a>
                         </li>
                         <li>
                             <a href="{{route('szorzo.ai')}}" style="font-size: large; color: white; font-weight: bold;">SZORZO AI</a>
                         </li>
                         <li class="menu-item-has-children">
-                            <a style="font-size: large; color: white; font-weight: bold;">Services
+                            <a style="font-size: large; color: white; font-weight: bold;">SERVICES
                                 <!-- <i class="ri-arrow-down-s-line"></i> -->
                             </a>
                             <div class="sub-menu mega-menu mega-menu-column-4">
@@ -93,16 +93,16 @@
                         </li>
                         <li>
                             <a href="{{ route('about.us') }}#industries"
-                                style="font-size: large; color: white; font-weight: bold;">Industries</a>
+                                style="font-size: large; color: white; font-weight: bold;">INDUSTRIES</a>
                         </li>
                         {{-- ?#industries --}}
                         <li class="menu-item-has-children">
-                            <a href="{{ route('about.us') }}" style="font-size: large; color: white; font-weight: bold;">About
-                                Us</a>
+                            <a href="{{ route('about.us') }}" style="font-size: large; color: white; font-weight: bold;">ABOUT
+                                US</a>
                         </li>
                         <li>
-                            <a href="{{ route('contact') }}" style="font-size: large; color: white; font-weight: bold;">Contact
-                                Us</a>
+                            <a href="{{ route('contact') }}" style="font-size: large; color: white; font-weight: bold;">CONTACT
+                                US</a>
                         </li>
                         {{-- <li class="menu-item-has-children">
                             <a style="font-size: large; color: white; font-weight: bold;">Careers</a>
