@@ -2547,14 +2547,7 @@ header.main-header .header-sticky.active {
     left: 0;
     width: 100%;
     height: 100%;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    background: rgba(0, 0, 0, 0.2);
->>>>>>> d4c8b77cf5344057d0e502314fbefa776386bad0
-=======
     background: rgba(0, 0, 0, 0.3);
->>>>>>> 188dad9a21fbed3200b7161d7d7b261b3e85111a
     z-index: -1;
 }
 
