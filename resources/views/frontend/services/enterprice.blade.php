@@ -20,7 +20,7 @@
     <!-- Page Header End -->
 
     <!-- How It Work Section Start -->
-    <div class="how-it-work bg-section mt-3 mb-5">
+    <div class="how-it-work bg-section mt-5 mb-5">
         <div class="container">
             <div class="row section-row align-items-center">
                 <div class="col-lg-12">
@@ -52,7 +52,7 @@
                     </div>
                     <!-- Work Step Item End -->
                 </div>
-                
+
                 <div class="col-lg-3 col-md-6">
                     <!-- Work Step Item Start -->
                     <div class="work-step-item wow fadeInUp" data-wow-delay="0.2s">
@@ -68,7 +68,7 @@
                     </div>
                     <!-- Work Step Item End -->
                 </div>
-                
+
                 <div class="col-lg-3 col-md-6">
                     <!-- Work Step Item Start -->
                     <div class="work-step-item wow fadeInUp" data-wow-delay="0.4s">
@@ -80,8 +80,8 @@
                             <p>Financial Accounting</p>
                             <p>Payroll Administration</p>
                             <p>Regulatory Compliance</p>
-                            <p>Virtual CFO</p> 
-                            <p>Internal Control</p> 
+                            <p>Virtual CFO</p>
+                            <p>Internal Control</p>
                             <p>Internal Audit</p>
                         </div>
                     </div>

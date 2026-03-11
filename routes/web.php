@@ -38,6 +38,15 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/it/cyber-security','cyberSecurity')->name('cyber.security');
     Route::get('/it/certificate-compliance','certificateCompliance')->name('certificate.compliance');
     Route::get('/it/hardware-software','hardwareSoftware')->name('hardware.software');
+    // Contact Forms
+    Route::get('/contact/szorzo-ai-form','szorzoAiForm')->name('contact.szorzo.ai.form');
+    Route::get('/contact/enterprise-transformation-form','enterpriseTransformationForm')->name('contact.enterprise.transformation.form');
+    Route::get('/contact/enterprise-digitalization-form','enterpriseDigitalizationForm')->name('contact.enterprise.digitalization.form');
+    Route::get('/contact/enterprise-learning-solution-form','enterpriseLearningSolutionForm')->name('contact.enterprise.learning.solution.form');
+    Route::get('/contact/organization-capacity-form','organizationCapacityForm')->name('contact.organization.capacity.form');
+    Route::get('/contact/operation-hr-offering-form','operationHrOfferingForm')->name('contact.operation.hr.offering.form');
+    Route::get('/contact/it-services-form','itServicesForm')->name('contact.it.services.form');
+    Route::get('/contact/merger-services-form','mergerServicesForm')->name('contact.merger.services.form');
 });
 
 Route::group(['controller' => LoginController::class], function () {

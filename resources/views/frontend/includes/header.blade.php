@@ -6,7 +6,7 @@
                 <div class="logo">
                     <a class="navbar-brand" href="{{route('index')}}">
                         <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                        <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px">
+                        <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
                     </a>
                 </div>
             </div>

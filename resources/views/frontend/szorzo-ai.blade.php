@@ -18,9 +18,9 @@
         </div>
     </div>
 
-    <section class="creative-cards style-one">
+    <section class="creative-cards">
 
-        <div class="our-approach bg-section mt-5">
+        <div class="our-approach bg-section mt-2">
             <div class="container">
                 <div class="row align-items-center">
                     <div class="szorzo-ai">
@@ -469,7 +469,7 @@
             </div>
         </section>
 
-        <div class="our-approach bg-section mt-3 mb-5">
+        <div class="our-approach bg-section mt-3 mb-3">
             <div class="container" style="margin-bottom: -40px">
                 <div class="row align-items-center">
                     <div class="col-lg-6">

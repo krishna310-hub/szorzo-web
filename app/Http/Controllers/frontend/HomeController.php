@@ -78,4 +78,29 @@ class HomeController extends Controller
     public function hardwareSoftware(){
         return view('frontend.services.it.hardware-software');
     }
+
+    public function szorzoAiForm(){
+        return view('frontend.contact-forms.szorzo-ai-form');
+    }
+    public function enterpriseTransformationForm(){
+        return view('frontend.contact-forms.enterprise-transformation-form');
+    }
+    public function enterpriseDigitalizationForm(){
+        return view('frontend.contact-forms.enterprise-digitalization-form');
+    }
+    public function enterpriseLearningSolutionForm(){
+        return view('frontend.contact-forms.enterprise-learning-solution-form');
+    }
+    public function organizationCapacityForm(){
+        return view('frontend.contact-forms.organization-capacity-form');
+    }
+    public function operationHrOfferingForm(){
+        return view('frontend.contact-forms.operation-hr-offering-form');
+    }
+    public function itServicesForm(){
+        return view('frontend.contact-forms.it-services-form');
+    }
+    public function mergerServicesForm(){
+        return view('frontend.contact-forms.merger-service-form');
+    }
 }

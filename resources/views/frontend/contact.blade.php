@@ -7,8 +7,9 @@
                 <div class="col-lg-6" style="margin-top: 200px;">
                     <!-- Page Header Box Start -->
                     <div class="page-header-box">
-                        <h1 style="color: white; margin-top: 80px; margin-left:-400px" class="wow fadeInUp" data-cursor="-opaque">Contact
-                            <span>Us</span>
+                        <h1 style="color: white; margin-top: 50px; margin-left: -470px" class="wow fadeInUp"
+                            data-cursor="-opaque">HOW CAN WE <br>
+                            <span>HELP YOU ?</span>
                         </h1>
                     </div>
                     <!-- Page Header Box End -->
@@ -18,82 +19,115 @@
     </div>
     <!-- Page Header End -->
 
-    <section class="looking-section mt-5">
+    <div class="our-approach bg-section mt-5 mb-5">
         <div class="container">
 
             <div class="text-center section-header">
                 <div class="section-title section-title-center">
-                    <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">I’m
-                        <span style="font-weight: bold;">Looking For</span>
+                    <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">
+                        <span style="font-weight: bold;">Choose your service and let’s get started</span>
                     </h2>
                 </div>
                 <p>
-                    Please select your area of interest below. An SZORZO representative
+                    Please select your area of interest below. An SZORZO experts
                     will contact you shortly after receiving your request.
                 </p>
             </div>
 
-            <div class="row looking-grid">
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="looking-card">
-                        <h5>SZORZO AI</h5>
-                        <span class="underline"></span>
+            <section id="features" class="section-padding">
+                <div class="container">
+                    <div class="section-header">
+                        <div class="shape wow fadeInDown"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                            <div class="content-left">
+                                <div class="box-item animated wow fadeInLeft">
+                                    <div class="text">
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#szorzoModal">
+                                            <h4>SZORZO AI</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="box-item animated wow fadeInLeft" data-wow-delay="0.6s">
+                                    <div class="text">
+                                        <a href="{{ route('contact.enterprise.transformation.form') }}">
+                                            <h4>Enterprise Transformation</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
+                                    <div class="text">
+                                        <a href="{{ route('contact.enterprise.digitalization.form') }}">
+                                            <h4>Enterprise Digitalization</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
+                                    <div class="text">
+                                        <a href="{{ route('contact.enterprise.learning.solution.form') }}">
+                                            <h4>Enterprise Learning Solutions</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
+                                    <div class="text">
+                                        <a href="{{ route('contact.merger.services.form') }}">
+                                            <h4>Merger and Acquisition Services</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                            <div class="show-box animated wow fadeInUp">
+                                <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                            <div class="content-right">
+                                <div class="box-item animated wow fadeInRight">
+                                    <div class="text">
+                                        <a href="{{ route('contact.organization.capacity.form') }}">
+                                            <h4>Organization Capacity Assessment</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="box-item animated wow fadeInRight" data-wow-delay="0.6s">
+                                    <div class="text">
+                                        <a href="{{ route('contact.operation.hr.offering.form') }}">
+                                            <h4>Operations and HR Infrastructure Offerings</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
+                                    <div class="text">
+                                        <a href="{{ route('contact.it.services.form') }}">
+                                            <h4>IT Services</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
+                                    <div class="text">
+                                        <a href="{{ route('contact.szorzo.ai.form') }}">
+                                            <h4>IT Infrastructure Services</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
+                                    <div class="text">
+                                        <a href="{{ route('contact.szorzo.ai.form') }}">
+                                            <h4>Cyber Security Services</h4>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="looking-card">
-                        <h5>Enterprise Transformation</h5>
-                        <span class="underline"></span>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="looking-card">
-                        <h5>Enterprise Digitalization</h5>
-                        <span class="underline"></span>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="looking-card">
-                        <h5>Enterprise Learning Solutions</h5>
-                        <span class="underline"></span>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="looking-card">
-                        <h5>Organization Capacity Assessment</h5>
-                        <span class="underline"></span>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="looking-card">
-                        <h5>Operations and HR Infrastructure Offerings</h5>
-                        <span class="underline"></span>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="looking-card">
-                        <h5>IT Infrastructure Services</h5>
-                        <span class="underline"></span>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="looking-card">
-                        <h5>Merger & Acq Services</h5>
-                        <span class="underline"></span>
-                    </div>
-                </div>
-
-            </div>
+            </section>
         </div>
-    </section>
+    </div>
 
     {{-- <section class="locations-section">
         <div class="container">
@@ -279,4 +313,155 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="szorzoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="szorzoForm">
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">SZORZO AI Contact Form</h4>
+
+                        <!-- First & Last Name -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback">First name is required</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback">Please enter a valid email</div>
+                        </div>
+
+                        <!-- Company -->
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback">Company is required</div>
+                        </div>
+
+                        <!-- Relationship Dropdown -->
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Alliance</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <div class="invalid-feedback">Relationship with Szorzo is required</div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" placeholder="Phone" required>
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback">Phone is required</div>
+                        </div>
+
+                        <!-- Additional Info -->
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button class="btn btn-danger w-40">Submit</button>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+
+            $("#szorzoForm").submit(function(e) {
+
+                e.preventDefault();
+
+                let valid = true;
+
+                let firstname = $("#firstname").val().trim();
+                let lastname = $("#lastname").val().trim();
+                let email = $("#email").val().trim();
+                let company = $("#company").val().trim();
+                let relationship = $("#relationship").val();
+                let phone = $("#phone").val().trim();
+
+                let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                let phonePattern = /^[0-9]{10}$/;
+
+                $(".form-control, .form-select").removeClass("is-invalid");
+
+                if (firstname == "") {
+                    $("#firstname").addClass("is-invalid");
+                    valid = false;
+                }
+
+                if (lastname == "") {
+                    $("#lastname").addClass("is-invalid");
+                    valid = false;
+                }
+
+                if (!emailPattern.test(email)) {
+                    $("#email").addClass("is-invalid");
+                    valid = false;
+                }
+
+                if (company == "") {
+                    $("#company").addClass("is-invalid");
+                    valid = false;
+                }
+
+                if (relationship == "") {
+                    $("#relationship").addClass("is-invalid");
+                    valid = false;
+                }
+
+                if (!phonePattern.test(phone)) {
+                    $("#phone").addClass("is-invalid");
+                    valid = false;
+                }
+
+                if (valid) {
+                    alert("Form submitted successfully");
+                    this.submit();
+                }
+
+            });
+
+            $("#szorzoForm input, #szorzoForm select").on("keyup change", function() {
+                if ($(this).val().trim() !== "") {
+                    $(this).removeClass("is-invalid");
+                }
+            });
+
+        });
+    </script>
 @endsection
