@@ -378,7 +378,7 @@
 
                         <!-- Phone -->
                         <div class="form-floating mb-4">
-                            <input type="text" class="form-control" id="phone" placeholder="Phone" required>
+                            <input type="text" class="form-control" id="phone" placeholder="Phone">
                             <label for="phone">Phone <span class="text-danger">*</span></label>
                             <div class="invalid-feedback">Phone is required</div>
                         </div>
