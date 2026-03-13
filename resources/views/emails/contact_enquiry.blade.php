@@ -15,7 +15,7 @@
         }
 
         body {
-            background-color: #0d0d0d;
+            background-color: #ffffff;
             font-family: 'DM Sans', sans-serif;
             -webkit-font-smoothing: antialiased;
         }
@@ -23,7 +23,7 @@
         .wrapper {
             max-width: 620px;
             margin: 48px auto;
-            background-color: #111;
+            background-color: #ffffff;
             border: 1px solid #222;
             border-radius: 4px;
             overflow: hidden;
@@ -31,7 +31,7 @@
 
         /* ── Header ── */
         .header {
-            background: linear-gradient(135deg, #1a0000 0%, #0d0d0d 60%, #1a0000 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 60%, #ffffff 100%);
             padding: 44px 48px 36px;
             border-bottom: 1px solid #2a0000;
             position: relative;
@@ -68,14 +68,14 @@
             font-weight: 600;
             letter-spacing: 4px;
             text-transform: uppercase;
-            color: #888;
+            color: #000000;
         }
 
         .header-title {
             font-family: 'Cormorant Garamond', serif;
             font-size: 36px;
-            font-weight: 300;
-            color: #f0f0f0;
+            font-weight: 800;
+            color: rgb(0, 0, 0);
             line-height: 1.1;
             letter-spacing: -0.5px;
         }
@@ -89,16 +89,16 @@
         .header-sub {
             margin-top: 10px;
             font-size: 12px;
-            color: #555;
+            color: #000000;
             letter-spacing: 2px;
             text-transform: uppercase;
         }
 
         /* ── Timestamp Badge ── */
         .timestamp-bar {
-            background: #0d0d0d;
+            background: #ffffff;
             padding: 12px 48px;
-            border-bottom: 1px solid #1c1c1c;
+            border-bottom: 1px solid #ffffff;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -107,13 +107,13 @@
         .timestamp-label {
             font-size: 10px;
             letter-spacing: 2px;
-            color: #444;
+            color: #000000;
             text-transform: uppercase;
         }
 
         .timestamp-value {
             font-size: 11px;
-            color: #555;
+            color: #000000;
             font-weight: 500;
         }
 
@@ -137,7 +137,7 @@
             font-size: 9px;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: #444;
+            color: #ffffff;
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid #1e1e1e;
@@ -153,12 +153,12 @@
 
         .field-item {
             padding: 16px 0;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid #000000;
         }
 
         .field-item:nth-child(odd) {
             padding-right: 24px;
-            border-right: 1px solid #1a1a1a;
+            border-right: 1px solid #000000;
         }
 
         .field-item:nth-child(even) {
@@ -175,13 +175,13 @@
             font-size: 9px;
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: #444;
+            color: #000000;
             margin-bottom: 6px;
         }
 
         .field-value {
             font-size: 14px;
-            color: #d0d0d0;
+            color: #000000;
             font-weight: 400;
             line-height: 1.4;
         }
@@ -190,7 +190,7 @@
             font-family: 'Cormorant Garamond', serif;
             font-size: 18px;
             font-weight: 400;
-            color: #f0f0f0;
+            color: #000000;
         }
 
         .field-value.email-val {
@@ -221,7 +221,7 @@
 
         .message-block p {
             font-size: 13px;
-            color: #888;
+            color: #000000;
             line-height: 1.8;
         }
 
@@ -246,7 +246,7 @@
 
         /* ── Footer ── */
         .footer {
-            background: #0a0a0a;
+            background: #ffffff;
             border-top: 1px solid #1a1a1a;
             padding: 24px 48px;
             display: flex;
@@ -259,12 +259,12 @@
             font-size: 11px;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: #333;
+            color: #000000;
         }
 
         .footer-note {
             font-size: 10px;
-            color: #2a2a2a;
+            color: #000000;
             letter-spacing: 1px;
         }
 
@@ -286,7 +286,7 @@
         <div class="header">
             <div class="brand">
                 <div class="brand-dot"></div>
-                <span class="brand-name">SZORZO AI</span>
+                <span class="brand-name">SZORZO</span>
             </div>
             <div class="header-title">
                 New Contact

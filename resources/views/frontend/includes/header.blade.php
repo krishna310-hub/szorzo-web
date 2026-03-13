@@ -91,6 +91,38 @@
                                 </div>
                             </div>
                         </li>
+                        {{-- <li class="menu-item-has-children">
+                            <a style="font-size: large; color: white; font-weight: bold;">SERVICES
+                                <!-- <i class="ri-arrow-down-s-line"></i> -->
+                            </a>
+                            <div class="sub-menu mega-menu mega-menu-column-4">
+                                <div class="list-item">
+                                    <h4 class="title"> <a href="">Enterprise Services</a></h4>
+                                    <ul>
+                                        <li><a href="">Enterprise Transformation</a></li>
+                                        <li><a href="">Enterprise Digitalization</a></li>
+                                        <li><a href="">Enterprise Learning Solutions</a></li>
+                                    </ul>
+                                </div>
+                                <div class="list-item">
+                                    <h4 class="title"> <a href="{{ route('strategic.advisory') }}">Merger & Acquisition
+                                            Services</a></h4>
+                                    <ul>
+                                        <li><a href="">Merger and Acquisition Services</a></li>
+                                        <li><a href="">Organization Capacity Assessment</a></li>
+                                        <li><a href="">Operations and HR Infrastructure Offerings</a></li>
+                                    </ul>
+                                </div>
+                                <div class="list-item">
+                                    <h4 class="title"> <a href="">IT Services</a></h4>
+                                    <ul>
+                                        <li><a href="">IT Services</a></li>
+                                        <li><a href="">IT Infrastructure Services</a></li>
+                                        <li><a href="">Cyber Security Services</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li> --}}
                         <li>
                             <a href="{{ route('about.us') }}#industries"
                                 style="font-size: large; color: white; font-weight: bold;">INDUSTRIES</a>

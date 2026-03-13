@@ -39,7 +39,8 @@
                     <div class="col-lg-4 col-md-6">
                     </div>
                     <div class="col-lg-4 col-md-6 mb-2">
-                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#szorzoModal" style="cursor:pointer;">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#szorzoModal"
+                            style="cursor:pointer;">
                             <div class="icon-box"> <img
                                     src="{{ asset('frontend/images/service-icons/artificial-intelligence.png') }}"
                                     alt=""> </div>
@@ -51,7 +52,8 @@
                     <div class="col-lg-4 col-md-6">
                     </div>
                     <div class="col-lg-4 col-md-6">
-                        <div class="service-box">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#enterpriseTransformationModal"
+                            style="cursor:pointer;">
                             <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/city.png') }}"
                                     alt=""> </div>
                             <div class="service-box-content ">
@@ -60,7 +62,8 @@
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6">
-                        <div class="service-box">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#enterpriseDigitalizationModal"
+                            style="cursor:pointer;">
                             <div class="icon-box"> <img
                                     src="{{ asset('frontend/images/service-icons/social-media-marketing.png') }}"
                                     alt=""> </div>
@@ -70,7 +73,8 @@
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 mt-3">
-                        <div class="service-box">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#enterpriseLearningSolutionModal"
+                            style="cursor:pointer;">
                             <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/learning.png') }}"
                                     alt=""> </div>
                             <div class="service-box-content">
@@ -79,16 +83,8 @@
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 mt-3">
-                        <div class="service-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/acquisition.png') }}"
-                                    alt=""> </div>
-                            <div class="service-box-content">
-                                <h3 style="font-size: 25px;">Merger and Acquisition Services</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mt-3">
-                        <div class="service-box">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#organizationCapacityAssessmentModal"
+                            style="cursor:pointer;">
                             <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/people.png') }}"
                                     alt=""> </div>
                             <div class="service-box-content">
@@ -97,7 +93,8 @@
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 mt-3">
-                        <div class="service-box">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#hrInfrastructureOfferingsModal"
+                            style="cursor:pointer;">
                             <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/customer-care.png') }}"
                                     alt=""> </div>
                             <div class="service-box-content">
@@ -106,7 +103,18 @@
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 mt-3">
-                        <div class="service-box">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#mergerAndAcquisitionServicesModal"
+                            style="cursor:pointer;">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/acquisition.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">Merger and Acquisition Services</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#itServicesModal"
+                            style="cursor:pointer;">
                             <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/settings.png') }}"
                                     alt=""> </div>
                             <div class="service-box-content">
@@ -114,7 +122,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-6 mt-3">
+                    <div class="col-lg-4 col-md-6 mt-3" data-bs-toggle="modal" data-bs-target="#itInfrastructureServicesModal"
+                            style="cursor:pointer;">
                         <div class="service-box">
                             <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/it-infra.png') }}"
                                     alt=""> </div>
@@ -123,7 +132,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-6 mt-3">
+                    <div class="col-lg-4 col-md-6 mt-3" data-bs-toggle="modal" data-bs-target="#cyberSecurityServicesModal"
+                            style="cursor:pointer;">
                         <div class="service-box">
                             <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/virus-attack.png') }}"
                                     alt=""> </div>
@@ -230,17 +240,64 @@
         </section> --}}
     </div>
 
-    {{-- <div class="text-center section-header">
+    {{-- <div class="text-center section-header location-section mb-5">
+
         <div class="section-title section-title-center">
-            <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">
-                <span style="font-weight: bold;">
-                    LOCATIONS
-                </span>
+            <h2>
+                <span style="font-weight:bold;">LOCATIONS</span>
             </h2>
-            <p style="font-size: 40px">
-                Explore our service offerings and subsidiaries <br>in specific geography.
+
+            <p style="font-size:40px">
+                Explore our service offerings and subsidiaries <br>
+                in specific geography.
             </p>
         </div>
+
+        <div class="country-icons">
+
+            <div class="country-icon">
+                INDIA
+                <div class="preview-card">
+                    <img src="{{ asset('frontend/images/white-tiger-stands-proudly-snowy-winter-landscape.jpg') }}">
+                    <span>INDIA</span>
+                </div>
+            </div>
+
+            <div class="country-icon">
+                DUBAI
+                <div class="preview-card">
+                    <img src="{{ asset('frontend/images/shanghai-aerial-sunset.jpg') }}">
+                    <span>DUBAI</span>
+                </div>
+            </div>
+
+            <div class="country-icon">
+                US
+                <div class="preview-card">
+                    <img src="{{ asset('frontend/images/view-world-monument-celebrate-world-heritage-day.jpg') }}">
+                    <span>WASHINGTON DC</span>
+                </div>
+            </div>
+
+            <div class="country-icon">
+                UK
+                <div class="preview-card">
+                    <img
+                        src="{{ asset('frontend/images/illuminated-landmark-reflects-water-majestic-man-made-structure-generated-by-ai.jpg') }}">
+                    <span>LONDON</span>
+                </div>
+            </div>
+
+            <div class="country-icon">
+                AFRICA
+                <div class="preview-card">
+                    <img src="{{ asset('frontend/images/cityscape-sunset-skyscrapers-silhouetted.jpg') }}">
+                    <span>AFRICA</span>
+                </div>
+            </div>
+
+        </div>
+
     </div> --}}
 
     {{-- <div class="col-md-12 d-flex justify-content-center position-relative">
@@ -532,7 +589,880 @@
                         <div class="form-floating mb-4">
                             <select class="form-select" id="relationship" name="relationship">
                                 <option value="">Select Relationship with SZORZO</option>
-                                <option>Alliance</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="enterpriseTransformationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="enterpriseTransformationForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">Enterprise Transformation Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="enterpriseDigitalizationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="enterpriseDigitalizationForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">Enterprise Digitalization Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="enterpriseLearningSolutionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="enterpriseLearningSolutionForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">Enterprise Learning Solutions Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="organizationCapacityAssessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="organizationCapacityAssessmentForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">Organization Capacity Assessment Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="hrInfrastructureOfferingsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="hrInfrastructureOfferingsForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">Operations and HR Infrastructure Offerings Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="mergerAndAcquisitionServicesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="mergerAndAcquisitionServicesForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">Merger and Acquisition Services Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="itServicesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="itServicesModalForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">IT Services Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="itInfrastructureServicesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="itInfrastructureServicesForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">IT Infrastructure Services Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
+                                <option>Technology Alliance</option>
+                                <option>Customer</option>
+                            </select>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
+                        </div>
+
+                        {{-- Phone --}}
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
+                            <label for="phone">Phone <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
+                        </div>
+
+                        {{-- Additional Info --}}
+                        <div class="form-floating mb-4">
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
+                            <label for="info">Additional Information</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cyberSecurityServicesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header" style="border-bottom:none;">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="padding: 100px; margin-top:-80px">
+
+                    <form id="cyberSecurityServicesForm">
+                        @csrf
+                        <a class="navbar-brand" style="margin-left:-20px">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                                class="logo-second">
+                        </a>
+                        <h4 class="modal-title mb-3">Cyber Security Services Contact Form</h4>
+
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
+                                    <label for="firstname">First Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
+                                    <label for="lastname">Last Name <span class="text-danger">*</span></label>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
+                            <label for="company">Company <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="relationship" name="relationship">
+                                <option value="">Select Relationship with SZORZO</option>
+                                <option>Vendor Partner</option>
                                 <option>Technology Alliance</option>
                                 <option>Customer</option>
                             </select>
@@ -690,6 +1620,1113 @@
 
         });
 
+        $(document).ready(function() {
+
+            $("#enterpriseTransformationForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+        $(document).ready(function() {
+
+            $("#enterpriseDigitalizationForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+        $(document).ready(function() {
+
+            $("#enterpriseLearningSolutionForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+        $(document).ready(function() {
+
+            $("#organizationCapacityAssessmentForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+        $(document).ready(function() {
+
+            $("#hrInfrastructureOfferingsForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+        $(document).ready(function() {
+
+            $("#mergerAndAcquisitionServicesForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+        $(document).ready(function() {
+
+            $("#itServicesModalForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+        $(document).ready(function() {
+
+            $("#itInfrastructureServicesForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
+        $(document).ready(function() {
+
+            $("#cyberSecurityServicesForm").validate({
+
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
+
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
+
+                errorElement: "div",
+                errorClass: "invalid-feedback",
+
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
+
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
+
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+        });
+
         $.fn.commentCards = function() {
 
             return this.each(function() {
@@ -721,62 +2758,31 @@
 
         };
 
-        $('.cards').commentCards();
+        const icons = document.querySelectorAll(".country-icon");
+        const preview = document.getElementById("locationPreview");
+        const previewImg = document.getElementById("previewImg");
+        const previewText = document.getElementById("previewText");
 
-        document.querySelectorAll(".card").forEach(card => {
+        icons.forEach(icon => {
 
-            card.addEventListener("click", function() {
-
-                let country = this.getAttribute("data-country");
-
-                document.getElementById("countryName").innerText = country;
-
+            icon.addEventListener("mouseenter", function() {
+                preview.style.display = "block";
+                previewImg.src = this.dataset.img;
+                previewText.innerText = this.dataset.name;
             });
+
         });
 
-        const cards = document.querySelectorAll(".card");
-        let current = 0;
+        document.addEventListener("DOMContentLoaded", function () {
 
-        function updateCards() {
+            const iconsContainer = document.querySelector(".country-icons");
 
-            cards.forEach((card, index) => {
-
-                card.classList.remove("card--current", "card--next", "card--out");
-
-                if (index === current) {
-                    card.classList.add("card--current");
-                } else if (index === current + 1) {
-                    card.classList.add("card--next");
-                } else if (index < current) {
-                    card.classList.add("card--out");
-                }
-
-            });
-
-        }
-
-        document.querySelector(".right").onclick = function() {
-
-            current++;
-
-            if (current >= cards.length) {
-                current = 0;
+            if (iconsContainer) {
+                iconsContainer.addEventListener("mouseleave", function () {
+                    preview.style.display = "none";
+                });
             }
 
-            updateCards();
-
-        };
-
-        document.querySelector(".left").onclick = function() {
-
-            current--;
-
-            if (current < 0) {
-                current = cards.length - 1;
-            }
-
-            updateCards();
-
-        };
+        });
     </script>
 @endsection
