@@ -5,6 +5,7 @@ use App\Http\Controllers\backend\LoginController;
 use App\Http\Controllers\backend\RoleController;
 use App\Http\Controllers\backend\SettingsController;
 use App\Http\Controllers\backend\UserController;
+use App\Http\Controllers\backend\ContactController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,7 @@ Route::group(['controller' => HomeController::class], function () {
     // pages
     Route::get('/about-us','aboutUs')->name('about.us');
     Route::get('/contact','contact')->name('contact');
+    Route::post('/contact/store','contactStore')->name('contact.store');
     Route::get('/careers','careers')->name('careers');
     Route::get('/careers/list','careersList')->name('careers.list');
     Route::get('/szorzo-ai','szorzoAi')->name('szorzo.ai');
@@ -82,4 +84,9 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::resource('user', UserController::class);
     });
 
+    Route::get('/enquiries',[ContactController::class,'index'])->name('enquiry.index');
+    Route::delete('/enquiry/delete/{id}',[ContactController::class,'delete'])->name('enquiry.delete');
+    Route::post('/enquiry/status',[ContactController::class,'changeStatus'])->name('enquiry.status');
+
 });
+                                                                                                                                                        

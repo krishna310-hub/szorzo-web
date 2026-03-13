@@ -2537,7 +2537,7 @@ header.main-header .header-sticky.active {
 
 .page-header-contact-us-bg {
     position: relative;
-    background: url("../images/szorzo-map.jpg") no-repeat center 10% / cover;
+    background: url("../images/szorzo-map-1.png") no-repeat center 10% / cover;
     padding: 230px 0 115px;
     height: 800px;
     margin-top: -150px;
@@ -8747,7 +8747,7 @@ $grey: #455560;
     max-width: 700px;
     margin: auto;
     font-size: 30px;
-    color: #666;
+    color: #000000;
 }
 
 /* location section */
@@ -8967,3 +8967,130 @@ $grey: #455560;
 .modal-content{
     border-radius:12px;
 }
+
+/* contact page location image */
+.cards {
+  position: relative;
+  list-style-type: none;
+  padding: 0;
+  max-width: 1000px;
+  margin: 100px auto;
+}
+
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+
+  border-radius: 20px;
+  padding: 0;
+  overflow: hidden;
+
+  width: 1000px;
+  height: 400px;
+
+  box-shadow: 0 0 20px #000;
+
+  transform: translateY(0) rotate(4deg) translateX(25px) scale(1);
+  transform-origin: 0 0;
+
+  transition: transform 0.6s cubic-bezier(.8,.2,.1,0.8) 0.1s,
+    background 0.4s linear;
+
+  cursor: pointer;
+}
+
+.card-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.india-img{
+    object-position: center 35%;
+}
+.dubai-img{
+    object-position: center 30%;
+}
+.washington-img{
+    object-position: center 0%;
+}
+.london-img{
+    object-position: center 30%;
+}
+
+.card--next {
+  z-index: 5;
+  transform: translateY(-20px) rotate(4deg) translateX(20px) scale(0.95);
+}
+
+.card--out {
+  animation: card-out 0.6s cubic-bezier(.8,.2,.1,0.8);
+  transform: translateY(-50px) rotate(8deg) translateX(55px) scale(0.95);
+  z-index: 1;
+  background: #bbb;
+}
+
+@keyframes card-out {
+  0% { z-index: 20; transform: translateY(0px) rotate(-4deg); }
+  50% { transform: translateY(-120%) rotate(-5deg) translateX(-40px); }
+  80% { z-index: 1; }
+  100% { transform: translateY(-50px) rotate(8deg) translateX(55px) scale(0.95); }
+}
+
+.card--current {
+  cursor: auto;
+  user-select: auto;
+  position: relative;
+  z-index: 10;
+  opacity: 1;
+  background: #EEE;
+  transform: rotate(-1deg) translateX(0%) scale(1);
+}
+
+.card-overlay{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:80px;
+  font-weight:bold;
+  color:#fff;
+
+  background:rgba(0,0,0,0.45);
+  transition:0.4s;
+}
+
+/* Hide overlay on hover */
+.card:hover .card-overlay{
+  opacity:0;
+}
+
+.arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  color:#000000;
+  border:none;
+  font-size:28px;
+  padding:6px 12px;
+  cursor:pointer;
+  z-index:100;
+}
+
+.arrow.left{
+  left:100px;
+}
+
+.arrow.right{
+  right:100px;
+}
+

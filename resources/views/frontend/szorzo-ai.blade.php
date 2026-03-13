@@ -20,7 +20,7 @@
 
     <section class="creative-cards">
 
-        <div class="our-approach bg-section mt-2">
+        <div class="our-approach bg-section mt-5">
             <div class="container">
                 <div class="row align-items-center">
                     <div class="szorzo-ai">

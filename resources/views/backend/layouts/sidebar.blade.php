@@ -64,6 +64,14 @@
                     </li>
                 @endcan
                  <!-- end Dashboard Menu -->
+                 @can('dashboard', \App\Models\General::class)
+                    <li class="nav-item">
+                        <a class="nav-link menu-link {{ request()->is('admin/enquiry*') ? 'active' : '' }}" href="{{ route('admin.enquiry.index') }}">
+                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Enquiry List</span>
+                        </a>
+                    </li>
+                @endcan
+                 <!-- end Dashboard Menu -->
 
                 @if(auth()->user()->can('read', \App\Models\User::class) || auth()->user()->can('read', \App\Models\Role::class))
                     <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-settings">Roles & Permission</span></li>

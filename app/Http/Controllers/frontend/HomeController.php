@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContactEnquiryMail;
+use App\Models\ContactEnquiry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class HomeController extends Controller
 {
@@ -102,5 +106,41 @@ class HomeController extends Controller
     }
     public function mergerServicesForm(){
         return view('frontend.contact-forms.merger-service-form');
+    }
+
+    public function contactStore(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'firstname'    => 'required|string|max:100',
+            'lastname'     => 'required|string|max:100',
+            'email'        => 'required|email',
+            'company'      => 'required|string|max:150',
+            'relationship' => 'required|string',
+            'phone'        => 'required|regex:/^[0-9]{10}$/',
+            'info'         => 'nullable|string',
+        ], [
+            'phone.regex' => 'Phone must be exactly 10 digits.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $data = $request->only(
+            'firstname','lastname','email','company','relationship','phone','info'
+        );
+
+        ContactEnquiry::create($data);
+
+        // Send Email
+        Mail::to('elangokrish310@gmail.com')->send(new ContactEnquiryMail($data));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your message has been submitted successfully!',
+        ]);
     }
 }

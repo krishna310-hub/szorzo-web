@@ -133,21 +133,29 @@
                     </div>
 
                     <div class="col-lg-3 col-md-6 mt-5">
-                        <!-- Footer Links Start -->
-                        <div class="footer-links">
-                            <h3>Office Address</h3>
-                            <ul>
-                                <ul class="contact-info">
-                                    <li>SZORZO Technologies Private Limited</li>
-                                    <li>No 81/1, 82/2, 1st Floor, Clayworks Shankara Campus,</li>
-                                    <li>Doddakallasandra, Kanakapura Road,</li>
-                                    <li>Bangalore - 560062</li>
-                                    <li>India</li>
-                                </ul>
-                            </ul>
-                        </div>
-                        <!-- Footer Links End -->
+                    <!-- Footer Links Start -->
+                    <div class="footer-links">
+                        <h3>Corporate Office</h3>
+
+                        <ul class="contact-info">
+                            <li>
+                                <a href="https://www.google.com/maps/place/ClayWorks+Shankaraa/@12.8839870,77.5514233,17z" target="_blank" style="text-decoration:none; color:inherit;">
+
+                                    <div class="d-flex align-items-start gap-2">
+                                        <i class="fas fa-map-marker-alt mt-1"></i>
+                                            SZORZO Technologies Private Limited <br><br>
+                                            No 81/1, 82/2, 1st Floor, Clayworks Shankara Campus,<br>
+                                            Doddakallasandra, Kanakapura Road,<br>
+                                            Bangalore - 560062<br>
+                                            India
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+
                     </div>
+                    <!-- Footer Links End -->
+                </div>
                 </div>
             </div>
         </div>
@@ -160,7 +168,7 @@
                     <div class="col-md-6">
                         <!-- Footer Copyright Text Start -->
                         <div class="footer-copyright-text">
-                            <p>SZORZO Technologies Private Limited © 2025 All Rights Reserved.</p>
+                            <p>SZORZO Technologies Private Limited © 2026 All Rights Reserved.</p>
                         </div>
                         <!-- Footer Copyright Text End -->
                     </div>
@@ -185,7 +193,7 @@
     <!-- Footer End -->
 
     <!-- Jquery Library File -->
-    <script src="{{ asset('frontend/js/jquery-3.7.1.min.js') }}"></script>
+    {{-- <script src="{{ asset('frontend/js/jquery-3.7.1.min.js') }}"></script> --}}
     <!-- Bootstrap js file -->
     <script src="{{ asset('frontend/js/bootstrap.min.js')}}"></script>
     <!-- Validator js file -->

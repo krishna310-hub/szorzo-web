@@ -9,6 +9,7 @@
         <meta name="description" content="">
         <meta name="keywords" content="">
         <meta name="author" content="Awaiken">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <!-- Page Title -->
         <title>SZORZO India's #1 GCC Launchpad | Global AI Partner</title>
         <!-- Favicon Icon -->
@@ -40,6 +41,13 @@
         <meta name="google-site-verification" content="lqB0UndLURfLDXdqhyq41AEiBl2RZhNUbOP8ppt6QSE" />
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+        </script>
     </head>
 
     <body>

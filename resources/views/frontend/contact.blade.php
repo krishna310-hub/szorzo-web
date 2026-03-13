@@ -8,8 +8,8 @@
                     <!-- Page Header Box Start -->
                     <div class="page-header-box">
                         <h1 style="color: white; margin-top: 50px; margin-left: -470px" class="wow fadeInUp"
-                            data-cursor="-opaque">HOW CAN WE <br>
-                            <span>HELP YOU ?</span>
+                            data-cursor="-opaque">WE SERVE THE <br>
+                            <span>WORLD ?</span>
                         </h1>
                     </div>
                     <!-- Page Header Box End -->
@@ -19,115 +19,268 @@
     </div>
     <!-- Page Header End -->
 
-    <div class="our-approach bg-section mt-5 mb-5">
-        <div class="container">
+    <div class="container mt-5">
 
-            <div class="text-center section-header">
-                <div class="section-title section-title-center">
-                    <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">
-                        <span style="font-weight: bold;">Choose your service and let’s get started</span>
-                    </h2>
-                </div>
-                <p>
-                    Please select your area of interest below. An SZORZO experts
-                    will contact you shortly after receiving your request.
-                </p>
+        <div class="text-center section-header">
+            <div class="section-title section-title-center">
+                <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">
+                    <span style="font-weight: bold;">Choose your services and let’s get started</span>
+                </h2>
             </div>
+            <p>
+                Please select your area of interest below. An SZORZO Experts
+                will contact you shortly after receiving your request.
+            </p>
+        </div>
 
-            <section id="features" class="section-padding">
-                <div class="container">
-                    <div class="section-header">
-                        <div class="shape wow fadeInDown"></div>
+        <div class="mt-5 mb-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-4 col-md-6">
                     </div>
-                    <div class="row">
-                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
-                            <div class="content-left">
-                                <div class="box-item animated wow fadeInLeft">
-                                    <div class="text">
-                                        <a href="#" data-bs-toggle="modal" data-bs-target="#szorzoModal">
-                                            <h4>SZORZO AI</h4>
-                                        </a>
-                                    </div>
+                    <div class="col-lg-4 col-md-6 mb-2">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#szorzoModal" style="cursor:pointer;">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/service-icons/artificial-intelligence.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">SZORZO AI</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/city.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content ">
+                                <h3 style="font-size: 25px;">Enterprise <br> Transformation</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="service-box">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/service-icons/social-media-marketing.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">Enterprise <br> Digitalization</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/learning.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">Enterprise Learning Solutions</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/acquisition.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">Merger and Acquisition Services</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/people.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">Organization Capacity Assessment</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/customer-care.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">Operations and HR Infrastructure Offerings</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/settings.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">IT Services</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/it-infra.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">IT Infrastructure <br> Services</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/virus-attack.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">Cyber Security <br> Services</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- <section id="features" class="section-padding mt-5">
+            <div class="container">
+                <div class="section-header">
+                    <div class="shape wow fadeInDown"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                        <div class="content-left">
+                            <div class="box-item animated wow fadeInLeft">
+                                <div class="text">
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#szorzoModal">
+                                        <h4>SZORZO AI</h4>
+                                    </a>
                                 </div>
-                                <div class="box-item animated wow fadeInLeft" data-wow-delay="0.6s">
-                                    <div class="text">
-                                        <a href="{{ route('contact.enterprise.transformation.form') }}">
-                                            <h4>Enterprise Transformation</h4>
-                                        </a>
-                                    </div>
+                            </div>
+                            <div class="box-item animated wow fadeInLeft" data-wow-delay="0.6s">
+                                <div class="text">
+                                    <a href="{{ route('contact.enterprise.transformation.form') }}">
+                                        <h4>Enterprise Transformation</h4>
+                                    </a>
                                 </div>
-                                <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
-                                    <div class="text">
-                                        <a href="{{ route('contact.enterprise.digitalization.form') }}">
-                                            <h4>Enterprise Digitalization</h4>
-                                        </a>
-                                    </div>
+                            </div>
+                            <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
+                                <div class="text">
+                                    <a href="{{ route('contact.enterprise.digitalization.form') }}">
+                                        <h4>Enterprise Digitalization</h4>
+                                    </a>
                                 </div>
-                                <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
-                                    <div class="text">
-                                        <a href="{{ route('contact.enterprise.learning.solution.form') }}">
-                                            <h4>Enterprise Learning Solutions</h4>
-                                        </a>
-                                    </div>
+                            </div>
+                            <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
+                                <div class="text">
+                                    <a href="{{ route('contact.enterprise.learning.solution.form') }}">
+                                        <h4>Enterprise Learning Solutions</h4>
+                                    </a>
                                 </div>
-                                <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
-                                    <div class="text">
-                                        <a href="{{ route('contact.merger.services.form') }}">
-                                            <h4>Merger and Acquisition Services</h4>
-                                        </a>
-                                    </div>
+                            </div>
+                            <div class="box-item animated wow fadeInLeft" data-wow-delay="0.9s">
+                                <div class="text">
+                                    <a href="{{ route('contact.merger.services.form') }}">
+                                        <h4>Merger and Acquisition Services</h4>
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
-                            <div class="show-box animated wow fadeInUp">
-                                <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="">
-                            </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                        <div class="show-box animated wow fadeInUp">
+                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="">
                         </div>
-                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
-                            <div class="content-right">
-                                <div class="box-item animated wow fadeInRight">
-                                    <div class="text">
-                                        <a href="{{ route('contact.organization.capacity.form') }}">
-                                            <h4>Organization Capacity Assessment</h4>
-                                        </a>
-                                    </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                        <div class="content-right">
+                            <div class="box-item animated wow fadeInRight">
+                                <div class="text">
+                                    <a href="{{ route('contact.organization.capacity.form') }}">
+                                        <h4>Organization Capacity Assessment</h4>
+                                    </a>
                                 </div>
-                                <div class="box-item animated wow fadeInRight" data-wow-delay="0.6s">
-                                    <div class="text">
-                                        <a href="{{ route('contact.operation.hr.offering.form') }}">
-                                            <h4>Operations and HR Infrastructure Offerings</h4>
-                                        </a>
-                                    </div>
+                            </div>
+                            <div class="box-item animated wow fadeInRight" data-wow-delay="0.6s">
+                                <div class="text">
+                                    <a href="{{ route('contact.operation.hr.offering.form') }}">
+                                        <h4>Operations and HR Infrastructure Offerings</h4>
+                                    </a>
                                 </div>
-                                <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
-                                    <div class="text">
-                                        <a href="{{ route('contact.it.services.form') }}">
-                                            <h4>IT Services</h4>
-                                        </a>
-                                    </div>
+                            </div>
+                            <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
+                                <div class="text">
+                                    <a href="{{ route('contact.it.services.form') }}">
+                                        <h4>IT Services</h4>
+                                    </a>
                                 </div>
-                                <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
-                                    <div class="text">
-                                        <a href="{{ route('contact.szorzo.ai.form') }}">
-                                            <h4>IT Infrastructure Services</h4>
-                                        </a>
-                                    </div>
+                            </div>
+                            <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
+                                <div class="text">
+                                    <a href="{{ route('contact.szorzo.ai.form') }}">
+                                        <h4>IT Infrastructure Services</h4>
+                                    </a>
                                 </div>
-                                <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
-                                    <div class="text">
-                                        <a href="{{ route('contact.szorzo.ai.form') }}">
-                                            <h4>Cyber Security Services</h4>
-                                        </a>
-                                    </div>
+                            </div>
+                            <div class="box-item animated wow fadeInRight" data-wow-delay="0.9s">
+                                <div class="text">
+                                    <a href="{{ route('contact.szorzo.ai.form') }}">
+                                        <h4>Cyber Security Services</h4>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
-        </div>
+            </div>
+        </section> --}}
     </div>
+
+    {{-- <div class="text-center section-header">
+        <div class="section-title section-title-center">
+            <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">
+                <span style="font-weight: bold;">
+                    LOCATIONS
+                </span>
+            </h2>
+            <p style="font-size: 40px">
+                Explore our service offerings and subsidiaries <br>in specific geography.
+            </p>
+        </div>
+    </div> --}}
+
+    {{-- <div class="col-md-12 d-flex justify-content-center position-relative">
+
+        <!-- LEFT ARROW -->
+        <button class="arrow left"><</button>
+
+        <ul class="cards">
+
+            <li class="card card--current">
+                <img src="{{ asset('frontend/images/white-tiger-stands-proudly-snowy-winter-landscape.jpg') }}" class="card-img india-img">
+                <div class="card-overlay">INDIA</div>
+            </li>
+
+            <li class="card">
+                <img src="{{ asset('frontend/images/shanghai-aerial-sunset.jpg') }}" class="card-img dubai-img">
+                <div class="card-overlay">DUBAI</div>
+            </li>
+
+            <li class="card">
+                <img src="{{ asset('frontend/images/view-world-monument-celebrate-world-heritage-day.jpg') }}" class="card-img washington-img">
+                <div class="card-overlay">WASHINGTON DC</div>
+            </li>
+
+            <li class="card">
+                <img src="{{ asset('frontend/images/illuminated-landmark-reflects-water-majestic-man-made-structure-generated-by-ai.jpg') }}" class="card-img london-img">
+                <div class="card-overlay">UK LONDON</div>
+            </li>
+
+            <li class="card">
+                <img src="{{ asset('frontend/images/cityscape-sunset-skyscrapers-silhouetted.jpg') }}" class="card-img">
+                <div class="card-overlay">AFRICA</div>
+            </li>
+
+        </ul>
+
+        <!-- RIGHT ARROW -->
+        <button class="arrow right">></button>
+
+    </div> --}}
 
     {{-- <section class="locations-section">
         <div class="container">
@@ -182,7 +335,7 @@
         </div>
     </section> --}}
 
-    <div class="page-contact-us mb-5">
+    {{-- <div class="page-contact-us mb-5">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
@@ -312,8 +465,9 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
+    {{-- modal popup --}}
     <div class="modal fade" id="szorzoModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -325,6 +479,7 @@
                 <div class="modal-body" style="padding: 100px; margin-top:-80px">
 
                     <form id="szorzoForm">
+                        @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
                             <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
                             <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
@@ -332,136 +487,296 @@
                         </a>
                         <h4 class="modal-title mb-3">SZORZO AI Contact Form</h4>
 
-                        <!-- First & Last Name -->
+                        <div id="successAlert" class="alert alert-success alert-dismissible fade d-none" role="alert">
+                            <strong>✅ Success!</strong> <span id="successMsg"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                            <strong>⚠️ Error!</strong> Please fix the highlighted fields below.
+                        </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="firstname" placeholder="First Name">
+                                    <input type="text" class="form-control" id="firstname" name="firstname"
+                                        placeholder="First Name">
                                     <label for="firstname">First Name <span class="text-danger">*</span></label>
-                                    <div class="invalid-feedback">First name is required</div>
+                                    <div class="invalid-feedback" id="err-firstname">First name is required</div>
                                 </div>
                             </div>
-
                             <div class="col-md-6 mb-4">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="lastname" placeholder="Last Name">
+                                    <input type="text" class="form-control" id="lastname" name="lastname"
+                                        placeholder="Last Name">
                                     <label for="lastname">Last Name <span class="text-danger">*</span></label>
-                                    <div class="invalid-feedback">Last name is required</div>
+                                    <div class="invalid-feedback" id="err-lastname">Last name is required</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Email -->
                         <div class="form-floating mb-4">
-                            <input type="email" class="form-control" id="email" placeholder="Email">
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Email">
                             <label for="email">Email <span class="text-danger">*</span></label>
-                            <div class="invalid-feedback">Please enter a valid email</div>
+                            <div class="invalid-feedback" id="err-email">Please enter a valid email</div>
                         </div>
 
-                        <!-- Company -->
                         <div class="form-floating mb-4">
-                            <input type="text" class="form-control" id="company" placeholder="Company">
+                            <input type="text" class="form-control" id="company" name="company"
+                                placeholder="Company">
                             <label for="company">Company <span class="text-danger">*</span></label>
-                            <div class="invalid-feedback">Company is required</div>
+                            <div class="invalid-feedback" id="err-company">Company is required</div>
                         </div>
 
-                        <!-- Relationship Dropdown -->
                         <div class="form-floating mb-4">
-                            <select class="form-select" id="relationship">
+                            <select class="form-select" id="relationship" name="relationship">
                                 <option value="">Select Relationship with SZORZO</option>
                                 <option>Alliance</option>
                                 <option>Technology Alliance</option>
                                 <option>Customer</option>
                             </select>
-                            <div class="invalid-feedback">Relationship with Szorzo is required</div>
+                            <label for="relationship">Relationship with SZORZO <span class="text-danger">*</span></label>
+                            <div class="invalid-feedback" id="err-relationship">Relationship with Szorzo is required</div>
                         </div>
 
-                        <!-- Phone -->
+                        {{-- Phone --}}
                         <div class="form-floating mb-4">
-                            <input type="text" class="form-control" id="phone" placeholder="Phone">
+                            <input type="text" class="form-control" id="phone" name="phone"
+                                placeholder="Phone">
                             <label for="phone">Phone <span class="text-danger">*</span></label>
-                            <div class="invalid-feedback">Phone is required</div>
+                            <div class="invalid-feedback" id="err-phone">Phone must be exactly 10 digits</div>
                         </div>
 
-                        <!-- Additional Info -->
+                        {{-- Additional Info --}}
                         <div class="form-floating mb-4">
-                            <textarea class="form-control" placeholder="Additional Information" id="info" style="height:100px"></textarea>
+                            <textarea class="form-control" placeholder="Additional Information" id="info" name="info"
+                                style="height:100px"></textarea>
                             <label for="info">Additional Information</label>
                         </div>
 
-                        <button class="btn btn-danger w-40">Submit</button>
-
+                        <button type="submit" class="btn btn-danger w-40" id="submitBtn">
+                            <span id="submitSpinner" class="spinner-border spinner-border-sm d-none me-1"></span>
+                            Submit
+                        </button>
                     </form>
-
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script>
         $(document).ready(function() {
 
-            $("#szorzoForm").submit(function(e) {
+            $("#szorzoForm").validate({
 
-                e.preventDefault();
+                rules: {
+                    firstname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    lastname: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    company: {
+                        required: true
+                    },
+                    relationship: {
+                        required: true
+                    },
+                    phone: {
+                        required: true,
+                        digits: true,
+                        minlength: 10,
+                        maxlength: 10
+                    }
+                },
 
-                let valid = true;
+                messages: {
+                    firstname: "First name is required",
+                    lastname: "Last name is required",
+                    email: "Enter valid email",
+                    company: "Company is required",
+                    relationship: "Select relationship",
+                    phone: "Phone must be 10 digits"
+                },
 
-                let firstname = $("#firstname").val().trim();
-                let lastname = $("#lastname").val().trim();
-                let email = $("#email").val().trim();
-                let company = $("#company").val().trim();
-                let relationship = $("#relationship").val();
-                let phone = $("#phone").val().trim();
+                errorElement: "div",
+                errorClass: "invalid-feedback",
 
-                let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                let phonePattern = /^[0-9]{10}$/;
+                highlight: function(element) {
+                    $(element).addClass("is-invalid");
+                },
 
-                $(".form-control, .form-select").removeClass("is-invalid");
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid");
+                },
 
-                if (firstname == "") {
-                    $("#firstname").addClass("is-invalid");
-                    valid = false;
+                submitHandler: function(form) {
+
+                    // Show loading spinner
+                    $("#submitBtn").prop("disabled", true);
+                    $("#submitSpinner").removeClass("d-none");
+
+                    $("#successAlert").addClass("d-none");
+                    $("#errorAlert").addClass("d-none");
+
+                    $.ajax({
+                        url: "{{ route('contact.store') }}",
+                        type: "POST",
+                        data: $(form).serialize(),
+
+                        success: function(res) {
+
+                            if (res.success) {
+
+                                // Show success alert
+                                $("#successMsg").text(res.message);
+                                $("#successAlert")
+                                    .removeClass("d-none")
+                                    .addClass("show");
+
+                                // Reset form
+                                $("#szorzoForm")[0].reset();
+                                $(".form-control, .form-select").removeClass("is-invalid");
+
+                                // Auto hide alert
+                                setTimeout(function() {
+                                    $("#successAlert").fadeOut();
+                                }, 4000);
+
+                            }
+
+                        },
+
+                        error: function(xhr) {
+
+                            $("#errorAlert").removeClass("d-none");
+
+                            if (xhr.status === 422) {
+
+                                let errors = xhr.responseJSON.errors;
+
+                                $.each(errors, function(key, value) {
+
+                                    $("#" + key).addClass("is-invalid");
+                                    $("#err-" + key).text(value[0]);
+
+                                });
+
+                            }
+
+                        },
+
+                        complete: function() {
+
+                            // Hide spinner
+                            $("#submitBtn").prop("disabled", false);
+                            $("#submitSpinner").addClass("d-none");
+
+                        }
+
+                    });
+
                 }
 
-                if (lastname == "") {
-                    $("#lastname").addClass("is-invalid");
-                    valid = false;
-                }
-
-                if (!emailPattern.test(email)) {
-                    $("#email").addClass("is-invalid");
-                    valid = false;
-                }
-
-                if (company == "") {
-                    $("#company").addClass("is-invalid");
-                    valid = false;
-                }
-
-                if (relationship == "") {
-                    $("#relationship").addClass("is-invalid");
-                    valid = false;
-                }
-
-                if (!phonePattern.test(phone)) {
-                    $("#phone").addClass("is-invalid");
-                    valid = false;
-                }
-
-                if (valid) {
-                    alert("Form submitted successfully");
-                    this.submit();
-                }
-
-            });
-
-            $("#szorzoForm input, #szorzoForm select").on("keyup change", function() {
-                if ($(this).val().trim() !== "") {
-                    $(this).removeClass("is-invalid");
-                }
             });
 
         });
+
+        $.fn.commentCards = function() {
+
+            return this.each(function() {
+
+                var $this = $(this),
+                    $cards = $this.find('.card'),
+                    $current = $cards.filter('.card--current'),
+                    $next;
+
+                $cards.on('click', function() {
+                    if (!$current.is(this)) {
+                        $cards.removeClass('card--current card--out card--next');
+                        $current.addClass('card--out');
+                        $current = $(this).addClass('card--current');
+                        $next = $current.next();
+                        $next = $next.length ? $next : $cards.first();
+                        $next.addClass('card--next');
+                    }
+                });
+
+                if (!$current.length) {
+                    $current = $cards.last();
+                    $cards.first().trigger('click');
+                }
+
+                $this.addClass('cards--active');
+
+            })
+
+        };
+
+        $('.cards').commentCards();
+
+        document.querySelectorAll(".card").forEach(card => {
+
+            card.addEventListener("click", function() {
+
+                let country = this.getAttribute("data-country");
+
+                document.getElementById("countryName").innerText = country;
+
+            });
+        });
+
+        const cards = document.querySelectorAll(".card");
+        let current = 0;
+
+        function updateCards() {
+
+            cards.forEach((card, index) => {
+
+                card.classList.remove("card--current", "card--next", "card--out");
+
+                if (index === current) {
+                    card.classList.add("card--current");
+                } else if (index === current + 1) {
+                    card.classList.add("card--next");
+                } else if (index < current) {
+                    card.classList.add("card--out");
+                }
+
+            });
+
+        }
+
+        document.querySelector(".right").onclick = function() {
+
+            current++;
+
+            if (current >= cards.length) {
+                current = 0;
+            }
+
+            updateCards();
+
+        };
+
+        document.querySelector(".left").onclick = function() {
+
+            current--;
+
+            if (current < 0) {
+                current = cards.length - 1;
+            }
+
+            updateCards();
+
+        };
     </script>
 @endsection

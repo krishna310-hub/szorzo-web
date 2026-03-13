@@ -19,10 +19,12 @@ class SettingsController extends Controller
         return view('backend.common.settings');
     }
 
-    public function store(Request $request,$type)
+    public function store(Request $request, $type)
     {
-        if($type == "general"){
+        if ($type == "general") {
+
             $this->authorize('generalSetting', Setting::class);
+
             $data = [
                 'app_name' => $request->app_name,
                 'mobile'   => $request->mobile,
@@ -31,9 +33,11 @@ class SettingsController extends Controller
 
             if ($request->hasFile('app_logo')) {
                 $file = $request->file('app_logo');
+
                 $image = Helper::uploadImage($file, 'logo');
+
                 if ($image['status'] === true) {
-                    $data['app_logo'] = $image['name']; 
+                    $data['app_logo'] = $image['name'];
                 }
             }
 
@@ -44,11 +48,16 @@ class SettingsController extends Controller
                 );
             }
 
-            return back()->with('success', 'General settings saved successfully!');
+            return back()->with([
+                'success' => 'General settings saved successfully!',
+                'type' => $type
+            ]);
         }
-        if($type == 'maintenance'){
+
+        if ($type == "maintenance") {
+
             $data = [
-                'mode' => $request->mode,
+                'mode' => $request->mode
             ];
 
             foreach ($data as $key => $value) {
@@ -57,7 +66,37 @@ class SettingsController extends Controller
                     ['value' => $value]
                 );
             }
-            return back()->with(['success'=> 'General settings saved successfully!','type'=> $type]);
+
+            return back()->with([
+                'success' => 'Maintenance settings saved successfully!',
+                'type' => $type
+            ]);
+        }
+
+        if ($type == "email") {
+
+            $data = [
+                'mail_mailer'       => $request->mail_mailer,
+                'smtp_host'         => $request->smtp_host,
+                'smtp_port'         => $request->smtp_port,
+                'smtp_encryption'   => $request->smtp_encryption,
+                'smtp_user'         => $request->smtp_user,
+                'smtp_pass'         => $request->smtp_pass,
+                'mail_from_address' => $request->mail_from_address,
+                'mail_from_name'    => $request->mail_from_name,
+            ];
+
+            foreach ($data as $key => $value) {
+                Setting::updateOrInsert(
+                    ['key' => $key],
+                    ['value' => $value]
+                );
+            }
+
+            return back()->with([
+                'success' => 'Mail settings saved successfully!',
+                'type' => $type
+            ]);
         }
     }
 }
