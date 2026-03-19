@@ -42,7 +42,7 @@
                             <img src="{{ asset('frontend/images/icon-service-2.svg')}}" alt="">
                         </div>
                         <div class="service-item-content">
-                            <h3><a href="service-single.html">Scope</a></h3>
+                            <h3>Scope</h3>
                             <p style="text-align: justify;">SZORZO is a global digital transformation and engineering
                                 services
                                 partner, enabling businesses to expand, innovate, and thrive
@@ -61,7 +61,7 @@
                             <img src="{{ asset('frontend/images/icon-service-3.svg')}}" alt="">
                         </div>
                         <div class="service-item-content">
-                            <h3><a href="service-single.html">Vision</a></h3>
+                            <h3>Vision</h3>
                             <p style="text-align: justify;">We aspire to be a trusted global digital transformation
                                 partner, recognized for building
                                 resilent and forward-thinking Technology & Engineering Services models that empower
@@ -80,7 +80,7 @@
                             <img src="{{ asset('frontend/images/icon-service-1.svg')}}" alt="">
                         </div>
                         <div class="service-item-content">
-                            <h3><a href="service-single.html">Mission</a></h3>
+                            <h3>Mission</h3>
                             <p style="text-align: justify;">Our mission is to build a profitable and purpose-driven
                                 organization from the ground
                                 up-anchored in strong ethics, transaparent corporate

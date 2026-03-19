@@ -45,7 +45,52 @@
                                     src="{{ asset('frontend/images/service-icons/artificial-intelligence.png') }}"
                                     alt=""> </div>
                             <div class="service-box-content">
-                                <h3 style="font-size: 25px;">SZORZO AI</h3>
+                                <h3 style="font-size: 25px; color:red">SZORZO AI</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3">
+                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#itServicesModal"
+                            style="cursor:pointer;">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/settings.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">IT Services</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3" data-bs-toggle="modal" data-bs-target="#itInfrastructureServicesModal"
+                            style="cursor:pointer;">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/it-infra.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">IT Infrastructure <br> Services</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mt-3" data-bs-toggle="modal" data-bs-target="#cyberSecurityServicesModal"
+                            style="cursor:pointer;">
+                        <div class="service-box">
+                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/virus-attack.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px;">Cyber Security <br> Services</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-2">
+                        <div class="service-box" data-bs-toggle="" data-bs-target=""
+                            style="cursor:pointer;">
+                            <div class="icon-box"> <img
+                                    src="{{ asset('frontend/images/service-icons/outsourcing.png') }}"
+                                    alt=""> </div>
+                            <div class="service-box-content">
+                                <h3 style="font-size: 25px; color:red">Enterprise Services</h3>
                             </div>
                         </div>
                     </div>
@@ -109,36 +154,6 @@
                                     alt=""> </div>
                             <div class="service-box-content">
                                 <h3 style="font-size: 25px;">Merger and Acquisition Services</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mt-3">
-                        <div class="service-box" data-bs-toggle="modal" data-bs-target="#itServicesModal"
-                            style="cursor:pointer;">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/settings.png') }}"
-                                    alt=""> </div>
-                            <div class="service-box-content">
-                                <h3 style="font-size: 25px;">IT Services</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mt-3" data-bs-toggle="modal" data-bs-target="#itInfrastructureServicesModal"
-                            style="cursor:pointer;">
-                        <div class="service-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/it-infra.png') }}"
-                                    alt=""> </div>
-                            <div class="service-box-content">
-                                <h3 style="font-size: 25px;">IT Infrastructure <br> Services</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mt-3" data-bs-toggle="modal" data-bs-target="#cyberSecurityServicesModal"
-                            style="cursor:pointer;">
-                        <div class="service-box">
-                            <div class="icon-box"> <img src="{{ asset('frontend/images/service-icons/virus-attack.png') }}"
-                                    alt=""> </div>
-                            <div class="service-box-content">
-                                <h3 style="font-size: 25px;">Cyber Security <br> Services</h3>
                             </div>
                         </div>
                     </div>
@@ -240,16 +255,15 @@
         </section> --}}
     </div>
 
-    {{-- <div class="text-center section-header location-section mb-5">
+    <div class="text-center section-header location-section mb-5">
 
         <div class="section-title section-title-center">
             <h2>
-                <span style="font-weight:bold;">LOCATIONS</span>
+                <span style="font-weight:bold;">GLOBAL PRESENCE</span>
             </h2>
 
             <p style="font-size:40px">
-                Explore our service offerings and subsidiaries <br>
-                in specific geography.
+                Delivering innovative solutions across global markets through our growing international presence.
             </p>
         </div>
 
@@ -298,7 +312,7 @@
 
         </div>
 
-    </div> --}}
+    </div>
 
     {{-- <div class="col-md-12 d-flex justify-content-center position-relative">
 

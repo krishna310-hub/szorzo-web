@@ -49,6 +49,8 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/contact/operation-hr-offering-form','operationHrOfferingForm')->name('contact.operation.hr.offering.form');
     Route::get('/contact/it-services-form','itServicesForm')->name('contact.it.services.form');
     Route::get('/contact/merger-services-form','mergerServicesForm')->name('contact.merger.services.form');
+    // Telecom Services
+    Route::get('/telecom-services','telecomServices')->name('telecom.services');
 });
 
 Route::group(['controller' => LoginController::class], function () {
@@ -89,4 +91,3 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::post('/enquiry/status',[ContactController::class,'changeStatus'])->name('enquiry.status');
 
 });
-                                                                                                                                                        

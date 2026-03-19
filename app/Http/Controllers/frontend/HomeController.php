@@ -143,4 +143,8 @@ class HomeController extends Controller
             'message' => 'Your message has been submitted successfully!',
         ]);
     }
+
+    public function telecomServices(){
+        return view('frontend.telecom-services');
+    }
 }
