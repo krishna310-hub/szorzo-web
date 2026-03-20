@@ -6610,7 +6610,7 @@ header.main-header .header-sticky.active {
 .header .menu>ul>li .sub-menu.mega-menu>.list-item>ul>li>a {
     padding: 9px 0;
     display: inline-block;
-    font-size: 15px;
+    font-size: 18px;
     color: #000;
     transition: color 0.3s;
 }
@@ -8950,10 +8950,10 @@ $grey: #455560;
 }
 
 .country-icon {
-    width: 70px;
-    height: 70px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
-    background: #ffffff;
+    background: #f4f4f4;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -8965,7 +8965,7 @@ $grey: #455560;
 
 .preview-card {
     position: absolute;
-    bottom: 120px;
+    bottom: 180px;
     width: 350px;
     height: 250px;
     left: 50%;
@@ -9458,4 +9458,18 @@ ul {
     border-radius: 30px;
     margin: 0 auto;
     margin-top: -40px;
+}
+
+/* header menu */
+.mega-menu ul li {
+    display: flex;
+    align-items: center;  /* 🔥 aligns arrow + text perfectly */
+    gap: 8px;
+}
+
+.arrow {
+    color: #ed1c24;
+    font-size: 14px;
+    line-height: 1;
+    margin-right: 10px;
 }

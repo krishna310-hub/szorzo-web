@@ -45,7 +45,7 @@
                                     src="{{ asset('frontend/images/service-icons/artificial-intelligence.png') }}"
                                     alt=""> </div>
                             <div class="service-box-content">
-                                <h3 style="font-size: 25px; color:red">SZORZO AI</h3>
+                                <h3 style="font-size: 35px; color:red">SZORZO AI</h3>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
                                     src="{{ asset('frontend/images/service-icons/outsourcing.png') }}"
                                     alt=""> </div>
                             <div class="service-box-content">
-                                <h3 style="font-size: 25px; color:red">Enterprise Services</h3>
+                                <h3 style="font-size: 35px; color:red">Enterprise Services</h3>
                             </div>
                         </div>
                     </div>
@@ -270,7 +270,7 @@
         <div class="country-icons">
 
             <div class="country-icon">
-                INDIA
+                <div style="font-size: 35px">INDIA</div>
                 <div class="preview-card">
                     <img src="{{ asset('frontend/images/white-tiger-stands-proudly-snowy-winter-landscape.jpg') }}">
                     <span>INDIA</span>
@@ -278,7 +278,7 @@
             </div>
 
             <div class="country-icon">
-                DUBAI
+                <div style="font-size: 35px">DUBAI</div>
                 <div class="preview-card">
                     <img src="{{ asset('frontend/images/shanghai-aerial-sunset.jpg') }}">
                     <span>DUBAI</span>
@@ -286,7 +286,7 @@
             </div>
 
             <div class="country-icon">
-                US
+                <div style="font-size: 35px">US</div>
                 <div class="preview-card">
                     <img src="{{ asset('frontend/images/view-world-monument-celebrate-world-heritage-day.jpg') }}">
                     <span>WASHINGTON DC</span>
@@ -294,7 +294,7 @@
             </div>
 
             <div class="country-icon">
-                UK
+                <div style="font-size: 35px">UK</div>
                 <div class="preview-card">
                     <img
                         src="{{ asset('frontend/images/illuminated-landmark-reflects-water-majestic-man-made-structure-generated-by-ai.jpg') }}">
@@ -303,7 +303,7 @@
             </div>
 
             <div class="country-icon">
-                AFRICA
+                <div style="font-size: 35px">AFRICA</div>
                 <div class="preview-card">
                     <img src="{{ asset('frontend/images/cityscape-sunset-skyscrapers-silhouetted.jpg') }}">
                     <span>AFRICA</span>

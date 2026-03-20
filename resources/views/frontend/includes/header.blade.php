@@ -27,14 +27,73 @@
                     </div>
                     <ul class="menu-main mb-0">
                         <li>
-                            <a href="{{route('index')}}" style="font-size: large; color: white; font-weight: bold;">HOME</a>
-                        </li>
-                        <li>
                             <a href="{{route('szorzo.ai')}}" style="font-size: large; color: white; font-weight: bold;">SZORZO AI</a>
                         </li>
                         <li class="menu-item-has-children">
+                            <a href="{{route('index')}}" style="font-size: large; color: white; font-weight: bold;">GCC SERVICES</a>
+                            <div class="sub-menu mega-menu mega-menu-column-4">
+                                <div class="list-item">
+                                    <h4 class="title"> <a href="">ENTERPRISE SERVICES</a></h4>
+                                    <ul>
+                                        <li><span class="arrow">➤</span><a href="{{ route('enterprice.formation') }}">Enterprise Transformation</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('enterprice.formation') }}">Enterprise Digitalization</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('enterprice.formation') }}">Enterprise Learning Solutions</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('marketing.service') }}">Marketing as A Service (MaaS)</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('org.capacity.ass') }}">Organization Capacity Assessment</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('opt.infra.off') }}">Operations and HR Infrastructure Offerings</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('strategic.advisory') }}">Merger and Acquisition Services</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="menu-item-has-children">
+                            <a href="#" style="font-size: large; color: white; font-weight: bold;">IT SERVICES</a>
+                            <div class="sub-menu mega-menu mega-menu-column-4">
+                                <div class="list-item">
+                                    <h4 class="title"> <a href="">ENTERPRISE SERVICES</a></h4>
+                                    <ul>
+                                        <li><span class="arrow">➤</span><a href="{{ route('enterprice.formation') }}">Enterprise Transformation</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('enterprice.formation') }}">Enterprise Digitalization</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('enterprice.formation') }}">Enterprise Learning Solutions</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('marketing.service') }}">Marketing as A Service (MaaS)</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('org.capacity.ass') }}">Organization Capacity Assessment</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('opt.infra.off') }}">Operations and HR Infrastructure Offerings</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('strategic.advisory') }}">Merger and Acquisition Services</a></li>
+                                    </ul>
+                                </div>
+                                <div class="list-item">
+                                    <h4 class="title"> <a href="">SZORZO SERVICES</a></h4>
+                                    <ul>
+                                        <li><span class="arrow">➤</span><a href="{{ route('telecom.services') }}">Telecom Services</a></li>
+                                        <li><span class="arrow">➤</span><a href="#">IT Services</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('it.infrastructure') }}">IT Infrastructure Services</a></li>
+                                        <li><span class="arrow">➤</span><a href="{{ route('cyber.security') }}">Cyber Security Services</a></li>
+                                    </ul>
+                                </div>
+                                <div class="list-item">
+                                    <h4 class="title"> <a href="">TECHNOLOGY SERVICES</a></h4>
+                                    <ul>
+                                        <li><span class="arrow">➤</span><a href="#">Data Center - Design, Built & Maintain</a></li>
+                                        <li><span class="arrow">➤</span><a href="#">Data Center - Managed Services</a></li>
+                                        <li><span class="arrow">➤</span><a href="#">Certification & Compliance</a></li>
+                                        <li><span class="arrow">➤</span><a href="#">Hardware + Software Integration</a></li>
+                                    </ul>
+                                </div>
+                                {{-- <div class="list-item header-cta">
+                                    <img src="{{ asset('frontend/images/rhino-white.jpg') }}" alt="Szorzo" />
+                                    <div class="cta-content">
+                                        <h2>Boost Your Security with Szorzo</h2>
+                                        <a href="{{ route('contact') }}" class="btn-default">Get Started</a>
+                                    </div>
+                                </div> --}}
+                            </div>
+                        </li>
+                        <li>
+                            <a href="{{ route('telecom.services') }}" style="font-size: large; color: white; font-weight: bold;">TELECOM SERVICES</a>
+                        </li>
+
+                        {{-- <li class="menu-item-has-children">
                             <a style="font-size: large; color: white; font-weight: bold;">SERVICES
-                                <!-- <i class="ri-arrow-down-s-line"></i> -->
                             </a>
                             <div class="sub-menu mega-menu mega-menu-column-4">
                                 <div class="list-item">
@@ -63,15 +122,6 @@
                                     </ul>
                                 </div>
                                 <div class="list-item">
-                                    {{-- <h4 class="title"> <a href="">Technology & Engineering Services</a></h4>
-                                    <ul>
-                                        <li><a href="#">Data Center - Design, Built & Maintain</a></li>
-                                        <li><a href="#">Data Center - Managed Services</a></li>
-                                        <li><a href="#">IT Infrastructure - Design, Built & Maintain</a></li>
-                                        <li><a href="#">Cyber Security - Security Operations Center</a></li>
-                                        <li><a href="#">Certification & Compliance</a></li>
-                                        <li><a href="#">Hardware + Software Integration</a></li>
-                                    </ul> --}}
                                     <h4 class="title"> <a href="">IT Infrastructure Services</a></h4>
                                     <ul>
                                         <li><a href="{{ route('data.center.design') }}">Data Center - Design, Built & Maintain</a></li>
@@ -90,44 +140,13 @@
                                     </div>
                                 </div>
                             </div>
-                        </li>
-                        {{-- <li class="menu-item-has-children">
-                            <a style="font-size: large; color: white; font-weight: bold;">SERVICES
-                                <!-- <i class="ri-arrow-down-s-line"></i> -->
-                            </a>
-                            <div class="sub-menu mega-menu mega-menu-column-4">
-                                <div class="list-item">
-                                    <h4 class="title"> <a href="">Enterprise Services</a></h4>
-                                    <ul>
-                                        <li><a href="">Enterprise Transformation</a></li>
-                                        <li><a href="">Enterprise Digitalization</a></li>
-                                        <li><a href="">Enterprise Learning Solutions</a></li>
-                                    </ul>
-                                </div>
-                                <div class="list-item">
-                                    <h4 class="title"> <a href="{{ route('strategic.advisory') }}">Merger & Acquisition
-                                            Services</a></h4>
-                                    <ul>
-                                        <li><a href="">Merger and Acquisition Services</a></li>
-                                        <li><a href="">Organization Capacity Assessment</a></li>
-                                        <li><a href="">Operations and HR Infrastructure Offerings</a></li>
-                                    </ul>
-                                </div>
-                                <div class="list-item">
-                                    <h4 class="title"> <a href="">IT Services</a></h4>
-                                    <ul>
-                                        <li><a href="">IT Services</a></li>
-                                        <li><a href="">IT Infrastructure Services</a></li>
-                                        <li><a href="">Cyber Security Services</a></li>
-                                    </ul>
-                                </div>
-                            </div>
                         </li> --}}
-                        <li>
+                        {{-- <li>
                             <a href="{{ route('about.us') }}#industries"
                                 style="font-size: large; color: white; font-weight: bold;">INDUSTRIES</a>
-                        </li>
+                        </li> --}}
                         {{-- ?#industries --}}
+
                         <li class="menu-item-has-children">
                             <a href="{{ route('about.us') }}" style="font-size: large; color: white; font-weight: bold;">ABOUT
                                 US</a>
@@ -136,6 +155,7 @@
                             <a href="{{ route('contact') }}" style="font-size: large; color: white; font-weight: bold;">CONTACT
                                 US</a>
                         </li>
+
                         {{-- <li class="menu-item-has-children">
                             <a style="font-size: large; color: white; font-weight: bold;">Careers</a>
                             <div class="sub-menu mega-menu mega-menu-column-2">
