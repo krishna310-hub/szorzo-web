@@ -6523,6 +6523,9 @@ header.main-header .header-sticky.active {
     left: 50%;
     visibility: hidden;
     transform: translate(-50%, 10px);
+
+    display: flex;
+    flex-wrap: wrap;
 }
 
 @media (min-width: 992px) {
@@ -6617,7 +6620,7 @@ header.main-header .header-sticky.active {
 
 .header .menu>ul>li .sub-menu.mega-menu-column-4 {
     max-width: 1400px;
-    width: 100%;
+    width: 70%;
     display: flex;
     flex-wrap: wrap;
     padding: 20px 15px;
@@ -9467,9 +9470,93 @@ ul {
     gap: 8px;
 }
 
-.arrow {
+/* .arrow {
     color: #ed1c24;
     font-size: 14px;
     line-height: 1;
     margin-right: 10px;
+} */
+
+/* ===== MEGA MENU FIXED LAYOUT ===== */
+
+.header .menu>ul>li .sub-menu.mega-menu-column-4 {
+    max-width: 1400px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap; /* allow next row */
+    padding: 20px 15px;
+    overflow: hidden; /* prevent overflow */
+}
+
+/* Remove 4-column restriction */
+.header .menu>ul>li .sub-menu.mega-menu-column-4>.list-item {
+    flex: 0 0 100%; /* full width */
+    padding: 0 15px;
+}
+
+
+/* ===== ROW-WISE FLOW DESIGN ===== */
+
+.header .menu>ul>li .sub-menu.mega-menu>.list-item>ul {
+    display: flex;
+    flex-wrap: wrap;        /* wrap to next line */
+    gap: 15px 25px;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* Each item */
+.header .menu>ul>li .sub-menu.mega-menu>.list-item>ul>li {
+    display: flex;
+    align-items: center;
+    position: relative;
+    max-width: 100%;
+}
+
+/* Text */
+.header .menu>ul>li .sub-menu.mega-menu>.list-item>ul>li>a {
+    font-size: 20px;
+    color: #333;
+    text-decoration: none;
+    white-space: normal;      /* allow wrap */
+    word-break: break-word;
+    transition: 0.3s;
+}
+
+/* Hover */
+.header .menu>ul>li .sub-menu.mega-menu>.list-item>ul>li>a:hover {
+    color: #ed1c24;
+}
+
+
+/* ===== DOTTED + ARROW CONNECTOR ===== */
+
+/* dotted line */
+.header .menu>ul>li .sub-menu.mega-menu>.list-item>ul>li::after {
+    content: "";
+    width: 20px;                   /* controlled width */
+    border-bottom: 2px dotted #ed1c24;
+    margin: 0 6px;
+}
+
+/* arrow */
+.header .menu>ul>li .sub-menu.mega-menu>.list-item>ul>li::before {
+    content: "➤";
+    margin-left: 4px;
+    color: #ed1c24;
+    font-size: 25px;
+}
+
+/* remove last connector */
+.header .menu>ul>li .sub-menu.mega-menu>.list-item>ul>li:last-child::after,
+.header .menu>ul>li .sub-menu.mega-menu>.list-item>ul>li:last-child::before {
+    content: none;
+}
+
+
+/* ===== REMOVE OLD ARROWS ===== */
+.arrow,
+.arrow-icon {
+    display: none !important;
 }
