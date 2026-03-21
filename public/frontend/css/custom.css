@@ -9628,44 +9628,29 @@ ul {
 }
 
 /* ===== ROW-WISE FLOW DESIGN ===== */
-
-/* ===== REMOVE OLD ARROWS ===== */
-.arrow,
+/* .arrow,
 .arrow-icon {
     display: none !important;
 }
 .gcc-menu {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 items first row */
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     list-style: none;
     padding: 0;
 }
 
-/* Each item */
 .gcc-menu li {
     position: relative;
     text-align: start;
 }
 
-/* Arrow + line */
-/* .gcc-menu li::after {
-    content: "→";
-    position: absolute;
-    left: 270px;
-    top: 30%;
-    font-size: 50px;
-    width: 74px;
-    transform: translateY(-50%);
-    color: #f80000;
-} */
 .gcc-menu li::before {
     content: "→";
     position: absolute;
     left: -18px;
     top: 30%;
     font-size: 50px;
-    /* width: 74px; */
     transform: translateY(-50%);
     color: #f80000;
 }
@@ -9679,16 +9664,58 @@ ul {
     left: -18px;
     top: 30%;
     font-size: 50px;
-    /* width: 74px; */
     transform: translateY(-50%);
     color: #f80000;
 }
-/* Remove arrow for last item in row 1 (4th) */
 .gcc-menu li::after {
     display: none;
 }
 
-/* Remove arrow for last item (7th) */
 .gcc-menu li::after {
     display: none;
+} */
+
+/* rhino logo menu services */
+.arrow,
+.arrow-icon {
+    display: none !important;
+}
+
+/* GRID */
+.gcc-menu {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+}
+
+/* EACH ITEM */
+.gcc-menu li {
+    position: relative;
+    text-align: start;
+    padding-left: 50px; /* space for logo */
+}
+
+/* LOGO INSTEAD OF ARROW */
+.gcc-menu li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 55%;
+    transform: translateY(-50%);
+
+    width: 40px;   /* adjust size */
+    height: 40px;
+
+    background-image: url("../images/rhino-logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* REMOVE UNUSED AFTER */
+.gcc-menu li::after {
+    display: none !important;
 }
