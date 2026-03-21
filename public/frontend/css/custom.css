@@ -9652,34 +9652,34 @@ ul {
 .gcc-menu li::after {
     content: "→";
     position: absolute;
-    right: -32px;
-    top: 33%;
-    font-size: 56px;
-    width: 86px;
+    left: 270px;
+    top: 30%;
+    font-size: 50px;
+    /* width: 74px; */
     transform: translateY(-50%);
     color: #f80000;
 }
 .gcc-menu li:first-child:before {
     content: "→";
     position: absolute;
-    left: -10px;
-    top: 33%;
-    font-size: 56px;
-    width: 74px;
+    left: -18px;
+    top: 30%;
+    font-size: 50px;
+    /* width: 74px; */
     transform: translateY(-50%);
     color: #f80000;
 }
 .gcc-menu li:first-child,
 .gcc-menu li:nth-child(5) {
-    padding-left: 60px;
+    padding-left: 50px;
 }
 .gcc-menu li:nth-child(5):before {
     content: "→";
     position: absolute;
-    left: -10px;
-    top: 33%;
-    font-size: 56px;
-    width: 74px;
+    left: -18px;
+    top: 30%;
+    font-size: 50px;
+    /* width: 74px; */
     transform: translateY(-50%);
     color: #f80000;
 }
