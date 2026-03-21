@@ -270,7 +270,7 @@
         <div class="country-icons">
 
             <div class="country-icon">
-                <div style="font-size: 35px">INDIA</div>
+                <div style="font-size: 35px; color:white">INDIA</div>
                 <div class="preview-card">
                     <img src="{{ asset('frontend/images/white-tiger-stands-proudly-snowy-winter-landscape.jpg') }}">
                     <span>INDIA</span>
@@ -278,7 +278,7 @@
             </div>
 
             <div class="country-icon">
-                <div style="font-size: 35px">DUBAI</div>
+                <div style="font-size: 35px; color:white">DUBAI</div>
                 <div class="preview-card">
                     <img src="{{ asset('frontend/images/shanghai-aerial-sunset.jpg') }}">
                     <span>DUBAI</span>
@@ -286,7 +286,7 @@
             </div>
 
             <div class="country-icon">
-                <div style="font-size: 35px">US</div>
+                <div style="font-size: 35px; color:white">US</div>
                 <div class="preview-card">
                     <img src="{{ asset('frontend/images/view-world-monument-celebrate-world-heritage-day.jpg') }}">
                     <span>WASHINGTON DC</span>
@@ -294,7 +294,7 @@
             </div>
 
             <div class="country-icon">
-                <div style="font-size: 35px">UK</div>
+                <div style="font-size: 35px; color:white">UK</div>
                 <div class="preview-card">
                     <img
                         src="{{ asset('frontend/images/illuminated-landmark-reflects-water-majestic-man-made-structure-generated-by-ai.jpg') }}">
@@ -303,7 +303,7 @@
             </div>
 
             <div class="country-icon">
-                <div style="font-size: 35px">AFRICA</div>
+                <div style="font-size: 35px; color:white">AFRICA</div>
                 <div class="preview-card">
                     <img src="{{ asset('frontend/images/cityscape-sunset-skyscrapers-silhouetted.jpg') }}">
                     <span>AFRICA</span>

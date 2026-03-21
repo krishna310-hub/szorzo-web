@@ -52,10 +52,9 @@
                                 <div class="list-item">
                                     <h4 class="title"> <a href="">IT SERVICES</a></h4>
                                     <ul class="gcc-menu">
-                                        <li><a href="#">IT Services</a></li>
+                                        <li><a href="{{ route('it.infrastructure') }}">IT Infrastructure Services</a></li>
                                         <li><a href="{{ route('data.center.design') }}">Data Center - Design, Built & Maintain</a></li>
                                         <li><a href="{{ route('data.center.managed.service') }}">Data Center - Managed Services</a></li>
-                                        <li><a href="{{ route('it.infrastructure') }}">IT Infrastructure Services</a></li>
                                         <li><a href="{{ route('cyber.security') }}">Cyber Security Services</a></li>
                                         <li><a href="{{ route('certificate.compliance') }}">Certification & Compliance</a></li>
                                         <li><a href="{{ route('hardware.software') }}">Hardware + Software Integration</a></li>
