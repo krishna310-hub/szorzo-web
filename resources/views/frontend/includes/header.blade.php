@@ -34,7 +34,7 @@
                             <div class="sub-menu mega-menu mega-menu-column-4">
                                 <div class="list-item">
                                     <h4 class="title"> <a href="">ENTERPRISE SERVICES</a></h4>
-                                    <ul>
+                                    <ul class="gcc-menu">
                                         <li><a href="{{ route('enterprice.formation') }}">Enterprise Transformation</a></li>
                                         <li><a href="{{ route('enterprice.formation') }}">Enterprise Digitalization</a></li>
                                         <li><a href="{{ route('enterprice.formation') }}">Enterprise Learning Solutions</a></li>
@@ -51,14 +51,14 @@
                             <div class="sub-menu mega-menu mega-menu-column-4">
                                 <div class="list-item">
                                     <h4 class="title"> <a href="">IT SERVICES</a></h4>
-                                    <ul>
-                                        <li><span class="arrow">➤</span><a href="#">IT Services</a></li>
-                                        <li><span class="arrow">➤</span><a href="#">Data Center - Design, Built & Maintain</a></li>
-                                        <li><span class="arrow">➤</span><a href="#">Data Center - Managed Services</a></li>
-                                        <li><span class="arrow">➤</span><a href="{{ route('it.infrastructure') }}">IT Infrastructure Services</a></li>
-                                        <li><span class="arrow">➤</span><a href="{{ route('cyber.security') }}">Cyber Security Services</a></li>
-                                        <li><span class="arrow">➤</span><a href="#">Certification & Compliance</a></li>
-                                        <li><span class="arrow">➤</span><a href="#">Hardware + Software Integration</a></li>
+                                    <ul class="gcc-menu">
+                                        <li><a href="#">IT Services</a></li>
+                                        <li><a href="#">Data Center - Design, Built & Maintain</a></li>
+                                        <li><a href="#">Data Center - Managed Services</a></li>
+                                        <li><a href="{{ route('it.infrastructure') }}">IT Infrastructure Services</a></li>
+                                        <li><a href="{{ route('cyber.security') }}">Cyber Security Services</a></li>
+                                        <li><a href="#">Certification & Compliance</a></li>
+                                        <li><a href="#">Hardware + Software Integration</a></li>
                                     </ul>
                                 </div>
                                 {{-- <div class="list-item header-cta">
