@@ -32,45 +32,45 @@
                         <!-- Section Title -->
                         <div class="section-title text-center mb-5">
                             <h2 class="wow fadeInUp" data-wow-delay="0.2s">
-                                Why Choose <span class="fw-bold">Szorzo Learning?</span>
+                                Why Choose <span class="fw-bold">SZORZO Learning?</span>
                             </h2>
                         </div>
 
                         <!-- Content Grid -->
                         <div class="row">
 
-                            <div class="col-md-12" style="padding-left: 70px;">
+                            <div class="col-md-12" style="padding-left: 80px; padding-right: 80px;">
                                 <h1 class="fw-bold" style="margin-bottom: 10px; color:red">Industry-Aligned Curriculum :
                                 </h1>
-                                <p style="font-size: 23px; margin-bottom: 25px;">Our training programs are developed in
+                                <p style="font-size: 23px; margin-bottom: 25px; text-align: justify;">Our training programs are developed in
                                     collaboration with GCC leaders and technology
                                     innovators to ensure real-world applicability and immediate business impact.</p>
                             </div>
 
-                            <div class="col-md-12 mb-4" style="padding-left: 70px;">
+                            <div class="col-md-12 mb-4" style="padding-left: 80px; padding-right: 80px;">
                                 <h1 class="fw-bold" style="margin-bottom: 10px; color:red">Expert Trainers :</h1>
-                                <p style="font-size: 23px; margin-bottom: 25px;">Learn from certified professionals with
+                                <p style="font-size: 23px; margin-bottom: 25px; text-align: justify;">Learn from certified professionals with
                                     extensive experience across Fortune 500
                                     companies, innovative startups, and leading technology organizations.</p>
                             </div>
 
-                            <div class="col-md-12 mb-4" style="padding-left: 70px;">
+                            <div class="col-md-12 mb-4" style="padding-left: 80px; padding-right: 80px;">
                                 <h1 class="fw-bold" style="margin-bottom: 10px; color:red">Hands-on Projects :</h1>
-                                <p style="font-size: 23px; margin-bottom: 25px;">We maintain 95%+ learner satisfaction
+                                <p style="font-size: 23px; margin-bottom: 25px; text-align: justify;">We maintain 95%+ learner satisfaction
                                     ratings, with participating organizations reporting
                                     an average 30% productivity boost post-training completion.</p>
                             </div>
 
-                            <div class="col-md-12 mb-4" style="padding-left: 70px;">
+                            <div class="col-md-12 mb-4" style="padding-left: 80px; padding-right: 80px;">
                                 <h1 class="fw-bold" style="margin-bottom: 10px; color:red">Placement Support :</h1>
-                                <p style="font-size: 23px; margin-bottom: 25px;">Choose from live online sessions, in-person
+                                <p style="font-size: 23px; margin-bottom: 25px; text-align: justify;">Choose from live online sessions, in-person
                                     training at our Bengaluru facility, or fully
                                     customized enterprise cohorts designed around your team's schedule.</p>
                             </div>
 
-                            <div class="col-md-12" style="padding-left: 70px;">
+                            <div class="col-md-12" style="padding-left: 80px; padding-right: 80px;">
                                 <h1 class="fw-bold" style="margin-bottom: 10px; color:red">Flexible Learning :</h1>
-                                <p style="font-size: 23px; margin-bottom: 25px;">All programs include preparation for
+                                <p style="font-size: 23px; margin-bottom: 25px; text-align: justify;">All programs include preparation for
                                     globally recognized certifications from AWS,
                                     Microsoft Azure, Google Cloud, and leading cybersecurity bodies.</p>
                             </div>
@@ -81,7 +81,7 @@
 
                 <div class="col-lg-12">
 
-                    <div class="project-entry">
+                    <div class="project-entry logo-list">
                         <div class="performance-step-list">
                             <div class="" data-wow-delay="0.4s">
                                 <div class="performance-step-content">
@@ -105,14 +105,13 @@
                                         <li>Natural Language Processing basics and text analytics</li>
                                         <li>AI model deployment in production environments</li>
                                         <li>Ethical considerations and bias mitigation in AI systems</li>
-
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="project-entry">
+                    <div class="project-entry logo-list">
                         <div class="project-performance-box">
                             <h2 class="wow fadeInUp">Generative <span style="font-weight: bold;">AI Specialization</span>
                             </h2>
@@ -142,7 +141,7 @@
                         </div>
                     </div>
 
-                    <div class="project-entry">
+                    <div class="project-entry logo-list">
                         <div class="project-performance-box">
                             <h2 class="wow fadeInUp">Cloud <span style="font-weight: bold;">Computing Mastery</span></h2>
 
@@ -171,7 +170,7 @@
                         </div>
                     </div>
 
-                    <div class="project-entry">
+                    <div class="project-entry logo-list">
                         <div class="project-performance-box">
                             <h2 class="wow fadeInUp">DevOps <span style="font-weight: bold;">Excellence Program</span></h2>
 
@@ -200,7 +199,7 @@
                         </div>
                     </div>
 
-                    <div class="project-entry">
+                    <div class="project-entry logo-list">
                         <div class="project-performance-box">
                             <h2 class="wow fadeInUp">Enterprise <span style="font-weight: bold;">Security Program</span>
                             </h2>
@@ -302,7 +301,7 @@
                         </div>
                     </div>
 
-                    <div class="project-entry">
+                    <div class="project-entry logo-list">
                         <div class="project-performance-box">
                             <h2 class="wow fadeInUp">Corporate <span style="font-weight: bold;">Training Solutions</span>
                             </h2>
@@ -329,7 +328,7 @@
                         </div>
                     </div>
 
-                    <div class="project-entry">
+                    <div class="project-entry logo-list">
                         <div class="project-performance-box">
                             <h2 class="wow fadeInUp">Success <span style="font-weight: bold;">Metrics and Outcomes</span>
                             </h2>
@@ -375,7 +374,7 @@
 
                                         <div class="cta-phone">
                                             <span><i class="fa-solid fa-envelope"></i></span>
-                                            learning@szorzo.com
+                                            business@szorzo.com
                                         </div>
                                         <div class="cta-phone">
                                             <span><i class="fa-solid fa-phone"></i></span>

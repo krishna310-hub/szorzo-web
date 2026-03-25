@@ -2754,7 +2754,7 @@ header.main-header .header-sticky.active {
 
 .page-header-enterprise-learning-solution-bg {
     position: relative;
-    background: url("../images/artificial-intelligence-neural-network-visualization.jpg") no-repeat center 40% / 100%;
+    background: url("../images/learning.jpg") no-repeat center 40% / 100%;
     padding: 100px 0 115px;
     height: 850px;
     margin-top: -150px;
@@ -2762,10 +2762,11 @@ header.main-header .header-sticky.active {
 }
 
 .page-header-enterprise-learning-solution-bg .white-card {
-    margin-top: 50px;
-    margin-left: -130px;
+    margin-top: 020px;
+    margin-left: 675px;
     max-width: 700px;
-    height: 350px;
+    height: 570px;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .our-approach {
@@ -9738,4 +9739,32 @@ ul {
 /* REMOVE UNUSED AFTER */
 .gcc-menu li::after {
     display: none !important;
+}
+
+.logo-list ul li::before {
+    content: "" !important;
+}
+
+.logo-list ul {
+    padding-left: 0;
+    margin: 0;
+}
+
+.logo-list ul li {
+    position: relative;
+    /* padding-left: 40px; */
+    list-style: none;
+    margin-bottom: 15px;
+}
+
+.logo-list ul li {
+    background-image: url("../images/rhino-logo.png");
+    background-repeat: no-repeat;
+    background-size: 40px;
+
+    background-position: left calc(50% + 5px);
+    padding-left: 50px;
+
+    display: flex;
+    align-items: center;
 }
