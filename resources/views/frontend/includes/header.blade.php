@@ -37,7 +37,7 @@
                                     <ul class="gcc-menu">
                                         <li><a href="{{ route('enterprice.formation') }}">Enterprise Formation</a></li>
                                         <li><a href="#">Enterprise Digitalization</a></li>
-                                        <li><a href="#">Enterprise Learning Solutions</a></li>
+                                        <li><a href="{{ route('enterprise.learning.solution') }}">Enterprise Learning Solutions</a></li>
                                         <li><a href="{{ route('marketing.service') }}">Marketing as A Service (MaaS)</a></li>
                                         <li><a href="{{ route('org.capacity.ass') }}">Organization Capacity Assessment</a></li>
                                         <li><a href="{{ route('opt.infra.off') }}">Operations and HR Infrastructure Offerings</a></li>

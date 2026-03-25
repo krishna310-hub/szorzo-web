@@ -25,7 +25,7 @@
             <div class="row section-row align-items-center">
                 <div class="col-lg-12">
                     <!-- Section Title Start -->
-                     <div class="section-title section-title-center">
+                    <div class="section-title section-title-center">
                         <h3 class="wow fadeInUp" style="font-size: x-large;">Enabling Business Foundations Globally</h3>
                         <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">WE HELP IN SETTING UP YOUR <span style="font-weight: bold;">GCC</span></h2>
                     </div>

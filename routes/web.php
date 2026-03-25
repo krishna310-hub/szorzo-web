@@ -26,6 +26,7 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/marketing/service','marketingService')->name('marketing.service');
     Route::get('/organization-and-capacity-assessment','organizationCapacityAssessment')->name('org.capacity.ass');
     Route::get('/operations/infrastructure-offerings','operationsInfrastructureOfferings')->name('opt.infra.off');
+    Route::get('/enterprise-learning-solution','enterpriseLearningSolution')->name('enterprise.learning.solution');
     //Merger & Acquisition Advisory
     Route::get('/strategic/advisory','strategicAdvisory')->name('strategic.advisory');
     Route::get('/target-identification-evaluation','targetIdentificationEvaluation')->name('target.identification.evaluation');
@@ -51,6 +52,8 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/contact/merger-services-form','mergerServicesForm')->name('contact.merger.services.form');
     // Telecom Services
     Route::get('/telecom-services','telecomServices')->name('telecom.services');
+    // Feedback Form
+    Route::get('/feedback-form','feedbackForm')->name('feedback.form');
 });
 
 Route::group(['controller' => LoginController::class], function () {

@@ -2752,6 +2752,22 @@ header.main-header .header-sticky.active {
     height: 250px;
 }
 
+.page-header-enterprise-learning-solution-bg {
+    position: relative;
+    background: url("../images/artificial-intelligence-neural-network-visualization.jpg") no-repeat center 40% / 100%;
+    padding: 100px 0 115px;
+    height: 850px;
+    margin-top: -150px;
+    z-index: 1;
+}
+
+.page-header-enterprise-learning-solution-bg .white-card {
+    margin-top: 50px;
+    margin-left: -130px;
+    max-width: 700px;
+    height: 350px;
+}
+
 .our-approach {
     padding: 40px 0 1px;
 }
@@ -8796,13 +8812,17 @@ $grey: #455560;
 }
 
 .cta-phone {
-    margin-top: 25px;
-    font-size: 30px;
+    margin-top: 20px;
+    font-size: 22px;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     color: #a00000;
+}
+
+.cta-phone i {
+    font-size: 20px;
 }
 
 /* Custom Mobile Icon */

@@ -35,6 +35,9 @@ class HomeController extends Controller
     public function enterpriceFormation(){
         return view('frontend.services.enterprice');
     }
+    public function enterpriseLearningSolution(){
+        return view('frontend.services.enterprise-learning-solution');
+    }
     public function marketingService(){
         return view('frontend.services.marketing');
     }
@@ -146,5 +149,8 @@ class HomeController extends Controller
 
     public function telecomServices(){
         return view('frontend.telecom-services');
+    }
+    public function feedbackForm(){
+        return view('frontend.feedback-form');
     }
 }
