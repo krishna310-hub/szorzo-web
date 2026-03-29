@@ -7675,7 +7675,7 @@ header.main-header .header-sticky.active {
     }
 
     .industries-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 15px;
         padding: 0 10px;
     }
@@ -9726,7 +9726,7 @@ ul {
     top: 55%;
     transform: translateY(-50%);
 
-    width: 40px;   /* adjust size */
+    width: 40px; /* adjust size */
     height: 40px;
 
     background-image: url("../images/rhino-logo.png");
@@ -9767,4 +9767,90 @@ ul {
 
     display: flex;
     align-items: center;
+}
+.page-header-demo-2 .col-lg-12 {
+    margin-left: 650px;
+}
+.page-header-demo-2 .section-title {
+    margin-left: -100px;
+}
+.page-header-demo-2 .section-title h3 {
+    margin-left: -27px;
+}
+.page-header-demo-2 .hero-section-content p {
+    margin-left: -110px;
+    margin-top: -20px;
+}
+
+@media screen and (max-width: 768px) {
+    .page-header-demo-2 .col-lg-12 {
+        margin-left: 0px;
+    }
+
+    .page-header-demo-2 .section-title {
+        margin-left: 0px;
+    }
+
+    .page-header-demo-2 .section-title h3 {
+        margin-left: 0px;
+    }
+
+    .page-header-demo-2 .hero-section-content p {
+        margin-left: 0px;
+        margin-top: 0px;
+    }
+    .page-header-about-us-bg {
+        position: relative;
+        background: url(../images/modern-businessman-working-with-digital-global-technology.jpg)
+            no-repeat center;
+        background-size: cover;
+        padding: 0 0 236px 0;
+        margin-top: 0px;
+        height: 100%;
+        z-index: 1;
+    }
+    .page-header-contact-us-bg {
+        position: relative;
+        background: url(../images/szorzo-map-1.png) no-repeat center 10% / cover;
+        padding: 0px 0px;
+        height: 100%;
+        margin-top: 0px;
+        z-index: 1;
+    }
+    .page-header-contact-us-bg h1 {
+        margin-left: 0px !important;
+    }
+    .country-icons {
+        flex-wrap: wrap;
+    }
+    .gcc-menu {
+        grid-template-columns: repeat(1, 1fr);
+    }
+    .page-header-szorzo-ai-bg .white-card {
+        margin-top: 0px;
+        margin-left: 0px;
+    }
+    .page-header-szorzo-ai-bg {
+        height: 100%;
+    }
+    .engagement-section {
+        display: flex;
+        flex-wrap: wrap;
+        min-height: 100%;
+        background: #ffffff;
+        margin-top: -70px;
+    }
+    .engagement-left {
+        margin-left: 0px;
+    }
+    .engagement-left{
+        width: 100%;
+    }
+    .engagement-right {
+        width: 100%;
+    }
+    .page-header-certificate-compliance-bg{
+            background-size: cover;
+    }
+    
 }
