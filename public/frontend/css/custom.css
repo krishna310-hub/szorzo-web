@@ -6727,8 +6727,12 @@ header.main-header .header-sticky.active {
 }
 
 .header .menu > ul > li .single-column-menu {
-    min-width: 280px;
-    max-width: 350px;
+    /* min-width: 280px;
+    max-width: 350px; */
+
+    width: 1400px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .header .menu > ul > li .sub-menu.mega-menu > .list-item > ul > li {
