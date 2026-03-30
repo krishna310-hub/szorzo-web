@@ -3,7 +3,7 @@
     <!-- Page Header Start -->
     <div class="page-header-it-infrastructure-bg">
         <div class="container">
-            <div class="col-lg-12" style="margin-top: 150px; margin-left: -140px;">
+            <div class="col-lg-12">
                 <div class="white-card">
                     <div class="section-title">
                         <h1 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">

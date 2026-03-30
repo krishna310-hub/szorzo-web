@@ -9786,6 +9786,11 @@ ul {
     margin-top: -20px;
 }
 
+.page-header-it-infrastructure-bg .col-lg-12 {
+    margin-top: 150px;
+    margin-left: -140px;
+}
+
 @media screen and (max-width: 768px) {
     .page-header-demo-2 .col-lg-12 {
         margin-left: 0px;
@@ -9847,14 +9852,58 @@ ul {
     .engagement-left {
         margin-left: 0px;
     }
-    .engagement-left{
+    .engagement-left {
         width: 100%;
     }
     .engagement-right {
         width: 100%;
     }
-    .page-header-certificate-compliance-bg{
-            background-size: cover;
+    .page-header-certificate-compliance-bg {
+        background-size: cover;
     }
-    
+    .page-header-it-infrastructure-bg .col-lg-12 {
+        margin-top: 0px;
+        margin-left: 0px;
+    }
+    .page-header-it-infrastructure-bg .white-card {
+        margin-left: 0px;
+        max-width: 100%;
+        margin-right: 0px;
+        max-height: 700px;
+    }
+    .page-header-data-center-design-bg .white-card {
+        margin-left: 0px;
+    }
+    .page-header-it-managed-services-bg .white-card {
+        margin-top: 0px;
+        margin-left: 0px;
+        max-height: 600px;
+    }
+    .page-header-cyber-security-bg .white-card {
+        margin-top: 10px;
+        margin-left: 0px;
+        max-width: 1000px;
+        margin-right: 0px;
+        max-height: 100%;
+    }
+    .page-header-certificate-compliance-bg .white-card {
+        margin-top: 100px;
+        margin-left: 0px;
+        max-width: 1100px;
+        margin-right: 0px;
+        max-height: 380px;
+        background: rgba(0, 0, 0, 0);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0);
+    }
+    .page-header-data-hardware-software-bg .white-card {
+        margin-top: 0px;
+        margin-left: -0px;
+        max-width: 800px;
+        margin-right: 0px;
+        max-height: 486px;
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
 }
