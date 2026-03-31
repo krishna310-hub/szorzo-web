@@ -1863,7 +1863,7 @@ header.main-header .header-sticky.active {
 
 .testimonial-slider-box {
     position: relative;
-    background: url("../images/testimonial-box-bg.jpg") no-repeat;
+    background: url("../images/testimonial-box-bg.webp") no-repeat;
     background-position: center center;
     background-size: cover;
     height: 100%;
@@ -2441,7 +2441,7 @@ header.main-header .header-sticky.active {
 
 .page-header-ma-bg {
     position: relative;
-    background: url("../images/bg-68.jpg") no-repeat center 0% / cover;
+    background: url("../images/bg-68.webp") no-repeat center 0% / cover;
     padding: 230px 0 115px;
     margin-top: -150px;
     height: 800px;
@@ -2561,7 +2561,7 @@ header.main-header .header-sticky.active {
 
 .page-header-about-us-bg {
     position: relative;
-    background: url("../images/modern-businessman-working-with-digital-global-technology.jpg")
+    background: url("../images/modern-businessman-working-with-digital-global-technology.webp")
         no-repeat center calc(-30% - 75px);
     background-size: 100%;
     padding: 230px 0 115px;
@@ -2591,7 +2591,7 @@ header.main-header .header-sticky.active {
 
 .page-header-contact-us-bg {
     position: relative;
-    background: url("../images/szorzo-map-1.png") no-repeat center 10% / cover;
+    background: url("../images/szorzo-map-1.webp") no-repeat center 10% / cover;
     padding: 230px 0 115px;
     height: 800px;
     margin-top: -150px;
@@ -2659,7 +2659,7 @@ header.main-header .header-sticky.active {
 
 .page-header-careers-bg {
     position: relative;
-    background: url("../images/bg-83.jpg") no-repeat center 20% / cover;
+    background: url("../images/bg-83.webp") no-repeat center 20% / cover;
     padding: 230px 0 115px;
     height: 710px;
     margin-top: -150px;
@@ -2679,7 +2679,7 @@ header.main-header .header-sticky.active {
 
 .page-header-job-bg {
     position: relative;
-    background: url("../images/bg-83.jpg") no-repeat center 20% / cover;
+    background: url("../images/bg-83.webp") no-repeat center 20% / cover;
     padding: 230px 0 115px;
     height: 550px;
     margin-top: -150px;
@@ -2699,7 +2699,7 @@ header.main-header .header-sticky.active {
 
 .page-header-szorzo-ai-bg {
     position: relative;
-    background: url("../images/abstract-network-interconnected-nodes-lines-black-background.jpg")
+    background: url("../images/abstract-network-interconnected-nodes-lines-black-background.webp")
         no-repeat center 50% / cover;
     padding: 180px 0 115px;
     height: 710px;
@@ -2727,7 +2727,7 @@ header.main-header .header-sticky.active {
 
 .page-header-telecom-service-bg {
     position: relative;
-    background: url("../images/25469.jpg") no-repeat center 10% / 100%;
+    background: url("../images/25469.webp") no-repeat center 10% / 100%;
     padding: 100px 0 115px;
     height: 850px;
     margin-top: -150px;
@@ -2754,7 +2754,7 @@ header.main-header .header-sticky.active {
 
 .page-header-enterprise-learning-solution-bg {
     position: relative;
-    background: url("../images/learning.jpg") no-repeat center 40% / 100%;
+    background: url("../images/learning.webp") no-repeat center 40% / 100%;
     padding: 100px 0 115px;
     height: 850px;
     margin-top: -150px;
@@ -7912,7 +7912,7 @@ textarea {
 
 .page-header-data-center-design-bg {
     position: relative;
-    background: url(../images/dynamic-data-visualization-3d.jpg) no-repeat
+    background: url(../images/dynamic-data-visualization-3d.webp) no-repeat
         center calc(030% - 0px);
     background-size: cover;
     padding: 130px 0 220px;
@@ -7934,7 +7934,7 @@ textarea {
 
 .page-header-cyber-security-bg {
     position: relative;
-    background: url(../images/bg-85.jpg) no-repeat center calc(-10% - 75px);
+    background: url(../images/bg-85.webp) no-repeat center calc(-10% - 75px);
     background-size: cover;
     padding: 230px 0 115px;
     margin-top: -150px;
@@ -7952,7 +7952,7 @@ textarea {
 
 .page-header-it-infrastructure-bg {
     position: relative;
-    background: url(../images/bg-10.jpg) no-repeat center calc(100% - 70px);
+    background: url(../images/bg-10.webp) no-repeat center calc(100% - 70px);
     background-size: cover;
     padding: 200px 0 100px;
     margin-top: -150px;
@@ -7974,7 +7974,7 @@ textarea {
 
 .page-header-certificate-compliance-bg {
     position: relative;
-    background: url(../images/standard-quality-control-concept-m.jpg) no-repeat
+    background: url(../images/standard-quality-control-concept-m.webp) no-repeat
         center 30%;
     background-size: 100% auto;
     padding: 100px 0 100px;
@@ -7996,7 +7996,7 @@ textarea {
 
 .page-header-it-managed-services-bg {
     position: relative;
-    background: url(../images/cybersecurity-concept-secure-data-transfer.jpg)
+    background: url(../images/cybersecurity-concept-secure-data-transfer.webp)
         no-repeat center -80px;
     background-size: cover;
     padding: 230px 0 80px;
@@ -8019,7 +8019,7 @@ textarea {
 
 .page-header-data-hardware-software-bg {
     position: relative;
-    background: url(../images/neon-motherboard-background.jpg) no-repeat
+    background: url(../images/neon-motherboard-background.webp) no-repeat
         center -80px;
     background-size: cover;
     padding: 200px 0 80px;
@@ -9810,7 +9810,7 @@ ul {
     }
     .page-header-about-us-bg {
         position: relative;
-        background: url(../images/modern-businessman-working-with-digital-global-technology.jpg)
+        background: url(../images/modern-businessman-working-with-digital-global-technology.webp)
             no-repeat center;
         background-size: cover;
         padding: 0 0 236px 0;

@@ -272,7 +272,7 @@
             <div class="country-icon">
                 <div style="font-size: 35px; color:white">INDIA</div>
                 <div class="preview-card">
-                    <img src="{{ asset('frontend/images/white-tiger-stands-proudly-snowy-winter-landscape.jpg') }}">
+                    <img src="{{ asset('frontend/images/white-tiger-stands-proudly-snowy-winter-landscape.webp') }}">
                     <span>INDIA</span>
                 </div>
             </div>
@@ -280,7 +280,7 @@
             <div class="country-icon">
                 <div style="font-size: 35px; color:white">DUBAI</div>
                 <div class="preview-card">
-                    <img src="{{ asset('frontend/images/shanghai-aerial-sunset.jpg') }}">
+                    <img src="{{ asset('frontend/images/shanghai-aerial-sunset.webp') }}">
                     <span>DUBAI</span>
                 </div>
             </div>
@@ -288,7 +288,7 @@
             <div class="country-icon">
                 <div style="font-size: 35px; color:white">US</div>
                 <div class="preview-card">
-                    <img src="{{ asset('frontend/images/view-world-monument-celebrate-world-heritage-day.jpg') }}">
+                    <img src="{{ asset('frontend/images/view-world-monument-celebrate-world-heritage-day.webp') }}">
                     <span>WASHINGTON DC</span>
                 </div>
             </div>
@@ -297,7 +297,7 @@
                 <div style="font-size: 35px; color:white">UK</div>
                 <div class="preview-card">
                     <img
-                        src="{{ asset('frontend/images/illuminated-landmark-reflects-water-majestic-man-made-structure-generated-by-ai.jpg') }}">
+                        src="{{ asset('frontend/images/illuminated-landmark-reflects-water-majestic-man-made-structure-generated-by-ai.webp') }}">
                     <span>LONDON</span>
                 </div>
             </div>
@@ -305,7 +305,7 @@
             <div class="country-icon">
                 <div style="font-size: 35px; color:white">AFRICA</div>
                 <div class="preview-card">
-                    <img src="{{ asset('frontend/images/cityscape-sunset-skyscrapers-silhouetted.jpg') }}">
+                    <img src="{{ asset('frontend/images/cityscape-sunset-skyscrapers-silhouetted.webp') }}">
                     <span>AFRICA</span>
                 </div>
             </div>
