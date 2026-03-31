@@ -108,14 +108,14 @@
                             <ul>
                                 <li><a href="{{ route('index') }}">Home</a></li>
                                 <li><a href="{{ route('about.us') }}">About Us</a></li>
-                                <li><a href="{{ route('contact') }}">Contact Us</a></li>
+                                {{-- <li><a href="{{ route('contact') }}">Contact Us</a></li> --}}
                                 <li><a href="{{ route('about.us') }}#industries">Industries</a></li>
                             </ul>
                         </div>
                         <!-- Footer Links End -->
                     </div>
 
-                    <div class="col-lg-3 col-md-6 mt-5">
+                    {{-- <div class="col-lg-3 col-md-6 mt-5">
                         <!-- Footer Links Start -->
                         <div class="footer-links">
                             <h3>Get in Touch</h3>
@@ -130,11 +130,11 @@
                             </ul>
                         </div>
                         <!-- Footer Links End -->
-                    </div>
+                    </div> --}}
 
                     <div class="col-lg-3 col-md-6 mt-5">
                     <!-- Footer Links Start -->
-                    <div class="footer-links">
+                    {{-- <div class="footer-links">
                         <h3>Corporate Office</h3>
 
                         <ul class="contact-info">
@@ -153,7 +153,7 @@
                             </li>
                         </ul>
 
-                    </div>
+                    </div> --}}
                     <!-- Footer Links End -->
                 </div>
                 </div>
