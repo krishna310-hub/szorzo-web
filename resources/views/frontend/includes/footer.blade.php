@@ -168,7 +168,7 @@
                     <div class="col-md-6">
                         <!-- Footer Copyright Text Start -->
                         <div class="footer-copyright-text">
-                            <p>SZORZO Technologies Private Limited © 2026 All Rights Reserved.</p>
+                            <p>© 2026 All Rights Reserved.</p>
                         </div>
                         <!-- Footer Copyright Text End -->
                     </div>
