@@ -372,14 +372,14 @@
                                             Schedule a free consultation to explore how Szorzo Enterprise Learning Division can accelerate your team's digital transformation journey.
                                         </p>
 
-                                        <div class="cta-phone">
+                                        {{-- <div class="cta-phone">
                                             <span><i class="fa-solid fa-envelope"></i></span>
                                             business@szorzo.com
                                         </div>
                                         <div class="cta-phone">
                                             <span><i class="fa-solid fa-phone"></i></span>
                                             +91 990 141 9393
-                                        </div>
+                                        </div> --}}
                                         <div class="cta-phone">
                                             <span><i class="fa-solid fa-globe"></i></span>
                                             <a href="https://szorzo.com/enterprise-learning-solution" target="_blank">szorzo.com/learning</a>

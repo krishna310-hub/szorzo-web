@@ -563,10 +563,10 @@
                                 </p>
 
                                 <!-- Phone Display -->
-                                <div class="cta-phone">
+                                {{-- <div class="cta-phone">
                                     <span><i class="fa-solid fa-phone"></i></span>
                                     +91 990 141 9393
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>
