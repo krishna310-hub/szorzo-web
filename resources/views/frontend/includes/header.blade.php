@@ -41,11 +41,12 @@
                         <!-- GCC SERVICES -->
                         <li class="menu-item-has-children">
                             <a href="{{route('index')}}" style="font-size: large; color: white; font-weight: bold;">
-                                GCC SERVICES <i class="ri-arrow-down-s-line"></i>
+                                GCC SERVICES
                             </a>
 
                             <!-- FIXED: single column -->
                             <div class="sub-menu single-column-menu">
+                                <h4 class="title"> <a href="">ENTERPRISE SERVICES</a></h4>
                                 <ul class="gcc-menu">
                                     <li><a href="{{ route('enterprice.formation') }}">Enterprise Formation</a></li>
                                     <li><a href="#">Enterprise Digitalization</a></li>
@@ -61,12 +62,13 @@
                         <!-- IT SERVICES -->
                         <li class="menu-item-has-children">
                             <a href="#" style="font-size: large; color: white; font-weight: bold;">
-                                IT SERVICES <i class="ri-arrow-down-s-line"></i>
+                                IT SERVICES
                             </a>
 
                             <!-- FIXED: single column -->
                             {{-- <div class="sub-menu single-column-menu"> --}}
                             <div class="sub-menu single-column-menu">
+                                <h4 class="title"> <a href="">IT SERVICES</a></h4>
                                 <ul class="gcc-menu">
                                     <li><a href="{{ route('it.infrastructure') }}">IT Infrastructure Services</a></li>
                                     <li><a href="{{ route('data.center.design') }}">Data Center - Design, Built & Maintain</a></li>
