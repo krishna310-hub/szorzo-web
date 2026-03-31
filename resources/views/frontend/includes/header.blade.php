@@ -24,7 +24,7 @@
                         <div class="mobile-logo">
                             <a href="{{route('index')}}">
                                 <img src="{{ asset('frontend/images/rhino-logo.png') }}" width="80">
-                                <img src="{{ asset('frontend/images/logo-bg.png') }}" width="150px">
+                                {{-- <img src="{{ asset('frontend/images/logo-bg.png') }}" width="150px"> --}}
                             </a>
                         </div>
 
@@ -65,6 +65,7 @@
                             </a>
 
                             <!-- FIXED: single column -->
+                            {{-- <div class="sub-menu single-column-menu"> --}}
                             <div class="sub-menu single-column-menu">
                                 <ul class="gcc-menu">
                                     <li><a href="{{ route('it.infrastructure') }}">IT Infrastructure Services</a></li>
