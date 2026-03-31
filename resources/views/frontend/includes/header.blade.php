@@ -103,11 +103,11 @@
                             </a>
                         </li>
 
-                        <li>
+                        {{-- <li>
                             <a href="{{ route('contact') }}" style="font-size: large; color: white; font-weight: bold;">
                                 CONTACT US
                             </a>
-                        </li>
+                        </li> --}}
 
                     </ul>
                 </nav>

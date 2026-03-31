@@ -529,7 +529,7 @@
         </div>
     </div>
 
-    <div class="company-support-section">
+    {{-- <div class="company-support-section">
         <div class="section-title" style="justify-items: center;">
             <h2 class="text-anime-style-2" data-cursor="-opaque"><span style="font-weight: bold;">Our Marquee Clients & Partners</span></h2>
         </div>
@@ -569,6 +569,6 @@
             </div>
         </div>
 
-    </div>
+    </div> --}}
     <br>
 @endsection
