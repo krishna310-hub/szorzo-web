@@ -47,15 +47,33 @@
                         <!-- About Footer End -->
                     </div>
 
+                    <div class="col-lg-3">
+                        <!-- Footer Links Start -->
+                        <div class="footer-links">
+                            <h3>quick link</h3>
+                            <ul>
+                                <li><a href="{{ route('index') }}">GCC Services</a></li>
+                                <li><a href="{{ route('szorzo.ai') }}">SZORZO AI</a></li>
+                                <li><a href="{{ route('telecom.services') }}">Telecom Services</a></li>
+                                {{-- <li><a href="{{ route('contact') }}">Contact Us</a></li> --}}
+                                <li><a href="{{ route('about.us') }}#industries">Industries</a></li>
+                            </ul>
+                        </div>
+                        <!-- Footer Links End -->
+                    </div>
+
                     <div class="col-lg-3 col-md-6">
                         <!-- Footer Links Start -->
                         <div class="footer-links">
-                            <h3>Enterprise Transformation</h3>
+                            <h3>Enterprise Services</h3>
                             <ul>
                                 <li><a href="{{ route('enterprice.formation') }}">Enterprise Formation</a></li>
+                                <li><a href="#">Enterprise Digitalization</a></li>
+                                <li><a href="{{ route('enterprise.learning.solution') }}">Enterprise Learning Solutions</a></li>
                                 <li><a href="{{ route('marketing.service') }}">Marketing as A Service (MaaS)</a></li>
                                 <li><a href="{{ route('org.capacity.ass') }}">Organization Capacity Assessment</a></li>
-                                <li><a href="{{ route('opt.infra.off') }}">Operations and Infrastructure Offerings</a></li>
+                                <li><a href="{{ route('opt.infra.off') }}">Operations and HR Infrastructure Offerings</a></li>
+                                <li><a href="{{ route('strategic.advisory') }}">Merger and Acquisition Services</a></li>
                             </ul>
                         </div>
                         <!-- Footer Links End -->
@@ -64,25 +82,20 @@
                     <div class="col-lg-3 col-md-6">
                         <!-- Footer Links Start -->
                         <div class="footer-links">
-                            <h3>Merger & Acquisition Advisory</h3>
+                            <h3>IT Services</h3>
                             <ul>
-                                <li><a href="{{ route('strategic.advisory') }}">Strategic Advisory</a></li>
-                                <li><a href="{{ route('strategic.advisory') }}">Target Identification &
-                                        Evaluation</a></li>
-                                <li><a href="{{ route('strategic.advisory') }}">Due Diligence</a></li>
-                                <li><a href="{{ route('strategic.advisory') }}">Valuation & Deal Structuring</a>
-                                </li>
-                                <li><a href="{{ route('strategic.advisory') }}">Negotiation & Deal Execution</a>
-                                </li>
-                                <li><a href="{{ route('strategic.advisory') }}">Post-Merger Integration (PMI)</a>
-                                </li>
+                                <li><a href="{{ route('it.infrastructure') }}">IT Infrastructure Services</a></li>
+                                <li><a href="{{ route('data.center.design') }}">Data Center - Design, Built & Maintain</a></li>
+                                <li><a href="{{ route('data.center.managed.service') }}">Data Center - Managed Services</a></li>
+                                <li><a href="{{ route('cyber.security') }}">Cyber Security Services</a></li>
+                                <li><a href="{{ route('certificate.compliance') }}">Certification & Compliance</a></li>
+                                <li><a href="{{ route('hardware.software') }}">Hardware + Software Integration</a></li>
                             </ul>
                         </div>
                         <!-- Footer Links End -->
                     </div>
 
-                    <div class="col-lg-3 col-md-6">
-                        <!-- Footer Links Start -->
+                    {{-- <div class="col-lg-3 col-md-6">
                         <div class="footer-links">
                             <h3>IT Infrastructure Services</h3>
                             <ul>
@@ -94,26 +107,7 @@
                                 <li><a href="{{ route('hardware.software') }}">Hardware + Software Integration</a></li>
                             </ul>
                         </div>
-                        <!-- Footer Links End -->
-                    </div>
-
-                    <div class="col-lg-3 col-md-6">
-
-                    </div>
-
-                    <div class="col-lg-3 col-md-6 mt-5">
-                        <!-- Footer Links Start -->
-                        <div class="footer-links">
-                            <h3>quick link</h3>
-                            <ul>
-                                <li><a href="{{ route('index') }}">Home</a></li>
-                                <li><a href="{{ route('about.us') }}">About Us</a></li>
-                                {{-- <li><a href="{{ route('contact') }}">Contact Us</a></li> --}}
-                                <li><a href="{{ route('about.us') }}#industries">Industries</a></li>
-                            </ul>
-                        </div>
-                        <!-- Footer Links End -->
-                    </div>
+                    </div> --}}
 
                     {{-- <div class="col-lg-3 col-md-6 mt-5">
                         <!-- Footer Links Start -->
