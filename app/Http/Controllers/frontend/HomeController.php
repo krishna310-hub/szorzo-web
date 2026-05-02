@@ -15,6 +15,9 @@ class HomeController extends Controller
         return view('frontend.index');
     }
 
+       public function landing(){
+        return view('frontend.landing');
+    }
     public function aboutUs(){
         return view('frontend.about');
     }

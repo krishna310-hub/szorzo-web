@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['controller' => HomeController::class], function () {
     Route::get('/', 'index')->name('index');
+    Route::get('/landing', 'landing')->name('landing');
     // pages
     Route::get('/about-us','aboutUs')->name('about.us');
     Route::get('/contact','contact')->name('contact');
