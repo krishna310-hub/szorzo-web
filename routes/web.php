@@ -6,6 +6,8 @@ use App\Http\Controllers\backend\RoleController;
 use App\Http\Controllers\backend\SettingsController;
 use App\Http\Controllers\backend\UserController;
 use App\Http\Controllers\backend\ContactController;
+use App\Http\Controllers\backend\PageController;
+use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -88,6 +90,25 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     // Users
     Route::prefix('users')->group(function () {
         Route::resource('user', UserController::class);
+    });
+
+    Route::prefix('pages')->name('pages.')->controller(PageController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/datatable', 'datatable')->name('datatable');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::delete('/delete-all','deleteAll')->name('deleteAll');
+        Route::post('/bulk-upload', 'bulkUpload')->name('bulk.upload');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::put('/{id}/update', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('delete');
+    });
+
+    Route::prefix('sitemap')->name('sitemap.')->controller(SitemapRobotsController::class)->group(function () {
+        Route::get('/sitemap-robots', 'index')->name('sitemap-robots.index');     
+        Route::post('/robots-upload',  'upload')->name('robots.upload'); 
+        Route::get('/sitemap-download', 'downloadSitemap')->name('sitemap.download');
+        Route::get('/robots-download', 'downloadRobots')->name('robots.download');
     });
 
     Route::get('/enquiries',[ContactController::class,'index'])->name('enquiry.index');

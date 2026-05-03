@@ -14,6 +14,7 @@ class ContactController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('read', ContactEnquiry::class);
         $enquiries = ContactEnquiry::orderBy('id','desc');
 
         if ($request->ajax()) {
@@ -66,6 +67,7 @@ class ContactController extends Controller
 
     public function changeStatus(Request $request)
     {
+        $this->authorize('edit', ContactEnquiry::class);
         $enquiry = ContactEnquiry::findOrFail($request->id);
 
         $enquiry->status = $request->status;
@@ -86,6 +88,7 @@ class ContactController extends Controller
 
     public function delete(Request $request, $id)
     {
+        $this->authorize('delete', ContactEnquiry::class);
         $enquiry = ContactEnquiry::findOrFail($id);
         $enquiry->delete();
 

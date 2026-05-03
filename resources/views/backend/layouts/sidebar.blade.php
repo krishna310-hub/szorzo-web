@@ -5,19 +5,23 @@
         <!-- Dark Logo-->
         <a href="{{route('index')}}" class="logo logo-dark">
             <span class="logo-sm">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/glow-unlock-favicon.png')}}" alt="" height="22">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.png')}}" alt="" height="22">
+                <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
             </span>
             <span class="logo-lg">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/Glow unlock colour.png')}}" alt="" height="17">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.png')}}" alt="" height="17">
+                <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
             </span>
         </a>
         <!-- Light Logo-->
         <a href="{{route('index')}}" class="logo logo-light">
             <span class="logo-sm">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/glow-unlock-favicon.png')}}" alt="" height="22">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.png')}}" alt="" height="22">
+                <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
             </span>
             <span class="logo-lg">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/Glow unlock white.png')}}" alt="" height="70">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.png')}}" alt="" height="70">
+                <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
             </span>
         </a>
         <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
@@ -64,14 +68,33 @@
                     </li>
                 @endcan
                  <!-- end Dashboard Menu -->
-                 @can('dashboard', \App\Models\General::class)
+                @can('read', \App\Models\ContactEnquiry::class)
                     <li class="nav-item">
-                        <a class="nav-link menu-link {{ request()->is('admin/enquiry*') ? 'active' : '' }}" href="{{ route('admin.enquiry.index') }}">
-                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Enquiry List</span>
+                        <a class="nav-link menu-link {{ request()->is('admin/enquiries*') ? 'active' : '' }}" href="{{ route('admin.enquiry.index') }}">
+                            <i class="ri-question-answer-line"></i> <span data-key="t-dashboards">Enquiry List</span>
                         </a>
                     </li>
                 @endcan
                  <!-- end Dashboard Menu -->
+
+                 @can('read', \App\Models\Pages::class)
+                    <li class="nav-item">
+                            <a class="nav-link menu-link {{ request()->is('admin/pages*') ? 'active' : '' }}" 
+                                href="{{ route('admin.pages.index') }}">
+                                <i class="ri-file-text-line"></i> 
+                                <span>Landing Pages</span>
+                            </a>
+                    </li>
+                @endcan
+                @can('sitemap', \App\Models\General::class)
+                    <li class="nav-item">
+                        <a class="nav-link menu-link {{ request()->is('admin/sitemap*') ? 'active' : '' }}" 
+                            href="{{ route('admin.sitemap.sitemap-robots.index') }}">
+                            <i class="ri-links-line"></i> 
+                            <span>Sitemap & Robots</span>
+                        </a>
+                    </li>
+                @endcan
 
                 @if(auth()->user()->can('read', \App\Models\User::class) || auth()->user()->can('read', \App\Models\Role::class))
                     <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-settings">Roles & Permission</span></li>
@@ -99,6 +122,7 @@
                         </div>
                     </li>
                 @endif
+
                 @if(auth()->user()->can('generalSetting', \App\Models\Setting::class) || auth()->user()->can('emailSetting', \App\Models\Setting::class) ||
                 auth()->user()->can('socialSetting', \App\Models\Setting::class))
                     {{-- <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-settings">Settings</span></li> --}}

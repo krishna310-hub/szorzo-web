@@ -139,28 +139,28 @@
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
                                                     <label for="firstnameInput" class="form-label">First Name</label>
-                                                    <input type="text" class="form-control" id="firstnameInput" placeholder="Enter your firstname" value="Dave">
+                                                    <input type="text" class="form-control" id="firstnameInput" placeholder="Enter your firstname" value="{{ auth()->user()->name }}">
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
                                                     <label for="lastnameInput" class="form-label">Last Name</label>
-                                                    <input type="text" class="form-control" id="lastnameInput" placeholder="Enter your lastname" value="Adame">
+                                                    <input type="text" class="form-control" id="lastnameInput" placeholder="Enter your lastname" value="{{ auth()->user()->last_name }}">
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
                                                     <label for="phonenumberInput" class="form-label">Phone Number</label>
-                                                    <input type="text" class="form-control" id="phonenumberInput" placeholder="Enter your phone number" value="+(1) 987 6543">
+                                                    <input type="text" class="form-control" id="phonenumberInput" placeholder="Enter your phone number" value="{{ auth()->user()->phone }}">
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
                                                     <label for="emailInput" class="form-label">Email Address</label>
-                                                    <input type="email" class="form-control" id="emailInput" placeholder="Enter your email" value="daveadame@.com">
+                                                    <input type="email" class="form-control" id="emailInput" placeholder="Enter your email" value="{{ auth()->user()->email }}">
                                                 </div>
                                             </div>
                                             <!--end col-->
@@ -189,7 +189,7 @@
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
                                                     <label for="designationInput" class="form-label">Designation</label>
-                                                    <input type="text" class="form-control" id="designationInput" placeholder="Designation" value="Lead Designer / Developer">
+                                                    <input type="text" class="form-control" id="designationInput" placeholder="Designation" value="{{ auth()->user()->role->name }}">
                                                 </div>
                                             </div>
                                             <!--end col-->

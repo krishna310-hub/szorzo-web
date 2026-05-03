@@ -4,25 +4,25 @@ namespace App\Policies;
 
 use App\Models\User;
 
-class GeneralPolicy
+class PagesPolicy
 {
-    public function dashboard(User $user)
+    public function read(User $user)
     {
-        return $this->getPermission($user,1);
-    } 
-    public function profileRead(User $user)
+        return $this->getPermission($user, 15);
+    }
+    public function create(User $user)
     {
-        return $this->getPermission($user,2);
-    } 
-    public function profileEdit(User $user)
+        return $this->getPermission($user, 16);
+    }
+    public function edit(User $user)
     {
-        return $this->getPermission($user,3);
-    } 
-    public function sitemap(User $user)
+        return $this->getPermission($user, 17);
+    }
+    public function delete(User $user)
     {
-        return $this->getPermission($user,22);
-    } 
-    
+        return $this->getPermission($user, 18);
+    }
+
     private function getPermission($user, $permission_id)
     {
         if ($user->role) {

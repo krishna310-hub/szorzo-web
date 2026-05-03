@@ -13,9 +13,11 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center">
                             <h5 class="card-title mb-0 flex-grow-1">Roles</h5>
+                            @can('create', \App\Models\Role::class)
                             <div class="ms-2">
                                 <a href="{{ route('admin.role.create') }}" class="btn btn-sm btn-primary">Add New Role</a>
                             </div>
+                            @endcan
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
