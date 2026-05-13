@@ -150,7 +150,7 @@
             display: inline-block;
         }
 
-        .dynamic-content h3 {
+        .dynamic-content h3 {                                                                                                                                                                                                                                                                                   
             font-size: 1.75rem;
             color: var(--accent-color);
         }
