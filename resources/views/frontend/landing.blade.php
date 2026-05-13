@@ -2,11 +2,30 @@
 <html lang="en" class="scroll-smooth">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GCC Services in India | Global Capability Center Setup by SZORZO</title>
-    <meta name="description"
-        content="Set up your Global Capability Center (GCC) in India with SZORZO. Expert solutions for market entry, expansion, engineering services, IT infrastructure, and business transformation.">
+    <!--====== Title ======-->
+    <title>{{ $page->meta_title ?? '' }}</title>
+
+    <!--====== Required meta tags ======-->
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="canonical" href="{{ url()->current() }}" />
+
+    <meta name="description" content="{!! $page->meta_description !!}">
+    <meta name="keywords" content="{!! $page->meta_keyword !!}">
+    <meta name="msvalidate.01" content="ED6B0D966B8C929AEC3D052969BEE2A9" />
+
+    <meta name="robots" content="INDEX,FOLLOW">
+    <meta name="Bingbot" content="INDEX,FOLLOW">
+    <meta name="googlebot" content="INDEX, FOLLOW">
+
+    <!-- Open Graph (SEO + Social) -->
+    <meta property="og:title" content="{{ $page->meta_title }}">
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="{!! $page->meta_description !!}">
+    <meta property="og:image" content="https://szorzo.com/public/frontend/images/logo-bg.png">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,7 +72,79 @@
             }
         }
     </script>
+    @php
+        $faqs = json_decode($page->faqs, true);
 
+        $faqSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => [],
+        ];
+
+        if (is_array($faqs)) {
+            foreach ($faqs as $faq) {
+                // Split questions and answers by "/"
+                $questions = array_map('trim', explode('/ ', $faq['question'] ?? ''));
+                $answers = array_map('trim', explode('/ ', $faq['answer'] ?? ''));
+
+                // Pair questions with answers
+                foreach ($questions as $index => $question) {
+                    if (!empty($question) && !empty($answers[$index])) {
+                        $faqSchema['mainEntity'][] = [
+                            '@type' => 'Question',
+                            'name' => strip_tags($question),
+                            'acceptedAnswer' => [
+                                '@type' => 'Answer',
+                                'text' => strip_tags($answers[$index]),
+                            ],
+                        ];
+                    }
+                }
+            }
+        }
+    @endphp
+
+    @if (!empty($faqSchema['mainEntity']))
+        <script type="application/ld+json">
+    {!! json_encode($faqSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+    @endif
+    @verbatim
+        <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "No.1 Award Winning Digital Marketing Agency and Company",
+    "image": "https://szorzo.com/public/frontend/images/logo-bg.png",
+    "description": "We are the Best digital marketing agency delivering powerful strategies that grow brands, increase visibility, and drive real revenue.",
+    "sku": "NIL",
+    "mpn": "NIL",
+    "brand": {
+        "@type": "Brand",
+        "name": "Webbitech.tech"
+    },
+    "logo": "https://szorzo.com/public/frontend/images/logo-bg.png",
+    "category": "Digital Marketing and Branding",
+    "review": {
+        "@type": "Review",
+        "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "4.9",
+        "bestRating": "5"
+        },
+        "author": {
+        "@type": "Person",
+        "name": "Ranjith Kumar"
+        }
+    },
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "3000"
+    }
+    }
+    </script>
+    @endverbatim
     <style>
         :root {
             --primary-color: #111111;

@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContactEnquiry;
 use App\Models\General;
+use App\Models\Pages;
+use App\Models\Role;
 use App\Models\User;
-use Flasher\Laravel\Facade\Flasher;
-use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +16,35 @@ use Illuminate\Support\Facades\Hash;
 class AdminController extends Controller
 {
     use AuthorizesRequests;
-    public function index(){
+    public function index()
+    {
         $this->authorize('dashboard', General::class);
-        return view('backend.index');
+
+        $today = now()->toDateString();
+        $startOfWeek = now()->startOfWeek();
+        $endOfWeek = now()->endOfWeek();
+        $currentMonth = now()->month;
+
+        // Single query for all counts
+        $counts = ContactEnquiry::selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN DATE(created_at) = ? THEN 1 ELSE 0 END) as today,
+            SUM(CASE WHEN created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as week,
+            SUM(CASE WHEN MONTH(created_at) = ? THEN 1 ELSE 0 END) as month
+        ", [$today, $startOfWeek, $endOfWeek, $currentMonth])->first();
+
+        return view('backend.index', [
+            'totalEnquiries'   => $counts->total,
+            'todayEnquiries'   => $counts->today,
+            'weekEnquiries'    => $counts->week,
+            'monthEnquiries'   => $counts->month,
+
+            // Other data (separate queries are fine here)
+            'latestEnquiries'  => ContactEnquiry::latest()->limit(5)->get(),
+            'totalPages'       => Pages::count(),
+            'totalUsers'       => User::where('role_id', 2)->count(),
+            'totalRoles'       => Role::where('status', 1)->count(),
+        ]);
     }
 
     public function profile()

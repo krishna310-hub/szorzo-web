@@ -9,7 +9,7 @@
     {{-- <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" /> --}}
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{asset('frontend/images/glow-unlock-favicon.png')}}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('frontend/images/favicon.png') }}">
 
     @include('backend.layouts.css_master')
 

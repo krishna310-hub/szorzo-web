@@ -13,9 +13,11 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center">
                             <h5 class="card-title mb-0 flex-grow-1">Users</h5>
+                            @can('create', \App\Models\User::class)
                             <div class="ms-2">
                                 <a href="{{ route('admin.user.create') }}" class="btn btn-sm btn-primary">Add New User</a>
                             </div>
+                            @endcan
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">

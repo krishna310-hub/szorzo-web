@@ -19,22 +19,28 @@
 
                             <!-- Nav Tabs -->
                             <ul class="nav nav-tabs" id="settingsTab" role="tablist">
+                                @can('generalSetting', \App\Models\Setting::class)
                                 <li class="nav-item">
                                     <a class="nav-link {{ session('type', 'general') === 'general' ? 'active' : '' }}"
                                     data-bs-toggle="tab" href="#general" role="tab">General</a>
                                 </li>
+                                @endcan
+                                @can('emailSetting', \App\Models\Setting::class)
                                 <li class="nav-item">
                                     <a class="nav-link {{ session('type') === 'email' ? 'active' : '' }}"
                                     data-bs-toggle="tab" href="#email" role="tab">Email Settings</a>
                                 </li>
-                                <li class="nav-item">
+                                @endcan
+                                {{-- <li class="nav-item">
                                     <a class="nav-link {{ session('type') === 'social' ? 'active' : '' }}"
                                     data-bs-toggle="tab" href="#social" role="tab">Social Media</a>
-                                </li>
+                                </li> --}}
+                                @can('socialSetting', \App\Models\Setting::class)
                                 <li class="nav-item">
                                     <a class="nav-link {{ session('type') === 'maintenance' ? 'active' : '' }}"
                                     data-bs-toggle="tab" href="#maintenance-mode" role="tab">Maintenance Mode</a>
                                 </li>
+                                @endcan
                             </ul>
 
                             <!-- Tab Content -->
@@ -138,7 +144,7 @@
                                 </div>
 
                                 <!-- Social Media Tab -->
-                                <div class="tab-pane fade {{ session('type') === 'social' ? 'show active' : '' }}" id="social" role="tabpanel">
+                                {{-- <div class="tab-pane fade {{ session('type') === 'social' ? 'show active' : '' }}" id="social" role="tabpanel">
                                     <form action="{{ route('admin.settings.store', 'social') }}" method="POST">
                                         @csrf
                                         <div class="row gy-4">
@@ -163,7 +169,7 @@
                                             <button class="btn btn-success">Save</button>
                                         </div>
                                     </form>
-                                </div>
+                                </div> --}}
 
                                 <!-- Maintenance Mode Tab -->
                                 <div class="tab-pane fade {{ session('type') === 'maintenance' ? 'show active' : '' }}" id="maintenance-mode" role="tabpanel">

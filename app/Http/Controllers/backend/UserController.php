@@ -30,17 +30,26 @@ class UserController extends Controller
                     }
                 })
                 ->addColumn('action', function ($row) {
-                    $editUrl = route('admin.user.edit', $row->id);
-                    $deleteUrl = route('admin.user.destroy', $row->id);
-                
-                    return '
-                        <a href="' . $editUrl . '" class="text-info fs-4 me-1" title="Edit">
-                            <i class="bx bxs-edit"></i>
-                        </a>
-                        <a href="' . $deleteUrl . '" class="text-danger fs-4 ms-1" title="Edit">
-                            <i class="bx bxs-trash"></i>
-                        </a>
-                    ';
+                    $buttons = '';
+
+                    if (auth()->user()->can('edit', User::class)) {
+                        $editUrl = route('admin.user.edit', $row->id);
+                        $buttons .= '
+                            <a href="' . $editUrl . '" class="text-info fs-4 me-1" title="Edit">
+                                <i class="bx bxs-edit"></i>
+                            </a>
+                        ';
+                    }
+
+                    if (auth()->user()->can('delete', User::class)) {
+                        $deleteUrl = route('admin.user.destroy', $row->id);
+                        $buttons .= '
+                            <a href="' . $deleteUrl . '" class="text-danger fs-4 ms-1" title="Delete">
+                                <i class="bx bxs-trash"></i>
+                            </a>
+                        ';
+                    }
+                    return $buttons ?: '-';
                 })
                 
                 ->rawColumns(['action','access_level','status'])
@@ -71,7 +80,7 @@ class UserController extends Controller
         if($role){
             $data['resource_type'] = $role->access_level;
         }
-        $data['type'] = $request['role_id'];
+        $data['role_id'] = $request['role_id'];
         $data['name'] = $request['user_name'];
         $data['email'] = $request['email'];
         $data['password'] = bcrypt($request['password']);
