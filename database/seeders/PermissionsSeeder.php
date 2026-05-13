@@ -33,6 +33,17 @@ class PermissionsSeeder extends Seeder
             ['name'=>'General setting',      'page'=>'settings'],
             ['name'=>'Email setting',    'page'=>'settings'],
             ['name'=>'Social Media setting',      'page'=>'settings'],
+
+            ['name'=>'Read',      'page'=>'landing_page'],
+            ['name'=>'Create',    'page'=>'landing_page'],
+            ['name'=>'Edit',      'page'=>'landing_page'],
+            ['name'=>'Delete',    'page'=>'landing_page'],
+
+            ['name'=>'Read',      'page'=>'enquiry'],
+            ['name'=>'Edit',      'page'=>'enquiry'],
+            ['name'=>'Delete',    'page'=>'enquiry'],
+
+            ['name'=>'Sitemap & Robots',      'page'=>'settings'],
         ];
         
         foreach ($permissions as $permission) {

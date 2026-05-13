@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Pages;
+use App\Policies\ContactEnquiryPolicy;
 use App\Policies\GeneralPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
+use App\Policies\PagesPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -19,6 +22,8 @@ class AuthServiceProvider extends ServiceProvider
         'App\Models\General' => GeneralPolicy::class,
         'App\Models\User'    => UserPolicy::class,
         'App\Models\Role'    => RolePolicy::class,
+        'App\Models\ContactEnquiry' => ContactEnquiryPolicy::class,
+        'App\Models\Pages' => PagesPolicy::class,
     ];
 
     /**
@@ -31,5 +36,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::Resource('General','App\Policies\GeneralPolicy');
         Gate::Resource('User','App\Policies\UserPolicy');
         Gate::Resource('Role','App\Policies\RolePolicy');
+        Gate::Resource('ContactEnquiry','App\Policies\ContactEnquiryPolicy');
+        Gate::Resource('Pages','App\Policies\PagesPolicy');
     }
 }

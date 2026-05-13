@@ -30,17 +30,29 @@ class RoleController extends Controller
                     }
                 })
                 ->addColumn('action', function ($row) {
-                    $editUrl = route('admin.role.edit', $row->id);
-                    $deleteUrl = route('admin.role.destroy', $row->id);
-                
-                    return '
-                        <a href="' . $editUrl . '" class="text-info fs-4 me-1" title="Edit">
-                            <i class="bx bxs-edit"></i>
-                        </a>
-                        <a href="' . $deleteUrl . '" class="text-danger fs-4 ms-1" title="Edit">
-                            <i class="bx bxs-trash"></i>
-                        </a>
-                    ';
+
+                    $buttons = '';
+
+                    if (auth()->user()->can('edit', Role::class)) {
+                        $editUrl = route('admin.role.edit', $row->id);
+                        $buttons .= '
+                            <a href="' . $editUrl . '" class="text-info fs-4 me-1" title="Edit">
+                                <i class="bx bxs-edit"></i>
+                            </a>
+                            
+                        ';
+                    }
+
+                    if (auth()->user()->can('delete', Role::class)) {
+                        $deleteUrl = route('admin.role.destroy', $row->id);
+                        $buttons .= '
+                            <a href="' . $deleteUrl . '" class="text-danger fs-4 ms-1" title="Delete">
+                                <i class="bx bxs-trash"></i>
+                            </a>
+                        ';
+                    }
+
+                    return $buttons ?: '-';
                 })
                 
                 ->rawColumns(['action','status'])

@@ -15,11 +15,11 @@ class SettingPolicy
     }
     public function emailSetting(User $user)
     {
-        return $this->getPermission($user, 5);
+        return $this->getPermission($user, 13);
     }
     public function socialSetting(User $user)
     {
-        return $this->getPermission($user, 6);
+        return $this->getPermission($user, 14);
     }
 
     private function getPermission($user, $permission_id)
