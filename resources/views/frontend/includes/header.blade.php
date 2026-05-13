@@ -7,8 +7,9 @@
             <div class="header-item item-left header-logo m-0">
                 <div class="logo">
                     <a class="navbar-brand" href="{{route('index')}}">
-                        <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                        <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
+                        <!-- Optimized Logo Images -->
+                        <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="183" height="183">
+                        <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230" height="55" class="logo-second">
                     </a>
                 </div>
             </div>
@@ -23,8 +24,9 @@
 
                         <div class="mobile-logo">
                             <a href="{{route('index')}}">
-                                <img src="{{ asset('frontend/images/rhino-logo.png') }}" width="80">
-                                {{-- <img src="{{ asset('frontend/images/logo-bg.png') }}" width="150px"> --}}
+                                <!-- Optimized Mobile Logo -->
+                                <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="80" height="80">
+                                {{-- <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="150" height="35"> --}}
                             </a>
                         </div>
 
@@ -66,7 +68,6 @@
                             </a>
 
                             <!-- FIXED: single column -->
-                            {{-- <div class="sub-menu single-column-menu"> --}}
                             <div class="sub-menu single-column-menu">
                                 <h4 class="title"> <a href="">IT SERVICES</a></h4>
                                 <ul class="gcc-menu">

@@ -25,7 +25,7 @@
 </IfModule>
 
 # =========================================
-# ENABLE BROWSER CACHING
+# ENABLE BROWSER CACHING (Expires)
 # =========================================
 
 <IfModule mod_expires.c>
@@ -60,8 +60,14 @@
 # =========================================
 
 <IfModule mod_headers.c>
-    <FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|webp|woff2)$">
+    # 1 Year Caching for Images & Fonts (Immutable)
+    <FilesMatch "\.(png|jpg|jpeg|gif|svg|webp|woff2|ico)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # 1 Month Caching for CSS & JS
+    <FilesMatch "\.(js|css)$">
+        Header set Cache-Control "public, max-age=2592000"
     </FilesMatch>
 </IfModule>
 
