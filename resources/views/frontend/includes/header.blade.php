@@ -12,7 +12,7 @@
                         <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230" height="55" class="logo-second">
                     </a>
                 </div>
-            </div>
+            </div> 
 
             <!-- Menu -->
             <div class="header-item item-center">
