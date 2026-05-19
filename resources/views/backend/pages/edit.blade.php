@@ -107,33 +107,67 @@
                                             @php
                                                 $faqs = [];
 
-                                                if (old('faqs')) {
+                                                // Old form data
+                                                if (is_array(old('faqs'))) {
+
                                                     $faqs = old('faqs');
+
                                                 }
+                                                // Database FAQs
                                                 elseif (!empty($page->faqs)) {
-                                                    $decoded = json_decode($page->faqs, true);
 
-                                                    if (is_array($decoded) && !empty($decoded)) {
+                                                    // If already array
+                                                    if (is_array($page->faqs)) {
 
-                                                        $first = $decoded[0];
+                                                        $decoded = $page->faqs;
 
-                                                        if (
-                                                            isset($first['question'], $first['answer']) &&
-                                                            (str_contains($first['question'], ' / ') || str_contains($first['answer'], ' / '))
-                                                        ) {
-                                                            $questions = array_map('trim', explode(' / ', $first['question']));
-                                                            $answers   = array_map('trim', explode(' / ', $first['answer']));
+                                                    } else {
 
-                                                            foreach ($questions as $i => $question) {
-                                                                $faqs[] = [
-                                                                    'question' => $question,
-                                                                    'answer'   => $answers[$i] ?? '',
-                                                                ];
+                                                        $decoded = json_decode($page->faqs, true);
+                                                    }
+
+                                                    // Validate decoded data
+                                                    if (is_array($decoded) && count($decoded) > 0) {
+
+                                                        // Reset indexes safely
+                                                        $decoded = array_values($decoded);
+
+                                                        // Check first item exists
+                                                        if (isset($decoded[0])) {
+
+                                                            $first = $decoded[0];
+
+                                                            // Old merged FAQ format
+                                                            if (
+                                                                isset($first['question'], $first['answer']) &&
+                                                                (
+                                                                    str_contains($first['question'], ' / ') ||
+                                                                    str_contains($first['answer'], ' / ')
+                                                                )
+                                                            ) {
+
+                                                                $questions = array_map(
+                                                                    'trim',
+                                                                    explode(' / ', $first['question'])
+                                                                );
+
+                                                                $answers = array_map(
+                                                                    'trim',
+                                                                    explode(' / ', $first['answer'])
+                                                                );
+
+                                                                foreach ($questions as $i => $question) {
+
+                                                                    $faqs[] = [
+                                                                        'question' => $question,
+                                                                        'answer'   => $answers[$i] ?? '',
+                                                                    ];
+                                                                }
+
+                                                            } else {
+
+                                                                $faqs = $decoded;
                                                             }
-                                                        }
-
-                                                        elseif (isset($first['question'], $first['answer'])) {
-                                                            $faqs = $decoded;
                                                         }
                                                     }
                                                 }
@@ -261,163 +295,418 @@
     </div>
 @endsection
 @section('script')
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.3.2/super-build/ckeditor.js"></script>
     <script>
-    ClassicEditor.create(document.querySelector('#banner_content'), {
-        toolbar: [
-            'heading',
-            '|',
-            'bold', 'italic', 'underline', 'strikethrough',
-            'link',
-            'bulletedList', 'numberedList',
-            'blockQuote',
-            'undo', 'redo'
-        ],
-        heading: {
-            options: [
-                {
-                    model: 'paragraph',
-                    title: 'Paragraph',
-                    class: 'ck-heading_paragraph'
-                },
-                {
-                    model: 'heading2',
-                    view: 'h2',
-                    title: 'Heading 2',
-                    class: 'ck-heading_heading2'
-                },
-                {
-                    model: 'heading3',
-                    view: 'h3',
-                    title: 'Heading 3',
-                    class: 'ck-heading_heading3'
-                },
-                {
-                    model: 'heading4',
-                    view: 'h4',
-                    title: 'Heading 4',
-                    class: 'ck-heading_heading4'
-                }
-            ]
-        }
-    })
-    .then(editor => {
-        editor.ui.view.editable.element.style.height = '150px';
-        editor.ui.view.editable.element.style.overflowY = 'auto';
-    })
-    .catch(console.error);
-
-    ClassicEditor.create(document.querySelector('#page_content'), {
-        toolbar: [
-            'heading',
-            '|',
-            'bold', 'italic', 'underline', 'strikethrough',
-            'link',
-            'bulletedList', 'numberedList',
-            'blockQuote',
-            'undo', 'redo'
-        ],
-        heading: {
-            options: [
-                { model: 'paragraph', title: 'Paragraph' },
-                { model: 'heading2', view: 'h2', title: 'Heading 2' },
-                { model: 'heading3', view: 'h3', title: 'Heading 3' },
-                { model: 'heading4', view: 'h4', title: 'Heading 4' }
-            ]
-        }
-    })
-    .then(editor => {
-        editor.ui.view.editable.element.style.height = '400px';
-        editor.ui.view.editable.element.style.overflowY = 'auto';
-    })
-    .catch(console.error);
-</script>
-
-<script>
-    $(document).ready(function() {
-        $.validator.addClassRules('faq-question', {
-            required: true,
-            maxlength: 255
-        });
-        // $.validator.addClassRules('faq-schema', {
-        //     required: true,
-        // });
-
-        $.validator.addClassRules('faq-answer', {
-            required: true,
-            maxlength: 1000
-        });
-        $('#pageForm').validate({
-            rules: {
-                name: { required: true, maxlength: 255 },
-                url: { required: true, maxlength: 255 },
-                location: { required: true, maxlength: 255 },
-                category: { required: true, maxlength: 255 },
-                meta_title: { required: true, maxlength: 255 },
-                meta_description: { required: true, maxlength: 255 },
-                meta_keywords: { required: true, maxlength: 255 },
-                banner_content: { required: true, maxlength: 1500 },
-                page_content: { required: true, maxlength: 1500 },
-                // image: { extension: "jpg|jpeg|png|webp" },
-                status: { required: true }
+        // This sample still does not showcase all CKEditor 5 features (!)
+        // Visit https://ckeditor.com/docs/ckeditor5/latest/features/index.html to browse all the features.
+        CKEDITOR.ClassicEditor.create(document.getElementById("page_content"), {
+            // https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
+            toolbar: {
+                items: [
+                    'exportPDF', 'exportWord', '|',
+                    'findAndReplace', 'selectAll', '|',
+                    'heading', '|',
+                    'bold', 'italic', 'strikethrough', 'underline', 'code', 'subscript', 'superscript',
+                    'removeFormat', '|',
+                    'bulletedList', 'numberedList', 'todoList', '|',
+                    'outdent', 'indent', '|',
+                    'undo', 'redo',
+                    '-',
+                    'fontSize', 'fontColor', 'fontBackgroundColor', 'highlight', '|',
+                    'alignment', '|',
+                    'link', 'insertImage', 'blockQuote', 'insertTable', 'mediaEmbed', 'htmlEmbed',
+                    '|',
+                    'specialCharacters', 'horizontalLine', 'pageBreak', '|',
+                    'sourceEditing'
+                ],
+                shouldNotGroupWhenFull: true
             },
-            messages: {
-                name: { required: "Please enter page name", maxlength: "Name cannot exceed 255 characters" },
-                url_slug: { required: "Please enter URL slug", maxlength: "Slug cannot exceed 255 characters" },
-                location: { required: "Please enter location", maxlength: "Location cannot exceed 255 characters" },
-                category: { required: "Please enter category", maxlength: "Category cannot exceed 255 characters" },
-                // image: { extension: "Please upload a valid image (jpg, jpeg, png, webp)" },
-                status: { required: "Please select status" }
+            // Changing the language of the interface requires loading the language file using the <script> tag.
+            // language: 'es',
+            list: {
+                properties: {
+                    styles: true,
+                    startIndex: true,
+                    reversed: true
+                }
             },
-            errorClass: 'text-danger',
-            errorElement: 'div',
-            highlight: function(element) { $(element).addClass('is-invalid'); },
-            unhighlight: function(element) { $(element).removeClass('is-invalid'); },
-            submitHandler: function(form) {
-
-                // Sync CKEditor → textarea
-                if (bannerEditor) {
-                    $('#banner_content').val(bannerEditor.getData());
+            // https://ckeditor.com/docs/ckeditor5/latest/features/headings.html#configuration
+            heading: {
+                options: [{
+                        model: 'paragraph',
+                        title: 'Paragraph',
+                        class: 'ck-heading_paragraph'
+                    },
+                    {
+                        model: 'heading1',
+                        view: 'h1',
+                        title: 'Heading 1',
+                        class: 'ck-heading_heading1'
+                    },
+                    {
+                        model: 'heading2',
+                        view: 'h2',
+                        title: 'Heading 2',
+                        class: 'ck-heading_heading2'
+                    },
+                    {
+                        model: 'heading3',
+                        view: 'h3',
+                        title: 'Heading 3',
+                        class: 'ck-heading_heading3'
+                    },
+                    {
+                        model: 'heading4',
+                        view: 'h4',
+                        title: 'Heading 4',
+                        class: 'ck-heading_heading4'
+                    },
+                    {
+                        model: 'heading5',
+                        view: 'h5',
+                        title: 'Heading 5',
+                        class: 'ck-heading_heading5'
+                    },
+                    {
+                        model: 'heading6',
+                        view: 'h6',
+                        title: 'Heading 6',
+                        class: 'ck-heading_heading6'
+                    }
+                ]
+            },
+            // https://ckeditor.com/docs/ckeditor5/latest/features/editor-placeholder.html#using-the-editor-configuration
+            placeholder: 'Enter Description',
+            // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-family-feature
+            
+            // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-size-feature
+            fontSize: {
+                options: [10, 12, 14, 'default', 18, 20, 22],
+                supportAllValues: true
+            },
+            // Be careful with the setting below. It instructs CKEditor to accept ALL HTML markup.
+            // https://ckeditor.com/docs/ckeditor5/latest/features/general-html-support.html#enabling-all-html-features
+            htmlSupport: {
+                allow: [{
+                    name: /.*/,
+                    attributes: true,
+                    classes: true,
+                    styles: true
+                }]
+            },
+            // Be careful with enabling previews
+            // https://ckeditor.com/docs/ckeditor5/latest/features/html-embed.html#content-previews
+            htmlEmbed: {
+                showPreviews: true
+            },
+            // https://ckeditor.com/docs/ckeditor5/latest/features/link.html#custom-link-attributes-decorators
+            link: {
+                decorators: {
+                    addTargetToExternalLinks: true,
+                    defaultProtocol: 'https://',
+                    toggleDownloadable: {
+                        mode: 'manual',
+                        label: 'Downloadable',
+                        attributes: {
+                            download: 'file'
+                        }
+                    }
                 }
-                if (pageEditor) {
-                    $('#page_content').val(pageEditor.getData());
+            },
+            // https://ckeditor.com/docs/ckeditor5/latest/features/mentions.html#configuration
+            mention: {
+                feeds: [{
+                    marker: '@',
+                    feed: [
+                        '@apple', '@bears', '@brownie', '@cake', '@cake', '@candy', '@canes',
+                        '@chocolate', '@cookie', '@cotton', '@cream',
+                        '@cupcake', '@danish', '@donut', '@dragée', '@fruitcake', '@gingerbread',
+                        '@gummi', '@ice', '@jelly-o',
+                        '@liquorice', '@macaroon', '@marzipan', '@oat', '@pie', '@plum', '@pudding',
+                        '@sesame', '@snaps', '@soufflé',
+                        '@sugar', '@sweet', '@topping', '@wafer'
+                    ],
+                    minimumCharacters: 1
+                }]
+            },
+            // The "super-build" contains more premium features that require additional configuration, disable them below.
+            // Do not turn them on unless you read the documentation and know how to configure them and setup the editor.
+            removePlugins: [
+                // These two are commercial, but you can try them out without registering to a trial.
+                // 'ExportPdf',
+                // 'ExportWord',
+                'CKBox',
+                'CKFinder',
+                'EasyImage',
+                // This sample uses the Base64UploadAdapter to handle image uploads as it requires no configuration.
+                // https://ckeditor.com/docs/ckeditor5/latest/features/images/image-upload/base64-upload-adapter.html
+                // Storing images as Base64 is usually a very bad idea.
+                // Replace it on production website with other solutions:
+                // https://ckeditor.com/docs/ckeditor5/latest/features/images/image-upload/image-upload.html
+                // 'Base64UploadAdapter',
+                'RealTimeCollaborativeComments',
+                'RealTimeCollaborativeTrackChanges',
+                'RealTimeCollaborativeRevisionHistory',
+                'PresenceList',
+                'Comments',
+                'TrackChanges',
+                'TrackChangesData',
+                'RevisionHistory',
+                'Pagination',
+                'WProofreader',
+                // Careful, with the Mathtype plugin CKEditor will not load when loading this sample
+                // from a local file system (file://) - load this site via HTTP server if you enable MathType
+                'MathType'
+            ]
+        });
+        CKEDITOR.ClassicEditor.create(document.getElementById("banner_content"), {
+            // https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
+            toolbar: {
+                items: [
+                    'exportPDF', 'exportWord', '|',
+                    'findAndReplace', 'selectAll', '|',
+                    'heading', '|',
+                    'bold', 'italic', 'strikethrough', 'underline', 'code', 'subscript', 'superscript',
+                    'removeFormat', '|',
+                    'bulletedList', 'numberedList', 'todoList', '|',
+                    'outdent', 'indent', '|',
+                    'undo', 'redo',
+                    '-',
+                    'fontSize', 'fontColor', 'fontBackgroundColor', 'highlight', '|',
+                    'alignment', '|',
+                    'link', 'insertImage', 'blockQuote', 'insertTable', 'mediaEmbed', 'htmlEmbed',
+                    '|',
+                    'specialCharacters', 'horizontalLine', 'pageBreak', '|',
+                    'sourceEditing'
+                ],
+                shouldNotGroupWhenFull: true
+            },
+            // Changing the language of the interface requires loading the language file using the <script> tag.
+            // language: 'es',
+            list: {
+                properties: {
+                    styles: true,
+                    startIndex: true,
+                    reversed: true
                 }
-
-                form.submit();
-            }
+            },
+            // https://ckeditor.com/docs/ckeditor5/latest/features/headings.html#configuration
+            heading: {
+                options: [{
+                        model: 'paragraph',
+                        title: 'Paragraph',
+                        class: 'ck-heading_paragraph'
+                    },
+                    {
+                        model: 'heading1',
+                        view: 'h1',
+                        title: 'Heading 1',
+                        class: 'ck-heading_heading1'
+                    },
+                    {
+                        model: 'heading2',
+                        view: 'h2',
+                        title: 'Heading 2',
+                        class: 'ck-heading_heading2'
+                    },
+                    {
+                        model: 'heading3',
+                        view: 'h3',
+                        title: 'Heading 3',
+                        class: 'ck-heading_heading3'
+                    },
+                    {
+                        model: 'heading4',
+                        view: 'h4',
+                        title: 'Heading 4',
+                        class: 'ck-heading_heading4'
+                    },
+                    {
+                        model: 'heading5',
+                        view: 'h5',
+                        title: 'Heading 5',
+                        class: 'ck-heading_heading5'
+                    },
+                    {
+                        model: 'heading6',
+                        view: 'h6',
+                        title: 'Heading 6',
+                        class: 'ck-heading_heading6'
+                    }
+                ]
+            },
+            // https://ckeditor.com/docs/ckeditor5/latest/features/editor-placeholder.html#using-the-editor-configuration
+            placeholder: 'Enter Description',
+            // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-family-feature
+            
+            // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-size-feature
+            fontSize: {
+                options: [10, 12, 14, 'default', 18, 20, 22],
+                supportAllValues: true
+            },
+            // Be careful with the setting below. It instructs CKEditor to accept ALL HTML markup.
+            // https://ckeditor.com/docs/ckeditor5/latest/features/general-html-support.html#enabling-all-html-features
+            htmlSupport: {
+                allow: [{
+                    name: /.*/,
+                    attributes: true,
+                    classes: true,
+                    styles: true
+                }]
+            },
+            // Be careful with enabling previews
+            // https://ckeditor.com/docs/ckeditor5/latest/features/html-embed.html#content-previews
+            htmlEmbed: {
+                showPreviews: true
+            },
+            // https://ckeditor.com/docs/ckeditor5/latest/features/link.html#custom-link-attributes-decorators
+            link: {
+                decorators: {
+                    addTargetToExternalLinks: true,
+                    defaultProtocol: 'https://',
+                    toggleDownloadable: {
+                        mode: 'manual',
+                        label: 'Downloadable',
+                        attributes: {
+                            download: 'file'
+                        }
+                    }
+                }
+            },
+            // https://ckeditor.com/docs/ckeditor5/latest/features/mentions.html#configuration
+            mention: {
+                feeds: [{
+                    marker: '@',
+                    feed: [
+                        '@apple', '@bears', '@brownie', '@cake', '@cake', '@candy', '@canes',
+                        '@chocolate', '@cookie', '@cotton', '@cream',
+                        '@cupcake', '@danish', '@donut', '@dragée', '@fruitcake', '@gingerbread',
+                        '@gummi', '@ice', '@jelly-o',
+                        '@liquorice', '@macaroon', '@marzipan', '@oat', '@pie', '@plum', '@pudding',
+                        '@sesame', '@snaps', '@soufflé',
+                        '@sugar', '@sweet', '@topping', '@wafer'
+                    ],
+                    minimumCharacters: 1
+                }]
+            },
+            // The "super-build" contains more premium features that require additional configuration, disable them below.
+            // Do not turn them on unless you read the documentation and know how to configure them and setup the editor.
+            removePlugins: [
+                // These two are commercial, but you can try them out without registering to a trial.
+                // 'ExportPdf',
+                // 'ExportWord',
+                'CKBox',
+                'CKFinder',
+                'EasyImage',
+                // This sample uses the Base64UploadAdapter to handle image uploads as it requires no configuration.
+                // https://ckeditor.com/docs/ckeditor5/latest/features/images/image-upload/base64-upload-adapter.html
+                // Storing images as Base64 is usually a very bad idea.
+                // Replace it on production website with other solutions:
+                // https://ckeditor.com/docs/ckeditor5/latest/features/images/image-upload/image-upload.html
+                // 'Base64UploadAdapter',
+                'RealTimeCollaborativeComments',
+                'RealTimeCollaborativeTrackChanges',
+                'RealTimeCollaborativeRevisionHistory',
+                'PresenceList',
+                'Comments',
+                'TrackChanges',
+                'TrackChangesData',
+                'RevisionHistory',
+                'Pagination',
+                'WProofreader',
+                // Careful, with the Mathtype plugin CKEditor will not load when loading this sample
+                // from a local file system (file://) - load this site via HTTP server if you enable MathType
+                'MathType'
+            ]
         });
+    </script>
 
-        $('#add-faq').click(function () {
+    <script>
+        $(document).ready(function() {
+            $.validator.addClassRules('faq-question', {
+                required: true,
+                maxlength: 255
+            });
+            // $.validator.addClassRules('faq-schema', {
+            //     required: true,
+            // });
 
-            let faqCount = $('.faq-item').length; // 0,1,2...
-            faqCount++;
-            let faqItem = `
-                <div class="faq-item row mb-2">
-                    <div class="col-sm-4">
-                        <input type="text"
-                            name="faqs[${faqCount}][question]"
-                            class="form-control faq-question"
-                            placeholder="Question">
-                    </div>
-                    <div class="col-sm-7">
-                        <textarea name="faqs[${faqCount}][answer]"
-                                class="form-control faq-answer"
-                                placeholder="Answer"
-                                rows="4"></textarea>
-                    </div>
-                    
-                    <div class="col-sm-1">
-                        <button type="button" class="btn btn-sm btn-danger remove-faq">Remove</button>
-                    </div>
-                </div>
-            `;
+            $.validator.addClassRules('faq-answer', {
+                required: true,
+                maxlength: 1000
+            });
+            $('#pageForm').validate({
+                rules: {
+                    name: { required: true, maxlength: 255 },
+                    url: { required: true, maxlength: 255 },
+                    location: { required: true, maxlength: 255 },
+                    category: { required: true, maxlength: 255 },
+                    meta_title: { required: true, maxlength: 255 },
+                    meta_description: { required: true, maxlength: 255 },
+                    meta_keywords: { required: true, maxlength: 255 },
+                    banner_content: { required: true, maxlength: 1500 },
+                    page_content: { required: true, maxlength: 1500 },
+                    // image: { extension: "jpg|jpeg|png|webp" },
+                    status: { required: true }
+                },
+                messages: {
+                    name: { required: "Please enter page name", maxlength: "Name cannot exceed 255 characters" },
+                    url_slug: { required: "Please enter URL slug", maxlength: "Slug cannot exceed 255 characters" },
+                    location: { required: "Please enter location", maxlength: "Location cannot exceed 255 characters" },
+                    category: { required: "Please enter category", maxlength: "Category cannot exceed 255 characters" },
+                    // image: { extension: "Please upload a valid image (jpg, jpeg, png, webp)" },
+                    status: { required: "Please select status" }
+                },
+                errorClass: 'text-danger',
+                errorElement: 'div',
+                highlight: function(element) { $(element).addClass('is-invalid'); },
+                unhighlight: function(element) { $(element).removeClass('is-invalid'); },
+                submitHandler: function(form) {
 
-            $('#faq-container').append(faqItem);
+                    // Sync CKEditor → textarea
+                    if (bannerEditor) {
+                        $('#banner_content').val(bannerEditor.getData());
+                    }
+                    if (pageEditor) {
+                        $('#page_content').val(pageEditor.getData());
+                    }
+
+                    form.submit();
+                }
+            });
+
+            $('#add-faq').click(function () {
+
+                let faqCount = $('.faq-item').length; // 0,1,2...
+                faqCount++;
+                let faqItem = `
+                    <div class="faq-item row mb-2">
+                        <div class="col-sm-4">
+                            <input type="text"
+                                name="faqs[${faqCount}][question]"
+                                class="form-control faq-question"
+                                placeholder="Question">
+                        </div>
+                        <div class="col-sm-7">
+                            <textarea name="faqs[${faqCount}][answer]"
+                                    class="form-control faq-answer"
+                                    placeholder="Answer"
+                                    rows="4"></textarea>
+                        </div>
+                        
+                        <div class="col-sm-1">
+                            <button type="button" class="btn btn-sm btn-danger remove-faq">Remove</button>
+                        </div>
+                    </div>
+                `;
+
+                $('#faq-container').append(faqItem);
+            });
+
+
+            $(document).on('click', '.remove-faq', function() {
+                $(this).closest('.faq-item').remove();
+            });
         });
-
-
-        $(document).on('click', '.remove-faq', function() {
-            $(this).closest('.faq-item').remove();
-        });
-    });
-</script>
+    </script>
 @endsection

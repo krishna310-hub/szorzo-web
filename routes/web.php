@@ -11,10 +11,8 @@ use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::group(['controller' => HomeController::class], function () {
     Route::get('/', 'index')->name('index');
-    Route::get('/landing', 'landing')->name('landing');
     // pages
     Route::get('/about-us','aboutUs')->name('about.us');
     Route::get('/contact','contact')->name('contact');
@@ -115,4 +113,8 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::delete('/enquiry/delete/{id}',[ContactController::class,'delete'])->name('enquiry.delete');
     Route::post('/enquiry/status',[ContactController::class,'changeStatus'])->name('enquiry.status');
 
+    
 });
+
+// Landing Pages
+Route::get('{slug}', [HomeController::class, 'landing'])->name('landing');

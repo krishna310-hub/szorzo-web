@@ -109,42 +109,7 @@
     {!! json_encode($faqSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
     </script>
     @endif
-    @verbatim
-        <script type="application/ld+json">
-    {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": "No.1 Award Winning Digital Marketing Agency and Company",
-    "image": "https://szorzo.com/public/frontend/images/logo-bg.png",
-    "description": "We are the Best digital marketing agency delivering powerful strategies that grow brands, increase visibility, and drive real revenue.",
-    "sku": "NIL",
-    "mpn": "NIL",
-    "brand": {
-        "@type": "Brand",
-        "name": "Webbitech.tech"
-    },
-    "logo": "https://szorzo.com/public/frontend/images/logo-bg.png",
-    "category": "Digital Marketing and Branding",
-    "review": {
-        "@type": "Review",
-        "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": "4.9",
-        "bestRating": "5"
-        },
-        "author": {
-        "@type": "Person",
-        "name": "Ranjith Kumar"
-        }
-    },
-    "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "reviewCount": "3000"
-    }
-    }
-    </script>
-    @endverbatim
+    
     <style>
         :root {
             --primary-color: #111111;

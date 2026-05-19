@@ -83,8 +83,8 @@ class PageController extends Controller
             'location'          => 'nullable|string|max:255',
             'category'          => 'nullable|string|max:255',
             'url'               => 'nullable|string|max:255',
-            'banner_content'    => 'required|string|max:1500',
-            'page_content'      => 'required|string|max:5000',
+            'banner_content'    => 'required|string|max:3000',
+            'page_content'      => 'required|string|max:10000',
             'faqs'              => 'nullable|array',
             'faqs.*.question'   => 'required_with:faqs|string|max:255',
             'faqs.*.answer'     => 'required_with:faqs|string|max:1000',
@@ -176,13 +176,14 @@ class PageController extends Controller
 
     public function edit($id)
     {
+        $this->authorize('edit', Pages::class);
         $page = Pages::findOrFail($id);
         return view('backend.pages.edit', compact('page'));
     }
 
     public function update(Request $request, $id)
     {
-        $this->authorize('update', Pages::class);
+        $this->authorize('edit', Pages::class);
         $page = Pages::findOrFail($id);
 
         $validated = $request->validate([
@@ -190,8 +191,8 @@ class PageController extends Controller
             'url'               => 'required|string|max:255',
             'location'          => 'nullable|string|max:255',
             'category'          => 'nullable|string|max:255',
-            'banner_content'    => 'required|string|max:1500',
-            'page_content'      => 'required|string|max:5000',
+            'banner_content'    => 'required|string|max:3000',
+            'page_content'      => 'required|string|max:10000',
             'faqs'              => 'nullable|array',
             'faqs.*.question'   => 'required_with:faqs|string|max:255',
             'faqs.*.answer'     => 'required_with:faqs|string|max:1000',

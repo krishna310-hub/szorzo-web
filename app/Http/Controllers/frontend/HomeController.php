@@ -5,6 +5,7 @@ namespace App\Http\Controllers\frontend;
 use App\Http\Controllers\Controller;
 use App\Mail\ContactEnquiryMail;
 use App\Models\ContactEnquiry;
+use App\Models\Pages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -15,8 +16,12 @@ class HomeController extends Controller
         return view('frontend.index');
     }
 
-       public function landing(){
-        return view('frontend.landing');
+    public function landing($slug){
+        $page = Pages::where('url_slug', $slug)->first();
+        if (!$page) {
+            abort(404);
+        }
+        return view('frontend.landing', compact('page'));
     }
     public function aboutUs(){
         return view('frontend.about');
