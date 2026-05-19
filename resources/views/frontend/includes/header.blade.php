@@ -7,9 +7,8 @@
             <div class="header-item item-left header-logo m-0">
                 <div class="logo">
                     <a class="navbar-brand" href="{{route('index')}}">
-                        <!-- Optimized Logo Images -->
-                        <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="183" height="183">
-                        <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230" height="55" class="logo-second">
+                        <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
+                        <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
                     </a>
                 </div>
             </div> 
