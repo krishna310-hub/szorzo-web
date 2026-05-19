@@ -11,7 +11,7 @@
                         <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
                     </a>
                 </div>
-            </div> 
+            </div>  
 
             <!-- Menu -->
             <div class="header-item item-center">
