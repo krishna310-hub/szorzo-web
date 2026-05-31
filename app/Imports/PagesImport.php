@@ -11,50 +11,57 @@ class PagesImport implements ToCollection
 {
     public function collection(Collection $rows)
     {
-        // $rows->shift();
+        $headers = $rows->first()->toArray();
+
+        $rows = $rows->skip(1);
+
         $lastId = Pages::max('id') ?? 0;
 
         foreach ($rows as $index => $row) {
 
-            if (empty(trim($row['location'] ?? '')) &&
-                empty(trim($row['category'] ?? ''))
+            $row = array_combine($headers, $row->toArray());
+
+            if (
+                empty(trim($row['Location'] ?? '')) &&
+                empty(trim($row['Category'] ?? '')) &&
+                empty(trim($row['Name'] ?? ''))
             ) {
                 continue;
             }
-            $urlSlug = $row['url']
-                ? Str::slug($row['url'])
-                : Str::slug($row['name'] ?? 'page');
+
+            $urlSlug = !empty($row['URL'])
+                ? Str::slug($row['URL'])
+                : Str::slug($row['Name'] ?? 'page');
 
             $faqs = null;
 
-            if (!empty($row['faq_heading']) || !empty($row['faq_content'])) {
+            if (!empty($row['FAQ Heading']) || !empty($row['FAQ Content'])) {
                 $faqs = json_encode([
                     [
-                        'question' => trim($row['faq_heading'] ?? ''),
-                        'answer'   => trim($row['faq_content'] ?? ''),
+                        'question' => trim($row['FAQ Heading'] ?? ''),
+                        'answer'   => trim($row['FAQ Content'] ?? ''),
                     ]
-                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                ]);
             }
 
             Pages::updateOrCreate(
                 ['url_slug' => $urlSlug],
                 [
-                    'location'         => $row['location'] ?? null,
-                    'category'         => $row['category'] ?? null,
-                    'name'             => $row['name'] ?? null,
-                    'image'            => $row['banner_link'] ?? null,
+                    'location'         => $row['Location'] ?? null,
+                    'category'         => $row['Category'] ?? null,
+                    'name'             => $row['Name'] ?? null,
+                    'image'            => $row['Banner Link'] ?? null,
                     'url_slug'         => $urlSlug,
-                    'banner_content'   => $row['banner_content'] ?? null,
-                    'page_content'     => $row['page_content'] ?? null,
+                    'banner_content'   => $row['Banner Content'] ?? null,
+                    'page_content'     => $row['Page Content'] ?? null,
                     'faqs'             => $faqs,
-                    'meta_title'       => $row['meta_title'] ?? null,
-                    'meta_description' => $row['meta_content'] ?? null,
-                    'meta_keyword'     => $row['meta_keyword'] ?? null,
-                    'status'           => 1,
+                    'meta_title'       => $row['Meta Title'] ?? null,
+                    'meta_description' => $row['Meta Content'] ?? null,
+                    'meta_keyword'     => $row['Meta Keyword'] ?? null,
+                    'status'           => strtolower($row['Status'] ?? '') === 'active' ? 1 : 0,
                     'page_code'        => '#GD' . ($lastId + $index + 1),
                 ]
             );
         }
     }
-
 }
