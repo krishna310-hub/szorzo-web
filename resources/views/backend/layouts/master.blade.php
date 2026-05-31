@@ -15,6 +15,7 @@
 
 </head>
 
+
 <body>
     @if(session('status') === 'success')
         <script>
