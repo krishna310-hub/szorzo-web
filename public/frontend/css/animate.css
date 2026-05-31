@@ -1295,6 +1295,21 @@ Copyright (c) 2014 Daniel Eden
           animation-name: fadeInUp;
 }
 
+.fadeIn {
+  opacity: 0;
+  animation: fadeOnly 0.8s ease forwards;
+}
+
+@keyframes fadeOnly {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 @-webkit-keyframes fadeInUpBig {
   0% {
     opacity: 0;

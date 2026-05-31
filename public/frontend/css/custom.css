@@ -2178,7 +2178,6 @@ header.main-header .header-sticky.active {
     display: inline-block;
     color: inherit;
 }
-
 /************************************/
 /***        14. Footer css	      ***/
 /************************************/
@@ -2190,6 +2189,7 @@ header.main-header .header-sticky.active {
 
 .footer-scrolling-ticker {
     margin-bottom: 60px;
+    background: #111;
 }
 
 .footer-scrolling-box {
@@ -2220,6 +2220,7 @@ header.main-header .header-sticky.active {
     }
 }
 
+/* FIXED CONTRAST ISSUE */
 .footer-scrolling-box .scrolling-content span {
     display: inline-flex;
     align-items: center;
@@ -2227,7 +2228,7 @@ header.main-header .header-sticky.active {
     font-size: 100px;
     line-height: 1em;
     font-weight: 700;
-    color: var(--text-color);
+    color: #ffffff; /* changed from var(--text-color) */
 }
 
 .footer-scrolling-box .scrolling-content span img {
@@ -2309,9 +2310,10 @@ header.main-header .header-sticky.active {
     margin-right: 0;
 }
 
+/* BETTER CONTRAST FOR SOCIAL BUTTONS */
 .footer-social-links ul li a {
     background: transparent;
-    border: 1px solid var(--dark-divider-color);
+    border: 1px solid #4a4a4a; /* improved visibility */
     border-radius: 50%;
     width: 36px;
     height: 36px;
@@ -2328,13 +2330,9 @@ header.main-header .header-sticky.active {
 .footer-social-links ul li a i {
     font-size: 18px;
     line-height: normal;
-    /* background: linear-gradient(
-    90deg,
-    var(--accent-color) 0%,
-    var(--accent-secondary-color) 100%
-  ); */
     background: var(--accent-color);
     background-clip: text;
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 

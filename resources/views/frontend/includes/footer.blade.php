@@ -169,14 +169,33 @@
 
                     <div class="col-md-6">
                         <!-- Footer Social Link Start -->
-                        <div class="footer-social-links">
-                            <ul>
-                                <li><a href="#"><i class="fa-brands fa-pinterest-p"></i></a></li>
-                                <li><a href="#"><i class="fa-brands fa-x-twitter"></i></a></li>
-                                <li><a href="#"><i class="fa-brands fa-facebook-f"></i></a></li>
-                                <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                            </ul>
-                        </div>
+                       <div class="footer-social-links">
+    <ul>
+        <li>
+            <a href="#" aria-label="Pinterest">
+                <i class="fa-brands fa-pinterest-p" aria-hidden="true"></i>
+            </a>
+        </li>
+
+        <li>
+            <a href="#" aria-label="Twitter">
+                <i class="fa-brands fa-x-twitter" aria-hidden="true"></i>
+            </a>
+        </li>
+
+        <li>
+            <a href="#" aria-label="Facebook">
+                <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+            </a>
+        </li>
+
+        <li>
+            <a href="#" aria-label="Instagram">
+                <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
                         <!-- Footer Social Link End -->
                     </div>
                 </div>

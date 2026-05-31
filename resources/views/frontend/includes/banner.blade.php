@@ -4,12 +4,11 @@
             <div class="black-card home-main-box">
 
                 <div class="section-title">
-                    <h3 class="hero-subtitle wow fadeInUp">
+                    <h3 class="hero-subtitle">
                         Welcome to Szorzo
                     </h3>
 
-                    <h1 class="hero-title wow fadeInUp"
-                        data-wow-delay="0.2s"
+                    <h1 class="hero-title"
                         data-cursor="-opaque">
                         WE HELP IN
                         <br>
@@ -20,7 +19,7 @@
                 </div>
 
                 <div class="hero-section-content">
-                    <div class="hero-content wow fadeInUp">
+                    <div class="hero-content">
                         <p class="hero-description">
                             BUILT TO SCALE.
                             STRUCTURED TO EXIT.
