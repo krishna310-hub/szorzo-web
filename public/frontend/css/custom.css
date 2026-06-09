@@ -331,6 +331,9 @@ body {
     justify-content: center;
 }
 
+.preloader {
+    display: none !important;
+}
 .loading-container,
 .loading {
     height: 100px;
