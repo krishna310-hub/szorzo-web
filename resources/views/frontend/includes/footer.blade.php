@@ -1,29 +1,29 @@
 <!-- Footer Start -->
     <footer class="main-footer">
         <!-- Footer Scrolling Ticker Section Start -->
-        <div class="footer-scrolling-ticker">
+        <div class="footer-scrolling-ticker" aria-hidden="true">
             <!-- Scrolling Ticker Start -->
             <div class="footer-scrolling-box">
                 <div class="scrolling-content">
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Strategic Advisory</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Target Identification & Evaluation</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Due Diligence</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Valuation & Deal Structuring</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Negotiation & Deal Execution</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Post-Merger Integration (PMI)</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Strategic Advisory</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Target Identification & Evaluation</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Strategic Advisory</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Target Identification & Evaluation</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Due Diligence</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Valuation & Deal Structuring</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Negotiation & Deal Execution</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Post-Merger Integration (PMI)</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Strategic Advisory</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Target Identification & Evaluation</span>
                 </div>
 
                 <div class="scrolling-content">
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Strategic Advisory</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Target Identification & Evaluation</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Due Diligence</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Valuation & Deal Structuring</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Negotiation & Deal Execution</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Post-Merger Integration (PMI)</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Strategic Advisory</span>
-                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt="">Target Identification & Evaluation</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Strategic Advisory</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Target Identification & Evaluation</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Due Diligence</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Valuation & Deal Structuring</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Negotiation & Deal Execution</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Post-Merger Integration (PMI)</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Strategic Advisory</span>
+                    <span><img src="{{ asset('frontend/images/asterisk-icon.svg')}}" alt=""  aria-hidden="true">Target Identification & Evaluation</span>
                 </div>
             </div>
             <!-- Scrolling Ticker End -->
@@ -206,7 +206,7 @@
     <!-- Footer End -->
 
     <!-- Jquery Library File -->
-    {{-- <script src="{{ asset('frontend/js/jquery-3.7.1.min.js') }}"></script> --}}
+    <script src="{{ asset('frontend/js/jquery-3.7.1.min.js') }}"></script>
     <!-- Bootstrap js file -->
     <script src="{{ asset('frontend/js/bootstrap.min.js')}}"></script>
     <!-- Validator js file -->
