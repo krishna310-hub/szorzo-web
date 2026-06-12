@@ -447,6 +447,23 @@ body {
     font-size: x-large;
 }
 
+.section-title .heading {
+    display: inline-block;
+    position: relative;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    /* color: var(--primary-color); */
+    background-image: url("../images/icon-sparkle.svg");
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 18px auto;
+    padding-left: 26px;
+    font-size: x-large;
+}
+
 .section-title h1 {
     font-size: 70px;
     line-height: 1.1em;
@@ -461,6 +478,15 @@ body {
     font-weight: 600;
     letter-spacing: -0.03em;
     margin-bottom: 0;
+    cursor: none;
+}
+
+.section-title .newheading {
+    font-size: 60px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: 0;
+    line-height: 120%;
     cursor: none;
 }
 
@@ -495,11 +521,33 @@ body {
     font-weight: 300;
 }
 
+.section-title .newheading span,
+.member-info-counter-item h2 span {
+    background: linear-gradient(
+        to right,
+        var(--accent-secondary-color) 0%,
+        var(--accent-color) 50%,
+        var(--accent-secondary-color) 100%
+    );
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: all 0.4s ease-in-out;
+}
+
+.section-title .newheading span {
+    font-weight: 300;
+}
+
 .section-title h1:hover span,
 .section-title h2:hover span {
     background-position: right center;
 }
 
+.section-title h1:hover span,
+.section-title .newheading:hover span {
+    background-position: right center;
+}
 .section-title p {
     margin-top: 20px;
     margin-bottom: 0;

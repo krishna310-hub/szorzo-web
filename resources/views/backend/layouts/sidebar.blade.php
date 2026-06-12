@@ -5,23 +5,23 @@
         <!-- Dark Logo-->
         <a href="{{route('index')}}" class="logo logo-dark">
             <span class="logo-sm">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.png')}}" alt="" height="22">
-                <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="22">
+                <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
             </span>
             <span class="logo-lg">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.png')}}" alt="" height="17">
-                <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="17">
+                <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
             </span>
         </a>
         <!-- Light Logo-->
         <a href="{{route('index')}}" class="logo logo-light">
             <span class="logo-sm">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.png')}}" alt="" height="22">
-                <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="22">
+                <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
             </span>
             <span class="logo-lg">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.png')}}" alt="" height="70">
-                <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px" class="logo-second">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="70">
+                <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
             </span>
         </a>
         <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">

@@ -10,7 +10,7 @@
 
                         <!-- Rhino Logo -->
                         <img
-                            src="{{ asset('frontend/images/rhino-logo.png') }}"
+                            src="{{ asset('frontend/images/rhino-logo.webp') }}"
                             alt="Szorzo Rhino Logo"
                             width="100"
                             height="100"
@@ -21,7 +21,7 @@
 
                         <!-- Logo Text -->
                         <img
-                            src="{{ asset('frontend/images/logo-bg.png') }}"
+                            src="{{ asset('frontend/images/logo-bg.webp') }}"
                             alt="Szorzo Logo"
                             width="230"
                             height="55"
@@ -51,7 +51,7 @@
                             <a href="{{ route('index') }}">
 
                                 <img
-                                    src="{{ asset('frontend/images/rhino-logo.png') }}"
+                                    src="{{ asset('frontend/images/rhino-logo.webp') }}"
                                     alt="Szorzo Rhino Logo"
                                     width="80"
                                     height="80"

@@ -8,7 +8,7 @@
                 <div class="col-lg-12">
                     <!-- Section Title Start -->
                     <div class="section-title section-title-center">
-                        <h3 class="wow fadeInUp" style="font-size: x-large;">About Us</h3>
+                        <h2 class="heading wow fadeInUp" style="font-size: x-large;">About Us</h2>
                         <p class="text-effect wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque"
                             style="font-size: xxx-large;">SZORZO is a global business transformation and engineering
                             services partner, enabling businesses to expand, innovate, and
@@ -26,11 +26,11 @@
             <div class="row section-row">
                 <div class="col-lg-12">
                     <div class="section-title section-title-center">
-                        <h3 class="wow fadeInUp" style="font-size: x-large;">INTRODUCTION TO SZORZO A GLOBAL PARTNER
-                        </h3>
-                        <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">WE INSPIRE THE WORLD BY
-                            <br><span style="font-weight: bold;">TAKING ACTION</span>
+                        <h2 class="heading wow fadeInUp" style="font-size: x-large;">INTRODUCTION TO SZORZO A GLOBAL PARTNER
                         </h2>
+                        <p class="newheading wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">WE INSPIRE THE WORLD BY
+                            <br><span style="font-weight: bold;">TAKING ACTION</span>
+                        </p>
                     </div>
                 </div>
             </div>

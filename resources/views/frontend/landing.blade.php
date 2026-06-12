@@ -23,7 +23,7 @@
     <meta property="og:title" content="{{ $page->meta_title }}">
     <meta property="og:type" content="website" />
     <meta property="og:description" content="{!! $page->meta_description !!}">
-    <meta property="og:image" content="https://szorzo.com/public/frontend/images/logo-bg.png">
+    <meta property="og:image" content="https://szorzo.com/public/frontend/images/logo-bg.webp">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -372,9 +372,9 @@
 
                 <div class="logo flex-shrink-0 z-50">
                     <a class="navbar-brand flex items-center gap-2 md:gap-3" href="http://127.0.0.1:8000">
-                        <img src="http://127.0.0.1:8000/frontend/images/rhino-logo.png" alt="Logo"
+                        <img src="http://127.0.0.1:8000/frontend/images/rhino-logo.webp" alt="Logo"
                             class="w-12 sm:w-16 md:w-[80px] h-auto object-contain">
-                        <img src="http://127.0.0.1:8000/frontend/images/logo-bg.png" alt="Logo"
+                        <img src="http://127.0.0.1:8000/frontend/images/logo-bg.webp" alt="Logo"
                             class="w-24 sm:w-32 md:w-[230px] h-auto object-contain logo-second">
                     </a>
                 </div>
@@ -1059,9 +1059,9 @@
                 <div class="col-span-1 sm:col-span-2 md:col-span-1">
                     <div class="logo flex items-center gap-2 mb-6">
                         <a class="flex items-center gap-2" href="http://127.0.0.1:8000">
-                            <img src="http://127.0.0.1:8000/frontend/images/rhino-logo.png" alt="Logo"
+                            <img src="http://127.0.0.1:8000/frontend/images/rhino-logo.webp" alt="Logo"
                                 class="w-12 h-auto object-contain brightness-0 invert opacity-90">
-                            <img src="http://127.0.0.1:8000/frontend/images/logo-bg.png" alt="Logo"
+                            <img src="http://127.0.0.1:8000/frontend/images/logo-bg.webp" alt="Logo"
                                 class="w-24 h-auto object-contain brightness-0 invert opacity-90">
                         </a>
                     </div>
