@@ -1,6 +1,6 @@
 @extends('frontend.includes.master')
 @section('content')
-@include('frontend.includes.banner')
+    @include('frontend.includes.banner')
     <!-- About Us Section Start -->
     <div class="about-us">
         <div class="container">
@@ -10,9 +10,11 @@
                     <div class="section-title section-title-center">
                         <h2 class="heading wow fadeInUp" style="font-size: x-large;">About Us</h2>
                         <p class="text-effect wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque"
-                            style="font-size: xxx-large;">SZORZO is a global business transformation and engineering
+                            style="font-size: clamp(20px, 5vw, 48px); width:100%; max-width:100%; display:block;">
+                            SZORZO is a global business transformation and engineering
                             services partner, enabling businesses to expand, innovate, and
-                            thrive particularly in the dynamic Indian market.</p>
+                            thrive particularly in the dynamic Indian market.
+                        </p>
                     </div>
                     <!-- Section Title End -->
                 </div>
@@ -28,7 +30,8 @@
                     <div class="section-title section-title-center">
                         <h2 class="heading wow fadeInUp" style="font-size: x-large;">INTRODUCTION TO SZORZO A GLOBAL PARTNER
                         </h2>
-                        <p class="newheading wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">WE INSPIRE THE WORLD BY
+                        <p class="newheading wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">WE INSPIRE THE WORLD
+                            BY
                             <br><span style="font-weight: bold;">TAKING ACTION</span>
                         </p>
                     </div>
@@ -39,13 +42,12 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-2.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-2.svg') }}" alt="">
                         </div>
                         <div class="service-item-content">
                             <h3>Scope</h3>
                             <p style="text-align: justify;">SZORZO is a global digital transformation and engineering
-                                services
-                                partner, enabling businesses to expand, innovate, and thrive
+                                services partner, enabling businesses to expand, innovate, and thrive
                                 particularly in the dynamic Indian market. We specialize in setting up
                                 Global Capability Centers (GCCs), market entry & expansion
                                 strategies, Market Intelligence, Talent Consolidation & Mapping and
@@ -58,7 +60,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="service-item wow fadeInUp">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-3.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-3.svg') }}" alt="">
                         </div>
                         <div class="service-item-content">
                             <h3>Vision</h3>
@@ -77,7 +79,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="service-item wow fadeInUp" data-wow-delay="0.4s">
                         <div class="icon-box">
-                            <img src="{{ asset('frontend/images/icon-service-1.svg')}}" alt="">
+                            <img src="{{ asset('frontend/images/icon-service-1.svg') }}" alt="">
                         </div>
                         <div class="service-item-content">
                             <h3>Mission</h3>
@@ -118,83 +120,84 @@
                 </div>
 
                 <!-- <div class="">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-4 col-md-6">
-                                <div class="service-item wow fadeInUp">
-                                    <div class="icon-box">
-                                        <img src="{{ asset('frontend/images/icon-service-1.svg')}}" alt="">
-                                    </div>
-                                    <div class="service-item-content">
-                                        <h3>TRULY GLOBAL, <br>DEEPLY LOCAL</h3>
-                                    </div>
-                                </div>
-                            </div>
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-lg-4 col-md-6">
+                                            <div class="service-item wow fadeInUp">
+                                                <div class="icon-box">
+                                                    <img src="{{ asset('frontend/images/icon-service-1.svg') }}" alt="">
+                                                </div>
+                                                <div class="service-item-content">
+                                                    <h3>TRULY GLOBAL, <br>DEEPLY LOCAL</h3>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="col-lg-4 col-md-6">
-                                <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
-                                    <div class="icon-box">
-                                        <img src="{{ asset('frontend/images/icon-service-2.svg')}}" alt="">
-                                    </div>
-                                    <div class="service-item-content">
-                                        <h3>COMPLIANCE ACROSS JURISDICTIONS</h3>
-                                    </div>
-                                </div>
-                            </div>
+                                        <div class="col-lg-4 col-md-6">
+                                            <div class="service-item wow fadeInUp" data-wow-delay="0.2s">
+                                                <div class="icon-box">
+                                                    <img src="{{ asset('frontend/images/icon-service-2.svg') }}" alt="">
+                                                </div>
+                                                <div class="service-item-content">
+                                                    <h3>COMPLIANCE ACROSS JURISDICTIONS</h3>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="col-lg-4 col-md-6">
-                                <div class="service-item wow fadeInUp" data-wow-delay="0.4s">
-                                    <div class="icon-box">
-                                        <img src="{{ asset('frontend/images/icon-service-3.svg')}}" alt="">
-                                    </div>
-                                    <div class="service-item-content">
-                                        <h3>INTEGRATED WITH YOUR BUSINESS EXPANSION ROADMAP</h3>
-                                    </div>
-                                </div>
-                            </div>
+                                        <div class="col-lg-4 col-md-6">
+                                            <div class="service-item wow fadeInUp" data-wow-delay="0.4s">
+                                                <div class="icon-box">
+                                                    <img src="{{ asset('frontend/images/icon-service-3.svg') }}" alt="">
+                                                </div>
+                                                <div class="service-item-content">
+                                                    <h3>INTEGRATED WITH YOUR BUSINESS EXPANSION ROADMAP</h3>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="col-lg-4 col-md-6">
-                                <div class="service-item wow fadeInUp" data-wow-delay="0.6s">
-                                    <div class="icon-box">
-                                        <img src="{{ asset('frontend/images/icon-service-4.svg')}}" alt="">
-                                    </div>
-                                    <div class="service-item-content">
-                                        <h3>MULTILINGUAL, <br>MULTI-JURISDICTIONAL EXPERTS</h3>
-                                    </div>
-                                </div>
-                            </div>
+                                        <div class="col-lg-4 col-md-6">
+                                            <div class="service-item wow fadeInUp" data-wow-delay="0.6s">
+                                                <div class="icon-box">
+                                                    <img src="{{ asset('frontend/images/icon-service-4.svg') }}" alt="">
+                                                </div>
+                                                <div class="service-item-content">
+                                                    <h3>MULTILINGUAL, <br>MULTI-JURISDICTIONAL EXPERTS</h3>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="col-lg-4 col-md-6">
-                                <div class="service-item wow fadeInUp" data-wow-delay="0.6s">
-                                    <div class="icon-box">
-                                        <img src="{{ asset('frontend/images/icon-service-4.svg')}}" alt="">
-                                    </div>
-                                    <div class="service-item-content">
-                                        <h3>SEAMLESS GLOBAL COLLABORATION</h3>
-                                    </div>
-                                </div>
-                            </div>
+                                        <div class="col-lg-4 col-md-6">
+                                            <div class="service-item wow fadeInUp" data-wow-delay="0.6s">
+                                                <div class="icon-box">
+                                                    <img src="{{ asset('frontend/images/icon-service-4.svg') }}" alt="">
+                                                </div>
+                                                <div class="service-item-content">
+                                                    <h3>SEAMLESS GLOBAL COLLABORATION</h3>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="col-lg-4 col-md-6">
-                                <div class="service-item wow fadeInUp" data-wow-delay="0.6s">
-                                    <div class="icon-box">
-                                        <img src="{{ asset('frontend/images/icon-service-4.svg')}}" alt="">
-                                    </div>
-                                    <div class="service-item-content">
-                                        <h3>PROVEN TRACK RECORD</h3>
+                                        <div class="col-lg-4 col-md-6">
+                                            <div class="service-item wow fadeInUp" data-wow-delay="0.6s">
+                                                <div class="icon-box">
+                                                    <img src="{{ asset('frontend/images/icon-service-4.svg') }}" alt="">
+                                                </div>
+                                                <div class="service-item-content">
+                                                    <h3>PROVEN TRACK RECORD</h3>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
+                            </div> -->
 
                 <div class="mt-3">
                     <div class="container">
                         <div class="row justify-content-center gy-4">
                             <div class="col-lg-4 col-md-6">
                                 <div class="service-box">
-                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-1.svg')}}" alt=""> </div>
+                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-1.svg') }}"
+                                            alt=""> </div>
                                     <div class="service-box-content section-title">
                                         <h3 style="font-size: 16px;">TRULY GLOBAL,<br>DEEPLY LOCAL</h3>
                                     </div>
@@ -202,7 +205,8 @@
                             </div>
                             <div class="col-lg-4 col-md-6">
                                 <div class="service-box">
-                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-2.svg')}}" alt=""> </div>
+                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-2.svg') }}"
+                                            alt=""> </div>
                                     <div class="service-box-content section-title">
                                         <h3 style="font-size: 16px;">COMPLIANCE ACROSS<br>JURISDICTIONS</h3>
                                     </div>
@@ -210,15 +214,18 @@
                             </div>
                             <div class="col-lg-4 col-md-6">
                                 <div class="service-box">
-                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-3.svg')}}" alt=""> </div>
+                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-3.svg') }}"
+                                            alt=""> </div>
                                     <div class="service-box-content section-title">
-                                        <h3 style="font-size: 16px;">INTEGRATED WITH YOUR<br>BUSINESS EXPANSION ROADMAP</h3>
+                                        <h3 style="font-size: 16px;">INTEGRATED WITH YOUR<br>BUSINESS EXPANSION ROADMAP
+                                        </h3>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-4 col-md-6">
                                 <div class="service-box">
-                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-4.svg')}}" alt=""> </div>
+                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-4.svg') }}"
+                                            alt=""> </div>
                                     <div class="service-box-content section-title">
                                         <h3 style="font-size: 16px;">MULTILINGUAL,<br>MULTI-JURISDICTIONAL EXPERTS</h3>
                                     </div>
@@ -226,7 +233,8 @@
                             </div>
                             <div class="col-lg-4 col-md-6">
                                 <div class="service-box">
-                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-5.svg')}}" alt=""> </div>
+                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-5.svg') }}"
+                                            alt=""> </div>
                                     <div class="service-box-content section-title">
                                         <h3 style="font-size: 16px;">SEAMLESS GLOBAL<br>COLLABORATION</h3>
                                     </div>
@@ -234,7 +242,8 @@
                             </div>
                             <div class="col-lg-4 col-md-6">
                                 <div class="service-box">
-                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-7.svg')}}" alt=""> </div>
+                                    <div class="icon-box"> <img src="{{ asset('frontend/images/icon-service-7.svg') }}"
+                                            alt=""> </div>
                                     <div class="service-box-content section-title">
                                         <h3 style="font-size: 16px;">PROVEN TRACK RECORD</h3>
                                     </div>
@@ -291,219 +300,218 @@
     <br>
 
     <!-- <div class="our-testimonials">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="testimonial-content-box">
-                        <div class="section-title">
-                            <h2 class="wow fadeInUp" data-cursor="-opaque">Impressive stats backing our <span>AI
-                                    solutions</span></h2>
-                            <p class="wow fadeInUp" data-wow-delay="0.2s">We are a forward-thinking AI agency
-                                specializing in cutting-edge artificial intelligence and machine learning solutions to
-                                build AI-powered tools that solve real-world problems.</p>
-                        </div>
-
-                        <div class="testimonial-counters">
-                            <div class="testimonial-counter-item">
-                                <div class="icon-box">
-                                    <img src="{{ asset('frontend/images/icon-testimonial-counter-1.svg')}}" alt="">
-                                </div>
-                                <div class="testimonial-counter-content">
-                                    <h2><span class="counter">200</span>+</h2>
-                                    <p>AI Agency Technology Project Complate</p>
-                                </div>
-                            </div>
-
-                            <div class="testimonial-counter-item">
-                                <div class="icon-box">
-                                    <img src="{{ asset('frontend/images/icon-testimonial-counter-2.svg')}}" alt="">
-                                </div>
-                                <div class="testimonial-counter-content">
-                                    <h2><span class="counter">98</span>%</h2>
-                                    <p>Client Satisfaction Rate in Our Agency</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="testimonial-slider-box dark-section">
-                        <div class="testimonial-slider-box-content">
-                            <div class="section-title">
-                                <h3 class="wow fadeInUp">Testimonials</h3>
-                                <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">What our client
-                                    says</h2>
-                            </div>
-
-                            <div class="testimonial-images">
-                                <div class="satisfy-client-images">
-                                    <div class="satisfy-client-image">
-                                        <figure class="image-anime">
-                                            <img src="{{ asset('frontend/images/author-1.jpg')}}" alt="">
-                                        </figure>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="testimonial-content-box">
+                                    <div class="section-title">
+                                        <h2 class="wow fadeInUp" data-cursor="-opaque">Impressive stats backing our <span>AI
+                                                solutions</span></h2>
+                                        <p class="wow fadeInUp" data-wow-delay="0.2s">We are a forward-thinking AI agency
+                                            specializing in cutting-edge artificial intelligence and machine learning solutions to
+                                            build AI-powered tools that solve real-world problems.</p>
                                     </div>
-                                    <div class="satisfy-client-image">
-                                        <figure class="image-anime">
-                                            <img src="{{ asset('frontend/images/author-2.jpg')}}" alt="">
-                                        </figure>
-                                    </div>
-                                    <div class="satisfy-client-image">
-                                        <figure class="image-anime">
-                                            <img src="{{ asset('frontend/images/author-3.jpg')}}" alt="">
-                                        </figure>
-                                    </div>
-                                    <div class="satisfy-client-image">
-                                        <figure class="image-anime">
-                                            <img src="{{ asset('frontend/images/author-4.jpg')}}" alt="">
-                                        </figure>
-                                    </div>
-                                    <div class="satisfy-client-image">
-                                        <figure class="image-anime">
-                                            <img src="{{ asset('frontend/images/author-5.jpg')}}" alt="">
-                                        </figure>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="testimonial-slider">
-                            <div class="swiper">
-                                <div class="swiper-wrapper" data-cursor-text="Drag">
-                                    <div class="swiper-slide">
-                                        <div class="testimonial-item">
-                                            <div class="testimonial-slider-content">
-                                                <div class="testimonial-rating">
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                </div>
-                                                <div class="testimonial-content">
-                                                    <p>"Working with was a game-changer for our business. They took the
-                                                        time understand our unique challenges & solutions that boosted
-                                                        our efficiency & the team was knowledgeable, responsive &
-                                                        incredibly easy to work with.!"</p>
-                                                </div>
-                                                <div class="author-content">
-                                                    <h3>Sophia Reynolds</h3>
-                                                    <p>Founder</p>
-                                                </div>
+                                    <div class="testimonial-counters">
+                                        <div class="testimonial-counter-item">
+                                            <div class="icon-box">
+                                                <img src="{{ asset('frontend/images/icon-testimonial-counter-1.svg') }}" alt="">
                                             </div>
-                                            <div class="testimonial-slider-image">
-                                                <figure class="image-anime">
-                                                    <img src="{{ asset('frontend/images/testimonial-image-1.jpg')}}" alt="">
-                                                </figure>
+                                            <div class="testimonial-counter-content">
+                                                <h2><span class="counter">200</span>+</h2>
+                                                <p>AI Agency Technology Project Complate</p>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="swiper-slide">
-                                        <div class="testimonial-item">
-                                            <div class="testimonial-slider-content">
-                                                <div class="testimonial-rating">
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                </div>
-                                                <div class="testimonial-content">
-                                                    <p>"Working with was a game-changer for our business. They took the
-                                                        time understand our unique challenges & solutions that boosted
-                                                        our efficiency & the team was knowledgeable, responsive &
-                                                        incredibly easy to work with.!"</p>
-                                                </div>
-                                                <div class="author-content">
-                                                    <h3>Jacob Jones</h3>
-                                                    <p>CEO</p>
-                                                </div>
+                                        <div class="testimonial-counter-item">
+                                            <div class="icon-box">
+                                                <img src="{{ asset('frontend/images/icon-testimonial-counter-2.svg') }}" alt="">
                                             </div>
-                                            <div class="testimonial-slider-image">
-                                                <figure class="image-anime">
-                                                    <img src="{{ asset('frontend/images/testimonial-image-2.jpg')}}" alt="">
-                                                </figure>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="swiper-slide">
-                                        <div class="testimonial-item">
-                                            <div class="testimonial-slider-content">
-                                                <div class="testimonial-rating">
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                    <i class="fa-solid fa-star"></i>
-                                                </div>
-                                                <div class="testimonial-content">
-                                                    <p>"Working with was a game-changer for our business. They took the
-                                                        time understand our unique challenges & solutions that boosted
-                                                        our efficiency & the team was knowledgeable, responsive &
-                                                        incredibly easy to work with.!"</p>
-                                                </div>
-                                                <div class="author-content">
-                                                    <h3>Olivia bennett</h3>
-                                                    <p>Managing director</p>
-                                                </div>
-                                            </div>
-                                            <div class="testimonial-slider-image">
-                                                <figure class="image-anime">
-                                                    <img src="{{ asset('frontend/images/testimonial-image-3.jpg')}}" alt="">
-                                                </figure>
+                                            <div class="testimonial-counter-content">
+                                                <h2><span class="counter">98</span>%</h2>
+                                                <p>Client Satisfaction Rate in Our Agency</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="testimonial-pagination"></div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="testimonial-slider-box dark-section">
+                                    <div class="testimonial-slider-box-content">
+                                        <div class="section-title">
+                                            <h3 class="wow fadeInUp">Testimonials</h3>
+                                            <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">What our client
+                                                says</h2>
+                                        </div>
+
+                                        <div class="testimonial-images">
+                                            <div class="satisfy-client-images">
+                                                <div class="satisfy-client-image">
+                                                    <figure class="image-anime">
+                                                        <img src="{{ asset('frontend/images/author-1.jpg') }}" alt="">
+                                                    </figure>
+                                                </div>
+                                                <div class="satisfy-client-image">
+                                                    <figure class="image-anime">
+                                                        <img src="{{ asset('frontend/images/author-2.jpg') }}" alt="">
+                                                    </figure>
+                                                </div>
+                                                <div class="satisfy-client-image">
+                                                    <figure class="image-anime">
+                                                        <img src="{{ asset('frontend/images/author-3.jpg') }}" alt="">
+                                                    </figure>
+                                                </div>
+                                                <div class="satisfy-client-image">
+                                                    <figure class="image-anime">
+                                                        <img src="{{ asset('frontend/images/author-4.jpg') }}" alt="">
+                                                    </figure>
+                                                </div>
+                                                <div class="satisfy-client-image">
+                                                    <figure class="image-anime">
+                                                        <img src="{{ asset('frontend/images/author-5.jpg') }}" alt="">
+                                                    </figure>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="testimonial-slider">
+                                        <div class="swiper">
+                                            <div class="swiper-wrapper" data-cursor-text="Drag">
+                                                <div class="swiper-slide">
+                                                    <div class="testimonial-item">
+                                                        <div class="testimonial-slider-content">
+                                                            <div class="testimonial-rating">
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                            </div>
+                                                            <div class="testimonial-content">
+                                                                <p>"Working with was a game-changer for our business. They took the
+                                                                    time understand our unique challenges & solutions that boosted
+                                                                    our efficiency & the team was knowledgeable, responsive &
+                                                                    incredibly easy to work with.!"</p>
+                                                            </div>
+                                                            <div class="author-content">
+                                                                <h3>Sophia Reynolds</h3>
+                                                                <p>Founder</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="testimonial-slider-image">
+                                                            <figure class="image-anime">
+                                                                <img src="{{ asset('frontend/images/testimonial-image-1.jpg') }}" alt="">
+                                                            </figure>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="swiper-slide">
+                                                    <div class="testimonial-item">
+                                                        <div class="testimonial-slider-content">
+                                                            <div class="testimonial-rating">
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                            </div>
+                                                            <div class="testimonial-content">
+                                                                <p>"Working with was a game-changer for our business. They took the
+                                                                    time understand our unique challenges & solutions that boosted
+                                                                    our efficiency & the team was knowledgeable, responsive &
+                                                                    incredibly easy to work with.!"</p>
+                                                            </div>
+                                                            <div class="author-content">
+                                                                <h3>Jacob Jones</h3>
+                                                                <p>CEO</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="testimonial-slider-image">
+                                                            <figure class="image-anime">
+                                                                <img src="{{ asset('frontend/images/testimonial-image-2.jpg') }}" alt="">
+                                                            </figure>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="swiper-slide">
+                                                    <div class="testimonial-item">
+                                                        <div class="testimonial-slider-content">
+                                                            <div class="testimonial-rating">
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                                <i class="fa-solid fa-star"></i>
+                                                            </div>
+                                                            <div class="testimonial-content">
+                                                                <p>"Working with was a game-changer for our business. They took the
+                                                                    time understand our unique challenges & solutions that boosted
+                                                                    our efficiency & the team was knowledgeable, responsive &
+                                                                    incredibly easy to work with.!"</p>
+                                                            </div>
+                                                            <div class="author-content">
+                                                                <h3>Olivia bennett</h3>
+                                                                <p>Managing director</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="testimonial-slider-image">
+                                                            <figure class="image-anime">
+                                                                <img src="{{ asset('frontend/images/testimonial-image-3.jpg') }}" alt="">
+                                                            </figure>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="testimonial-pagination"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="testimonial-rating-box">
+                                    <div class="testimonial-rating-item">
+                                        <div class="icon-box">
+                                            <img src="{{ asset('frontend/images/icon-testimonial-rating-1.svg') }}" alt="">
+                                        </div>
+                                        <div class="testimonial-rating-content">
+                                            <p><span class="counter">982</span>+ Trustpilot 4.8 start review</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="testimonial-rating-item">
+                                        <div class="icon-box">
+                                            <img src="{{ asset('frontend/images/icon-testimonial-rating-2.svg') }}" alt="">
+                                        </div>
+                                        <div class="testimonial-rating-content">
+                                            <p><span class="counter">487</span>+ Airbng 5 start reviews</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="testimonial-rating-item">
+                                        <div class="icon-box">
+                                            <img src="{{ asset('frontend/images/icon-testimonial-rating-3.svg') }}" alt="">
+                                        </div>
+                                        <div class="testimonial-rating-content">
+                                            <p><span class="counter">182</span>+ Yelp 5 start reviews</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="testimonial-rating-item">
+                                        <div class="icon-box">
+                                            <img src="{{ asset('frontend/images/icon-testimonial-rating-4.svg') }}" alt="">
+                                        </div>
+                                        <div class="testimonial-rating-content">
+                                            <p><span class="counter">897</span>+ Google 5 start reviews</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="col-lg-12">
-                    <div class="testimonial-rating-box">
-                        <div class="testimonial-rating-item">
-                            <div class="icon-box">
-                                <img src="{{ asset('frontend/images/icon-testimonial-rating-1.svg')}}" alt="">
-                            </div>
-                            <div class="testimonial-rating-content">
-                                <p><span class="counter">982</span>+ Trustpilot 4.8 start review</p>
-                            </div>
-                        </div>
-
-                        <div class="testimonial-rating-item">
-                            <div class="icon-box">
-                                <img src="{{ asset('frontend/images/icon-testimonial-rating-2.svg')}}" alt="">
-                            </div>
-                            <div class="testimonial-rating-content">
-                                <p><span class="counter">487</span>+ Airbng 5 start reviews</p>
-                            </div>
-                        </div>
-
-                        <div class="testimonial-rating-item">
-                            <div class="icon-box">
-                                <img src="{{ asset('frontend/images/icon-testimonial-rating-3.svg')}}" alt="">
-                            </div>
-                            <div class="testimonial-rating-content">
-                                <p><span class="counter">182</span>+ Yelp 5 start reviews</p>
-                            </div>
-                        </div>
-
-                        <div class="testimonial-rating-item">
-                            <div class="icon-box">
-                                <img src="{{ asset('frontend/images/icon-testimonial-rating-4.svg')}}" alt="">
-                            </div>
-                            <div class="testimonial-rating-content">
-                                <p><span class="counter">897</span>+ Google 5 start reviews</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
-
+                </div> -->
 @endsection
