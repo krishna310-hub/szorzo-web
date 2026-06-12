@@ -208,7 +208,7 @@
                     </div>
                     <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
                         <div class="show-box animated wow fadeInUp">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="">
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="">
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
@@ -552,8 +552,8 @@
                     <form id="szorzoForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">SZORZO AI Contact Form</h4>
@@ -649,8 +649,8 @@
                     <form id="enterpriseTransformationForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">Enterprise Transformation Contact Form</h4>
@@ -746,8 +746,8 @@
                     <form id="enterpriseDigitalizationForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">Enterprise Digitalization Contact Form</h4>
@@ -843,8 +843,8 @@
                     <form id="enterpriseLearningSolutionForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">Enterprise Learning Solutions Contact Form</h4>
@@ -940,8 +940,8 @@
                     <form id="organizationCapacityAssessmentForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">Organization Capacity Assessment Contact Form</h4>
@@ -1037,8 +1037,8 @@
                     <form id="hrInfrastructureOfferingsForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">Operations and HR Infrastructure Offerings Contact Form</h4>
@@ -1134,8 +1134,8 @@
                     <form id="mergerAndAcquisitionServicesForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">Merger and Acquisition Services Contact Form</h4>
@@ -1231,8 +1231,8 @@
                     <form id="itServicesModalForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">IT Services Contact Form</h4>
@@ -1328,8 +1328,8 @@
                     <form id="itInfrastructureServicesForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">IT Infrastructure Services Contact Form</h4>
@@ -1425,8 +1425,8 @@
                     <form id="cyberSecurityServicesForm">
                         @csrf
                         <a class="navbar-brand" style="margin-left:-20px">
-                            <img src="{{ asset('frontend/images/rhino-logo.png') }}" alt="Logo" width="100">
-                            <img src="{{ asset('frontend/images/logo-bg.png') }}" alt="Logo" width="230px"
+                            <img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="Logo" width="100">
+                            <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                                 class="logo-second">
                         </a>
                         <h4 class="modal-title mb-3">Cyber Security Services Contact Form</h4>

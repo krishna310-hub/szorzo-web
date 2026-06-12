@@ -4,7 +4,7 @@
             <div class="col-lg-12">
                 <div class="black-card home-main-box">
                     <div class="section-title">
-                        <h3 class="wow fadeInUp">Welcome to Szorzo</h3><br><br>
+                        <p class="heading wow fadeInUp" style=" margin-left: -27px;">Welcome to Szorzo</p><br><br>
                         <h1 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">
                             WE HELP IN <br>SETTING UP YOUR <br><span > GCC IN INDIA</span>
                         </h1>

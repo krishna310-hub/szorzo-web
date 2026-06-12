@@ -39,8 +39,8 @@
                         <div class="about-footer">
                             <!-- Footer Logo Start -->
                             <div class="footer-logo">
-                                <img src="{{ asset('frontend/images/logo-bg.png')}}" alt="">
-                                <img src="{{ asset('frontend/images/rhino-logo.png')}}" alt="Logo" width="100">
+                                <img src="{{ asset('frontend/images/logo-bg.webp')}}" alt="">
+                                <img src="{{ asset('frontend/images/rhino-logo.webp')}}" alt="Logo" width="100">
                             </div>
                             <!-- Footer Logo End -->
                         </div>

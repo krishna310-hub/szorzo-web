@@ -136,7 +136,7 @@
 
             <div id="loading-icon">
                 <img
-                    src="{{ asset('frontend/images/loader.png') }}"
+                    src="{{ asset('frontend/images/loader.webp') }}"
                     alt="Loading"
                     width="80"
                     height="80">
