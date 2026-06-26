@@ -31,10 +31,10 @@
                 <div class="col-lg-12">
                     <!-- Section Title Start -->
                     <div class="section-title section-title-center">
-                        <h2 class="wow fadeInUp" style="font-size: x-large;">TRANSFORMING BUSINESS DYNAMICS WORLDWIDE</h2>
-                        <h3 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">WE CRAFT COMPELLING GCC
+                        <h3 class="wow fadeInUp" style="font-size: x-large;">TRANSFORMING BUSINESS DYNAMICS WORLDWIDE</h3>
+                        <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">WE CRAFT COMPELLING GCC
                             PRACTICES FOR <span style="font-weight: bold;">GLOBAL BRANDS</span>
-                        </h3>
+                        </h2>
                     </div>
                     <!-- Section Title End -->
                 </div>
@@ -62,7 +62,7 @@
                         <!-- Approach Image Start -->
                         <div class="approach-image">
                             <figure class="image-anime reveal">
-                                <img src="{{ asset('frontend/images/loader.webp') }}" alt="">
+                                <img src="{{ asset('frontend/images/loader-about.webp') }}" alt="about">
                             </figure>
                         </div>
                         <!-- Approach Image End -->
@@ -79,7 +79,7 @@
                                 <img src="{{ asset('frontend/images/icon-mission.svg') }}" alt="">
                             </div>
                             <div class="mission-vision-item-content">
-                                <h2 style="font-size: x-large;">Our mission</h2>
+                                <h3 style="font-size: x-large;">Our mission</h3>
                                 <p style="text-align: justify;">Our mission is to build a profitable and purpose-driven
                                     organization
                                     from the ground up—anchored in strong ethics, transparent corporate
@@ -99,7 +99,7 @@
                                 <img src="{{ asset('frontend/images/icon-vision.svg') }}" alt="">
                             </div>
                             <div class="mission-vision-item-content">
-                                <h2 style="font-size: x-large;">Our vision</h2>
+                                <h3 style="font-size: x-large;">Our vision</h3>
                                 <p style="text-align: justify;">We aspire to be a trusted global business transformation
                                     partner,
                                     recognized for building resilient and forward-thinking Technology &
@@ -128,10 +128,10 @@
                     <div class="team-single-content">
                         <div class="team-member-info">
                             <div class="section-title">
-                                <h2 class="wow fadeInUp" style="font-size: x-large;">INTERESTING FACTS OF SZORZO</h2>
-                                <h3 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">Building Brands
+                                <h3 class="wow fadeInUp" style="font-size: x-large;">INTERESTING FACTS OF SZORZO</h3>
+                                <h2 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">Building Brands
                                     <span>Forever</span>
-                                </h3>
+                                </h2>
                             </div>
                             <div class="team-member-info-counters">
                                 <div class="member-info-counter-item">
@@ -207,9 +207,9 @@
                 <div class="col-xl-6" style="">
                     <div class="our-value-content" style="width: 1300px;">
                         <div class="section-title">
-                            <h2 class="wow fadeInUp">Logo Concept & Symbolism</h2>
-                            <h3 class="text-anime-style-2" data-cursor="-opaque">Why the <span
-                                    style="font-weight: bold;">Rhino ?</span></h3>
+                            <h3 class="wow fadeInUp">Logo Concept & Symbolism</h3>
+                            <h2 class="text-anime-style-2" data-cursor="-opaque">Why the <span
+                                    style="font-weight: bold;">Rhino ?</span></h2>
                             <p class="wow fadeInUp" data-wow-delay="0.2s" style="text-align: justify;">The SZORZO logo
                                 features a powerful and streamlined depiction of a rhino, symbolizing the core values that
                                 define our company: strength, resilience, focus, and boldness.
