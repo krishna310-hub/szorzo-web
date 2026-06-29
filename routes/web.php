@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\backend\AdminController;
+use App\Http\Controllers\backend\ClientController;
 use App\Http\Controllers\backend\LoginController;
+use App\Http\Controllers\backend\InterviewLevelController;
+use App\Http\Controllers\backend\LocationController;
 use App\Http\Controllers\backend\RoleController;
 use App\Http\Controllers\backend\SettingsController;
 use App\Http\Controllers\backend\UserController;
@@ -100,6 +103,35 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/{id}/edit', 'edit')->name('edit');
         Route::put('/{id}/update', 'update')->name('update');
         Route::delete('/{id}', 'destroy')->name('delete');
+    });
+
+    Route::prefix('masters')->group(function () {
+        Route::prefix('clients')->name('clients.')->controller(ClientController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('interview-levels')->name('interview-levels.')->controller(InterviewLevelController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('locations')->name('locations.')->controller(LocationController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
     });
 
     Route::prefix('sitemap')->name('sitemap.')->controller(SitemapRobotsController::class)->group(function () {

@@ -2,9 +2,15 @@
 
 namespace App\Providers;
 
+use App\Models\Client;
+use App\Models\InterviewLevel;
+use App\Models\Location;
 use App\Models\Pages;
+use App\Policies\ClientPolicy;
 use App\Policies\ContactEnquiryPolicy;
 use App\Policies\GeneralPolicy;
+use App\Policies\InterviewLevelPolicy;
+use App\Policies\LocationPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use App\Policies\PagesPolicy;
@@ -24,6 +30,9 @@ class AuthServiceProvider extends ServiceProvider
         'App\Models\Role'    => RolePolicy::class,
         'App\Models\ContactEnquiry' => ContactEnquiryPolicy::class,
         'App\Models\Pages' => PagesPolicy::class,
+        Client::class => ClientPolicy::class,
+        InterviewLevel::class => InterviewLevelPolicy::class,
+        Location::class => LocationPolicy::class,
     ];
 
     /**
@@ -38,5 +47,8 @@ class AuthServiceProvider extends ServiceProvider
         Gate::Resource('Role','App\Policies\RolePolicy');
         Gate::Resource('ContactEnquiry','App\Policies\ContactEnquiryPolicy');
         Gate::Resource('Pages','App\Policies\PagesPolicy');
+        Gate::Resource('Client','App\Policies\ClientPolicy');
+        Gate::Resource('InterviewLevel','App\Policies\InterviewLevelPolicy');
+        Gate::Resource('Location','App\Policies\LocationPolicy');
     }
 }

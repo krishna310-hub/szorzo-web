@@ -96,6 +96,34 @@
                     </li>
                 @endcan
 
+                @if(auth()->user()->can('read', \App\Models\Client::class) || auth()->user()->can('read', \App\Models\InterviewLevel::class) || auth()->user()->can('read', \App\Models\Location::class))
+                    <li class="menu-title"><i class="ri-more-fill"></i> <span>Masters</span></li>
+                    <li class="nav-item">
+                        <a class="nav-link menu-link" href="#sidebarMasters" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->is('admin/masters*') ? 'true' : 'false' }}" aria-controls="sidebarMasters">
+                            <i class="ri-database-2-line"></i> <span>Masters</span>
+                        </a>
+                        <div class="collapse menu-dropdown {{ request()->is('admin/masters*') ? 'show' : '' }}" id="sidebarMasters">
+                            <ul class="nav nav-sm flex-column">
+                                @can('read', \App\Models\Client::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.clients.index') }}" class="nav-link {{ request()->is('admin/masters/clients*') ? 'active' : '' }}"> Clients </a>
+                                    </li>
+                                @endcan
+                                @can('read', \App\Models\InterviewLevel::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.interview-levels.index') }}" class="nav-link {{ request()->is('admin/masters/interview-levels*') ? 'active' : '' }}"> Level of Interview </a>
+                                    </li>
+                                @endcan
+                                @can('read', \App\Models\Location::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.locations.index') }}" class="nav-link {{ request()->is('admin/masters/locations*') ? 'active' : '' }}"> Locations </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endif
+
                 @if(auth()->user()->can('read', \App\Models\User::class) || auth()->user()->can('read', \App\Models\Role::class))
                     <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-settings">Roles & Permission</span></li>
                     <li class="nav-item">
