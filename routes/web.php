@@ -9,7 +9,10 @@ use App\Http\Controllers\backend\RoleController;
 use App\Http\Controllers\backend\SettingsController;
 use App\Http\Controllers\backend\UserController;
 use App\Http\Controllers\backend\ContactController;
+use App\Http\Controllers\backend\JobRoleController;
+use App\Http\Controllers\backend\ModeController;
 use App\Http\Controllers\backend\PageController;
+use App\Http\Controllers\backend\RecruiterController;
 use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
@@ -132,11 +135,38 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::put('/{id}/update', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('delete');
         });
+
+        Route::prefix('recruiters')->name('recruiters.')->controller(RecruiterController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('job-roles')->name('job-roles.')->controller(JobRoleController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('modes')->name('modes.')->controller(ModeController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
     });
 
     Route::prefix('sitemap')->name('sitemap.')->controller(SitemapRobotsController::class)->group(function () {
-        Route::get('/sitemap-robots', 'index')->name('sitemap-robots.index');     
-        Route::post('/robots-upload',  'upload')->name('robots.upload'); 
+        Route::get('/sitemap-robots', 'index')->name('sitemap-robots.index');
+        Route::post('/robots-upload',  'upload')->name('robots.upload');
         Route::get('/sitemap-download', 'downloadSitemap')->name('sitemap.download');
         Route::get('/robots-download', 'downloadRobots')->name('robots.download');
     });
@@ -145,7 +175,6 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::delete('/enquiry/delete/{id}',[ContactController::class,'delete'])->name('enquiry.delete');
     Route::post('/enquiry/status',[ContactController::class,'changeStatus'])->name('enquiry.status');
 
-    
 });
 
 // Landing Pages

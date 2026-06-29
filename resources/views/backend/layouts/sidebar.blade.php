@@ -79,18 +79,18 @@
 
                  @can('read', \App\Models\Pages::class)
                     <li class="nav-item">
-                            <a class="nav-link menu-link {{ request()->is('admin/pages*') ? 'active' : '' }}" 
+                            <a class="nav-link menu-link {{ request()->is('admin/pages*') ? 'active' : '' }}"
                                 href="{{ route('admin.pages.index') }}">
-                                <i class="ri-file-text-line"></i> 
+                                <i class="ri-file-text-line"></i>
                                 <span>Landing Pages</span>
                             </a>
                     </li>
                 @endcan
                 @can('sitemap', \App\Models\General::class)
                     <li class="nav-item">
-                        <a class="nav-link menu-link {{ request()->is('admin/sitemap*') ? 'active' : '' }}" 
+                        <a class="nav-link menu-link {{ request()->is('admin/sitemap*') ? 'active' : '' }}"
                             href="{{ route('admin.sitemap.sitemap-robots.index') }}">
-                            <i class="ri-links-line"></i> 
+                            <i class="ri-links-line"></i>
                             <span>Sitemap & Robots</span>
                         </a>
                     </li>
@@ -109,6 +109,15 @@
                                         <a href="{{ route('admin.clients.index') }}" class="nav-link {{ request()->is('admin/masters/clients*') ? 'active' : '' }}"> Clients </a>
                                     </li>
                                 @endcan
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.recruiters.index') }}" class="nav-link {{ request()->is('admin/masters/recruiters*') ? 'active' : '' }}"> Recruiters </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.job-roles.index') }}" class="nav-link {{ request()->is('admin/masters/job-roles*') ? 'active' : '' }}"> Job Roles </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.modes.index') }}" class="nav-link {{ request()->is('admin/masters/modes*') ? 'active' : '' }}"> Modes </a>
+                                    </li>
                                 @can('read', \App\Models\InterviewLevel::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.interview-levels.index') }}" class="nav-link {{ request()->is('admin/masters/interview-levels*') ? 'active' : '' }}"> Level of Interview </a>
