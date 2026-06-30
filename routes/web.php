@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\backend\AdminController;
+use App\Http\Controllers\backend\CandidateController;
 use App\Http\Controllers\backend\ClientController;
+use App\Http\Controllers\backend\ClientJobRoleController;
+use App\Http\Controllers\backend\ClientRequirementController;
 use App\Http\Controllers\backend\LoginController;
 use App\Http\Controllers\backend\InterviewLevelController;
 use App\Http\Controllers\backend\LocationController;
@@ -155,6 +158,33 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         });
 
         Route::prefix('modes')->name('modes.')->controller(ModeController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('client-job-roles')->name('client-job-roles.')->controller(ClientJobRoleController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('client-requirements')->name('client-requirements.')->controller(ClientRequirementController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('candidates')->name('candidates.')->controller(CandidateController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');

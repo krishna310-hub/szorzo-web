@@ -1,6 +1,6 @@
 @extends('backend.layouts.master')
 
-@section('title', 'Recruiters')
+@section('title', 'Candidates')
 
 @section('content')
 <div class="main-content">
@@ -10,8 +10,8 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header d-flex align-items-center">
-                            <h5 class="card-title mb-0 flex-grow-1">Recruiters</h5>
-                            <a href="{{ route('admin.recruiters.create') }}" class="btn btn-sm btn-primary">Add New Recruiter</a>
+                            <h5 class="card-title mb-0 flex-grow-1">Candidates</h5>
+                            <a href="{{ route('admin.candidates.create') }}" class="btn btn-sm btn-primary">Add New Candidate</a>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -19,7 +19,7 @@
                                     <thead>
                                         <tr>
                                             <th>S.No</th>
-                                            <th>Recruiter Name</th>
+                                            <th>Candidate Name</th>
                                             <th>Location</th>
                                             <th>Email</th>
                                             <th>Mobile No</th>

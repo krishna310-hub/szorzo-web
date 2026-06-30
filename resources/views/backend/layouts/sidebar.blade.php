@@ -110,6 +110,15 @@
                                     </li>
                                 @endcan
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.client-job-roles.index') }}" class="nav-link {{ request()->is('admin/masters/client-job-roles*') ? 'active' : '' }}"> Client Job Roles </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.client-requirements.index') }}" class="nav-link {{ request()->is('admin/masters/client-requirements*') ? 'active' : '' }}"> Client Requirements </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.candidates.index') }}" class="nav-link {{ request()->is('admin/masters/candidates*') ? 'active' : '' }}"> Candidates </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.recruiters.index') }}" class="nav-link {{ request()->is('admin/masters/recruiters*') ? 'active' : '' }}"> Recruiters </a>
                                     </li>
                                     <li class="nav-item">
