@@ -11,23 +11,23 @@ class ClientRequirement extends Model
 
     protected $fillable = [
         'client_id',
-        'billing_percentage',
+        'billing',
         'job_description_id',
         'mode_id',
-        'open_date',
+        'requirement_open_date',
         'job_role_id',
+        'number_of_position',
+        'closure_target_date',
+        'cv_required',
+        'cv_uploaded',
+        'project_owner',
         'ctc',
         'location_id',
-        'no_of_positions',
-        'closure_target_date',
-        'cvs_required',
-        'cvs_uploaded',
-        'project_owner_id',
         'status',
     ];
 
     protected $casts = [
-        'open_date' => 'date',
+        'requirement_open_date' => 'date',
         'closure_target_date' => 'date',
         'status' => 'boolean',
     ];
@@ -42,6 +42,11 @@ class ClientRequirement extends Model
         return $this->belongsTo(Mode::class);
     }
 
+    public function jobDescription()
+    {
+        return $this->belongsTo(ClientJobRole::class, 'job_description_id');
+    }
+
     public function jobRole()
     {
         return $this->belongsTo(JobRole::class);
@@ -54,6 +59,6 @@ class ClientRequirement extends Model
 
     public function projectOwner()
     {
-        return $this->belongsTo(Recruiter::class, 'project_owner_id');
+        return $this->belongsTo(Recruiter::class, 'project_owner');
     }
 }

@@ -1,8 +1,8 @@
 <div class="row gy-4">
     <div class="col-md-4">
-        <label for="name" class="form-label">Job Role <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $jobRole->name ?? '') }}" placeholder="Enter job role">
-        @error('name')<span class="text-danger small">{{ $message }}</span>@enderror
+        <label for="job_role" class="form-label">Job Role <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="job_role" name="job_role" value="{{ old('job_role', $jobRole->job_role ?? '') }}" placeholder="Enter job role">
+        @error('job_role')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label class="form-label">Status</label>

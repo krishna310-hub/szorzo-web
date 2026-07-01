@@ -10,12 +10,16 @@ return new class extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
-            $table->string('client_code')->nullable()->unique();
-            $table->string('name')->unique();
-            $table->string('logo')->nullable();
-            $table->string('contact_person')->nullable();
+            $table->string('client');
+            $table->decimal('billing', 8, 2)->nullable();
+            $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->string('poc_name')->nullable();
+            $table->date('signed_date')->nullable();
+            $table->date('renewal_date')->nullable();
+            $table->foreignId('division_id')->nullable()->constrained('divisions')->nullOnDelete();
+            $table->string('contact_number')->nullable();
             $table->string('email')->nullable();
-            $table->string('mobile_no')->nullable();
+            $table->string('mobile_number')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();

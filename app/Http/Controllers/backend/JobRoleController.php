@@ -83,11 +83,11 @@ class JobRoleController extends Controller
     private function validatedData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
-            'name' => [
+            'job_role' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('job_roles', 'name')->ignore($ignoreId)->whereNull('deleted_at'),
+                Rule::unique('job_roles', 'job_role')->ignore($ignoreId)->whereNull('deleted_at'),
             ],
             'status' => 'required|in:0,1',
         ]);

@@ -10,11 +10,25 @@ class Candidate extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name',
-        'profile_image',
-        'location_id',
-        'email',
+        'recruiter_id',
+        'client_id',
+        'job_role_id',
+        'candidate_name',
         'mobile_no',
+        'email',
+        'qualification',
+        'total_experience',
+        'relevant_experience',
+        'take_home',
+        'variable',
+        'current_ctc',
+        'expected_ctc',
+        'notice_period',
+        'current_company',
+        'current_location',
+        'preferred_location',
+        'reason_for_change',
+        'level_of_interview_id',
         'status',
     ];
 
@@ -22,8 +36,23 @@ class Candidate extends Model
         'status' => 'boolean',
     ];
 
-    public function location()
+    public function recruiter()
     {
-        return $this->belongsTo(Location::class);
+        return $this->belongsTo(Recruiter::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function jobRole()
+    {
+        return $this->belongsTo(JobRole::class);
+    }
+
+    public function interviewLevel()
+    {
+        return $this->belongsTo(InterviewLevel::class, 'level_of_interview_id');
     }
 }

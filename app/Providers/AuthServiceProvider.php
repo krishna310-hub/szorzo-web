@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Candidate;
 use App\Models\ClientJobRole;
 use App\Models\ClientRequirement;
+use App\Models\Division;
 use App\Models\InterviewLevel;
 use App\Models\JobRole;
 use App\Models\Location;
@@ -16,6 +17,7 @@ use App\Policies\CandidatePolicy;
 use App\Policies\ClientJobRolePolicy;
 use App\Policies\ClientRequirementPolicy;
 use App\Policies\ClientPolicy;
+use App\Policies\DivisionPolicy;
 use App\Policies\ContactEnquiryPolicy;
 use App\Policies\GeneralPolicy;
 use App\Policies\InterviewLevelPolicy;
@@ -50,6 +52,7 @@ class AuthServiceProvider extends ServiceProvider
         Mode::class => ModePolicy::class,
         ClientJobRole::class => ClientJobRolePolicy::class,
         ClientRequirement::class => ClientRequirementPolicy::class,
+        Division::class => DivisionPolicy::class,
         Candidate::class => CandidatePolicy::class,
     ];
 
@@ -74,5 +77,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::Resource('ClientJobRole','App\Policies\ClientJobRolePolicy');
         Gate::Resource('ClientRequirement','App\Policies\ClientRequirementPolicy');
         Gate::Resource('Candidate','App\Policies\CandidatePolicy');
+        Gate::Resource('Division','App\Policies\DivisionPolicy');
     }
 }

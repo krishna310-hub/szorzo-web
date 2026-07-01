@@ -8,13 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('candidates', function (Blueprint $table) {
+        Schema::create('client_job_roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('profile_image')->nullable();
-            $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
-            $table->string('email')->nullable();
-            $table->string('mobile_no')->nullable();
+            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
+            $table->foreignId('job_role_id')->constrained('job_roles')->cascadeOnDelete();
+            $table->text('job_description')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();
@@ -23,6 +21,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('candidates');
+        Schema::dropIfExists('client_job_roles');
     }
 };

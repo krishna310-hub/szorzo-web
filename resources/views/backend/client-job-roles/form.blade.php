@@ -4,7 +4,7 @@
         <select class="form-select" id="client_id" name="client_id">
             <option value="">Select client</option>
             @foreach($clients as $client)
-                <option value="{{ $client->id }}" {{ old('client_id', $clientJobRole->client_id ?? '') == $client->id ? 'selected' : '' }}>{{ $client->name }}</option>
+                <option value="{{ $client->id }}" {{ old('client_id', $clientJobRole->client_id ?? '') == $client->id ? 'selected' : '' }}>{{ $client->client }}</option>
             @endforeach
         </select>
         @error('client_id')<span class="text-danger small">{{ $message }}</span>@enderror
@@ -14,10 +14,15 @@
         <select class="form-select" id="job_role_id" name="job_role_id">
             <option value="">Select job role</option>
             @foreach($jobRoles as $jobRole)
-                <option value="{{ $jobRole->id }}" {{ old('job_role_id', $clientJobRole->job_role_id ?? '') == $jobRole->id ? 'selected' : '' }}>{{ $jobRole->name }}</option>
+                <option value="{{ $jobRole->id }}" {{ old('job_role_id', $clientJobRole->job_role_id ?? '') == $jobRole->id ? 'selected' : '' }}>{{ $jobRole->job_role }}</option>
             @endforeach
         </select>
         @error('job_role_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-8">
+        <label for="job_description" class="form-label">Job Description</label>
+        <textarea class="form-control" id="job_description" name="job_description" rows="4" placeholder="Enter job description">{{ old('job_description', $clientJobRole->job_description ?? '') }}</textarea>
+        @error('job_description')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label class="form-label">Status</label>

@@ -8,20 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('client_job_roles', function (Blueprint $table) {
+        Schema::create('locations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
-            $table->foreignId('job_role_id')->constrained('job_roles')->cascadeOnDelete();
+            $table->string('location');
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();
-
-            $table->unique(['client_id', 'job_role_id', 'deleted_at']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('client_job_roles');
+        Schema::dropIfExists('locations');
     }
 };

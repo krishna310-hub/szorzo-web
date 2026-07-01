@@ -1,8 +1,8 @@
 <div class="row gy-4">
     <div class="col-md-4">
-        <label for="name" class="form-label">Mode <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $mode->name ?? '') }}" placeholder="Enter mode">
-        @error('name')<span class="text-danger small">{{ $message }}</span>@enderror
+        <label for="mode" class="form-label">Mode <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="mode" name="mode" value="{{ old('mode', $mode->mode ?? '') }}" placeholder="Enter mode">
+        @error('mode')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label class="form-label">Status</label>

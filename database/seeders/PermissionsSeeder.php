@@ -60,6 +60,11 @@ class PermissionsSeeder extends Seeder
             ['name'=>'Edit',      'page'=>'location'],
             ['name'=>'Delete',    'page'=>'location'],
 
+            ['name'=>'Read',      'page'=>'division'],
+            ['name'=>'Create',    'page'=>'division'],
+            ['name'=>'Edit',      'page'=>'division'],
+            ['name'=>'Delete',    'page'=>'division'],
+
             ['name'=>'Read',      'page'=>'recruiter'],
             ['name'=>'Create',    'page'=>'recruiter'],
             ['name'=>'Edit',      'page'=>'recruiter'],

@@ -96,7 +96,7 @@
                     </li>
                 @endcan
 
-                @if(auth()->user()->can('read', \App\Models\Client::class) || auth()->user()->can('read', \App\Models\InterviewLevel::class) || auth()->user()->can('read', \App\Models\Location::class))
+                @if(auth()->user()->can('read', \App\Models\Client::class) || auth()->user()->can('read', \App\Models\InterviewLevel::class) || auth()->user()->can('read', \App\Models\Location::class) || auth()->user()->can('read', \App\Models\Division::class))
                     <li class="menu-title"><i class="ri-more-fill"></i> <span>Masters</span></li>
                     <li class="nav-item">
                         <a class="nav-link menu-link" href="#sidebarMasters" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->is('admin/masters*') ? 'true' : 'false' }}" aria-controls="sidebarMasters">
@@ -135,6 +135,11 @@
                                 @can('read', \App\Models\Location::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.locations.index') }}" class="nav-link {{ request()->is('admin/masters/locations*') ? 'active' : '' }}"> Locations </a>
+                                    </li>
+                                @endcan
+                                @can('read', \App\Models\Division::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.divisions.index') }}" class="nav-link {{ request()->is('admin/masters/divisions*') ? 'active' : '' }}"> Divisions </a>
                                     </li>
                                 @endcan
                             </ul>

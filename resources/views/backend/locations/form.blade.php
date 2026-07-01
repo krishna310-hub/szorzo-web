@@ -1,8 +1,8 @@
 <div class="row gy-4">
     <div class="col-md-4">
-        <label for="name" class="form-label">Location <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $location->name ?? '') }}" placeholder="Enter location">
-        @error('name')<span class="text-danger small">{{ $message }}</span>@enderror
+        <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="location" name="location" value="{{ old('location', $location->location ?? '') }}" placeholder="Enter location">
+        @error('location')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label class="form-label">Status</label>

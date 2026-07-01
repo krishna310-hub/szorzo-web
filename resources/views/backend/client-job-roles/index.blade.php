@@ -23,6 +23,7 @@
                                             <th>S.No</th>
                                             <th>Client</th>
                                             <th>Job Role</th>
+                                            <th>Job Description</th>
                                             <th>Status</th>
                                             <th>Created At</th>
                                             <th>Action</th>
@@ -51,6 +52,7 @@
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'client_name', name: 'client_name', orderable: false, searchable: false },
                 { data: 'job_role_name', name: 'job_role_name', orderable: false, searchable: false },
+                { data: 'job_description', name: 'job_description' },
                 { data: 'status', name: 'status', orderable: false, searchable: false },
                 { data: 'created_at', name: 'created_at' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }

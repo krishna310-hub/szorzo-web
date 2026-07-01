@@ -1,8 +1,8 @@
 <div class="row gy-4">
     <div class="col-md-4">
-        <label for="name" class="form-label">Level <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $interviewLevel->name ?? '') }}" placeholder="Enter level">
-        @error('name')<span class="text-danger small">{{ $message }}</span>@enderror
+        <label for="level" class="form-label">Level <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="level" name="level" value="{{ old('level', $interviewLevel->level ?? '') }}" placeholder="Enter level">
+        @error('level')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label for="sort_order" class="form-label">Sort Order</label>
