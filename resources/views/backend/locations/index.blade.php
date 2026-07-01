@@ -51,7 +51,7 @@
             },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'name', name: 'name' },
+                { data: 'location', name: 'location' },
                 { data: 'status', name: 'status', orderable: false, searchable: false },
                 { data: 'created_at', name: 'created_at' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }

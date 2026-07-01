@@ -10,10 +10,11 @@ class Recruiter extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name',
-        'location_id',
+        'recruiter_name',
+        'location',
         'email',
-        'mobile_no',
+        'mobile_number',
+        'performance_rating',
         'status',
     ];
 
@@ -21,8 +22,4 @@ class Recruiter extends Model
         'status' => 'boolean',
     ];
 
-    public function location()
-    {
-        return $this->belongsTo(Location::class);
-    }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Location;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class LocationController extends Controller
@@ -60,7 +61,12 @@ class LocationController extends Controller
         $this->authorize('create', Location::class);
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:locations,name',
+            'location' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('locations', 'location')->whereNull('deleted_at'),
+            ],
             'status' => 'required|in:0,1',
         ]);
 
@@ -83,7 +89,12 @@ class LocationController extends Controller
         $location = Location::findOrFail($id);
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:locations,name,' . $location->id,
+            'location' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('locations', 'location')->ignore($location->id)->whereNull('deleted_at'),
+            ],
             'status' => 'required|in:0,1',
         ]);
 

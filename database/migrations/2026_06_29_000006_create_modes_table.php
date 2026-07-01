@@ -8,10 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('interview_levels', function (Blueprint $table) {
+        Schema::create('modes', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->unsignedInteger('sort_order')->default(0);
+            $table->string('mode');
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();
@@ -20,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('interview_levels');
+        Schema::dropIfExists('modes');
     }
 };

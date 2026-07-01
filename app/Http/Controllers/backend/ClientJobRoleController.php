@@ -24,8 +24,8 @@ class ClientJobRoleController extends Controller
 
             return DataTables::of($clientJobRoles)
                 ->addIndexColumn()
-                ->addColumn('client_name', fn ($row) => $row->client->name ?? '-')
-                ->addColumn('job_role_name', fn ($row) => $row->jobRole->name ?? '-')
+                ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
+                ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -50,8 +50,8 @@ class ClientJobRoleController extends Controller
     public function create()
     {
         $this->authorize('create', ClientJobRole::class);
-        $clients = Client::where('status', true)->orderBy('name')->get();
-        $jobRoles = JobRole::where('status', true)->orderBy('name')->get();
+        $clients = Client::where('status', true)->orderBy('client')->get();
+        $jobRoles = JobRole::where('status', true)->orderBy('job_role')->get();
 
         return view('backend.client-job-roles.create', compact('clients', 'jobRoles'));
     }
@@ -68,8 +68,8 @@ class ClientJobRoleController extends Controller
     {
         $this->authorize('edit', ClientJobRole::class);
         $clientJobRole = ClientJobRole::findOrFail($id);
-        $clients = Client::where('status', true)->orderBy('name')->get();
-        $jobRoles = JobRole::where('status', true)->orderBy('name')->get();
+        $clients = Client::where('status', true)->orderBy('client')->get();
+        $jobRoles = JobRole::where('status', true)->orderBy('job_role')->get();
 
         return view('backend.client-job-roles.edit', compact('clientJobRole', 'clients', 'jobRoles'));
     }
@@ -103,6 +103,7 @@ class ClientJobRoleController extends Controller
                     ->ignore($ignoreId)
                     ->whereNull('deleted_at'),
             ],
+            'job_description' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
     }

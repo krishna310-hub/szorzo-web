@@ -10,28 +10,33 @@ class Client extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'client_code',
-        'name',
-        'logo',
-        'contact_person',
+        'client',
+        'billing',
+        'location_id',
+        'poc_name',
+        'signed_date',
+        'renewal_date',
+        'division_id',
+        'contact_number',
         'email',
-        'mobile_no',
+        'mobile_number',
         'status',
     ];
 
     protected $casts = [
+        'signed_date' => 'date',
+        'renewal_date' => 'date',
         'status' => 'boolean',
     ];
 
-    protected static function booted()
+    public function location()
     {
-        static::created(function ($client) {
-            if (!$client->client_code) {
-                $client->update([
-                    'client_code' => '#CL' . $client->id,
-                ]);
-            }
-        });
+        return $this->belongsTo(Location::class);
+    }
+
+    public function division()
+    {
+        return $this->belongsTo(Division::class);
     }
 
     public function clientJobRoles()

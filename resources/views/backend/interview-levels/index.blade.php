@@ -52,7 +52,7 @@
             },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'name', name: 'name' },
+                { data: 'level', name: 'level' },
                 { data: 'sort_order', name: 'sort_order' },
                 { data: 'status', name: 'status', orderable: false, searchable: false },
                 { data: 'created_at', name: 'created_at' },

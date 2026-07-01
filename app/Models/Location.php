@@ -10,7 +10,7 @@ class Location extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name',
+        'location',
         'status',
     ];
 
@@ -18,13 +18,4 @@ class Location extends Model
         'status' => 'boolean',
     ];
 
-    public function recruiters()
-    {
-        return $this->hasMany(Recruiter::class);
-    }
-
-    public function candidates()
-    {
-        return $this->hasMany(Candidate::class);
-    }
 }

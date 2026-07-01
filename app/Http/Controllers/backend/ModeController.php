@@ -83,11 +83,11 @@ class ModeController extends Controller
     private function validatedData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
-            'name' => [
+            'mode' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('modes', 'name')->ignore($ignoreId)->whereNull('deleted_at'),
+                Rule::unique('modes', 'mode')->ignore($ignoreId)->whereNull('deleted_at'),
             ],
             'status' => 'required|in:0,1',
         ]);

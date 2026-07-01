@@ -10,7 +10,7 @@ class JobRole extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name',
+        'job_role',
         'status',
     ];
 

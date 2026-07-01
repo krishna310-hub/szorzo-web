@@ -8,12 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('recruiters', function (Blueprint $table) {
+        Schema::create('level_of_interviews', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
-            $table->string('email')->nullable();
-            $table->string('mobile_no')->nullable();
+            $table->string('level');
+            $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();
@@ -22,6 +20,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('recruiters');
+        Schema::dropIfExists('level_of_interviews');
     }
 };

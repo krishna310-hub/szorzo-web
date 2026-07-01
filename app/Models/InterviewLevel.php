@@ -9,8 +9,10 @@ class InterviewLevel extends Model
 {
     use SoftDeletes;
 
+    protected $table = 'level_of_interviews';
+
     protected $fillable = [
-        'name',
+        'level',
         'sort_order',
         'status',
     ];

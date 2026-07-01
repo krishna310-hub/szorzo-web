@@ -24,7 +24,8 @@
                                             <th>Recruiter Name</th>
                                             <th>Location</th>
                                             <th>Email</th>
-                                            <th>Mobile No</th>
+                                            <th>Mobile Number</th>
+                                            <th>Performance Rating</th>
                                             <th>Status</th>
                                             <th>Created At</th>
                                             <th>Action</th>
@@ -51,10 +52,11 @@
             ajax: { url: '{{ route('admin.recruiters.index') }}', type: 'GET' },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'name', name: 'name' },
-                { data: 'location_name', name: 'location_name', orderable: false, searchable: false },
+                { data: 'recruiter_name', name: 'recruiter_name' },
+                { data: 'location', name: 'location' },
                 { data: 'email', name: 'email' },
-                { data: 'mobile_no', name: 'mobile_no' },
+                { data: 'mobile_number', name: 'mobile_number' },
+                { data: 'performance_rating', name: 'performance_rating' },
                 { data: 'status', name: 'status', orderable: false, searchable: false },
                 { data: 'created_at', name: 'created_at' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }

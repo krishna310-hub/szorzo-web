@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Location;
 use App\Models\Recruiter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -18,11 +17,10 @@ class RecruiterController extends Controller
         $this->authorize('read', Recruiter::class);
 
         if ($request->ajax()) {
-            $recruiters = Recruiter::with('location')->latest();
+            $recruiters = Recruiter::latest();
 
             return DataTables::of($recruiters)
                 ->addIndexColumn()
-                ->addColumn('location_name', fn ($row) => $row->location->name ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -47,9 +45,7 @@ class RecruiterController extends Controller
     public function create()
     {
         $this->authorize('create', Recruiter::class);
-        $locations = Location::where('status', true)->orderBy('name')->get();
-
-        return view('backend.recruiters.create', compact('locations'));
+        return view('backend.recruiters.create');
     }
 
     public function store(Request $request)
@@ -64,9 +60,7 @@ class RecruiterController extends Controller
     {
         $this->authorize('edit', Recruiter::class);
         $recruiter = Recruiter::findOrFail($id);
-        $locations = Location::where('status', true)->orderBy('name')->get();
-
-        return view('backend.recruiters.edit', compact('recruiter', 'locations'));
+        return view('backend.recruiters.edit', compact('recruiter'));
     }
 
     public function update(Request $request, $id)
@@ -89,10 +83,11 @@ class RecruiterController extends Controller
     private function validatedData(Request $request): array
     {
         return $request->validate([
-            'name' => 'required|string|max:255',
-            'location_id' => 'nullable|exists:locations,id',
+            'recruiter_name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
-            'mobile_no' => 'nullable|string|max:30',
+            'mobile_number' => 'nullable|string|max:30',
+            'performance_rating' => 'nullable|numeric|min:0|max:10',
             'status' => 'required|in:0,1',
         ]);
     }

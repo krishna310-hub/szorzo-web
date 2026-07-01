@@ -1,18 +1,13 @@
 <div class="row gy-4">
     <div class="col-md-4">
-        <label for="name" class="form-label">Recruiter Name <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $recruiter->name ?? '') }}" placeholder="Enter recruiter name">
-        @error('name')<span class="text-danger small">{{ $message }}</span>@enderror
+        <label for="recruiter_name" class="form-label">Recruiter Name <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="recruiter_name" name="recruiter_name" value="{{ old('recruiter_name', $recruiter->recruiter_name ?? '') }}" placeholder="Enter recruiter name">
+        @error('recruiter_name')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
-        <label for="location_id" class="form-label">Location</label>
-        <select class="form-select" id="location_id" name="location_id">
-            <option value="">Select location</option>
-            @foreach($locations as $location)
-                <option value="{{ $location->id }}" {{ old('location_id', $recruiter->location_id ?? '') == $location->id ? 'selected' : '' }}>{{ $location->name }}</option>
-            @endforeach
-        </select>
-        @error('location_id')<span class="text-danger small">{{ $message }}</span>@enderror
+        <label for="location" class="form-label">Location</label>
+        <input type="text" class="form-control" id="location" name="location" value="{{ old('location', $recruiter->location ?? '') }}" placeholder="Enter location">
+        @error('location')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label for="email" class="form-label">Email</label>
@@ -20,9 +15,14 @@
         @error('email')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
-        <label for="mobile_no" class="form-label">Mobile No</label>
-        <input type="text" class="form-control" id="mobile_no" name="mobile_no" value="{{ old('mobile_no', $recruiter->mobile_no ?? '') }}" placeholder="Enter mobile no">
-        @error('mobile_no')<span class="text-danger small">{{ $message }}</span>@enderror
+        <label for="mobile_number" class="form-label">Mobile Number</label>
+        <input type="text" class="form-control" id="mobile_number" name="mobile_number" value="{{ old('mobile_number', $recruiter->mobile_number ?? '') }}" placeholder="Enter mobile number">
+        @error('mobile_number')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4">
+        <label for="performance_rating" class="form-label">Performance Rating</label>
+        <input type="number" step="0.01" min="0" max="10" class="form-control" id="performance_rating" name="performance_rating" value="{{ old('performance_rating', $recruiter->performance_rating ?? '') }}" placeholder="Enter performance rating">
+        @error('performance_rating')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label class="form-label">Status</label>

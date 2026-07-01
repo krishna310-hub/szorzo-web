@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\backend;
 
-use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
-use App\Models\Location;
+use App\Models\Client;
+use App\Models\InterviewLevel;
+use App\Models\JobRole;
+use App\Models\Recruiter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -19,20 +21,18 @@ class CandidateController extends Controller
         $this->authorize('read', Candidate::class);
 
         if ($request->ajax()) {
-            $candidates = Candidate::with('location')->latest();
+            $query = Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])->latest();
 
-            return DataTables::of($candidates)
+            return DataTables::of($query)
                 ->addIndexColumn()
-                ->editColumn('profile_image', function ($row) {
-                    return $row->profile_image
-                        ? '<img src="' . asset($row->profile_image) . '" alt="' . e($row->name) . '" class="rounded" width="45" height="45" style="object-fit: cover;">'
-                        : '-';
-                })
-                ->addColumn('location_name', fn ($row) => $row->location->name ?? '-')
+                ->addColumn('recruiter_name', fn ($row) => $row->recruiter->recruiter_name ?? '-')
+                ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
+                ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
+                ->addColumn('interview_level', fn ($row) => $row->interviewLevel->level ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
-                ->editColumn('created_at', fn ($row) => $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '-')
+                ->editColumn('created_at', fn ($row) => $row->created_at?->format('Y-m-d H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', Candidate::class)) {
@@ -43,7 +43,7 @@ class CandidateController extends Controller
                     }
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['profile_image', 'status', 'action'])
+                ->rawColumns(['status', 'action'])
                 ->make(true);
         }
 
@@ -53,79 +53,71 @@ class CandidateController extends Controller
     public function create()
     {
         $this->authorize('create', Candidate::class);
-        $locations = Location::where('status', true)->orderBy('name')->get();
-
-        return view('backend.candidates.create', compact('locations'));
+        return view('backend.candidates.create', $this->formData());
     }
 
     public function store(Request $request)
     {
         $this->authorize('create', Candidate::class);
-        $data = $this->validatedData($request);
-
-        if ($request->hasFile('profile_image')) {
-            $upload = Helper::uploadImage($request->file('profile_image'), 'candidates');
-            if ($upload['status']) {
-                $data['profile_image'] = $upload['name'];
-            }
-        }
-
-        Candidate::create($data);
-
+        Candidate::create($this->validatedData($request));
         return redirect()->route('admin.candidates.index')->with('success', 'Candidate created successfully.');
     }
 
     public function edit($id)
     {
         $this->authorize('edit', Candidate::class);
-        $candidate = Candidate::findOrFail($id);
-        $locations = Location::where('status', true)->orderBy('name')->get();
-
-        return view('backend.candidates.edit', compact('candidate', 'locations'));
+        return view('backend.candidates.edit', array_merge(
+            ['candidate' => Candidate::findOrFail($id)],
+            $this->formData()
+        ));
     }
 
     public function update(Request $request, $id)
     {
         $this->authorize('edit', Candidate::class);
-        $candidate = Candidate::findOrFail($id);
-        $data = $this->validatedData($request);
-
-        if ($request->hasFile('profile_image')) {
-            $oldImage = $candidate->profile_image;
-            $upload = Helper::uploadImage($request->file('profile_image'), 'candidates');
-            if ($upload['status']) {
-                $data['profile_image'] = $upload['name'];
-                if ($oldImage) {
-                    Helper::unlinkImage($oldImage);
-                }
-            }
-        }
-
-        $candidate->update($data);
-
+        Candidate::findOrFail($id)->update($this->validatedData($request));
         return redirect()->route('admin.candidates.index')->with('success', 'Candidate updated successfully.');
     }
 
     public function destroy($id)
     {
         $this->authorize('delete', Candidate::class);
-        $candidate = Candidate::findOrFail($id);
-        if ($candidate->profile_image) {
-            Helper::unlinkImage($candidate->profile_image);
-        }
-        $candidate->delete();
-
+        Candidate::findOrFail($id)->delete();
         return response()->json(['status' => true, 'message' => 'Candidate deleted successfully.']);
+    }
+
+    private function formData(): array
+    {
+        return [
+            'recruiters' => Recruiter::where('status', true)->orderBy('recruiter_name')->get(),
+            'clients' => Client::where('status', true)->orderBy('client')->get(),
+            'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
+            'interviewLevels' => InterviewLevel::where('status', true)->orderBy('sort_order')->get(),
+        ];
     }
 
     private function validatedData(Request $request): array
     {
         return $request->validate([
-            'name' => 'required|string|max:255',
-            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'location_id' => 'nullable|exists:locations,id',
-            'email' => 'nullable|email|max:255',
+            'recruiter_id' => 'nullable|exists:recruiters,id',
+            'client_id' => 'nullable|exists:clients,id',
+            'job_role_id' => 'nullable|exists:job_roles,id',
+            'candidate_name' => 'required|string|max:255',
             'mobile_no' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:255',
+            'qualification' => 'nullable|string|max:255',
+            'total_experience' => 'nullable|numeric|min:0',
+            'relevant_experience' => 'nullable|numeric|min:0',
+            'take_home' => 'nullable|numeric|min:0',
+            'variable' => 'nullable|numeric|min:0',
+            'current_ctc' => 'nullable|numeric|min:0',
+            'expected_ctc' => 'nullable|numeric|min:0',
+            'notice_period' => 'nullable|string|max:255',
+            'current_company' => 'nullable|string|max:255',
+            'current_location' => 'nullable|string|max:255',
+            'preferred_location' => 'nullable|string|max:255',
+            'reason_for_change' => 'nullable|string',
+            'level_of_interview_id' => 'nullable|exists:level_of_interviews,id',
             'status' => 'required|in:0,1',
         ]);
     }

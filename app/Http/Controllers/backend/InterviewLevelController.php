@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InterviewLevel;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class InterviewLevelController extends Controller
@@ -60,7 +61,12 @@ class InterviewLevelController extends Controller
         $this->authorize('create', InterviewLevel::class);
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:interview_levels,name',
+            'level' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('level_of_interviews', 'level')->whereNull('deleted_at'),
+            ],
             'sort_order' => 'nullable|integer|min:0',
             'status' => 'required|in:0,1',
         ]);
@@ -85,7 +91,12 @@ class InterviewLevelController extends Controller
         $interviewLevel = InterviewLevel::findOrFail($id);
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:interview_levels,name,' . $interviewLevel->id,
+            'level' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('level_of_interviews', 'level')->ignore($interviewLevel->id)->whereNull('deleted_at'),
+            ],
             'sort_order' => 'nullable|integer|min:0',
             'status' => 'required|in:0,1',
         ]);

@@ -8,9 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('locations', function (Blueprint $table) {
+        Schema::create('recruiters', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('recruiter_name');
+            $table->string('location')->nullable();
+            $table->string('email')->nullable();
+            $table->string('mobile_number')->nullable();
+            $table->decimal('performance_rating', 4, 2)->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();
@@ -19,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('locations');
+        Schema::dropIfExists('recruiters');
     }
 };

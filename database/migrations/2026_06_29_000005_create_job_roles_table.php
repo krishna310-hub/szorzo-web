@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('job_roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('job_role');
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();
