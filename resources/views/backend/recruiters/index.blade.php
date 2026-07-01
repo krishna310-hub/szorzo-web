@@ -25,7 +25,7 @@
                                             <th>Location</th>
                                             <th>Email</th>
                                             <th>Mobile Number</th>
-                                            <th>Performance Rating</th>
+                                            {{-- <th>Performance Rating</th> --}}
                                             <th>Status</th>
                                             <th>Created At</th>
                                             <th>Action</th>
@@ -56,7 +56,7 @@
                 { data: 'location', name: 'location' },
                 { data: 'email', name: 'email' },
                 { data: 'mobile_number', name: 'mobile_number' },
-                { data: 'performance_rating', name: 'performance_rating' },
+                // { data: 'performance_rating', name: 'performance_rating' },
                 { data: 'status', name: 'status', orderable: false, searchable: false },
                 { data: 'created_at', name: 'created_at' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }

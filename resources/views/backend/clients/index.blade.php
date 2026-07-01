@@ -8,7 +8,7 @@
     </div>
     <div class="card-body"><div class="table-responsive">
         <table id="clients-table" class="table table-bordered dt-responsive nowrap w-100"><thead><tr>
-            <th>S.No</th><th>Client</th><th>Billing</th><th>Location</th><th>PoC Name</th><th>Signed Date</th><th>Renewal Date</th><th>Division</th><th>Contact Number</th><th>Email</th><th>Mobile Number</th><th>Status</th><th>Created At</th><th>Action</th>
+            <th>S.No</th><th>Client</th><th>Billing</th><th>Location</th><th>PoC Name</th><th>Signed Date</th><th>Renewal Date</th><th>Division</th><th>Contact Number</th><th>Email</th><th>Status</th><th>Created At</th><th>Action</th>
         </tr></thead><tbody></tbody></table>
     </div></div>
 </div></div></div></div></div></div>
@@ -27,7 +27,6 @@ $(document).ready(function () {
             { data: 'renewal_date', name: 'renewal_date' },
             { data: 'division_name', name: 'division_name', orderable: false, searchable: false },
             { data: 'contact_number', name: 'contact_number' }, { data: 'email', name: 'email' },
-            { data: 'mobile_number', name: 'mobile_number' },
             { data: 'status', name: 'status', orderable: false, searchable: false },
             { data: 'created_at', name: 'created_at' }, { data: 'action', name: 'action', orderable: false, searchable: false }
         ]

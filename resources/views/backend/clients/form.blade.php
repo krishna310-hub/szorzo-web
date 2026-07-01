@@ -55,11 +55,6 @@
         @error('email')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
-        <label for="mobile_number" class="form-label">Mobile Number</label>
-        <input type="text" class="form-control" id="mobile_number" name="mobile_number" value="{{ old('mobile_number', $client->mobile_number ?? '') }}">
-        @error('mobile_number')<span class="text-danger small">{{ $message }}</span>@enderror
-    </div>
-    <div class="col-md-4">
         <label class="form-label">Status</label>
         <div class="d-flex">
             <div class="form-check form-radio-success me-3">

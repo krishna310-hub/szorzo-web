@@ -19,11 +19,11 @@
         <input type="text" class="form-control" id="mobile_number" name="mobile_number" value="{{ old('mobile_number', $recruiter->mobile_number ?? '') }}" placeholder="Enter mobile number">
         @error('mobile_number')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
-    <div class="col-md-4">
+    {{-- <div class="col-md-4">
         <label for="performance_rating" class="form-label">Performance Rating</label>
         <input type="number" step="0.01" min="0" max="10" class="form-control" id="performance_rating" name="performance_rating" value="{{ old('performance_rating', $recruiter->performance_rating ?? '') }}" placeholder="Enter performance rating">
         @error('performance_rating')<span class="text-danger small">{{ $message }}</span>@enderror
-    </div>
+    </div> --}}
     <div class="col-md-4">
         <label class="form-label">Status</label>
         <div class="d-flex">
