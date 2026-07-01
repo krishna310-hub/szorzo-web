@@ -15,12 +15,12 @@
         </a>
         <!-- Light Logo-->
         <a href="{{route('index')}}" class="logo logo-light">
-            <span class="logo-sm">
+            {{-- <span class="logo-sm">
                 <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="22">
                 <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
-            </span>
+            </span> --}}
             <span class="logo-lg">
-                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="70">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="150">
                 <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
             </span>
         </a>

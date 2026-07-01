@@ -117,7 +117,7 @@
                                         class="apex-charts" dir="ltr"></div>
                             </div>
                         </div> <!-- .card-->
-                    </div> 
+                    </div>
 
                     {{-- Latest Enquiries --}}
                     <div class="col-md-6">
@@ -166,7 +166,7 @@
                 © {{ date('Y') }} SZORZO
             </div>
             <div>
-                Developed by NextDNA Technologies
+                Developed by SZORZO Technologies
             </div>
         </div>
     </footer>
