@@ -8,12 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('clients', function (Blueprint $table) {
+        Schema::create('candidates', function (Blueprint $table) {
             $table->id();
-            $table->string('client_code')->nullable()->unique();
-            $table->string('name')->unique();
-            $table->string('logo')->nullable();
-            $table->string('contact_person')->nullable();
+            $table->string('name');
+            $table->string('profile_image')->nullable();
+            $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->string('email')->nullable();
             $table->string('mobile_no')->nullable();
             $table->boolean('status')->default(true);
@@ -24,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('clients');
+        Schema::dropIfExists('candidates');
     }
 };

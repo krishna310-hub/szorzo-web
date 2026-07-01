@@ -1,19 +1,18 @@
 <div class="row gy-4">
     <div class="col-md-4">
         <label for="name" class="form-label">Job Role <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $client->name ?? '') }}" placeholder="Enter recruiter name">
+        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $jobRole->name ?? '') }}" placeholder="Enter job role">
         @error('name')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
-    
     <div class="col-md-4">
         <label class="form-label">Status</label>
         <div class="d-flex">
             <div class="form-check form-radio-success me-3">
-                <input class="form-check-input" type="radio" name="status" id="status_active" value="1" {{ old('status', isset($client) ? (int) $client->status : 1) == 1 ? 'checked' : '' }}>
+                <input class="form-check-input" type="radio" name="status" id="status_active" value="1" {{ old('status', isset($jobRole) ? (int) $jobRole->status : 1) == 1 ? 'checked' : '' }}>
                 <label class="form-check-label" for="status_active">Active</label>
             </div>
             <div class="form-check form-radio-danger ms-3">
-                <input class="form-check-input" type="radio" name="status" id="status_inactive" value="0" {{ old('status', isset($client) ? (int) $client->status : 1) == 0 ? 'checked' : '' }}>
+                <input class="form-check-input" type="radio" name="status" id="status_inactive" value="0" {{ old('status', isset($jobRole) ? (int) $jobRole->status : 1) == 0 ? 'checked' : '' }}>
                 <label class="form-check-label" for="status_inactive">Inactive</label>
             </div>
         </div>

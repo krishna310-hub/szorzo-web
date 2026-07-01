@@ -11,11 +11,13 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center">
                             <h5 class="card-title mb-0 flex-grow-1">Recruiters</h5>
-                            <a href="{{ route('admin.recruiters.create') }}" class="btn btn-sm btn-primary">Add New Recruiter</a>
+                            @can('create', \App\Models\Recruiter::class)
+                                <a href="{{ route('admin.recruiters.create') }}" class="btn btn-sm btn-primary">Add New Recruiter</a>
+                            @endcan
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table id="" class="table table-bordered dt-responsive nowrap w-100">
+                                <table id="recruiters-table" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>S.No</th>
@@ -42,6 +44,34 @@
 
 @section('script')
 <script>
+    $(document).ready(function () {
+        var table = $('#recruiters-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: { url: '{{ route('admin.recruiters.index') }}', type: 'GET' },
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'name', name: 'name' },
+                { data: 'location_name', name: 'location_name', orderable: false, searchable: false },
+                { data: 'email', name: 'email' },
+                { data: 'mobile_no', name: 'mobile_no' },
+                { data: 'status', name: 'status', orderable: false, searchable: false },
+                { data: 'created_at', name: 'created_at' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ]
+        });
 
+        $(document).on('click', '.delete-record', function () {
+            if (!confirm('Are you sure you want to delete this recruiter?')) return;
+            $.ajax({
+                url: $(this).data('route'),
+                type: 'DELETE',
+                success: function (res) {
+                    res.status ? toastr.success(res.message) : toastr.error(res.message);
+                    table.ajax.reload(null, false);
+                }
+            });
+        });
+    });
 </script>
 @endsection

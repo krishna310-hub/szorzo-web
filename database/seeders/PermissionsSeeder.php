@@ -59,6 +59,36 @@ class PermissionsSeeder extends Seeder
             ['name'=>'Create',    'page'=>'location'],
             ['name'=>'Edit',      'page'=>'location'],
             ['name'=>'Delete',    'page'=>'location'],
+
+            ['name'=>'Read',      'page'=>'recruiter'],
+            ['name'=>'Create',    'page'=>'recruiter'],
+            ['name'=>'Edit',      'page'=>'recruiter'],
+            ['name'=>'Delete',    'page'=>'recruiter'],
+
+            ['name'=>'Read',      'page'=>'job_role'],
+            ['name'=>'Create',    'page'=>'job_role'],
+            ['name'=>'Edit',      'page'=>'job_role'],
+            ['name'=>'Delete',    'page'=>'job_role'],
+
+            ['name'=>'Read',      'page'=>'mode'],
+            ['name'=>'Create',    'page'=>'mode'],
+            ['name'=>'Edit',      'page'=>'mode'],
+            ['name'=>'Delete',    'page'=>'mode'],
+
+            ['name'=>'Read',      'page'=>'client_job_role'],
+            ['name'=>'Create',    'page'=>'client_job_role'],
+            ['name'=>'Edit',      'page'=>'client_job_role'],
+            ['name'=>'Delete',    'page'=>'client_job_role'],
+
+            ['name'=>'Read',      'page'=>'client_requirement'],
+            ['name'=>'Create',    'page'=>'client_requirement'],
+            ['name'=>'Edit',      'page'=>'client_requirement'],
+            ['name'=>'Delete',    'page'=>'client_requirement'],
+
+            ['name'=>'Read',      'page'=>'candidate'],
+            ['name'=>'Create',    'page'=>'candidate'],
+            ['name'=>'Edit',      'page'=>'candidate'],
+            ['name'=>'Delete',    'page'=>'candidate'],
         ];
         
         foreach ($permissions as $permission) {

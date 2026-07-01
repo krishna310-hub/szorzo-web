@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\Helper;
 use App\Models\Client;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class ClientController extends Controller
@@ -21,6 +23,11 @@ class ClientController extends Controller
 
             return DataTables::of($clients)
                 ->addIndexColumn()
+                ->editColumn('logo', function ($row) {
+                    return $row->logo
+                        ? '<img src="' . asset($row->logo) . '" alt="' . e($row->name) . '" class="rounded" width="45" height="45" style="object-fit: cover;">'
+                        : '-';
+                })
                 ->editColumn('status', function ($row) {
                     return $row->status
                         ? '<span class="badge bg-success-subtle text-success">Active</span>'
@@ -42,7 +49,7 @@ class ClientController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['logo', 'status', 'action'])
                 ->make(true);
         }
 
@@ -60,12 +67,25 @@ class ClientController extends Controller
         $this->authorize('create', Client::class);
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:clients,name',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('clients', 'name')->whereNull('deleted_at'),
+            ],
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'mobile_no' => 'nullable|string|max:30',
             'status' => 'required|in:0,1',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $upload = Helper::uploadImage($request->file('logo'), 'clients');
+            if ($upload['status']) {
+                $data['logo'] = $upload['name'];
+            }
+        }
 
         $client = Client::create($data);
 
@@ -90,12 +110,29 @@ class ClientController extends Controller
         $client = Client::findOrFail($id);
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:clients,name,' . $client->id,
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('clients', 'name')->ignore($client->id)->whereNull('deleted_at'),
+            ],
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'contact_person' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'mobile_no' => 'nullable|string|max:30',
             'status' => 'required|in:0,1',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $oldLogo = $client->logo;
+            $upload = Helper::uploadImage($request->file('logo'), 'clients');
+            if ($upload['status']) {
+                $data['logo'] = $upload['name'];
+                if ($oldLogo) {
+                    Helper::unlinkImage($oldLogo);
+                }
+            }
+        }
 
         $client->update($data);
 
@@ -105,7 +142,11 @@ class ClientController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', Client::class);
-        Client::findOrFail($id)->delete();
+        $client = Client::findOrFail($id);
+        if ($client->logo) {
+            Helper::unlinkImage($client->logo);
+        }
+        $client->delete();
 
         return response()->json(['status' => true, 'message' => 'Client deleted successfully.']);
     }

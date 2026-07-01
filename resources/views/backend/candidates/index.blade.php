@@ -11,14 +11,17 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center">
                             <h5 class="card-title mb-0 flex-grow-1">Candidates</h5>
-                            <a href="{{ route('admin.candidates.create') }}" class="btn btn-sm btn-primary">Add New Candidate</a>
+                            @can('create', \App\Models\Candidate::class)
+                                <a href="{{ route('admin.candidates.create') }}" class="btn btn-sm btn-primary">Add New Candidate</a>
+                            @endcan
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table id="" class="table table-bordered dt-responsive nowrap w-100">
+                                <table id="candidates-table" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>S.No</th>
+                                            <th>Image</th>
                                             <th>Candidate Name</th>
                                             <th>Location</th>
                                             <th>Email</th>
@@ -42,6 +45,35 @@
 
 @section('script')
 <script>
+    $(document).ready(function () {
+        var table = $('#candidates-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: { url: '{{ route('admin.candidates.index') }}', type: 'GET' },
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'profile_image', name: 'profile_image', orderable: false, searchable: false },
+                { data: 'name', name: 'name' },
+                { data: 'location_name', name: 'location_name', orderable: false, searchable: false },
+                { data: 'email', name: 'email' },
+                { data: 'mobile_no', name: 'mobile_no' },
+                { data: 'status', name: 'status', orderable: false, searchable: false },
+                { data: 'created_at', name: 'created_at' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ]
+        });
 
+        $(document).on('click', '.delete-record', function () {
+            if (!confirm('Are you sure you want to delete this candidate?')) return;
+            $.ajax({
+                url: $(this).data('route'),
+                type: 'DELETE',
+                success: function (res) {
+                    res.status ? toastr.success(res.message) : toastr.error(res.message);
+                    table.ajax.reload(null, false);
+                }
+            });
+        });
+    });
 </script>
 @endsection

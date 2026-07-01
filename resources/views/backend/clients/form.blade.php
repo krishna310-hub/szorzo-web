@@ -5,6 +5,14 @@
         @error('name')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
+        <label for="logo" class="form-label">Logo</label>
+        <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+        @if(isset($client) && $client->logo)
+            <img src="{{ asset($client->logo) }}" alt="Client logo" class="rounded mt-2" width="70" height="70" style="object-fit: cover;">
+        @endif
+        @error('logo')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4">
         <label for="contact_person" class="form-label">Contact Person</label>
         <input type="text" class="form-control" id="contact_person" name="contact_person" value="{{ old('contact_person', $client->contact_person ?? '') }}" placeholder="Enter contact person">
         @error('contact_person')<span class="text-danger small">{{ $message }}</span>@enderror

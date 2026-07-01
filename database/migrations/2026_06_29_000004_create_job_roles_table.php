@@ -8,14 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('clients', function (Blueprint $table) {
+        Schema::create('job_roles', function (Blueprint $table) {
             $table->id();
-            $table->string('client_code')->nullable()->unique();
             $table->string('name')->unique();
-            $table->string('logo')->nullable();
-            $table->string('contact_person')->nullable();
-            $table->string('email')->nullable();
-            $table->string('mobile_no')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();
@@ -24,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('clients');
+        Schema::dropIfExists('job_roles');
     }
 };

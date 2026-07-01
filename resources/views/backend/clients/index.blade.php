@@ -22,6 +22,7 @@
                                         <tr>
                                             <th>S.No</th>
                                             <th>Client Code</th>
+                                            <th>Logo</th>
                                             <th>Client</th>
                                             <th>Contact Person</th>
                                             <th>Email</th>
@@ -56,6 +57,7 @@
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'client_code', name: 'client_code' },
+                { data: 'logo', name: 'logo', orderable: false, searchable: false },
                 { data: 'name', name: 'name' },
                 { data: 'contact_person', name: 'contact_person' },
                 { data: 'email', name: 'email' },

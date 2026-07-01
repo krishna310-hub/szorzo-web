@@ -11,11 +11,13 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center">
                             <h5 class="card-title mb-0 flex-grow-1">Client Job Roles</h5>
-                            <a href="{{ route('admin.client-job-roles.create') }}" class="btn btn-sm btn-primary">Add Client Job Role</a>
+                            @can('create', \App\Models\ClientJobRole::class)
+                                <a href="{{ route('admin.client-job-roles.create') }}" class="btn btn-sm btn-primary">Add Client Job Role</a>
+                            @endcan
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table id="" class="table table-bordered dt-responsive nowrap w-100">
+                                <table id="client-job-roles-table" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
                                         <tr>
                                             <th>S.No</th>
@@ -40,6 +42,32 @@
 
 @section('script')
 <script>
+    $(document).ready(function () {
+        var table = $('#client-job-roles-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: { url: '{{ route('admin.client-job-roles.index') }}', type: 'GET' },
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'client_name', name: 'client_name', orderable: false, searchable: false },
+                { data: 'job_role_name', name: 'job_role_name', orderable: false, searchable: false },
+                { data: 'status', name: 'status', orderable: false, searchable: false },
+                { data: 'created_at', name: 'created_at' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ]
+        });
 
+        $(document).on('click', '.delete-record', function () {
+            if (!confirm('Are you sure you want to delete this client job role?')) return;
+            $.ajax({
+                url: $(this).data('route'),
+                type: 'DELETE',
+                success: function (res) {
+                    res.status ? toastr.success(res.message) : toastr.error(res.message);
+                    table.ajax.reload(null, false);
+                }
+            });
+        });
+    });
 </script>
 @endsection

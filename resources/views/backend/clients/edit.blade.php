@@ -14,7 +14,7 @@
                             <a href="{{ route('admin.clients.index') }}" class="btn btn-sm btn-light">Back</a>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('admin.clients.update', $client->id) }}" method="POST">
+                            <form action="{{ route('admin.clients.update', $client->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
                                 @include('backend.clients.form')

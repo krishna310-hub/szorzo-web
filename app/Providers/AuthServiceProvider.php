@@ -3,14 +3,26 @@
 namespace App\Providers;
 
 use App\Models\Client;
+use App\Models\Candidate;
+use App\Models\ClientJobRole;
+use App\Models\ClientRequirement;
 use App\Models\InterviewLevel;
+use App\Models\JobRole;
 use App\Models\Location;
+use App\Models\Mode;
 use App\Models\Pages;
+use App\Models\Recruiter;
+use App\Policies\CandidatePolicy;
+use App\Policies\ClientJobRolePolicy;
+use App\Policies\ClientRequirementPolicy;
 use App\Policies\ClientPolicy;
 use App\Policies\ContactEnquiryPolicy;
 use App\Policies\GeneralPolicy;
 use App\Policies\InterviewLevelPolicy;
+use App\Policies\JobRolePolicy;
 use App\Policies\LocationPolicy;
+use App\Policies\ModePolicy;
+use App\Policies\RecruiterPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use App\Policies\PagesPolicy;
@@ -33,6 +45,12 @@ class AuthServiceProvider extends ServiceProvider
         Client::class => ClientPolicy::class,
         InterviewLevel::class => InterviewLevelPolicy::class,
         Location::class => LocationPolicy::class,
+        Recruiter::class => RecruiterPolicy::class,
+        JobRole::class => JobRolePolicy::class,
+        Mode::class => ModePolicy::class,
+        ClientJobRole::class => ClientJobRolePolicy::class,
+        ClientRequirement::class => ClientRequirementPolicy::class,
+        Candidate::class => CandidatePolicy::class,
     ];
 
     /**
@@ -50,5 +68,11 @@ class AuthServiceProvider extends ServiceProvider
         Gate::Resource('Client','App\Policies\ClientPolicy');
         Gate::Resource('InterviewLevel','App\Policies\InterviewLevelPolicy');
         Gate::Resource('Location','App\Policies\LocationPolicy');
+        Gate::Resource('Recruiter','App\Policies\RecruiterPolicy');
+        Gate::Resource('JobRole','App\Policies\JobRolePolicy');
+        Gate::Resource('Mode','App\Policies\ModePolicy');
+        Gate::Resource('ClientJobRole','App\Policies\ClientJobRolePolicy');
+        Gate::Resource('ClientRequirement','App\Policies\ClientRequirementPolicy');
+        Gate::Resource('Candidate','App\Policies\CandidatePolicy');
     }
 }
