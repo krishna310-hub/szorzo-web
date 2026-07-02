@@ -12,6 +12,8 @@ class ClientJobRole extends Model
     protected $fillable = [
         'client_id',
         'job_role_id',
+        'poc_name',
+        'contact_number',
         'job_description',
         'status',
     ];

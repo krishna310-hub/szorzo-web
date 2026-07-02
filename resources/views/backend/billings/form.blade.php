@@ -1,19 +1,23 @@
 <div class="row gy-4">
-    <div class="col-md-6"><label for="name" class="form-label">Name <span class="text-danger">*</span></label><input
-            class="form-control" id="name" name="name" value="{{ old('name', $division->name ?? '') }}">
-        @error('name')
+
+    <div class="col-md-4"><label for="value" class="form-label">Value <span class="text-danger">*</span></label><input type="number" step="0.01"
+            min="0" max="100" class="form-control" id="value" name="value"
+            value="{{ old('value', $billing->value ?? '') }}">
+        @error('value')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+
+
     <div class="col-md-6"><label class="form-label">Status</label>
         <div class="d-flex">
             <div class="form-check form-radio-success me-3"><input class="form-check-input" type="radio"
                     name="status" id="status_active" value="1"
-                    {{ old('status', isset($division) ? (int) $division->status : 1) == 1 ? 'checked' : '' }}><label
+                    {{ old('status', isset($billing) ? (int) $billing->status : 1) == 1 ? 'checked' : '' }}><label
                     class="form-check-label" for="status_active">Active</label></div>
             <div class="form-check form-radio-danger ms-3"><input class="form-check-input" type="radio" name="status"
                     id="status_inactive" value="0"
-                    {{ old('status', isset($division) ? (int) $division->status : 1) == 0 ? 'checked' : '' }}><label
+                    {{ old('status', isset($billing) ? (int) $billing->status : 1) == 0 ? 'checked' : '' }}><label
                     class="form-check-label" for="status_inactive">Inactive</label></div>
         </div>
         @error('status')

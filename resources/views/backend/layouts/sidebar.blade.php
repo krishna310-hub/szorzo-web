@@ -127,6 +127,9 @@
                                     <li class="nav-item">
                                         <a href="{{ route('admin.modes.index') }}" class="nav-link {{ request()->is('admin/masters/modes*') ? 'active' : '' }}"> Modes </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.billings.index') }}" class="nav-link {{ request()->is('admin/masters/billings*') ? 'active' : '' }}"> Billings </a>
+                                    </li>
                                 @can('read', \App\Models\InterviewLevel::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.interview-levels.index') }}" class="nav-link {{ request()->is('admin/masters/interview-levels*') ? 'active' : '' }}"> Level of Interview </a>

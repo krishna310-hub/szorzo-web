@@ -104,6 +104,8 @@ class ClientJobRoleController extends Controller
                     ->whereNull('deleted_at'),
             ],
             'job_description' => 'nullable|string',
+            'poc_name' => 'nullable|string',
+            'contact_number' => 'nullable|string|max:30',
             'status' => 'required|in:0,1',
         ]);
     }

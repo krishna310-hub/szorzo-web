@@ -11,7 +11,7 @@ class Client extends Model
 
     protected $fillable = [
         'client',
-        'billing',
+        'billing_id',
         'location_id',
         'poc_name',
         'signed_date',
@@ -42,5 +42,10 @@ class Client extends Model
     public function clientJobRoles()
     {
         return $this->hasMany(ClientJobRole::class);
+    }
+
+    public function billing()
+    {
+        return $this->belongsTo(Billing::class);
     }
 }

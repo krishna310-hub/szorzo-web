@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Billing;
 use App\Models\Client;
 use App\Models\Division;
 use App\Models\Location;
@@ -19,17 +20,17 @@ class ClientController extends Controller
         $this->authorize('read', Client::class);
 
         if ($request->ajax()) {
-            return DataTables::of(Client::with(['location', 'division'])->latest())
+            return DataTables::of(Client::with(['location', 'division', 'billing'])->latest())
                 ->addIndexColumn()
                 ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
                 ->addColumn('division_name', fn ($row) => $row->division->name ?? '-')
-                ->editColumn('billing', fn ($row) => $row->billing !== null ? $row->billing . '%' : '-')
-                ->editColumn('signed_date', fn ($row) => $row->signed_date?->format('Y-m-d') ?? '-')
-                ->editColumn('renewal_date', fn ($row) => $row->renewal_date?->format('Y-m-d') ?? '-')
+                ->addColumn('billing_value', fn ($row) => $row->billing->value ?? '-')
+                ->editColumn('signed_date', fn ($row) => $row->signed_date?->format('d-m-Y') ?? '-')
+                ->editColumn('renewal_date', fn ($row) => $row->renewal_date?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
-                ->editColumn('created_at', fn ($row) => $row->created_at?->format('Y-m-d H:i:s') ?? '-')
+                ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', Client::class)) {
@@ -88,6 +89,7 @@ class ClientController extends Controller
         return [
             'locations' => Location::where('status', true)->orderBy('location')->get(),
             'divisions' => Division::where('status', true)->orderBy('name')->get(),
+            'billings'  => Billing::where('status', true)->orderBy('value')->get(),
         ];
     }
 
@@ -95,7 +97,7 @@ class ClientController extends Controller
     {
         return $request->validate([
             'client' => 'required|string|max:255',
-            'billing' => 'nullable|numeric|min:0|max:100',
+            'billing_id' => 'nullable|exists:billings,id',
             'location_id' => 'nullable|exists:locations,id',
             'poc_name' => 'nullable|string|max:255',
             'signed_date' => 'nullable|date',

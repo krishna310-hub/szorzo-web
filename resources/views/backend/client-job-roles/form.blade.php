@@ -19,6 +19,16 @@
         </select>
         @error('job_role_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+    <div class="col-md-4">
+        <label for="poc_name" class="form-label">PoC Name</label>
+        <input type="text" class="form-control" id="poc_name" name="poc_name" value="{{ old('poc_name', $clientJobRole->poc_name ?? '') }}">
+        @error('poc_name')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4">
+        <label for="contact_number" class="form-label">Contact Number</label>
+        <input type="text" class="form-control" id="contact_number" name="contact_number" value="{{ old('contact_number', $clientJobRole->contact_number ?? '') }}">
+        @error('contact_number')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
     <div class="col-md-8">
         <label for="job_description" class="form-label">Job Description</label>
         <textarea class="form-control" id="job_description" name="job_description" rows="4" placeholder="Enter job description">{{ old('job_description', $clientJobRole->job_description ?? '') }}</textarea>

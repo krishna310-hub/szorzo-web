@@ -21,7 +21,8 @@ $(document).ready(function () {
         ajax: { url: '{{ route('admin.clients.index') }}', type: 'GET' },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'client', name: 'client' }, { data: 'billing', name: 'billing' },
+            { data: 'client', name: 'client' },
+            { data: 'billing_value', name: 'billing_value', orderable: false, searchable: false  },
             { data: 'location_name', name: 'location_name', orderable: false, searchable: false },
             { data: 'poc_name', name: 'poc_name' }, { data: 'signed_date', name: 'signed_date' },
             { data: 'renewal_date', name: 'renewal_date' },

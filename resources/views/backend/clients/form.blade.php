@@ -6,8 +6,14 @@
     </div>
     <div class="col-md-4">
         <label for="billing" class="form-label">Billing</label>
-        <input type="number" step="0.01" min="0" max="100" class="form-control" id="billing" name="billing" value="{{ old('billing', $client->billing ?? '') }}">
-        @error('billing')<span class="text-danger small">{{ $message }}</span>@enderror
+
+        <select class="form-select" id="billing_id" name="billing_id">
+            <option value="">Select billing</option>
+            @foreach($billings as $billing)
+                <option value="{{ $billing->id }}" {{ old('billing_id', $client->billing_id ?? '') == $billing->id ? 'selected' : '' }}>{{ $billing->value }}</option>
+            @endforeach
+        </select>
+        @error('billing_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label for="location_id" class="form-label">Location</label>
