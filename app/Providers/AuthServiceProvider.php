@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Client;
+use App\Models\Billing;
 use App\Models\Candidate;
 use App\Models\ClientJobRole;
 use App\Models\ClientRequirement;
@@ -14,6 +15,7 @@ use App\Models\Mode;
 use App\Models\Pages;
 use App\Models\Recruiter;
 use App\Policies\CandidatePolicy;
+use App\Policies\BillingPolicy;
 use App\Policies\ClientJobRolePolicy;
 use App\Policies\ClientRequirementPolicy;
 use App\Policies\ClientPolicy;
@@ -54,6 +56,7 @@ class AuthServiceProvider extends ServiceProvider
         ClientRequirement::class => ClientRequirementPolicy::class,
         Division::class => DivisionPolicy::class,
         Candidate::class => CandidatePolicy::class,
+        Billing::class => BillingPolicy::class,
     ];
 
     /**
@@ -78,5 +81,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::Resource('ClientRequirement','App\Policies\ClientRequirementPolicy');
         Gate::Resource('Candidate','App\Policies\CandidatePolicy');
         Gate::Resource('Division','App\Policies\DivisionPolicy');
+        Gate::Resource('Billing','App\Policies\BillingPolicy');
     }
 }

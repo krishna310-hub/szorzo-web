@@ -96,7 +96,7 @@
                     </li>
                 @endcan
 
-                @if(auth()->user()->can('read', \App\Models\Client::class) || auth()->user()->can('read', \App\Models\InterviewLevel::class) || auth()->user()->can('read', \App\Models\Location::class) || auth()->user()->can('read', \App\Models\Division::class))
+                @if(auth()->user()->can('read', \App\Models\Client::class) || auth()->user()->can('read', \App\Models\ClientJobRole::class) || auth()->user()->can('read', \App\Models\ClientRequirement::class) || auth()->user()->can('read', \App\Models\Candidate::class) || auth()->user()->can('read', \App\Models\Recruiter::class) || auth()->user()->can('read', \App\Models\JobRole::class) || auth()->user()->can('read', \App\Models\Mode::class) || auth()->user()->can('read', \App\Models\Billing::class) || auth()->user()->can('read', \App\Models\InterviewLevel::class) || auth()->user()->can('read', \App\Models\Location::class) || auth()->user()->can('read', \App\Models\Division::class))
                     <li class="menu-title"><i class="ri-more-fill"></i> <span>Masters</span></li>
                     <li class="nav-item">
                         <a class="nav-link menu-link" href="#sidebarMasters" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->is('admin/masters*') ? 'true' : 'false' }}" aria-controls="sidebarMasters">
@@ -109,27 +109,41 @@
                                         <a href="{{ route('admin.clients.index') }}" class="nav-link {{ request()->is('admin/masters/clients*') ? 'active' : '' }}"> Clients </a>
                                     </li>
                                 @endcan
+                                @can('read', \App\Models\ClientJobRole::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.client-job-roles.index') }}" class="nav-link {{ request()->is('admin/masters/client-job-roles*') ? 'active' : '' }}"> Client Job Roles </a>
                                     </li>
+                                @endcan
+                                @can('read', \App\Models\ClientRequirement::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.client-requirements.index') }}" class="nav-link {{ request()->is('admin/masters/client-requirements*') ? 'active' : '' }}"> Client Requirements </a>
                                     </li>
+                                @endcan
+                                @can('read', \App\Models\Candidate::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.candidates.index') }}" class="nav-link {{ request()->is('admin/masters/candidates*') ? 'active' : '' }}"> Candidates </a>
                                     </li>
+                                @endcan
+                                @can('read', \App\Models\Recruiter::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.recruiters.index') }}" class="nav-link {{ request()->is('admin/masters/recruiters*') ? 'active' : '' }}"> Recruiters </a>
                                     </li>
+                                @endcan
+                                @can('read', \App\Models\JobRole::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.job-roles.index') }}" class="nav-link {{ request()->is('admin/masters/job-roles*') ? 'active' : '' }}"> Job Roles </a>
                                     </li>
+                                @endcan
+                                @can('read', \App\Models\Mode::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.modes.index') }}" class="nav-link {{ request()->is('admin/masters/modes*') ? 'active' : '' }}"> Modes </a>
                                     </li>
+                                @endcan
+                                @can('read', \App\Models\Billing::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.billings.index') }}" class="nav-link {{ request()->is('admin/masters/billings*') ? 'active' : '' }}"> Billings </a>
                                     </li>
+                                @endcan
                                 @can('read', \App\Models\InterviewLevel::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.interview-levels.index') }}" class="nav-link {{ request()->is('admin/masters/interview-levels*') ? 'active' : '' }}"> Level of Interview </a>

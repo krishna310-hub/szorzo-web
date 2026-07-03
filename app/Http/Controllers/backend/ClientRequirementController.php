@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Billing;
 use App\Models\Client;
 use App\Models\ClientJobRole;
 use App\Models\ClientRequirement;
@@ -27,20 +28,20 @@ class ClientRequirementController extends Controller
 
             return DataTables::of($query)
                 ->addIndexColumn()
-                ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
-                ->addColumn('job_description_name', fn ($row) => $row->jobDescription->job_description ?? '-')
-                ->addColumn('mode_name', fn ($row) => $row->mode->mode ?? '-')
-                ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
-                ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
-                ->addColumn('project_owner_name', fn ($row) => $row->projectOwner->recruiter_name ?? '-')
-                ->editColumn('billing', fn ($row) => $row->billing !== null ? $row->billing . '%' : '-')
-                ->editColumn('requirement_open_date', fn ($row) => $row->requirement_open_date?->format('Y-m-d') ?? '-')
-                ->editColumn('closure_target_date', fn ($row) => $row->closure_target_date?->format('Y-m-d') ?? '-')
-                ->editColumn('ctc', fn ($row) => $row->ctc !== null ? number_format((float) $row->ctc, 2) : '-')
-                ->editColumn('status', fn ($row) => $row->status
+                ->addColumn('client_name', fn($row) => $row->client->client ?? '-')
+                ->addColumn('job_description_name', fn($row) => $row->jobDescription->job_description ?? '-')
+                ->addColumn('mode_name', fn($row) => $row->mode->mode ?? '-')
+                ->addColumn('job_role_name', fn($row) => $row->jobRole->job_role ?? '-')
+                ->addColumn('location_name', fn($row) => $row->location->location ?? '-')
+                ->addColumn('project_owner_name', fn($row) => $row->projectOwner->recruiter_name ?? '-')
+                ->editColumn('billing', fn($row) => $row->billing !== null ? $row->billing . '%' : '-')
+                ->editColumn('requirement_open_date', fn($row) => $row->requirement_open_date?->format('Y-m-d') ?? '-')
+                ->editColumn('closure_target_date', fn($row) => $row->closure_target_date?->format('Y-m-d') ?? '-')
+                ->editColumn('ctc', fn($row) => $row->ctc !== null ? number_format((float) $row->ctc, 2) : '-')
+                ->editColumn('status', fn($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
-                ->editColumn('created_at', fn ($row) => $row->created_at?->format('Y-m-d H:i:s') ?? '-')
+                ->editColumn('created_at', fn($row) => $row->created_at?->format('Y-m-d H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', ClientRequirement::class)) {
@@ -98,6 +99,7 @@ class ClientRequirementController extends Controller
     {
         return [
             'clients' => Client::where('status', true)->orderBy('client')->get(),
+            'billing'=>Billing::where('status', true)->orderBy('value')->get(),
             'jobDescriptions' => ClientJobRole::where('status', true)->orderBy('job_description')->get(),
             'modes' => Mode::where('status', true)->orderBy('mode')->get(),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
@@ -110,6 +112,7 @@ class ClientRequirementController extends Controller
     {
         return $request->validate([
             'client_id' => 'required|exists:clients,id',
+            'billing_id' => 'required|exists:billings,id',
             'billing' => 'nullable|numeric|min:0|max:100',
             'job_description_id' => 'nullable|exists:client_job_roles,id',
             'mode_id' => 'nullable|exists:modes,id',
