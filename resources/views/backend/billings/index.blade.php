@@ -9,8 +9,10 @@
                         <div class="card">
                             <div class="card-header d-flex align-items-center">
                                 <h5 class="card-title mb-0 flex-grow-1">Billings</h5>
+                                @can('create', \App\Models\Billing::class)
                                     <a href="{{ route('admin.billings.create') }}" class="btn btn-sm btn-primary">Add
                                         Billing %</a>
+                                @endcan
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
