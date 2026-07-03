@@ -14,7 +14,7 @@ class PermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            
+
             ['name'=>'Read',      'page'=>'dashboard'],
 
             ['name'=>'Read',      'page'=>'profile'],
@@ -95,7 +95,7 @@ class PermissionsSeeder extends Seeder
             ['name'=>'Edit',      'page'=>'candidate'],
             ['name'=>'Delete',    'page'=>'candidate'],
         ];
-        
+
         foreach ($permissions as $permission) {
             Permission::firstOrCreate($permission);
         }
