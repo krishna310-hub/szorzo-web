@@ -20,12 +20,16 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->dropForeign(['billing_id']);
-            $table->dropColumn('billing_id');
+            if (Schema::hasColumn('clients', 'billing_id')) {
+                $table->dropForeign(['billing_id']);
+                $table->dropColumn('billing_id');
+            }
 
-            $table->decimal('billing', 8, 2)
-                ->nullable()
-                ->after('client');
+            if (!Schema::hasColumn('clients', 'billing')) {
+                $table->decimal('billing', 8, 2)
+                    ->nullable()
+                    ->after('client');
+            }
         });
     }
 };

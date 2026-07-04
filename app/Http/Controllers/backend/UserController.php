@@ -20,7 +20,7 @@ class UserController extends Controller
             return DataTables::eloquent($roles)
                 ->addIndexColumn()
                 ->addColumn('access_level', function ($row) {
-                    return $row->role && $row->role->access_level ? $row->role->access_level : '123';
+                    return $row->role && $row->role->access_level ? $row->role->access_level : '-';
                 })
                 ->addColumn('status', function ($row) {
                     if ($row->is_active == 1) {
@@ -42,9 +42,10 @@ class UserController extends Controller
                     }
 
                     if (auth()->user()->can('delete', User::class)) {
-                        $deleteUrl = route('admin.user.destroy', $row->id);
                         $buttons .= '
-                            <a href="' . $deleteUrl . '" class="text-danger fs-4 ms-1" title="Delete">
+                            <a href="javascript:void(0)" class="text-danger fs-4 ms-1 destroy-ajax" title="Delete"
+                            data-id="'.$row->id.'" data-table-id="user-table"
+                                data-route="'.route('admin.user.destroy', $row->id).'">
                                 <i class="bx bxs-trash"></i>
                             </a>
                         ';

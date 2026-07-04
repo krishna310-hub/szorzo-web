@@ -44,9 +44,11 @@ class RoleController extends Controller
                     }
 
                     if (auth()->user()->can('delete', Role::class)) {
-                        $deleteUrl = route('admin.role.destroy', $row->id);
                         $buttons .= '
-                            <a href="' . $deleteUrl . '" class="text-danger fs-4 ms-1" title="Delete">
+                            <a href="javascript:void(0);" class="text-danger fs-4 ms-1 destroy-ajax" title="Delete"
+                            data-id="'.$row->id.'" data-table-id="role-table"
+                                data-route="'.route('admin.role.destroy', $row->id).'"
+                                >
                                 <i class="bx bxs-trash"></i>
                             </a>
                         ';

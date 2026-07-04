@@ -43,6 +43,7 @@ $(document).on('click', '.destroy', function (event) {
 
 $(document).on('click', '.destroy-ajax', function (event) {
     var url     = $(this).attr('data-route');
+    var table   = $(this).attr('data-table-id') ?? '';
     var type    = $(this).attr('data-type') ?? '';
     $.confirm( {
         columnClass: 'small', containerFluid: true,
@@ -56,7 +57,7 @@ $(document).on('click', '.destroy-ajax', function (event) {
                         type: 'DELETE',
                         data: {type: type},
                         beforeSend: function(){
-                            // $('#loading-image').removeClass('d-none');
+                            $('#loading-image1').removeClass('d-none');
                         },
                         success: function(response){
                             if (response.status) {
@@ -64,11 +65,19 @@ $(document).on('click', '.destroy-ajax', function (event) {
                             } else {
                                 toastr.error(response.message);
                             }
-                            $('#scroll-vertical').DataTable().ajax.reload();
+                            $('#'+table).DataTable().ajax.reload();
+                            $('#loading-image1').addClass('d-none');
                         },
-                        error: function(XMLHttpRequest, textStatus, errorThrown) {
-                            toastr.error(errorThrown);
-                            $('#scroll-vertical').DataTable().ajax.reload();
+                        error: function (xhr, textStatus, errorThrown) {
+                            let message = 'Something went wrong!';
+
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+
+                            toastr.error(message);
+                            $('#' + table).DataTable().ajax.reload();
+                            $('#loading-image1').addClass('d-none');
                         }
                     });
                 }

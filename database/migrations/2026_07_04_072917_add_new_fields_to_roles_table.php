@@ -6,17 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::table('client_requirements', function (Blueprint $table) {
-            $table->decimal('revenue_amount', 12, 2)->nullable()->after('billing_id');
+        Schema::table('roles', function (Blueprint $table) {
+            $table->softDeletes();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::table('client_requirements', function (Blueprint $table) {
-            $table->dropColumn('revenue_amount');
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropSoftDeletes();
         });
     }
 };
