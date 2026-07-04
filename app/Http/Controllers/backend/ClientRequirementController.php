@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\backend;
 
+use App\Exports\MasterDataExport;
 use App\Http\Controllers\Controller;
 use App\Models\Billing;
 use App\Models\Client;
@@ -11,8 +12,12 @@ use App\Models\JobRole;
 use App\Models\Location;
 use App\Models\Mode;
 use App\Models\Recruiter;
+use App\Support\MasterDataSpreadsheet;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class ClientRequirementController extends Controller
@@ -28,28 +33,29 @@ class ClientRequirementController extends Controller
 
             return DataTables::of($query)
                 ->addIndexColumn()
-                ->addColumn('client_name', fn($row) => $row->client->client ?? '-')
-                ->addColumn('job_description_name', fn($row) => $row->jobDescription->job_description ?? '-')
-                ->addColumn('mode_name', fn($row) => $row->mode->mode ?? '-')
-                ->addColumn('job_role_name', fn($row) => $row->jobRole->job_role ?? '-')
-                ->addColumn('location_name', fn($row) => $row->location->location ?? '-')
-                ->addColumn('project_owner_name', fn($row) => $row->projectOwner->recruiter_name ?? '-')
-                ->addColumn('billing_value', fn ($row) => $row->billing->value . '%' ?? '-')
-                ->editColumn('requirement_open_date', fn($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
-                ->editColumn('closure_target_date', fn($row) => $row->closure_target_date?->format('d-m-Y') ?? '-')
-                ->editColumn('ctc', fn($row) => $row->ctc !== null ? number_format((float) $row->ctc, 2) : '-')
-                ->editColumn('status', fn($row) => $row->status
+                ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
+                ->addColumn('job_description_name', fn ($row) => $row->jobDescription->job_description ?? '-')
+                ->addColumn('mode_name', fn ($row) => $row->mode->mode ?? '-')
+                ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
+                ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
+                ->addColumn('project_owner_name', fn ($row) => $row->projectOwner->recruiter_name ?? '-')
+                ->addColumn('billing_value', fn ($row) => $row->billing->value.'%' ?? '-')
+                ->editColumn('requirement_open_date', fn ($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
+                ->editColumn('closure_target_date', fn ($row) => $row->closure_target_date?->format('d-m-Y') ?? '-')
+                ->editColumn('ctc', fn ($row) => $row->ctc !== null ? number_format((float) $row->ctc, 2) : '-')
+                ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
-                ->editColumn('created_at', fn($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
+                ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', ClientRequirement::class)) {
-                        $buttons .= '<a href="' . route('admin.client-requirements.edit', $row->id) . '" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
+                        $buttons .= '<a href="'.route('admin.client-requirements.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }
                     if (auth()->user()->can('delete', ClientRequirement::class)) {
-                        $buttons .= '<button type="button" data-route="' . route('admin.client-requirements.delete', $row->id) . '" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
+                        $buttons .= '<button type="button" data-route="'.route('admin.client-requirements.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
                     }
+
                     return $buttons ?: '-';
                 })
                 ->rawColumns(['status', 'action'])
@@ -62,6 +68,7 @@ class ClientRequirementController extends Controller
     public function create()
     {
         $this->authorize('create', ClientRequirement::class);
+
         return view('backend.client-requirements.create', $this->formData());
     }
 
@@ -69,12 +76,14 @@ class ClientRequirementController extends Controller
     {
         $this->authorize('create', ClientRequirement::class);
         ClientRequirement::create($this->validatedData($request));
+
         return redirect()->route('admin.client-requirements.index')->with('success', 'Client requirement created successfully.');
     }
 
     public function edit($id)
     {
         $this->authorize('edit', ClientRequirement::class);
+
         return view('backend.client-requirements.edit', array_merge(
             ['clientRequirement' => ClientRequirement::findOrFail($id)],
             $this->formData()
@@ -85,6 +94,7 @@ class ClientRequirementController extends Controller
     {
         $this->authorize('edit', ClientRequirement::class);
         ClientRequirement::findOrFail($id)->update($this->validatedData($request));
+
         return redirect()->route('admin.client-requirements.index')->with('success', 'Client requirement updated successfully.');
     }
 
@@ -92,14 +102,173 @@ class ClientRequirementController extends Controller
     {
         $this->authorize('delete', ClientRequirement::class);
         ClientRequirement::findOrFail($id)->delete();
+
         return response()->json(['status' => true, 'message' => 'Client requirement deleted successfully.']);
+    }
+
+    public function export()
+    {
+        $this->authorize('read', ClientRequirement::class);
+
+        $rows = ClientRequirement::with(['client', 'billing', 'jobDescription', 'mode', 'jobRole', 'projectOwner', 'location'])
+            ->latest()->get()->map(fn ($item) => [
+                $item->id,
+                $item->client?->client,
+                $item->billing?->value,
+                $item->revenue_amount,
+                $item->jobDescription?->job_description,
+                $item->mode?->mode,
+                $item->requirement_open_date?->format('Y-m-d'),
+                $item->jobRole?->job_role,
+                $item->number_of_position,
+                $item->closure_target_date?->format('Y-m-d'),
+                $item->cv_required,
+                $item->cv_uploaded,
+                $item->projectOwner?->recruiter_name,
+                $item->ctc,
+                $item->location?->location,
+                $item->status ? 'Active' : 'Inactive',
+            ])->all();
+
+        return Excel::download(new MasterDataExport($this->importHeadings(), $rows), 'client-requirements-'.now()->format('Y-m-d').'.xlsx');
+    }
+
+    public function importTemplate()
+    {
+        $this->authorize('create', ClientRequirement::class);
+
+        return Excel::download(new MasterDataExport($this->importHeadings(), [[
+            null, 'Existing Client Name', '8.5', null, null, 'Onsite', '2026-07-01', 'Existing Job Role',
+            2, '2026-07-31', 10, 0, 'Existing Recruiter', 500000, 'Chennai', 'Active',
+        ]]), 'client-requirements-import-template.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $this->authorize('create', ClientRequirement::class);
+        $request->validate(['import_file' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
+
+        try {
+            $rows = MasterDataSpreadsheet::rows($request->file('import_file'));
+        } catch (\Throwable) {
+            return back()->with('error', 'The spreadsheet could not be read. Please use the provided template.');
+        }
+
+        if ($rows->isEmpty()) {
+            return back()->with('error', 'The spreadsheet has no data rows.');
+        }
+
+        $validRows = [];
+        $errors = [];
+
+        foreach ($rows as $index => $row) {
+            $number = $index + 2;
+            $clientName = $row['client'] ?? null;
+            $billingValue = MasterDataSpreadsheet::cleanPercent($row['billing'] ?? null);
+            $jobDescription = $row['job_description'] ?? null;
+            $mode = $row['mode'] ?? null;
+            $jobRole = $row['job_role'] ?? null;
+            $projectOwner = $row['project_owner'] ?? null;
+            $location = $row['location'] ?? null;
+            $clientId = MasterDataSpreadsheet::lookup(Client::class, 'client', $clientName);
+            $billingId = MasterDataSpreadsheet::lookup(Billing::class, 'value', $billingValue);
+            $jobDescriptionId = null;
+
+            if ($jobDescription !== null && trim((string) $jobDescription) !== '' && $clientId) {
+                $jobDescriptionId = ClientJobRole::where('client_id', $clientId)
+                    ->whereRaw('LOWER(job_description) = ?', [mb_strtolower(trim((string) $jobDescription))])
+                    ->value('id');
+            }
+
+            $ctc = $row['ctc'] ?? null;
+            $revenue = $row['revenue_amount'] ?? null;
+            if (($revenue === null || $revenue === '') && is_numeric($billingValue) && is_numeric($ctc)) {
+                $revenue = ((float) $billingValue * (float) $ctc) / 100;
+            }
+
+            $data = [
+                'id' => $row['record_id'] ?? null,
+                'client_id' => $clientId,
+                'billing_id' => $billingId,
+                'revenue_amount' => $revenue,
+                'job_description_id' => $jobDescriptionId,
+                'mode_id' => MasterDataSpreadsheet::lookup(Mode::class, 'mode', $mode),
+                'requirement_open_date' => MasterDataSpreadsheet::date($row['requirement_open_date'] ?? null),
+                'job_role_id' => MasterDataSpreadsheet::lookup(JobRole::class, 'job_role', $jobRole),
+                'number_of_position' => $row['number_of_position'] ?? 0,
+                'closure_target_date' => MasterDataSpreadsheet::date($row['closure_target_date'] ?? null),
+                'cv_required' => $row['cv_required'] ?? 0,
+                'cv_uploaded' => $row['cv_uploaded'] ?? 0,
+                'project_owner' => MasterDataSpreadsheet::lookup(Recruiter::class, 'recruiter_name', $projectOwner),
+                'ctc' => $ctc,
+                'location_id' => MasterDataSpreadsheet::lookup(Location::class, 'location', $location),
+                'status' => MasterDataSpreadsheet::status($row['status'] ?? null),
+            ];
+
+            $validator = Validator::make($data, [
+                'id' => 'nullable|integer|exists:client_requirements,id',
+                'client_id' => 'required|exists:clients,id',
+                'billing_id' => 'required|exists:billings,id',
+                'revenue_amount' => 'nullable|numeric|min:0',
+                'job_description_id' => 'nullable|exists:client_job_roles,id',
+                'mode_id' => 'nullable|exists:modes,id',
+                'requirement_open_date' => 'nullable|date',
+                'job_role_id' => 'nullable|exists:job_roles,id',
+                'number_of_position' => 'nullable|integer|min:0',
+                'closure_target_date' => 'nullable|date|after_or_equal:requirement_open_date',
+                'cv_required' => 'nullable|integer|min:0',
+                'cv_uploaded' => 'nullable|integer|min:0',
+                'project_owner' => 'nullable|exists:recruiters,id',
+                'ctc' => 'nullable|numeric|min:0',
+                'location_id' => 'nullable|exists:locations,id',
+                'status' => 'required|in:0,1',
+            ], [
+                'client_id.required' => 'Client "'.$clientName.'" was not found.',
+                'billing_id.required' => 'Billing "'.$billingValue.'" was not found.',
+            ]);
+
+            $validator->after(function ($validator) use ($jobDescription, $mode, $jobRole, $projectOwner, $location, $data) {
+                $lookups = [
+                    ['value' => $jobDescription, 'id' => $data['job_description_id'], 'label' => 'Job description'],
+                    ['value' => $mode, 'id' => $data['mode_id'], 'label' => 'Mode'],
+                    ['value' => $jobRole, 'id' => $data['job_role_id'], 'label' => 'Job role'],
+                    ['value' => $projectOwner, 'id' => $data['project_owner'], 'label' => 'Project owner'],
+                    ['value' => $location, 'id' => $data['location_id'], 'label' => 'Location'],
+                ];
+                foreach ($lookups as $lookup) {
+                    if ($lookup['value'] !== null && trim((string) $lookup['value']) !== '' && ! $lookup['id']) {
+                        $validator->errors()->add('lookup', $lookup['label'].' "'.$lookup['value'].'" was not found.');
+                    }
+                }
+            });
+
+            if ($validator->fails()) {
+                $errors[] = 'Row '.$number.': '.implode(', ', $validator->errors()->all());
+            } else {
+                $validRows[] = $data;
+            }
+        }
+
+        if ($errors) {
+            return back()->with('error', 'Nothing was imported. '.MasterDataSpreadsheet::errors($errors));
+        }
+
+        DB::transaction(function () use ($validRows) {
+            foreach ($validRows as $data) {
+                $id = $data['id'];
+                unset($data['id']);
+                $id ? ClientRequirement::findOrFail($id)->update($data) : ClientRequirement::create($data);
+            }
+        });
+
+        return back()->with('success', count($validRows).' client requirement row(s) imported successfully.');
     }
 
     private function formData(): array
     {
         return [
             'clients' => Client::where('status', true)->orderBy('client')->get(),
-            'billings'=>Billing::where('status', true)->orderBy('value')->get(),
+            'billings' => Billing::where('status', true)->orderBy('value')->get(),
             'jobDescriptions' => ClientJobRole::where('status', true)->orderBy('job_description')->get(),
             'modes' => Mode::where('status', true)->orderBy('mode')->get(),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
@@ -114,7 +283,7 @@ class ClientRequirementController extends Controller
             'client_id' => 'required|exists:clients,id',
             'billing_id' => 'required|exists:billings,id',
             'revenue_amount' => 'nullable|numeric|min:0',
-            // 'job_description_id' => 'nullable|exists:client_job_roles,id',
+            'job_description_id' => 'nullable|exists:client_job_roles,id',
             'mode_id' => 'nullable|exists:modes,id',
             'requirement_open_date' => 'nullable|date',
             'job_role_id' => 'nullable|exists:job_roles,id',
@@ -127,5 +296,10 @@ class ClientRequirementController extends Controller
             'location_id' => 'nullable|exists:locations,id',
             'status' => 'required|in:0,1',
         ]);
+    }
+
+    private function importHeadings(): array
+    {
+        return ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Location', 'Status'];
     }
 }

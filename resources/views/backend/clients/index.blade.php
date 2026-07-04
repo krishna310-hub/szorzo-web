@@ -4,9 +4,19 @@
 <div class="main-content"><div class="page-content"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="card">
     <div class="card-header d-flex align-items-center">
         <h5 class="card-title mb-0 flex-grow-1">Clients</h5>
-        @can('create', \App\Models\Client::class)<a href="{{ route('admin.clients.create') }}" class="btn btn-sm btn-primary">Add New Client</a>@endcan
+        <div class="d-flex flex-wrap gap-2">
+            @include('backend.partials.master-import-export', [
+                'routePrefix' => 'clients',
+                'moduleName' => 'Clients',
+                'model' => \App\Models\Client::class,
+                'fields' => ['Record ID', 'Client', 'Billing', 'Location', 'PoC Name', 'Signed Date', 'Renewal Date', 'Division', 'Contact Number', 'Email', 'Mobile Number', 'Status'],
+            ])
+            @can('create', \App\Models\Client::class)<a href="{{ route('admin.clients.create') }}" class="btn btn-sm btn-primary">Add New Client</a>@endcan
+        </div>
     </div>
-    <div class="card-body"><div class="table-responsive">
+    <div class="card-body">
+        @include('backend.partials.import-feedback')
+        <div class="table-responsive">
         <table id="clients-table" class="table table-bordered dt-responsive nowrap w-100"><thead><tr>
             <th>S.No</th><th>Client</th><th>Billing</th><th>Location</th><th>PoC Name</th><th>Signed Date</th><th>Renewal Date</th><th>Division</th><th>Contact Number</th><th>Email</th><th>Status</th><th>Created At</th><th>Action</th>
         </tr></thead><tbody></tbody></table>

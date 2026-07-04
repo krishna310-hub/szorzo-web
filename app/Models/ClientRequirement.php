@@ -12,6 +12,7 @@ class ClientRequirement extends Model
     protected $fillable = [
         'client_id',
         'billing_id',
+        'revenue_amount',
         'job_description_id',
         'mode_id',
         'requirement_open_date',

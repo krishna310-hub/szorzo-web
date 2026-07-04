@@ -59,7 +59,7 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <div>
-                                                    <label for="password" class="form-label">Change New Password <span class="text-danger">*</span></label>
+                                                    <label for="password" class="form-label">Change New Password <span class="text-danger">* Current Password : {{ $user->ref ?? '-' }}</span></label>
                                                     <input type="password" id="password" class="form-control" name="password"
                                                         placeholder="Enter password" value="">
                                                         <button

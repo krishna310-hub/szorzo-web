@@ -8,6 +8,8 @@ use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class SettingsController extends Controller
 {
@@ -21,6 +23,32 @@ class SettingsController extends Controller
 
     public function store(Request $request, $type)
     {
+        if ($type == "change_password") {
+
+            $request->validate([
+                'current_password' => ['required'],
+                'new_password' => ['required', 'min:6', 'confirmed'],
+            ]);
+
+            $user = Auth::user();
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->with([
+                    'error' => 'Current password is incorrect!',
+                    'type' => $type
+                ]);
+            }
+
+            $user->update([
+                'ref'=> $request->ref,
+                'password' => Hash::make($request->new_password)
+            ]);
+
+            return back()->with([
+                'success' => 'Password changed successfully!',
+                'type' => $type
+            ]);
+        }
         if ($type == "general") {
 
             $this->authorize('generalSetting', Setting::class);

@@ -82,6 +82,7 @@ class UserController extends Controller
             $data['resource_type'] = $role->access_level;
         }
         $data['role_id'] = $request['role_id'];
+        $data['ref'] = $request['password'];
         $data['name'] = $request['user_name'];
         $data['email'] = $request['email'];
         $data['password'] = bcrypt($request['password']);
@@ -120,6 +121,7 @@ class UserController extends Controller
         }
         
         $data['role_id'] = $request['role_id'];
+        $data['ref'] = $request['password'];
         $data['name'] = $request['user_name'];
         $data['email'] = $request['email'];
         $data['phone_number'] = $request['mobile'];

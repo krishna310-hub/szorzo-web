@@ -271,7 +271,7 @@
                     },
                     new_password_confirmation: {
                         required: true,
-                        equalTo: "#new_password"
+                        // equalTo: "#new_password"
                     }
                 },
                 messages: {

@@ -116,6 +116,9 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::prefix('masters')->group(function () {
         Route::prefix('clients')->name('clients.')->controller(ClientController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/import-template', 'importTemplate')->name('import-template');
+            Route::post('/import', 'import')->name('import');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');
@@ -179,6 +182,9 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
 
         Route::prefix('client-job-roles')->name('client-job-roles.')->controller(ClientJobRoleController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/import-template', 'importTemplate')->name('import-template');
+            Route::post('/import', 'import')->name('import');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');
@@ -188,6 +194,9 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
 
         Route::prefix('client-requirements')->name('client-requirements.')->controller(ClientRequirementController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/import-template', 'importTemplate')->name('import-template');
+            Route::post('/import', 'import')->name('import');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');

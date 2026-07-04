@@ -9,12 +9,20 @@
                         <div class="card">
                             <div class="card-header d-flex align-items-center">
                                 <h5 class="card-title mb-0 flex-grow-1">Client Requirements</h5>
-                                @can('create', \App\Models\ClientRequirement::class)
-                                    <a href="{{ route('admin.client-requirements.create') }}" class="btn btn-sm btn-primary">Add
-                                        Client Requirement</a>
-                                @endcan
+                                <div class="d-flex flex-wrap gap-2">
+                                    @include('backend.partials.master-import-export', [
+                                        'routePrefix' => 'client-requirements',
+                                        'moduleName' => 'Client Requirements',
+                                        'model' => \App\Models\ClientRequirement::class,
+                                        'fields' => ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Location', 'Status'],
+                                    ])
+                                    @can('create', \App\Models\ClientRequirement::class)
+                                        <a href="{{ route('admin.client-requirements.create') }}" class="btn btn-sm btn-primary">Add Client Requirement</a>
+                                    @endcan
+                                </div>
                             </div>
                             <div class="card-body">
+                                @include('backend.partials.import-feedback')
                                 <div class="table-responsive">
                                     <table id="client-requirements-table" class="table table-bordered nowrap w-100">
                                         <thead>

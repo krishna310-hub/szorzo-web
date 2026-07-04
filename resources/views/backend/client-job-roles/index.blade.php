@@ -11,11 +11,20 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center">
                             <h5 class="card-title mb-0 flex-grow-1">Client Job Roles</h5>
-                            @can('create', \App\Models\ClientJobRole::class)
-                                <a href="{{ route('admin.client-job-roles.create') }}" class="btn btn-sm btn-primary">Add Client Job Role</a>
-                            @endcan
+                            <div class="d-flex flex-wrap gap-2">
+                                @include('backend.partials.master-import-export', [
+                                    'routePrefix' => 'client-job-roles',
+                                    'moduleName' => 'Client Job Roles',
+                                    'model' => \App\Models\ClientJobRole::class,
+                                    'fields' => ['Record ID', 'Client', 'Job Role', 'PoC Name', 'Contact Number', 'Job Description', 'Status'],
+                                ])
+                                @can('create', \App\Models\ClientJobRole::class)
+                                    <a href="{{ route('admin.client-job-roles.create') }}" class="btn btn-sm btn-primary">Add Client Job Role</a>
+                                @endcan
+                            </div>
                         </div>
                         <div class="card-body">
+                            @include('backend.partials.import-feedback')
                             <div class="table-responsive">
                                 <table id="client-job-roles-table" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead>
