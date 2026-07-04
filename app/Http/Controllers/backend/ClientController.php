@@ -24,7 +24,7 @@ class ClientController extends Controller
                 ->addIndexColumn()
                 ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
                 ->addColumn('division_name', fn ($row) => $row->division->name ?? '-')
-                ->addColumn('billing_value', fn ($row) => $row->billing->value ?? '-')
+                ->addColumn('billing_value', fn ($row) => $row->billing->value . '%' ?? '-')
                 ->editColumn('signed_date', fn ($row) => $row->signed_date?->format('d-m-Y') ?? '-')
                 ->editColumn('renewal_date', fn ($row) => $row->renewal_date?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status

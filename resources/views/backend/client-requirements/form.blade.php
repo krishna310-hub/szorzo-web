@@ -12,37 +12,16 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-4">
-        <label for="billing" class="form-label">Billing</label>
-        <select class="form-select" id="billing_id" name="billing_id">
-            <option value="">Select Billing</option>
-            @foreach ($billing as $bill)
-                <option value="{{ $bill->id }}"
-                    {{ old('billing_id', $clientRequirement->billing_id ?? '') == $bill->id ? 'selected' : '' }}>
-                    {{ $bill->value }}</option>
+    <div class="col-md-4"><label for="job_role_id" class="form-label">Job Role</label><select class="form-select"
+            id="job_role_id" name="job_role_id">
+            <option value="">Select job role</option>
+            @foreach ($jobRoles as $jobRole)
+                <option value="{{ $jobRole->id }}"
+                    {{ old('job_role_id', $clientRequirement->job_role_id ?? '') == $jobRole->id ? 'selected' : '' }}>
+                    {{ $jobRole->job_role }}</option>
             @endforeach
         </select>
-        @error('billing_id')
-            <span class="text-danger small">{{ $message }}</span>
-        @enderror
-    </div>
-    <div class="col-md-4"><label for="billing_amount" class="form-label">Revenue Amount</label><input type="number"
-            step="0.01" min="0" max="100" class="form-control" id="billing" name="billing"
-            value="{{ old('billing', $clientRequirement->billing ?? '') }}">
-        @error('billing')
-            <span class="text-danger small">{{ $message }}</span>
-        @enderror
-    </div>
-    <div class="col-md-4"><label for="job_description_id" class="form-label">Job Description</label><select
-            class="form-select" id="job_description_id" name="job_description_id">
-            <option value="">Select job description</option>
-            @foreach ($jobDescriptions as $jobDescription)
-                <option value="{{ $jobDescription->id }}"
-                    {{ old('job_description_id', $clientRequirement->job_description_id ?? '') == $jobDescription->id ? 'selected' : '' }}>
-                    {{ $jobDescription->job_description ?: 'Job Description #' . $jobDescription->id }}</option>
-            @endforeach
-        </select>
-        @error('job_description_id')
+        @error('job_role_id')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
@@ -59,23 +38,47 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    <div class="col-md-4">
+        <label for="billing" class="form-label">Billing</label>
+        <select class="form-select" id="billing_id" name="billing_id">
+            <option value="">Select billing</option>
+            @foreach($billings as $billing)
+                <option value="{{ $billing->id }}" data-value="{{ $billing->value }}" {{ old('billing_id', $clientRequirement->billing_id ?? '') == $billing->id ? 'selected' : '' }}>{{ $billing->value }} %</option>
+            @endforeach
+        </select>
+        @error('billing_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4"><label for="ctc" class="form-label">CTC</label><input type="number" step="0.01"
+            min="0" class="form-control" id="ctc" name="ctc"
+            value="{{ old('ctc', $clientRequirement->ctc ?? '') }}">
+        @error('ctc')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-4"><label for="revenue_amount" class="form-label">Revenue Amount</label><input type="number"
+            class="form-control" id="revenue_amount" name="revenue_amount"
+            value="" readonly>
+        @error('revenue_amount')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
+    {{-- <div class="col-md-4"><label for="job_description_id" class="form-label">Job Description</label><select
+            class="form-select" id="job_description_id" name="job_description_id">
+            <option value="">Select job description</option>
+            @foreach ($jobDescriptions as $jobDescription)
+                <option value="{{ $jobDescription->id }}"
+                    {{ old('job_description_id', $clientRequirement->job_description_id ?? '') == $jobDescription->id ? 'selected' : '' }}>
+                    {{ $jobDescription->job_description ?: 'Job Description #' . $jobDescription->id }}</option>
+            @endforeach
+        </select>
+        @error('job_description_id')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div> --}}
     <div class="col-md-4"><label for="requirement_open_date" class="form-label">Requirement Open Date</label><input
             type="date" class="form-control" id="requirement_open_date" name="requirement_open_date"
             value="{{ old('requirement_open_date', isset($clientRequirement) && $clientRequirement->requirement_open_date ? $clientRequirement->requirement_open_date->format('Y-m-d') : '') }}">
         @error('requirement_open_date')
-            <span class="text-danger small">{{ $message }}</span>
-        @enderror
-    </div>
-    <div class="col-md-4"><label for="job_role_id" class="form-label">Job Role</label><select class="form-select"
-            id="job_role_id" name="job_role_id">
-            <option value="">Select job role</option>
-            @foreach ($jobRoles as $jobRole)
-                <option value="{{ $jobRole->id }}"
-                    {{ old('job_role_id', $clientRequirement->job_role_id ?? '') == $jobRole->id ? 'selected' : '' }}>
-                    {{ $jobRole->job_role }}</option>
-            @endforeach
-        </select>
-        @error('job_role_id')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
@@ -117,13 +120,6 @@
             @endforeach
         </select>
         @error('project_owner')
-            <span class="text-danger small">{{ $message }}</span>
-        @enderror
-    </div>
-    <div class="col-md-4"><label for="ctc" class="form-label">CTC</label><input type="number" step="0.01"
-            min="0" class="form-control" id="ctc" name="ctc"
-            value="{{ old('ctc', $clientRequirement->ctc ?? '') }}">
-        @error('ctc')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>

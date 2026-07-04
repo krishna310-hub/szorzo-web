@@ -11,7 +11,7 @@ class ClientRequirement extends Model
 
     protected $fillable = [
         'client_id',
-        'billing',
+        'billing_id',
         'job_description_id',
         'mode_id',
         'requirement_open_date',
@@ -60,5 +60,10 @@ class ClientRequirement extends Model
     public function projectOwner()
     {
         return $this->belongsTo(Recruiter::class, 'project_owner');
+    }
+
+    public function billing()
+    {
+        return $this->belongsTo(Billing::class);
     }
 }

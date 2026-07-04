@@ -24,7 +24,7 @@ class ClientRequirementController extends Controller
         $this->authorize('read', ClientRequirement::class);
 
         if ($request->ajax()) {
-            $query = ClientRequirement::with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner'])->latest();
+            $query = ClientRequirement::with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner', 'billing'])->latest();
 
             return DataTables::of($query)
                 ->addIndexColumn()
@@ -34,14 +34,14 @@ class ClientRequirementController extends Controller
                 ->addColumn('job_role_name', fn($row) => $row->jobRole->job_role ?? '-')
                 ->addColumn('location_name', fn($row) => $row->location->location ?? '-')
                 ->addColumn('project_owner_name', fn($row) => $row->projectOwner->recruiter_name ?? '-')
-                ->editColumn('billing', fn($row) => $row->billing !== null ? $row->billing . '%' : '-')
-                ->editColumn('requirement_open_date', fn($row) => $row->requirement_open_date?->format('Y-m-d') ?? '-')
-                ->editColumn('closure_target_date', fn($row) => $row->closure_target_date?->format('Y-m-d') ?? '-')
+                ->addColumn('billing_value', fn ($row) => $row->billing->value . '%' ?? '-')
+                ->editColumn('requirement_open_date', fn($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
+                ->editColumn('closure_target_date', fn($row) => $row->closure_target_date?->format('d-m-Y') ?? '-')
                 ->editColumn('ctc', fn($row) => $row->ctc !== null ? number_format((float) $row->ctc, 2) : '-')
                 ->editColumn('status', fn($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
-                ->editColumn('created_at', fn($row) => $row->created_at?->format('Y-m-d H:i:s') ?? '-')
+                ->editColumn('created_at', fn($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', ClientRequirement::class)) {
@@ -99,7 +99,7 @@ class ClientRequirementController extends Controller
     {
         return [
             'clients' => Client::where('status', true)->orderBy('client')->get(),
-            'billing'=>Billing::where('status', true)->orderBy('value')->get(),
+            'billings'=>Billing::where('status', true)->orderBy('value')->get(),
             'jobDescriptions' => ClientJobRole::where('status', true)->orderBy('job_description')->get(),
             'modes' => Mode::where('status', true)->orderBy('mode')->get(),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
@@ -113,8 +113,8 @@ class ClientRequirementController extends Controller
         return $request->validate([
             'client_id' => 'required|exists:clients,id',
             'billing_id' => 'required|exists:billings,id',
-            'billing' => 'nullable|numeric|min:0|max:100',
-            'job_description_id' => 'nullable|exists:client_job_roles,id',
+            'revenue_amount' => 'nullable|numeric|min:0',
+            // 'job_description_id' => 'nullable|exists:client_job_roles,id',
             'mode_id' => 'nullable|exists:modes,id',
             'requirement_open_date' => 'nullable|date',
             'job_role_id' => 'nullable|exists:job_roles,id',

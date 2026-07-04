@@ -10,7 +10,7 @@
         <select class="form-select" id="billing_id" name="billing_id">
             <option value="">Select billing</option>
             @foreach($billings as $billing)
-                <option value="{{ $billing->id }}" {{ old('billing_id', $client->billing_id ?? '') == $billing->id ? 'selected' : '' }}>{{ $billing->value }}</option>
+                <option value="{{ $billing->id }}" {{ old('billing_id', $client->billing_id ?? '') == $billing->id ? 'selected' : '' }}>{{ $billing->value }} %</option>
             @endforeach
         </select>
         @error('billing_id')<span class="text-danger small">{{ $message }}</span>@enderror

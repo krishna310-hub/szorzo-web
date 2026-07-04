@@ -22,10 +22,10 @@
                                                 <th>S.No</th>
                                                 <th>Client</th>
                                                 <th>Billing</th>
-                                                <th>Job Description</th>
+                                                <th>Job Role</th>
+                                                {{-- <th>Job Description</th> --}}
                                                 <th>Mode</th>
                                                 <th>Requirement Open Date</th>
-                                                <th>Job Role</th>
                                                 <th>Number Of Position</th>
                                                 <th>Closure Target Date</th>
                                                 <th>CV's Required</th>
@@ -71,14 +71,21 @@
                     orderable: false,
                     searchable: false
                 }, {
-                    data: 'billing',
-                    name: 'billing'
+                    data: 'billing_value',
+                    name: 'billing_value'
                 }, {
-                    data: 'job_description_name',
-                    name: 'job_description_name',
+                    data: 'job_role_name',
+                    name: 'job_role_name',
                     orderable: false,
                     searchable: false
-                }, {
+                }, 
+                // {
+                //     data: 'job_description_name',
+                //     name: 'job_description_name',
+                //     orderable: false,
+                //     searchable: false
+                // }
+                {
                     data: 'mode_name',
                     name: 'mode_name',
                     orderable: false,
@@ -86,11 +93,6 @@
                 }, {
                     data: 'requirement_open_date',
                     name: 'requirement_open_date'
-                }, {
-                    data: 'job_role_name',
-                    name: 'job_role_name',
-                    orderable: false,
-                    searchable: false
                 }, {
                     data: 'number_of_position',
                     name: 'number_of_position'
