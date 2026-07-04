@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
+<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg"
+    data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
 
 <head>
     <meta charset="utf-8" />
@@ -7,184 +8,415 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
-    <!-- App favicon -->
-    <link rel="shortcut icon" href="{{asset('frontend/images/glow-unlock-favicon.png')}}">
+    <link rel="shortcut icon" href="{{ asset('frontend/images/glow-unlock-favicon.png') }}">
 
     @include('backend.layouts.css_master')
-    <link rel="stylesheet" href="{{ asset('vendor/flasher/flasher.min.css')}}">
-    {{-- @include('') --}}
+    <link rel="stylesheet" href="{{ asset('vendor/flasher/flasher.min.css') }}">
+
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-color: #f8fafc;
+            
+        }
+
+        .animated-gradient-bg {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(75px);
+            z-index: 1;
+            animation: floatShape 20s ease-in-out infinite;
+        }
+
+        .shape-1 {
+            width: 500px;
+            height: 500px;
+            background: rgba(220, 38, 38, 0.12);
+            top: -10%;
+            left: -10%;
+        }
+
+        .shape-2 {
+            width: 450px;
+            height: 450px;
+            background: rgba(254, 205, 211, 0.5);
+            bottom: -5%;
+            right: -5%;
+            animation-delay: -5s;
+            animation-direction: reverse;
+        }
+
+        .shape-3 {
+            width: 600px;
+            height: 600px;
+            background: rgba(252, 165, 165, 0.2);
+            top: 25%;
+            left: 35%;
+            animation-delay: -10s;
+        }
+
+        @keyframes floatShape {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(40px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-30px, 30px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        .glass-login-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1050px;
+            margin: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            z-index: 10;
+
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 4. Left Side: Brand & Illustration Showcase */
+        .image-container {
+            position: relative;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* Decorative faint circles in the red background */
+        .image-container::before {
+            content: '';
+            position: absolute;
+            top: -15%;
+            right: -15%;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            z-index: 0;
+        }
+
+        .image-container::after {
+            content: '';
+            position: absolute;
+            bottom: -5%;
+            left: -10%;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            z-index: 0;
+        }
+
+        .brand-logo-wrapper {
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .brand-logo-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        /* Wrapper to perfectly center the illustration */
+        .illustration-wrapper {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            margin: 2rem 0;
+        }
+
+        /* The actual PNG Illustration styling */
+        .side-illustration {
+            width: 100%;
+            max-width: 360px;
+            /* Keeps the illustration at a beautiful size */
+            height: auto;
+            object-fit: contain;
+            animation: floatImg 5s ease-in-out infinite;
+            filter: drop-shadow(0px 25px 35px rgba(130, 0, 0, 0.4));
+            /* Deep red shadow */
+        }
+
+        @keyframes floatImg {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .text-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 5. Right Side: Form UI */
+        .form-container {
+            padding: 4.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-size: 1rem;
+            color: #334155;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+            background: #fff;
+        }
+
+        .input-group-text {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #e2e8f0;
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus+.input-group-text {
+            border-color: #dc2626;
+            background: #fff;
+        }
+
+        /* Custom Button */
+        .btn-animated {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+            background-size: 200% auto;
+            border: none;
+            color: #ffffff;
+            padding: 0.9rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+            transition: 0.4s;
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.25);
+        }
+
+        .btn-animated:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(220, 38, 38, 0.4);
+            color: #ffffff;
+        }
+
+        .footer-credits {
+            position: absolute;
+            bottom: 1.5rem;
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+
+        /* Responsive */
+        @media (max-width: 991.98px) {
+            .image-container {
+                display: none;
+            }
+
+            .form-container {
+                padding: 3rem 2rem;
+                border-radius: 24px;
+            }
+
+            .glass-login-card {
+                margin: 1rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div id="layout-wrapper">
-        <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
-            <div class="bg-overlay"></div>
-            <!-- auth-page content -->
-            <div class="auth-page-content overflow-hidden pt-lg-5">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="card overflow-hidden card-bg-fill galaxy-border-none">
-                                <div class="row g-0">
-                                    <div class="col-lg-6">
-                                        <div id="qoutescarouselIndicators" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="3000">
+    <div class="animated-gradient-bg">
 
-                                        <!-- Indicators -->
-                                        <div class="carousel-indicators">
-                                            @foreach ($sliders as $index => $slider)
-                                                <button type="button" data-bs-target="#qoutescarouselIndicators"
-                                                    data-bs-slide-to="{{ $index }}"
-                                                    @if ($index == 0) class="active" aria-current="true" @endif
-                                                    aria-label="Slide {{ $index + 1 }}">
-                                                </button>
-                                            @endforeach
-                                        </div>
+        <!-- Animated Background Orbs -->
+        <div class="bg-shape shape-1"></div>
+        <div class="bg-shape shape-2"></div>
+        <div class="bg-shape shape-3"></div>
 
-                                        <!-- Slides -->
-                                        <div class="carousel-inner h-100">
-                                            @foreach ($sliders as $index => $slider)
-                                                <div class="carousel-item @if ($index == 0) active @endif">
-                                                    <img src="{{ asset($slider->image) }}"
-                                                        class="d-block w-100 h-100 slide-bg-img"
-                                                        style="object-fit: cover;" alt="Slide {{ $index + 1 }}">
-                                                    <div class="bg-overlay"></div>
-                                                    <div class="carousel-caption d-flex flex-column justify-content-center h-100">
-                                                        <div class="mb-4">
-                                                            <a href="{{ route('admin.dashboard') }}" class="d-block">
-                                                                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/glow-unlock-favicon.png') }}"
-                                                                    alt="Logo" height="100">
-                                                            </a>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            {{-- <i class="ri-double-quotes-l display-4 text-success"></i>
-                                                             --}}
-                                                             <span class="">{{$slider->content_head}}</span>
-                                                        </div>
-                                                        <p class="fs-15 fst-italic text-white">
-                                                            {{ $slider->content_body ?? '' }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
+        <div class="glass-login-card row g-0">
 
-                                        <!-- Controls -->
-                                        <button class="carousel-control-prev" type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide="prev">
-                                            <span class="carousel-control-prev-icon"></span>
-                                            <span class="visually-hidden">Previous</span>
-                                        </button>
-                                        <button class="carousel-control-next" type="button" data-bs-target="#qoutescarouselIndicators" data-bs-slide="next">
-                                            <span class="carousel-control-next-icon"></span>
-                                            <span class="visually-hidden">Next</span>
-                                        </button>
-                                    </div>
-                                    </div>
-                                    <!-- end col -->
+            <!-- Left Column: Illustration Showcase -->
+            <div class="col-lg-6 image-container">
 
-                                    <div class="col-lg-6">
-                                        <div class="p-lg-5 p-4">
-                                            <div>
-                                                <h4 class="text-danger">Welcome Back !</h4>
-                                                <p class="text-muted">Sign in to continue to
-                                                    {{ $settings['app_name'] ?? 'SZORZO' }}.</p>
-                                            </div>
-
-                                            <div class="mt-4">
-                                                <form method="POST" action="{{ route('login.check') }}">
-                                                    @csrf
-                                                    <div class="mb-3">
-                                                        <label for="username" class="form-label">Username</label>
-                                                        <input type="email" class="form-control" name="email" id="username" placeholder="Enter username" value="{{ old('email') }}" required>
-                                                    </div>
-                                                    @error('email')
-                                                        <span class="invalid-feedback" role="alert">
-                                                            <strong>{{ $message }}</strong>
-                                                        </span>
-                                                    @enderror
-                                                    <div class="mb-3">
-                                                    <div class="input-group">
-                                                        <label class="form-label"
-                                                            for="password-input">Password</label>
-                                                        <div class="input-group">
-                                                            <input type="password" id="password"
-                                                                class="form-control" name="password"
-                                                                placeholder="Enter password" value="">
-                                                            <span class="input-group-text" id="password-addon"
-                                                                style="cursor: pointer;">
-                                                                <i toggle="#password"
-                                                                    class="ri-eye-fill align-middle toggle-password"></i>
-                                                            </span>
-                                                        </div>
-                                                        @error('password')
-                                                            <span class="invalid-feedback" role="alert">
-                                                                <strong>{{ $message }}</strong>
-                                                            </span>
-                                                        @enderror
-                                                    </div>
-                                                    </div>
-
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" value="" id="auth-remember-check" {{ old('remember') ? 'checked' : '' }}>
-                                                        <label class="form-check-label" for="auth-remember-check">Remember me</label>
-                                                    </div>
-
-                                                    <div class="mt-4">
-                                                        <button class="btn btn-success w-100" type="submit">Sign In</button>
-                                                    </div>
-
-                                                    {{-- <div class="mt-4 text-center">
-                                                        <div class="signin-other-title">
-                                                            <h5 class="fs-13 mb-4 title">Sign In with</h5>
-                                                        </div>
-
-                                                        <div>
-                                                            <button type="button" class="btn btn-primary btn-icon waves-effect waves-light"><i class="ri-facebook-fill fs-16"></i></button>
-                                                            <button type="button" class="btn btn-danger btn-icon waves-effect waves-light"><i class="ri-google-fill fs-16"></i></button>
-                                                            <button type="button" class="btn btn-dark btn-icon waves-effect waves-light"><i class="ri-github-fill fs-16"></i></button>
-                                                            <button type="button" class="btn btn-info btn-icon waves-effect waves-light"><i class="ri-twitter-fill fs-16"></i></button>
-                                                        </div>
-                                                    </div> --}}
-
-                                                </form>
-                                            </div>
-
-                                            <div class="mt-5 text-center">
-                                                {{-- <p class="mb-0">Don't have an account ? <a href="auth-signup-cover.html" class="fw-semibold text-primary text-decoration-underline"> Signup</a> </p> --}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- end col -->
-                                </div>
-                                <!-- end row -->
-                            </div>
-                            <!-- end card -->
-                        </div>
-                        <!-- end col -->
-
-                    </div>
-                    <!-- end row -->
+                <div class="brand-logo-wrapper">
+                    <a href="{{ route('admin.dashboard') }}">
+                        <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/logo-bg.webp') }}"
+                            alt="SZORZO Logo" height="45" style="filter: brightness(0) invert(1);">
+                    </a>
                 </div>
-                <!-- end container -->
+
+                <!-- Fixed Illustration without overlay -->
+                <div class="illustration-wrapper">
+                    <img src="{{ asset('frontend/images/Mobile login-pana.png') }}" class="side-illustration"
+                        alt="Mobile Login Illustration">
+                </div>
+
+                <div class="text-content mt-auto">
+                    <h2 class="fw-bold text-white mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.15);">Welcome to
+                        {{ $settings['app_name'] ?? 'SZORZO' }}</h2>
+                    <p class="fs-15 text-white mb-0"
+                        style="opacity: 0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.15); line-height: 1.6;">
+                        Experience seamless management with our secure, beautifully designed dashboard. Your workflow,
+                        optimized.
+                    </p>
+                </div>
+
             </div>
-            <!-- footer -->
-            <footer class="footer galaxy-border-none">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="text-center">
-                                <p class="mb-0">©
-                                    <script>
-                                        document.write(new Date().getFullYear())
-                                    </script> All rights reserved. by Szorzo
-                                </p>
+
+            <!-- Right Column: Login Form -->
+            <div class="col-lg-6 form-container">
+                <div class="mb-5">
+                    <h2 class="fw-bold text-dark mb-2">Sign In 👋</h2>
+                    <p class="text-muted fs-15">Please enter your credentials to access your account.</p>
+                </div>
+
+                <div>
+                    <form method="POST" action="{{ route('login.check') }}">
+                        @csrf
+
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-semibold text-dark">Email Address</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                name="email" id="username" placeholder="name@example.com" value="{{ old('email') }}"
+                                required autofocus>
+                            @error('email')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold text-dark mb-0" for="password">Password</label>
+                            </div>
+                            <div class="input-group">
+                                <input type="password" id="password"
+                                    class="form-control border-end-0 @error('password') is-invalid @enderror"
+                                    name="password" placeholder="Enter your password" required>
+                                <span class="input-group-text" id="password-addon" style="cursor: pointer;">
+                                    <i toggle="#password" class="ri-eye-fill align-middle fs-18 toggle-password"></i>
+                                </span>
+                                @error('password')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
                         </div>
-                    </div>
+
+                        <div class="form-check mb-4 mt-2">
+                            <input class="form-check-input" type="checkbox" name="remember" id="auth-remember-check"
+                                {{ old('remember') ? 'checked' : '' }}>
+                            <label class="form-check-label text-muted fs-14" for="auth-remember-check">
+                                Remember me on this device
+                            </label>
+                        </div>
+
+                        <div class="mt-4 pt-2">
+                            <button class="btn btn-animated w-100" type="submit">Sign In to Dashboard</button>
+                        </div>
+                    </form>
                 </div>
-            </footer>
+            </div>
+
+        </div>
+
+        <div class="footer-credits">
+            <p class="mb-0">©
+                <script>
+                    document.write(new Date().getFullYear())
+                </script> <strong>Szorzo</strong>. All rights reserved.
+            </p>
         </div>
     </div>
+
+    @include('backend.layouts.js_master')
+    <script src="{{ asset('vendor/flasher/flasher.min.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.querySelector('.toggle-password');
+            const passwordInput = document.getElementById('password');
+
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+
+                    this.classList.toggle('ri-eye-fill');
+                    this.classList.toggle('ri-eye-off-fill');
+                });
+            }
+        });
+    </script>
 </body>
+
 </html>
-@include('backend.layouts.js_master')
-<script src="{{ asset('vendor/flasher/flasher.min.js')}}"></script>
