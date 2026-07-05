@@ -34,6 +34,16 @@ class MasterDataSpreadsheet
             ->value('id');
     }
 
+    public static function lookupNumeric(string $model, string $column, mixed $value): ?int
+    {
+        if ($value === null || trim((string) $value) === '' || ! is_numeric($value)) {
+            return null;
+        }
+
+        /** @var Model $model */
+        return $model::query()->where($column, (float) $value)->value('id');
+    }
+
     public static function status(mixed $value): ?int
     {
         if ($value === null || trim((string) $value) === '') {
@@ -67,6 +77,15 @@ class MasterDataSpreadsheet
     public static function cleanPercent(mixed $value): mixed
     {
         return is_string($value) ? trim(str_replace('%', '', $value)) : $value;
+    }
+
+    public static function text(mixed $value): ?string
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+
+        return trim((string) $value);
     }
 
     public static function errors(array $errors, int $limit = 10): string

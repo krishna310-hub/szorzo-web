@@ -29,7 +29,7 @@ class ClientController extends Controller
                 ->addIndexColumn()
                 ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
                 ->addColumn('division_name', fn ($row) => $row->division->name ?? '-')
-                ->addColumn('billing_value', fn ($row) => $row->billing->value.'%' ?? '-')
+                ->addColumn('billing_value', fn ($row) => $row->billing ? $row->billing->value.'%' : '-')
                 ->editColumn('signed_date', fn ($row) => $row->signed_date?->format('d-m-Y') ?? '-')
                 ->editColumn('renewal_date', fn ($row) => $row->renewal_date?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
@@ -155,15 +155,15 @@ class ClientController extends Controller
             $data = [
                 'id' => $row['record_id'] ?? null,
                 'client' => trim((string) ($row['client'] ?? '')),
-                'billing_id' => MasterDataSpreadsheet::lookup(Billing::class, 'value', $billingValue),
+                'billing_id' => MasterDataSpreadsheet::lookupNumeric(Billing::class, 'value', $billingValue),
                 'location_id' => MasterDataSpreadsheet::lookup(Location::class, 'location', $location),
-                'poc_name' => $row['poc_name'] ?? null,
+                'poc_name' => MasterDataSpreadsheet::text($row['poc_name'] ?? null),
                 'signed_date' => MasterDataSpreadsheet::date($row['signed_date'] ?? null),
                 'renewal_date' => MasterDataSpreadsheet::date($row['renewal_date'] ?? null),
                 'division_id' => MasterDataSpreadsheet::lookup(Division::class, 'name', $division),
-                'contact_number' => $row['contact_number'] ?? null,
-                'email' => $row['email'] ?? null,
-                'mobile_number' => $row['mobile_number'] ?? null,
+                'contact_number' => MasterDataSpreadsheet::text($row['contact_number'] ?? null),
+                'email' => MasterDataSpreadsheet::text($row['email'] ?? null),
+                'mobile_number' => MasterDataSpreadsheet::text($row['mobile_number'] ?? null),
                 'status' => $status,
             ];
 

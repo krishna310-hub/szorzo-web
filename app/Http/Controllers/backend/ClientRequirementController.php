@@ -39,7 +39,7 @@ class ClientRequirementController extends Controller
                 ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
                 ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
                 ->addColumn('project_owner_name', fn ($row) => $row->projectOwner->recruiter_name ?? '-')
-                ->addColumn('billing_value', fn ($row) => $row->billing->value.'%' ?? '-')
+                ->addColumn('billing_value', fn ($row) => $row->billing ? $row->billing->value.'%' : '-')
                 ->editColumn('requirement_open_date', fn ($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
                 ->editColumn('closure_target_date', fn ($row) => $row->closure_target_date?->format('d-m-Y') ?? '-')
                 ->editColumn('ctc', fn ($row) => $row->ctc !== null ? number_format((float) $row->ctc, 2) : '-')
@@ -171,7 +171,7 @@ class ClientRequirementController extends Controller
             $projectOwner = $row['project_owner'] ?? null;
             $location = $row['location'] ?? null;
             $clientId = MasterDataSpreadsheet::lookup(Client::class, 'client', $clientName);
-            $billingId = MasterDataSpreadsheet::lookup(Billing::class, 'value', $billingValue);
+            $billingId = MasterDataSpreadsheet::lookupNumeric(Billing::class, 'value', $billingValue);
             $jobDescriptionId = null;
 
             if ($jobDescription !== null && trim((string) $jobDescription) !== '' && $clientId) {
@@ -208,7 +208,7 @@ class ClientRequirementController extends Controller
             $validator = Validator::make($data, [
                 'id' => 'nullable|integer|exists:client_requirements,id',
                 'client_id' => 'required|exists:clients,id',
-                'billing_id' => 'required|exists:billings,id',
+                'billing_id' => 'nullable|exists:billings,id',
                 'revenue_amount' => 'nullable|numeric|min:0',
                 'job_description_id' => 'nullable|exists:client_job_roles,id',
                 'mode_id' => 'nullable|exists:modes,id',
@@ -224,11 +224,11 @@ class ClientRequirementController extends Controller
                 'status' => 'required|in:0,1',
             ], [
                 'client_id.required' => 'Client "'.$clientName.'" was not found.',
-                'billing_id.required' => 'Billing "'.$billingValue.'" was not found.',
             ]);
 
-            $validator->after(function ($validator) use ($jobDescription, $mode, $jobRole, $projectOwner, $location, $data) {
+            $validator->after(function ($validator) use ($billingValue, $jobDescription, $mode, $jobRole, $projectOwner, $location, $data) {
                 $lookups = [
+                    ['value' => $billingValue, 'id' => $data['billing_id'], 'label' => 'Billing'],
                     ['value' => $jobDescription, 'id' => $data['job_description_id'], 'label' => 'Job description'],
                     ['value' => $mode, 'id' => $data['mode_id'], 'label' => 'Mode'],
                     ['value' => $jobRole, 'id' => $data['job_role_id'], 'label' => 'Job role'],
@@ -281,7 +281,7 @@ class ClientRequirementController extends Controller
     {
         return $request->validate([
             'client_id' => 'required|exists:clients,id',
-            'billing_id' => 'required|exists:billings,id',
+            'billing_id' => 'nullable|exists:billings,id',
             'revenue_amount' => 'nullable|numeric|min:0',
             'job_description_id' => 'nullable|exists:client_job_roles,id',
             'mode_id' => 'nullable|exists:modes,id',

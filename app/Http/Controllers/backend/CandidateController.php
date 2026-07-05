@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers\backend;
 
+use App\Exports\MasterDataExport;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\InterviewLevel;
 use App\Models\JobRole;
 use App\Models\Recruiter;
+use App\Support\MasterDataSpreadsheet;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class CandidateController extends Controller
@@ -42,11 +47,12 @@ class CandidateController extends Controller
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', Candidate::class)) {
-                        $buttons .= '<a href="' . route('admin.candidates.edit', $row->id) . '" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
+                        $buttons .= '<a href="'.route('admin.candidates.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }
                     if (auth()->user()->can('delete', Candidate::class)) {
-                        $buttons .= '<button type="button" data-route="' . route('admin.candidates.delete', $row->id) . '" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
+                        $buttons .= '<button type="button" data-route="'.route('admin.candidates.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
                     }
+
                     return $buttons ?: '-';
                 })
                 ->rawColumns(['status', 'action'])
@@ -59,6 +65,7 @@ class CandidateController extends Controller
     public function create()
     {
         $this->authorize('create', Candidate::class);
+
         return view('backend.candidates.create', $this->formData());
     }
 
@@ -66,12 +73,14 @@ class CandidateController extends Controller
     {
         $this->authorize('create', Candidate::class);
         Candidate::create($this->validatedData($request));
+
         return redirect()->route('admin.candidates.index')->with('success', 'Candidate created successfully.');
     }
 
     public function edit($id)
     {
         $this->authorize('edit', Candidate::class);
+
         return view('backend.candidates.edit', array_merge(
             ['candidate' => Candidate::findOrFail($id)],
             $this->formData()
@@ -82,6 +91,7 @@ class CandidateController extends Controller
     {
         $this->authorize('edit', Candidate::class);
         Candidate::findOrFail($id)->update($this->validatedData($request));
+
         return redirect()->route('admin.candidates.index')->with('success', 'Candidate updated successfully.');
     }
 
@@ -89,7 +99,162 @@ class CandidateController extends Controller
     {
         $this->authorize('delete', Candidate::class);
         Candidate::findOrFail($id)->delete();
+
         return response()->json(['status' => true, 'message' => 'Candidate deleted successfully.']);
+    }
+
+    public function export()
+    {
+        $this->authorize('read', Candidate::class);
+
+        $rows = Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])
+            ->latest()->get()->map(fn ($candidate) => [
+                $candidate->id,
+                $candidate->recruiter?->recruiter_name,
+                $candidate->client?->client,
+                $candidate->jobRole?->job_role,
+                $candidate->candidate_name,
+                $candidate->mobile_no,
+                $candidate->email,
+                $candidate->qualification,
+                $candidate->total_experience,
+                $candidate->relevant_experience,
+                $candidate->take_home,
+                $candidate->variable,
+                $candidate->current_ctc,
+                $candidate->expected_ctc,
+                $candidate->notice_period,
+                $candidate->current_company,
+                $candidate->current_location,
+                $candidate->preferred_location,
+                $candidate->reason_for_change,
+                $candidate->interviewLevel?->level,
+                $candidate->status ? 'Active' : 'Inactive',
+            ])->all();
+
+        return Excel::download(new MasterDataExport($this->importHeadings(), $rows), 'candidates-'.now()->format('Y-m-d').'.xlsx');
+    }
+
+    public function importTemplate()
+    {
+        $this->authorize('create', Candidate::class);
+
+        return Excel::download(new MasterDataExport($this->importHeadings(), [[
+            null, 'Existing Recruiter', 'Existing Client', 'Existing Job Role', 'Example Candidate',
+            '9876543210', 'candidate@example.com', 'B.Tech', 5, 3, 60000, 5000, 900000,
+            1100000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
+            'Screening', 'Active',
+        ]]), 'candidates-import-template.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $this->authorize('create', Candidate::class);
+        $request->validate(['import_file' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
+
+        try {
+            $rows = MasterDataSpreadsheet::rows($request->file('import_file'));
+        } catch (\Throwable) {
+            return back()->with('error', 'The spreadsheet could not be read. Please use the provided template.');
+        }
+
+        if ($rows->isEmpty()) {
+            return back()->with('error', 'The spreadsheet has no data rows.');
+        }
+
+        $validRows = [];
+        $errors = [];
+
+        foreach ($rows as $index => $row) {
+            $number = $index + 2;
+            $recruiter = $row['recruiter'] ?? null;
+            $client = $row['client'] ?? null;
+            $jobRole = $row['job_role'] ?? null;
+            $interviewLevel = $row['level_of_interview'] ?? null;
+
+            $data = [
+                'id' => $row['record_id'] ?? null,
+                'recruiter_id' => MasterDataSpreadsheet::lookup(Recruiter::class, 'recruiter_name', $recruiter),
+                'client_id' => MasterDataSpreadsheet::lookup(Client::class, 'client', $client),
+                'job_role_id' => MasterDataSpreadsheet::lookup(JobRole::class, 'job_role', $jobRole),
+                'candidate_name' => trim((string) ($row['candidate_name'] ?? '')),
+                'mobile_no' => MasterDataSpreadsheet::text($row['mobile_no'] ?? null),
+                'email' => MasterDataSpreadsheet::text($row['email'] ?? null),
+                'qualification' => MasterDataSpreadsheet::text($row['qualification'] ?? null),
+                'total_experience' => $row['total_experience'] ?? null,
+                'relevant_experience' => $row['relevant_experience'] ?? null,
+                'take_home' => $row['take_home'] ?? null,
+                'variable' => $row['variable'] ?? null,
+                'current_ctc' => $row['current_ctc'] ?? null,
+                'expected_ctc' => $row['expected_ctc'] ?? null,
+                'notice_period' => MasterDataSpreadsheet::text($row['notice_period'] ?? null),
+                'current_company' => MasterDataSpreadsheet::text($row['current_company'] ?? null),
+                'current_location' => MasterDataSpreadsheet::text($row['current_location'] ?? null),
+                'preferred_location' => MasterDataSpreadsheet::text($row['preferred_location'] ?? null),
+                'reason_for_change' => MasterDataSpreadsheet::text($row['reason_for_change'] ?? null),
+                'level_of_interview_id' => MasterDataSpreadsheet::lookup(InterviewLevel::class, 'level', $interviewLevel),
+                'status' => MasterDataSpreadsheet::status($row['status'] ?? null),
+            ];
+
+            $validator = Validator::make($data, [
+                'id' => 'nullable|integer|exists:candidates,id',
+                'recruiter_id' => 'nullable|exists:recruiters,id',
+                'client_id' => 'nullable|exists:clients,id',
+                'job_role_id' => 'nullable|exists:job_roles,id',
+                'candidate_name' => 'required|string|max:255',
+                'mobile_no' => 'nullable|string|max:30',
+                'email' => 'nullable|email|max:255',
+                'qualification' => 'nullable|string|max:255',
+                'total_experience' => 'nullable|numeric|min:0',
+                'relevant_experience' => 'nullable|numeric|min:0',
+                'take_home' => 'nullable|numeric|min:0',
+                'variable' => 'nullable|numeric|min:0',
+                'current_ctc' => 'nullable|numeric|min:0',
+                'expected_ctc' => 'nullable|numeric|min:0',
+                'notice_period' => 'nullable|string|max:255',
+                'current_company' => 'nullable|string|max:255',
+                'current_location' => 'nullable|string|max:255',
+                'preferred_location' => 'nullable|string|max:255',
+                'reason_for_change' => 'nullable|string',
+                'level_of_interview_id' => 'nullable|exists:level_of_interviews,id',
+                'status' => 'required|in:0,1',
+            ]);
+
+            $validator->after(function ($validator) use ($recruiter, $client, $jobRole, $interviewLevel, $data) {
+                $lookups = [
+                    ['value' => $recruiter, 'id' => $data['recruiter_id'], 'label' => 'Recruiter'],
+                    ['value' => $client, 'id' => $data['client_id'], 'label' => 'Client'],
+                    ['value' => $jobRole, 'id' => $data['job_role_id'], 'label' => 'Job role'],
+                    ['value' => $interviewLevel, 'id' => $data['level_of_interview_id'], 'label' => 'Level of interview'],
+                ];
+
+                foreach ($lookups as $lookup) {
+                    if ($lookup['value'] !== null && trim((string) $lookup['value']) !== '' && ! $lookup['id']) {
+                        $validator->errors()->add('lookup', $lookup['label'].' "'.$lookup['value'].'" was not found.');
+                    }
+                }
+            });
+
+            if ($validator->fails()) {
+                $errors[] = 'Row '.$number.': '.implode(', ', $validator->errors()->all());
+            } else {
+                $validRows[] = $data;
+            }
+        }
+
+        if ($errors) {
+            return back()->with('error', 'Nothing was imported. '.MasterDataSpreadsheet::errors($errors));
+        }
+
+        DB::transaction(function () use ($validRows) {
+            foreach ($validRows as $data) {
+                $id = $data['id'];
+                unset($data['id']);
+                $id ? Candidate::findOrFail($id)->update($data) : Candidate::create($data);
+            }
+        });
+
+        return back()->with('success', count($validRows).' candidate row(s) imported successfully.');
     }
 
     private function formData(): array
@@ -126,5 +291,10 @@ class CandidateController extends Controller
             'level_of_interview_id' => 'nullable|exists:level_of_interviews,id',
             'status' => 'required|in:0,1',
         ]);
+    }
+
+    private function importHeadings(): array
+    {
+        return ['Record ID', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Status'];
     }
 }

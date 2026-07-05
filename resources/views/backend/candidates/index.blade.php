@@ -2,8 +2,16 @@
 @section('title', 'Candidates')
 @section('content')
 <div class="main-content"><div class="page-content"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="card">
-<div class="card-header d-flex align-items-center"><h5 class="card-title mb-0 flex-grow-1">Candidates</h5>@can('create', \App\Models\Candidate::class)<a href="{{ route('admin.candidates.create') }}" class="btn btn-sm btn-primary">Add New Candidate</a>@endcan</div>
-<div class="card-body"><div class="table-responsive"><table id="candidates-table" class="table table-bordered nowrap w-100"><thead><tr>
+<div class="card-header d-flex align-items-center"><h5 class="card-title mb-0 flex-grow-1">Candidates</h5><div class="d-flex flex-wrap gap-2">
+@include('backend.partials.master-import-export', [
+    'routePrefix' => 'candidates',
+    'moduleName' => 'Candidates',
+    'model' => \App\Models\Candidate::class,
+    'fields' => ['Record ID', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Status'],
+])
+@can('create', \App\Models\Candidate::class)<a href="{{ route('admin.candidates.create') }}" class="btn btn-sm btn-primary">Add New Candidate</a>@endcan
+</div></div>
+<div class="card-body">@include('backend.partials.import-feedback')<div class="table-responsive"><table id="candidates-table" class="table table-bordered nowrap w-100"><thead><tr>
 <th>S.No</th><th>Candidate Name</th><th>Recruiter</th><th>Client</th><th>Job Role</th><th>Mobile No</th><th>Email</th><th>Qualification</th><th>Total Experience</th><th>Relevant Experience</th><th>Take Home</th><th>Variable</th><th>Current CTC</th><th>Expected CTC</th><th>Notice Period</th><th>Current Company</th><th>Current Location</th><th>Preferred Location</th><th>Reason For Change</th><th>Level Of Interview</th><th>Status</th><th>Created At</th><th>Action</th>
 </tr></thead><tbody></tbody></table></div></div>
 </div></div></div></div></div></div>

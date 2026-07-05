@@ -38,10 +38,12 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
-        if ($user->role->status != 0) {
-            return back()->with([
-                'error' => 'Your role is inactive. Please contact the administrator.'
-            ])->onlyInput('email');
+        if($user->id != 1){
+            if ($user->role->status != 1) {
+                return back()->with([
+                    'error' => 'Your role is inactive. Please contact the administrator.'
+                ])->onlyInput('email');
+            }
         }
 
         Auth::login($user);
