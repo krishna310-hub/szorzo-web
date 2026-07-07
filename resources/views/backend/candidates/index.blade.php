@@ -12,7 +12,7 @@
 @can('create', \App\Models\Candidate::class)<a href="{{ route('admin.candidates.create') }}" class="btn btn-sm btn-primary">Add New Candidate</a>@endcan
 </div></div>
 <div class="card-body">@include('backend.partials.import-feedback')<div class="table-responsive"><table id="candidates-table" class="table table-bordered nowrap w-100"><thead><tr>
-<th>S.No</th><th>Candidate Name</th><th>Recruiter</th><th>Client</th><th>Job Role</th><th>Mobile No</th><th>Email</th><th>Qualification</th><th>Total Experience</th><th>Relevant Experience</th><th>Take Home</th><th>Variable</th><th>Current CTC</th><th>Expected CTC</th><th>Notice Period</th><th>Current Company</th><th>Current Location</th><th>Preferred Location</th><th>Reason For Change</th><th>Level Of Interview</th><th>Status</th><th>Created At</th><th>Action</th>
+<th>S.No</th><th>Candidate Name</th><th>CV<th>Recruiter</th><th>Client</th><th>Job Role</th><th>Mobile No</th><th>Email</th><th>Qualification</th><th>Total Experience</th><th>Relevant Experience</th><th>Take Home</th><th>Variable</th><th>Current CTC</th><th>Expected CTC</th><th>Notice Period</th><th>Current Company</th><th>Current Location</th><th>Preferred Location</th><th>Reason For Change</th><th>Level Of Interview</th><th>Status</th><th>Created At</th><th>Action</th>
 </tr></thead><tbody></tbody></table></div></div>
 </div></div></div></div></div></div>
 @endsection
@@ -21,6 +21,7 @@
 $(document).ready(function () {
 var table = $('#candidates-table').DataTable({ processing: true, serverSide: true, scrollX: true, ajax: { url: '{{ route('admin.candidates.index') }}', type: 'GET' }, columns: [
 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false }, { data: 'candidate_name', name: 'candidate_name' },
+{ data: 'cv_preview', name: 'cv_preview', orderable: false, searchable: false },
 { data: 'recruiter_name', name: 'recruiter_name', orderable: false, searchable: false }, { data: 'client_name', name: 'client_name', orderable: false, searchable: false }, { data: 'job_role_name', name: 'job_role_name', orderable: false, searchable: false },
 { data: 'mobile_no', name: 'mobile_no' }, { data: 'email', name: 'email' }, { data: 'qualification', name: 'qualification' },
 { data: 'total_experience', name: 'total_experience' }, { data: 'relevant_experience', name: 'relevant_experience' }, { data: 'take_home', name: 'take_home' }, { data: 'variable', name: 'variable' },

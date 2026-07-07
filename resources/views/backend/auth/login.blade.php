@@ -22,7 +22,7 @@
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             background-color: #f8fafc;
-            
+
         }
 
         .animated-gradient-bg {
@@ -165,12 +165,15 @@
         /* Wrapper to perfectly center the illustration */
         .illustration-wrapper {
             position: relative;
-            flex: 1;
+            background: #ffffff;
+            width: min(380px, 90vw);
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2;
-            margin: 2rem 0;
+            margin: 2rem auto;
+            overflow: hidden;
         }
 
         /* The actual PNG Illustration styling */
@@ -314,7 +317,7 @@
 
                 <!-- Fixed Illustration without overlay -->
                 <div class="illustration-wrapper">
-                    <img src="{{ asset('frontend/images/Mobile login-pana.png') }}" class="side-illustration"
+                    <img src="{{ asset('frontend/images/adminlogos.png') }}" class="side-illustration"
                         alt="Mobile Login Illustration">
                 </div>
 
@@ -361,7 +364,8 @@
                                 <input type="password" id="password"
                                     class="form-control border-end-0 @error('password') is-invalid @enderror"
                                     name="password" placeholder="Enter your password" required>
-                                <span class="input-group-text" id="password-addon" style="cursor: pointer;">
+                                <span class="input-group-text toggle-password" id="password-addon"
+                                    style="cursor: pointer;">
                                     <i toggle="#password" class="ri-eye-fill align-middle fs-18 toggle-password"></i>
                                 </span>
                                 @error('password')
