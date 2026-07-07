@@ -30,6 +30,7 @@ class Candidate extends Model
         'reason_for_change',
         'level_of_interview_id',
         'status',
+        'upload_cv',
     ];
 
     protected $casts = [
