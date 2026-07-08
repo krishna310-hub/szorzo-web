@@ -43,7 +43,12 @@ class CandidateController extends Controller
                 ->editColumn('variable', fn ($row) => $row->variable !== null ? number_format((float) $row->variable, 2) : '-')
                 ->editColumn('current_ctc', fn ($row) => $row->current_ctc !== null ? number_format((float) $row->current_ctc, 2) : '-')
                 ->editColumn('expected_ctc', fn ($row) => $row->expected_ctc !== null ? number_format((float) $row->expected_ctc, 2) : '-')
-
+                ->addColumn('cv_preview', function ($row) {
+                    if ($row->upload_cv) {
+                        return '<a href="'.asset($row->upload_cv).'" target="_blank" class="btn btn-sm btn-outline-primary">View CV</a>';
+                    }
+                    return '-';
+                })
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', Candidate::class)) {
@@ -55,7 +60,7 @@ class CandidateController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['status', 'action', 'cv_preview'])
                 ->make(true);
         }
 
@@ -71,10 +76,27 @@ class CandidateController extends Controller
 
     public function store(Request $request)
     {
+        ini_set('upload_max_filesize', '20M');
+        ini_set('post_max_size', '25M');
         $this->authorize('create', Candidate::class);
-        Candidate::create($this->validatedData($request));
 
-        return redirect()->route('admin.candidates.index')->with('success', 'Candidate created successfully.');
+        $data = $this->validatedData($request);
+
+        if ($request->hasFile('upload_cv')) {
+
+            $file = $request->file('upload_cv');
+            $filename = time() . '_' . $file->getClientOriginalName();
+
+            $file->move(public_path('uploads/candidates'), $filename);
+
+            $data['upload_cv'] = 'uploads/candidates/' . $filename;
+        }
+
+        Candidate::create($data);
+
+        return redirect()
+            ->route('admin.candidates.index')
+            ->with('success', 'Candidate created successfully.');
     }
 
     public function edit($id)
@@ -90,9 +112,29 @@ class CandidateController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('edit', Candidate::class);
-        Candidate::findOrFail($id)->update($this->validatedData($request));
 
-        return redirect()->route('admin.candidates.index')->with('success', 'Candidate updated successfully.');
+        $candidate = Candidate::findOrFail($id);
+
+        $data = $this->validatedData($request);
+
+        if ($request->hasFile('upload_cv')) {
+
+            if ($candidate->upload_cv && file_exists(public_path($candidate->upload_cv))) {
+                unlink(public_path($candidate->upload_cv));
+            }
+
+            $file = $request->file('upload_cv');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/candidates'), $filename);
+
+            $data['upload_cv'] = 'uploads/candidates/' . $filename;
+        }
+
+        $candidate->update($data);
+
+        return redirect()
+            ->route('admin.candidates.index')
+            ->with('success', 'Candidate updated successfully.');
     }
 
     public function destroy($id)
@@ -139,12 +181,19 @@ class CandidateController extends Controller
     {
         $this->authorize('create', Candidate::class);
 
+        $dropdowns = [
+            'Recruiter' => Recruiter::where('status', true)->orderBy('recruiter_name')->pluck('recruiter_name')->all(),
+            'Client' => Client::where('status', true)->orderBy('client')->pluck('client')->all(),
+            'Job Role' => JobRole::where('status', true)->orderBy('job_role')->pluck('job_role')->all(),
+            'Level Of Interview' => InterviewLevel::where('status', true)->orderBy('sort_order')->pluck('level')->all(),
+        ];
+
         return Excel::download(new MasterDataExport($this->importHeadings(), [[
             null, 'Existing Recruiter', 'Existing Client', 'Existing Job Role', 'Example Candidate',
             '9876543210', 'candidate@example.com', 'B.Tech', 5, 3, 60000, 5000, 900000,
             1100000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
             'Screening', 'Active',
-        ]]), 'candidates-import-template.xlsx');
+        ]], $dropdowns), 'candidates-import-template.xlsx');
     }
 
     public function import(Request $request)
@@ -289,6 +338,7 @@ class CandidateController extends Controller
             'preferred_location' => 'nullable|string|max:255',
             'reason_for_change' => 'nullable|string',
             'level_of_interview_id' => 'nullable|exists:level_of_interviews,id',
+            'upload_cv' => 'nullable|mimes:pdf,doc,docx|max:2048',
             'status' => 'required|in:0,1',
         ]);
     }

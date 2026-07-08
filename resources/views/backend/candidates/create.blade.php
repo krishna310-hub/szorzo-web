@@ -14,7 +14,7 @@
                             <a href="{{ route('admin.candidates.index') }}" class="btn btn-sm btn-light">Back</a>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('admin.candidates.store') }}" method="POST">
+                            <form action="{{ route('admin.candidates.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @include('backend.candidates.form')
                             </form>

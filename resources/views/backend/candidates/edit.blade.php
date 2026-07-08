@@ -14,7 +14,7 @@
                             <a href="{{ route('admin.candidates.index') }}" class="btn btn-sm btn-light">Back</a>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('admin.candidates.update', $candidate->id) }}" method="POST">
+                            <form action="{{ route('admin.candidates.update', $candidate->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
                                 @include('backend.candidates.form')
