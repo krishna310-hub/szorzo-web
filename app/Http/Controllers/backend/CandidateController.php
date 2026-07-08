@@ -149,9 +149,9 @@ class CandidateController extends Controller
     {
         $this->authorize('read', Candidate::class);
 
-        $rows = Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])
-            ->latest()->get()->map(fn ($candidate) => [
-                $candidate->id,
+        $rows = Candidate::whereNull('deleted_at')->with(['recruiter', 'client', 'jobRole', 'interviewLevel'])
+            ->orderBy('id', 'asc')->get()->map(fn ($candidate,$index) => [
+                $index + 1,
                 $candidate->recruiter?->recruiter_name,
                 $candidate->client?->client,
                 $candidate->jobRole?->job_role,
@@ -216,6 +216,9 @@ class CandidateController extends Controller
 
         foreach ($rows as $index => $row) {
             $number = $index + 2;
+            if (empty(trim((string) ($row['candidate_name'] ?? '')))) {
+                continue;
+            }
             $recruiter = $row['recruiter'] ?? null;
             $client = $row['client'] ?? null;
             $jobRole = $row['job_role'] ?? null;
