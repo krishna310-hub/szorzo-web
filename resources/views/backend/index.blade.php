@@ -29,13 +29,13 @@
         border-radius: 50%;
         animation: sz-float 10s infinite ease-in-out alternate;
     }
-    
+
     .sz-blob-primary {
         top: -5%; left: -5%;
         width: 450px; height: 450px;
         background: #b91c1c;
     }
-    
+
     .sz-blob-dark {
         bottom: -10%; right: -5%;
         width: 400px; height: 400px;
@@ -123,11 +123,11 @@
 
     /* Smooth rounded icon boxes */
     .sz-icon-box {
-        width: 70px; 
+        width: 70px;
         height: 70px;
         border-radius: 20px;
-        display: flex; 
-        align-items: center; 
+        display: flex;
+        align-items: center;
         justify-content: center;
         background: rgba(185, 28, 28, 0.05);
         color: #b91c1c;
@@ -148,7 +148,7 @@
         border-spacing: 0 12px;
         margin-top: -12px;
     }
-    
+
     .sz-glassy-table thead th {
         background: transparent;
         color: #6b7280;
@@ -159,19 +159,19 @@
         font-size: 0.75rem;
         letter-spacing: 1px;
     }
-    
+
     .sz-glassy-table tbody tr {
         background: rgba(255, 255, 255, 0.8);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
         transition: all 0.3s ease;
     }
-    
+
     .sz-glassy-table tbody tr:hover {
         transform: scale(1.01) translateX(5px);
         background: #ffffff;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
     }
-    
+
     .sz-glassy-table tbody td {
         border: none;
         padding: 18px 20px;
@@ -179,17 +179,17 @@
         vertical-align: middle;
     }
 
-    .sz-glassy-table tbody td:first-child { 
-        border-radius: 16px 0 0 16px; 
+    .sz-glassy-table tbody td:first-child {
+        border-radius: 16px 0 0 16px;
         border-left: 3px solid transparent;
     }
-    
+
     .sz-glassy-table tbody tr:hover td:first-child {
         border-left: 3px solid #b91c1c;
     }
 
-    .sz-glassy-table tbody td:last-child { 
-        border-radius: 0 16px 16px 0; 
+    .sz-glassy-table tbody td:last-child {
+        border-radius: 0 16px 16px 0;
     }
 
     .sz-table-badge {
@@ -233,7 +233,7 @@
 </style>
 
 <div class="main-content">
-    
+
     <!-- STRICTLY CONFINED BACKGROUND LAYER FOR BLOBS -->
     <div class="sz-glass-bg-layer">
         <div class="sz-glassy-blob sz-blob-primary"></div>
@@ -276,7 +276,7 @@
                 @endcan
 
                 {{-- Pages --}}
-                @can('read', \App\Models\Pages::class)
+                {{-- @can('read', \App\Models\Pages::class)
                     <div class="col-sm-6 col-xl-3">
                         <div class="sz-glassy-card">
                             <div class="card-body p-4 d-flex justify-content-between align-items-center h-100">
@@ -291,7 +291,7 @@
                             </div>
                         </div>
                     </div>
-                @endcan
+                @endcan --}}
 
                 {{-- Users --}}
                 @can('read', \App\Models\User::class)
@@ -310,7 +310,7 @@
                         </div>
                     </div>
                 @endcan
-                
+
                 {{-- Settings --}}
                 @if(auth()->user()->can('generalSetting', \App\Models\Setting::class) || auth()->user()->can('emailSetting', \App\Models\Setting::class) || auth()->user()->can('socialSetting', \App\Models\Setting::class))
                 <div class="col-sm-6 col-xl-3">
@@ -334,7 +334,7 @@
             {{-- CHART & TABLE SECTION --}}
             @can('read', \App\Models\ContactEnquiry::class)
                 <div class="row g-4 mb-4">
-                    
+
                     {{-- Enquiry Chart --}}
                     <div class="col-xl-4">
                         <div class="sz-glassy-card">
@@ -448,7 +448,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         series: [today, week, month],
         labels: ['Today', 'This Week', 'This Month'],
-        colors: ['#b91c1c', '#ea580c', '#111111'], 
+        colors: ['#b91c1c', '#ea580c', '#111111'],
         stroke: {
             width: 3,
             colors: ['#ffffff'] // Clean white separators for glass effect
