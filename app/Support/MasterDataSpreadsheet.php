@@ -17,9 +17,7 @@ class MasterDataSpreadsheet
         $import = new SpreadsheetRowsImport;
         Excel::import($import, $file);
 
-        return ($import->rows ?? collect())->filter(
-            fn ($row) => collect($row)->contains(fn ($value) => $value !== null && trim((string) $value) !== '')
-        )->values();
+        return $import->rows ?? collect();
     }
 
     public static function lookup(string $model, string $column, mixed $value): ?int

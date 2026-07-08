@@ -219,6 +219,7 @@ class CandidateController extends Controller
             if (empty(trim((string) ($row['candidate_name'] ?? '')))) {
                 continue;
             }
+
             $recruiter = $row['recruiter'] ?? null;
             $client = $row['client'] ?? null;
             $jobRole = $row['job_role'] ?? null;
