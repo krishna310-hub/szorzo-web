@@ -181,12 +181,19 @@ class CandidateController extends Controller
     {
         $this->authorize('create', Candidate::class);
 
+        $dropdowns = [
+            'Recruiter' => Recruiter::where('status', true)->orderBy('recruiter_name')->pluck('recruiter_name')->all(),
+            'Client' => Client::where('status', true)->orderBy('client')->pluck('client')->all(),
+            'Job Role' => JobRole::where('status', true)->orderBy('job_role')->pluck('job_role')->all(),
+            'Level Of Interview' => InterviewLevel::where('status', true)->orderBy('sort_order')->pluck('level')->all(),
+        ];
+
         return Excel::download(new MasterDataExport($this->importHeadings(), [[
             null, 'Existing Recruiter', 'Existing Client', 'Existing Job Role', 'Example Candidate',
             '9876543210', 'candidate@example.com', 'B.Tech', 5, 3, 60000, 5000, 900000,
             1100000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
             'Screening', 'Active',
-        ]]), 'candidates-import-template.xlsx');
+        ]], $dropdowns), 'candidates-import-template.xlsx');
     }
 
     public function import(Request $request)

@@ -138,11 +138,20 @@
         @enderror
     </div>
     <div class="col-md-4">
-        <label for="upload cv" class="form-label">Upload CV @if($candidate->upload_cv) 
-            <a href="{{ asset($candidate->upload_cv) }}" target="_blank" class="btn btn-sm btn-outline-primary">View CV</a> @endif
+        <label for="upload_cv" class="form-label">
+            Upload CV
+    
+            @if(isset($candidate) && $candidate->upload_cv)
+                <a href="{{ asset($candidate->upload_cv) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    View CV
+                </a>
+            @endif
         </label>
+    
         <input type="file" class="form-control" id="upload_cv" name="upload_cv">
+    
         <span class="text-danger small">Maximum file size is 2MB</span>
+    
         @error('upload_cv')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
