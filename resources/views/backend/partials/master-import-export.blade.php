@@ -1,4 +1,9 @@
 <div class="d-flex flex-wrap gap-2 justify-content-end">
+    @if (!empty($showExportFilters))
+        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#candidateFilterOffcanvas" aria-controls="candidateFilterOffcanvas">
+            <i class="ri-filter-3-line me-1"></i> Filter
+        </button>
+    @endif
     <a href="{{ route('admin.' . $routePrefix . '.export') }}" class="btn btn-sm btn-success">
         <i class="ri-file-excel-2-line me-1"></i> Export
     </a>

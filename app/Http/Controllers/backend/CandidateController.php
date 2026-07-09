@@ -26,7 +26,7 @@ class CandidateController extends Controller
         $this->authorize('read', Candidate::class);
 
         if ($request->ajax()) {
-            $query = Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])->latest();
+            $query = $this->candidateQuery($request)->latest();
 
             return DataTables::of($query)
                 ->addIndexColumn()
@@ -64,7 +64,7 @@ class CandidateController extends Controller
                 ->make(true);
         }
 
-        return view('backend.candidates.index');
+        return view('backend.candidates.index', $this->formData());
     }
 
     public function create()
@@ -145,11 +145,11 @@ class CandidateController extends Controller
         return response()->json(['status' => true, 'message' => 'Candidate deleted successfully.']);
     }
 
-    public function export()
+    public function export(Request $request)
     {
         $this->authorize('read', Candidate::class);
 
-        $rows = Candidate::whereNull('deleted_at')->with(['recruiter', 'client', 'jobRole', 'interviewLevel'])
+        $rows = $this->candidateQuery($request)
             ->orderBy('id', 'asc')->get()->map(fn ($candidate,$index) => [
                 $index + 1,
                 $candidate->created_at ? date('d-m-Y', strtotime($candidate->created_at)) : '',
@@ -319,6 +319,17 @@ class CandidateController extends Controller
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
             'interviewLevels' => InterviewLevel::where('status', true)->orderBy('sort_order')->get(),
         ];
+    }
+
+    private function candidateQuery(Request $request)
+    {
+        return Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])
+            ->when($request->filled('from_date'), fn ($query) => $query->whereDate('created_at', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn ($query) => $query->whereDate('created_at', '<=', $request->to_date))
+            ->when($request->filled('recruiter_id'), fn ($query) => $query->where('recruiter_id', $request->recruiter_id))
+            ->when($request->filled('job_role_id'), fn ($query) => $query->where('job_role_id', $request->job_role_id))
+            ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
+            ->when($request->filled('level_of_interview_id'), fn ($query) => $query->where('level_of_interview_id', $request->level_of_interview_id));
     }
 
     private function validatedData(Request $request): array

@@ -14,6 +14,7 @@
                                         'routePrefix' => 'candidates',
                                         'moduleName' => 'Candidates',
                                         'model' => \App\Models\Candidate::class,
+                                        'showExportFilters' => true,
                                         'fields' => [
                                             'Record ID',
                                             'Recruiter',
@@ -50,7 +51,7 @@
                                             <tr>
                                                 <th>S.No</th>
                                                 <th>Candidate Name</th>
-                                                <th>CV
+                                                <th>CV</th>
                                                 <th>Recruiter</th>
                                                 <th>Client</th>
                                                 <th>Job Role</th>
@@ -84,17 +85,99 @@
             </div>
         </div>
     </div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="candidateFilterOffcanvas" aria-labelledby="candidateFilterOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="candidateFilterOffcanvasLabel">Candidate Filters</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <form id="candidate-filter-form" class="offcanvas-body d-flex flex-column gap-3">
+            <div>
+                <label for="filter_from_date" class="form-label">From Date</label>
+                <input type="date" class="form-control" id="filter_from_date" name="from_date">
+            </div>
+            <div>
+                <label for="filter_to_date" class="form-label">To Date</label>
+                <input type="date" class="form-control" id="filter_to_date" name="to_date">
+            </div>
+            <div>
+                <label for="filter_recruiter_id" class="form-label">Recruiter</label>
+                <select class="form-select" id="filter_recruiter_id" name="recruiter_id">
+                    <option value="">All recruiters</option>
+                    @foreach ($recruiters as $recruiter)
+                        <option value="{{ $recruiter->id }}">{{ $recruiter->recruiter_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="filter_job_role_id" class="form-label">Job Role</label>
+                <select class="form-select" id="filter_job_role_id" name="job_role_id">
+                    <option value="">All job roles</option>
+                    @foreach ($jobRoles as $jobRole)
+                        <option value="{{ $jobRole->id }}">{{ $jobRole->job_role }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="filter_client_id" class="form-label">Client</label>
+                <select class="form-select" id="filter_client_id" name="client_id">
+                    <option value="">All clients</option>
+                    @foreach ($clients as $client)
+                        <option value="{{ $client->id }}">{{ $client->client }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="filter_level_of_interview_id" class="form-label">Job Level</label>
+                <select class="form-select" id="filter_level_of_interview_id" name="level_of_interview_id">
+                    <option value="">All job levels</option>
+                    @foreach ($interviewLevels as $level)
+                        <option value="{{ $level->id }}">{{ $level->level }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mt-auto d-flex gap-2 border-top pt-3">
+                <button type="button" class="btn btn-light w-50" id="candidate-filter-reset">Reset</button>
+                <button type="submit" class="btn btn-primary w-50">Apply</button>
+            </div>
+        </form>
+    </div>
 @endsection
 @section('script')
     <script>
         $(document).ready(function() {
+            var exportBaseUrl = @json(route('admin.candidates.export'));
+            var indexUrl = @json(route('admin.candidates.index'));
+            var currentFilters = {};
+
+            function collectFilters() {
+                var filters = {};
+                $('#candidate-filter-form').serializeArray().forEach(function(item) {
+                    if (item.value) {
+                        filters[item.name] = item.value;
+                    }
+                });
+                return filters;
+            }
+
+            function updateExportUrl() {
+                var url = new URL(exportBaseUrl, window.location.origin);
+                Object.keys(currentFilters).forEach(function(key) {
+                    url.searchParams.set(key, currentFilters[key]);
+                });
+                $('a[href^="' + exportBaseUrl + '"]').attr('href', url.toString());
+            }
+
             var table = $('#candidates-table').DataTable({
                 processing: true,
                 serverSide: true,
                 scrollX: true,
                 ajax: {
-                    url: '{{ route('admin.candidates.index') }}',
-                    type: 'GET'
+                    url: indexUrl,
+                    type: 'GET',
+                    data: function(d) {
+                        Object.assign(d, currentFilters);
+                    }
                 },
                 columns: [{
                         data: 'DT_RowIndex',
@@ -194,6 +277,28 @@
                     }
                 ]
             });
+            updateExportUrl();
+
+            $('#candidate-filter-form').on('submit', function(e) {
+                e.preventDefault();
+                currentFilters = collectFilters();
+                updateExportUrl();
+                table.ajax.reload();
+
+                var offcanvasEl = document.getElementById('candidateFilterOffcanvas');
+                var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+                if (offcanvas) {
+                    offcanvas.hide();
+                }
+            });
+
+            $('#candidate-filter-reset').on('click', function() {
+                $('#candidate-filter-form')[0].reset();
+                currentFilters = {};
+                updateExportUrl();
+                table.ajax.reload();
+            });
+
             $(document).on('click', '.delete-record', function() {
                 if (!confirm('Are you sure you want to delete this candidate?')) return;
                 $.ajax({
