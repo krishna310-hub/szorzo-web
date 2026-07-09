@@ -1,25 +1,10 @@
 <div class="row gy-4">
     {{-- <div class="col-md-4">
         <label for="recruiter_id" class="form-label">Recruiter</label>
-<<<<<<< HEAD
         <select class="form-select" id="recruiter_id" name="recruiter_id"><option value="">Select recruiter</option>
             @foreach($recruiters as $recruiter)<option value="{{ $recruiter->id }}" {{ old('recruiter_id', $candidate->recruiter_id ?? '') == $recruiter->id ? 'selected' : '' }}>{{ $recruiter->recruiter_name }}</option>@endforeach
         </select>@error('recruiter_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div> --}}
-=======
-        <select class="form-select" id="recruiter_id" name="recruiter_id">
-            <option value="">Select recruiter</option>
-            @foreach ($recruiters as $recruiter)
-                <option value="{{ $recruiter->id }}"
-                    {{ old('recruiter_id', $candidate->recruiter_id ?? '') == $recruiter->id ? 'selected' : '' }}>
-                    {{ $recruiter->recruiter_name }}</option>
-            @endforeach
-        </select>
-        @error('recruiter_id')
-            <span class="text-danger small">{{ $message }}</span>
-        @enderror
-    </div>
->>>>>>> cc3c715b210c8ae5571e044c411639205935a1f0
     <div class="col-md-4">
         <label for="client_id" class="form-label">Client</label>
         <select class="form-select" id="client_id" name="client_id">
