@@ -110,15 +110,6 @@
                 </select>
             </div>
             <div>
-                <label for="filter_job_role_id" class="form-label">Job Role</label>
-                <select class="form-select" id="filter_job_role_id" name="job_role_id">
-                    <option value="">All job roles</option>
-                    @foreach ($jobRoles as $jobRole)
-                        <option value="{{ $jobRole->id }}">{{ $jobRole->job_role }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
                 <label for="filter_client_id" class="form-label">Client</label>
                 <select class="form-select" id="filter_client_id" name="client_id">
                     <option value="">All clients</option>
@@ -128,9 +119,18 @@
                 </select>
             </div>
             <div>
-                <label for="filter_level_of_interview_id" class="form-label">Job Level</label>
+                <label for="filter_job_role_id" class="form-label">Job Role</label>
+                <select class="form-select" id="filter_job_role_id" name="job_role_id">
+                    <option value="">All job roles</option>
+                    @foreach ($jobRoles as $jobRole)
+                        <option value="{{ $jobRole->id }}">{{ $jobRole->job_role }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="filter_level_of_interview_id" class="form-label">Interview Level</label>
                 <select class="form-select" id="filter_level_of_interview_id" name="level_of_interview_id">
-                    <option value="">All job levels</option>
+                    <option value="">All interview levels</option>
                     @foreach ($interviewLevels as $level)
                         <option value="{{ $level->id }}">{{ $level->level }}</option>
                     @endforeach
