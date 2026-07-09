@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
 
 class CandidateController extends Controller
 {
@@ -85,13 +86,17 @@ class CandidateController extends Controller
         if ($request->hasFile('upload_cv')) {
 
             $file = $request->file('upload_cv');
-            $filename = time() . '_' . $file->getClientOriginalName();
+
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+
+            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
 
             $file->move(public_path('uploads/candidates'), $filename);
 
             $data['upload_cv'] = 'uploads/candidates/' . $filename;
         }
-
+    
         Candidate::create($data);
 
         return redirect()
@@ -124,7 +129,9 @@ class CandidateController extends Controller
             }
 
             $file = $request->file('upload_cv');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
             $file->move(public_path('uploads/candidates'), $filename);
 
             $data['upload_cv'] = 'uploads/candidates/' . $filename;
