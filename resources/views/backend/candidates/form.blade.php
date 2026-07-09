@@ -6,9 +6,9 @@
         </select>@error('recruiter_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div> --}}
     <div class="col-md-4">
-        <label for="client_id" class="form-label">Client</label>
+        <label for="client_id" class="form-label">Recruiter</label>
         <select class="form-select" id="recruiter_id" name="recruiter_id">
-            <option value="">Select recruiter</option>
+            <option value="">Select Recruiter</option>
             @foreach ($recruiters as $recruiter)
                 <option value="{{ $recruiter->id }}"
                     {{ old('recruiter_id', $candidate->recruiter_id ?? '') == $recruiter->id ? 'selected' : '' }}>
