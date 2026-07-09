@@ -42,7 +42,7 @@ class AdminController extends Controller
             // Other data (separate queries are fine here)
             'latestEnquiries'  => ContactEnquiry::latest()->limit(5)->get(),
             'totalPages'       => Pages::count(),
-            'totalUsers'       => User::where('role_id', 2)->count(),
+            'totalUsers'       => User::where('role_id', '!=', 1)->count(),
             'totalRoles'       => Role::where('status', 1)->count(),
         ]);
     }

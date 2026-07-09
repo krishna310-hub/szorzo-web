@@ -336,7 +336,7 @@
           for (
             var a = document.getElementsByClassName('dropdown-custom-right');
             0 < a.length;
-  
+
           )
             a[0].classList.remove('dropdown-custom-right')
       if (e.target && e.target.matches('a.nav-link'))
@@ -356,7 +356,7 @@
           for (
             a = document.getElementsByClassName('dropdown-custom-right');
             0 < a.length;
-  
+
           )
             a[0].classList.remove('dropdown-custom-right')
     }
@@ -1930,4 +1930,3 @@
     (window.onscroll = function () {
       scrollFunction()
     })
-  

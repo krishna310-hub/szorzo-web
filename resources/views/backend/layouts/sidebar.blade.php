@@ -6,7 +6,7 @@
         justify-content: center !important;
         gap: 0 !important;
         line-height: 0 !important;
-        margin-top: 40px !important; 
+        margin-top: 40px !important;
         margin-bottom: 20px !important;
     }
 
@@ -43,12 +43,12 @@
         <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="22">
         <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
     </span> --}}
-    
+
     <!-- Added 'sz-logo-wrapper' -->
     <span class="logo-lg sz-logo-wrapper">
         <!-- Added 'sz-logo-top' -->
         <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/adminlogos.png')}}" alt="" height="50" class="sz-logo-top">
-        
+
         <!-- Added 'sz-logo-bottom' (kept 'logo-second' untouched) -->
         <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="200px" class="logo-second sz-logo-bottom">
     </span>
