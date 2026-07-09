@@ -172,6 +172,7 @@ class CandidateController extends Controller
                 $candidate->reason_for_change,
                 $candidate->interviewLevel?->level,
                 $candidate->status ? 'Active' : 'Inactive',
+                $candidate->created_at ? date('d-m-Y', strtotime($candidate->created_at)) : '',
             ])->all();
 
         return Excel::download(new MasterDataExport($this->importHeadings(), $rows), 'candidates-'.now()->format('Y-m-d').'.xlsx');
@@ -349,6 +350,6 @@ class CandidateController extends Controller
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Status'];
+        return ['Record ID', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Status','Created Date',];
     }
 }
