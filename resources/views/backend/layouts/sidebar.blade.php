@@ -197,6 +197,11 @@
                                             class="nav-link {{ request()->is('admin/masters/candidates*') ? 'active' : '' }}">
                                             Candidates </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.interview-schedules.index') }}"
+                                            class="nav-link {{ request()->is('admin/masters/interview-schedules*') ? 'active' : '' }}">
+                                            Interview Schedules List </a>
+                                    </li>
                                 @endcan
                                 @can('read', \App\Models\Recruiter::class)
                                     <li class="nav-item">

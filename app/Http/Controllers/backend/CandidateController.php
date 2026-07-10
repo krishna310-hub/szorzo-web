@@ -54,7 +54,9 @@ class CandidateController extends Controller
                     $buttons = '';
                     if (auth()->user()->can('edit', Candidate::class)) {
                         $buttons .= '<a href="'.route('admin.candidates.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
+                        $buttons .= '<a href="'.route('admin.interview-schedules.create', ['candidate_id' => $row->id]).'" class="text-success fs-4 me-1" title="Schedule Interview"><i class="ri-calendar-schedule-line"></i></a>';
                     }
+                    $buttons .= '<a href="'.route('admin.interview-schedules.show', $row->id).'" class="text-primary fs-4 me-1" title="Interview History"><i class="ri-history-line"></i></a>';
                     if (auth()->user()->can('delete', Candidate::class)) {
                         $buttons .= '<button type="button" data-route="'.route('admin.candidates.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
                     }
