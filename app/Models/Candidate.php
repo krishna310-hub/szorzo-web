@@ -56,4 +56,9 @@ class Candidate extends Model
     {
         return $this->belongsTo(InterviewLevel::class, 'level_of_interview_id');
     }
+
+    public function interviewSchedules()
+    {
+        return $this->hasMany(InterviewSchedule::class);
+    }
 }

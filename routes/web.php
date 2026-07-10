@@ -9,6 +9,7 @@ use App\Http\Controllers\backend\ClientRequirementController;
 use App\Http\Controllers\backend\DivisionController;
 use App\Http\Controllers\backend\LoginController;
 use App\Http\Controllers\backend\InterviewLevelController;
+use App\Http\Controllers\backend\InterviewScheduleController;
 use App\Http\Controllers\backend\LocationController;
 use App\Http\Controllers\backend\RoleController;
 use App\Http\Controllers\backend\SettingsController;
@@ -211,6 +212,16 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::post('/import', 'import')->name('import');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('interview-schedules')->name('interview-schedules.')->controller(InterviewScheduleController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/candidate/{candidateId}', 'show')->name('show');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}/update', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('delete');
