@@ -223,7 +223,7 @@
                     </li>
                 @endcan
 
-                @can('read', \App\Models\Pages::class)
+                {{-- @can('read', \App\Models\Pages::class)
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/pages*') ? 'active' : '' }}"
                             href="{{ route('admin.pages.index') }}">
@@ -241,12 +241,38 @@
                             <span>Sitemap & Robots</span>
                         </a>
                     </li>
+                @endcan --}}
+
+                @can('read', \App\Models\ClientRequirement::class)
+                    <li class="nav-item">
+                        <a href="{{ route('admin.client-requirements.index') }}"
+                            class="nav-link menu-link {{ request()->is('admin/client-requirements*') ? 'active' : '' }}">
+                            <i class="ri-file-list-3-line"></i>
+                            <span>Client Requirements</span>
+                        </a>
+                    </li>
                 @endcan
+
+                @can('read', \App\Models\Candidate::class)
+                    <li class="nav-item">
+                        <a href="{{ route('admin.candidates.index') }}"
+                            class="nav-link menu-link {{ request()->is('admin/candidates*') ? 'active' : '' }}">
+                            <i class="ri-user-search-line"></i>
+                            <span>Candidates</span>
+                        </a>
+                    </li>
+                @endcan
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.interview-schedules.index') }}"
+                        class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">
+                        <i class="ri-calendar-check-line"></i>
+                        <span>Interview Scheduled List</span>
+                    </a>
+                </li>
 
                 @if (auth()->user()->can('read', \App\Models\Client::class) ||
                         auth()->user()->can('read', \App\Models\ClientJobRole::class) ||
-                        auth()->user()->can('read', \App\Models\ClientRequirement::class) ||
-                        auth()->user()->can('read', \App\Models\Candidate::class) ||
                         auth()->user()->can('read', \App\Models\Recruiter::class) ||
                         auth()->user()->can('read', \App\Models\JobRole::class) ||
                         auth()->user()->can('read', \App\Models\Mode::class) ||
@@ -276,25 +302,6 @@
                                         <a href="{{ route('admin.client-job-roles.index') }}"
                                             class="nav-link {{ request()->is('admin/masters/client-job-roles*') ? 'active' : '' }}">
                                             Client Job Roles </a>
-                                    </li>
-                                @endcan
-                                @can('read', \App\Models\ClientRequirement::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.client-requirements.index') }}"
-                                            class="nav-link {{ request()->is('admin/masters/client-requirements*') ? 'active' : '' }}">
-                                            Client Requirements </a>
-                                    </li>
-                                @endcan
-                                @can('read', \App\Models\Candidate::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.candidates.index') }}"
-                                            class="nav-link {{ request()->is('admin/masters/candidates*') ? 'active' : '' }}">
-                                            Candidates </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.interview-schedules.index') }}"
-                                            class="nav-link {{ request()->is('admin/masters/interview-schedules*') ? 'active' : '' }}">
-                                            Interview Schedules List </a>
                                     </li>
                                 @endcan
                                 @can('read', \App\Models\Recruiter::class)
@@ -375,6 +382,41 @@
                                         <a href="{{ route('admin.user.index') }}"
                                             class="nav-link {{ request()->is('admin/users/user*', 'users*') ? 'active' : '' }}"
                                             data-key="t-settings"> Users </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endif
+
+                @if (auth()->user()->can('read', \App\Models\Pages::class) ||
+                        auth()->user()->can('sitemap', \App\Models\General::class))
+                    <li class="menu-title"><i class="ri-more-fill"></i> <span>SEO</span></li>
+                    <li class="nav-item">
+                        <a class="nav-link menu-link" href="#sidebarSeo" data-bs-toggle="collapse"
+                            role="button" aria-expanded="{{ request()->is('admin/seo*') ? 'true' : 'false' }}"
+                            aria-controls="sidebarSeo">
+                            <i class="ri-global-line"></i> <span>SEO</span>
+                        </a>
+                        <div class="collapse menu-dropdown {{ request()->is('admin/seo*') ? 'show' : '' }}"
+                            id="sidebarSeo">
+                            <ul class="nav nav-sm flex-column">
+                                @can('read', \App\Models\Pages::class)
+                                    <li class="nav-item">
+                                        <a class="nav-link menu-link {{ request()->is('admin/pages*') ? 'active' : '' }}"
+                                            href="{{ route('admin.pages.index') }}">
+                                            <i class="ri-file-text-line"></i>
+                                            <span>Landing Pages</span>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('sitemap', \App\Models\General::class)
+                                    <li class="nav-item">
+                                        <a class="nav-link menu-link {{ request()->is('admin/sitemap*') ? 'active' : '' }}"
+                                            href="{{ route('admin.sitemap.sitemap-robots.index') }}">
+                                            <i class="ri-links-line"></i>
+                                            <span>Sitemap & Robots</span>
+                                        </a>
                                     </li>
                                 @endcan
                             </ul>

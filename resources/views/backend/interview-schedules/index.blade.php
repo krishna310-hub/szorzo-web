@@ -8,7 +8,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header d-flex align-items-center">
-                                <h5 class="card-title mb-0 flex-grow-1">Interview Schedules List</h5>
+                                <h5 class="card-title mb-0 flex-grow-1">Interview Scheduled List</h5>
                                 <div class="d-flex flex-wrap gap-2">
                                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#interviewScheduleFilterOffcanvas" aria-controls="interviewScheduleFilterOffcanvas">
                                         <i class="ri-filter-3-line me-1"></i> Filter
