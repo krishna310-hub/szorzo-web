@@ -1,539 +1,450 @@
 @extends('backend.layouts.master')
 
-@section('title', 'Dashboard')
+@section('title', 'Recruitment Dashboard')
 
 @section('content')
+    <style>
+        .dashboard-shell {
+            background: linear-gradient(145deg, #f8fafc 0%, #fff7f7 48%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
 
-<style>
-    .page-content {
-        background-color: transparent !important;
-        position: relative;
-        min-height: 100vh;
-        z-index: 1;
-    }
+        .dashboard-hero {
+            border-radius: 24px;
+            color: #fff;
+            background: linear-gradient(120deg, #171923, #4a1621 65%, #b91c1c);
+            box-shadow: 0 18px 45px rgba(31, 41, 55, .16);
+            overflow: hidden;
+            position: relative;
+        }
 
-    .sz-glass-bg-layer {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        z-index: 0;
-        pointer-events: none;
-    }
-    .sz-glassy-blob {
-        position: absolute;
-        filter: blur(80px);
-        opacity: 0.15;
-        border-radius: 50%;
-        animation: sz-float 10s infinite ease-in-out alternate;
-    }
+        .dashboard-hero:after {
+            content: '';
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: -65px;
+            top: -100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .09);
+        }
 
-    .sz-blob-primary {
-        top: -5%; left: -5%;
-        width: 450px; height: 450px;
-        background: #b91c1c;
-    }
+        .scope-pill {
+            display: inline-flex;
+            gap: 7px;
+            align-items: center;
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .13);
+            font-size: .8rem;
+        }
 
-    .sz-blob-dark {
-        bottom: -10%; right: -5%;
-        width: 400px; height: 400px;
-        background: #111111;
-        animation-delay: -5s;
-    }
+        .metric-card,
+        .panel-card {
+            border: 0;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, .06);
+            height: 100%;
+        }
 
-    @keyframes sz-float {
-        0% { transform: translateY(0) scale(1); }
-        100% { transform: translateY(-40px) scale(1.05); }
-    }
+        .metric-card {
+            transition: transform .2s, box-shadow .2s;
+            overflow: hidden;
+        }
 
-    .sz-greeting-text {
-        color: #111111;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-    }
-    .sz-glassy-card {
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        border-right: 1px solid rgba(0, 0, 0, 0.05);
-        border-radius: 24px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-        height: 100%;
-        z-index: 2;
-    }
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 35px rgba(15, 23, 42, .1);
+        }
 
-    .sz-glassy-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px 0 rgba(185, 28, 28, 0.08);
-        border: 1px solid rgba(255, 255, 255, 1);
-    }
-    .sz-glassy-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: -100%;
-        width: 50%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-        transform: skewX(-20deg);
-        transition: all 0.6s ease;
-    }
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            display: grid;
+            place-items: center;
+            font-size: 1.35rem;
+        }
 
-    .sz-glassy-card:hover::before {
-        left: 150%;
-    }
+        .metric-value {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1;
+        }
 
-    .sz-card-title {
-        color: #6b7280;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 1px;
-        margin-bottom: 0.5rem;
-    }
+        .metric-label {
+            color: #64748b;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .55px;
+            font-weight: 700;
+        }
 
-    .sz-card-value {
-        color: #111111;
-        font-weight: 800;
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-        line-height: 1.2;
-    }
+        .section-title {
+            font-weight: 800;
+            color: #172033;
+        }
 
-    .sz-view-link {
-        color: #b91c1c;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        transition: all 0.3s ease;
-    }
+        .pipeline-row {
+            display: grid;
+            grid-template-columns: minmax(90px, 1fr) 4fr 45px;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 17px;
+        }
 
-    .sz-view-link:hover {
-        color: #111111;
-        gap: 8px;
-    }
+        .pipeline-track {
+            height: 9px;
+            border-radius: 20px;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
 
-    /* Smooth rounded icon boxes */
-    .sz-icon-box {
-        width: 70px;
-        height: 70px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(185, 28, 28, 0.05);
-        color: #b91c1c;
-        box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.1);
-        transition: all 0.4s ease;
-    }
+        .pipeline-fill {
+            height: 100%;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #ef4444, #7f1d1d);
+        }
 
-    .sz-glassy-card:hover .sz-icon-box {
-        background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
-        color: #ffffff;
-        box-shadow: 0 8px 20px rgba(185, 28, 28, 0.2);
-        transform: scale(1.05) rotate(-5deg);
-    }
+        .interview-item {
+            padding: 14px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
 
-    /* Glass Table Styling */
-    .sz-glassy-table {
-        border-collapse: separate;
-        border-spacing: 0 12px;
-        margin-top: -12px;
-    }
+        .interview-item:last-child {
+            border: 0;
+        }
 
-    .sz-glassy-table thead th {
-        background: transparent;
-        color: #6b7280;
-        border: none;
-        padding: 0 20px 10px 20px;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 1px;
-    }
+        .date-box {
+            min-width: 52px;
+            text-align: center;
+            border-radius: 13px;
+            padding: 7px;
+            background: #fff1f2;
+            color: #991b1b;
+        }
 
-    .sz-glassy-table tbody tr {
-        background: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-        transition: all 0.3s ease;
-    }
+        @media (max-width: 576px) {
+            .dashboard-hero {
+                border-radius: 16px;
+            }
 
-    .sz-glassy-table tbody tr:hover {
-        transform: scale(1.01) translateX(5px);
-        background: #ffffff;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-    }
+            .pipeline-row {
+                grid-template-columns: 80px 1fr 35px;
+            }
+        }
+    </style>
 
-    .sz-glassy-table tbody td {
-        border: none;
-        padding: 18px 20px;
-        color: #374151;
-        vertical-align: middle;
-    }
-
-    .sz-glassy-table tbody td:first-child {
-        border-radius: 16px 0 0 16px;
-        border-left: 3px solid transparent;
-    }
-
-    .sz-glassy-table tbody tr:hover td:first-child {
-        border-left: 3px solid #b91c1c;
-    }
-
-    .sz-glassy-table tbody td:last-child {
-        border-radius: 0 16px 16px 0;
-    }
-
-    .sz-table-badge {
-        background: rgba(243, 244, 246, 0.8);
-        backdrop-filter: blur(4px);
-        border: 1px solid rgba(0,0,0,0.05);
-        color: #111111;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-weight: 500;
-    }
-
-    /* Custom Glassy Button */
-    .sz-btn-glass {
-        background: rgba(17, 17, 17, 0.9);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: white;
-        padding: 10px 24px;
-        border-radius: 12px;
-        font-weight: 600;
-        transition: all 0.3s;
-    }
-
-    .sz-btn-glass:hover {
-        background: #b91c1c;
-        color: white;
-        box-shadow: 0 8px 20px rgba(185, 28, 28, 0.25);
-        transform: translateY(-2px);
-    }
-
-    .sz-footer {
-        background-color: rgba(255, 255, 255, 0.5);
-        backdrop-filter: blur(10px);
-        border-top: 1px solid rgba(0,0,0,0.05);
-        color: #6b7280;
-        font-weight: 500;
-        position: relative;
-        z-index: 2;
-    }
-</style>
-
-<div class="main-content">
-
-    <!-- STRICTLY CONFINED BACKGROUND LAYER FOR BLOBS -->
-    <div class="sz-glass-bg-layer">
-        <div class="sz-glassy-blob sz-blob-primary"></div>
-        <div class="sz-glassy-blob sz-blob-dark"></div>
-    </div>
-
-    <div class="page-content position-relative z-1">
-        <div class="container-fluid pt-5">
-
-            {{-- Greeting --}}
-            @php
-                $hour = now()->format('H');
-                $greeting = $hour < 12 ? 'Good Morning' : ($hour < 17 ? 'Good Afternoon' : ($hour < 21 ? 'Good Evening' : 'Good Night'));
-            @endphp
-
-            <div class="mb-5 position-relative z-2">
-                <h4 class="sz-greeting-text fs-1 mb-2">{{ $greeting }}, {{ auth()->user()->name }} 👋</h4>
-                <p class="text-muted fs-6">Here is what's happening with your platform today.</p>
-            </div>
-
-            {{-- COUNTS --}}
-            <div class="row g-4 mb-5">
-
-                {{-- Enquiries --}}
-                @can('read', \App\Models\ContactEnquiry::class)
-                <div class="col-sm-6 col-xl-3">
-                    <div class="sz-glassy-card">
-                        <div class="card-body p-4 d-flex justify-content-between align-items-center h-100">
-                            <div>
-                                <h6 class="sz-card-title">Total Enquiries</h6>
-                                <h3 class="sz-card-value">{{ $totalEnquiries }}</h3>
-                                <a href="{{ route('admin.enquiry.index') }}" class="sz-view-link">View Details <i class="ri-arrow-right-line"></i></a>
-                            </div>
-                            <div class="sz-icon-box">
-                                <i class="ri-question-answer-line fs-2"></i>
-                            </div>
-                        </div>
+    <div class="main-content dashboard-shell">
+        <div class="page-content">
+            <div class="container-fluid">
+                <div class="dashboard-hero p-4 p-lg-5 mb-4">
+                    <div class="position-relative" style="z-index:1">
+                        <div class="scope-pill mb-3"><i class="ri-shield-user-line"></i>{{ $scopeLabel }}</div>
+                        <h2 class="fw-bold text-white mb-2">Welcome back, {{ auth()->user()->name }}</h2>
+                        <p class="mb-0 text-white-50">A live view of requirements, applicants and interviews available to
+                            your role.</p>
                     </div>
                 </div>
-                @endcan
 
-                {{-- Pages --}}
-                {{-- @can('read', \App\Models\Pages::class)
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="sz-glassy-card">
-                            <div class="card-body p-4 d-flex justify-content-between align-items-center h-100">
-                                <div>
-                                    <h6 class="sz-card-title">Landing Pages</h6>
-                                    <h3 class="sz-card-value">{{ $totalPages }}</h3>
-                                    <a href="{{ route('admin.pages.index') }}" class="sz-view-link">View Details <i class="ri-arrow-right-line"></i></a>
+                @unless ($isRecruiterDashboard)
+                    <div class="card panel-card mb-4">
+                        <div class="card-body p-3 p-lg-4">
+                            <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3 align-items-end">
+                                <div class="col-md-{{ $showClientFilter ? '5' : '9' }}">
+                                    <label for="dashboard_recruiter_id" class="form-label fw-semibold">Recruiter</label>
+                                    <select id="dashboard_recruiter_id" name="recruiter_id" class="form-select">
+                                        <option value="">All recruiters</option>
+                                        @foreach ($recruiters as $recruiter)
+                                            <option value="{{ $recruiter->id }}" @selected((int) $selectedRecruiterId === $recruiter->id)>{{ $recruiter->recruiter_name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="sz-icon-box">
-                                    <i class="ri-pages-line fs-2"></i>
+                                @if ($showClientFilter)
+                                    <div class="col-md-4">
+                                        <label for="dashboard_client_id" class="form-label fw-semibold">Client</label>
+                                        <select id="dashboard_client_id" name="client_id" class="form-select">
+                                            <option value="">All clients</option>
+                                            @foreach ($clients as $client)
+                                                <option value="{{ $client->id }}" @selected((int) $selectedClientId === $client->id)>{{ $client->client }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
+                                <div class="col-md-3 d-flex gap-2">
+                                    <button type="submit" class="btn btn-danger flex-grow-1"><i class="ri-filter-3-line me-1"></i>Apply</button>
+                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-light" title="Clear filters"><i class="ri-refresh-line"></i></a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @endunless
+
+                @unless ($recruiterLinked)
+                    <div class="alert alert-warning border-0 shadow-sm"><i class="ri-alert-line me-2"></i>Your login email is
+                        not linked to a recruiter record, so your personal dashboard currently has no records.</div>
+                @endunless
+
+                <div class="row g-3 mb-4">
+                    @can('read', \App\Models\ClientRequirement::class)
+                        <div class="col-6 col-xl-3">
+                            <div class="card metric-card">
+                                <div class="card-body p-4 d-flex justify-content-between">
+                                    <div>
+                                        <div class="metric-label mb-2">Active Positions</div>
+                                        <div class="metric-value">{{ number_format($activeRequirements) }}</div>
+                                    </div>
+                                    <div class="metric-icon bg-danger-subtle text-danger"><i class="ri-briefcase-4-line"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                @endcan --}}
+                    @endcan
+                    @can('read', \App\Models\Candidate::class)
+                        <div class="col-6 col-xl-3">
+                            <div class="card metric-card">
+                                <div class="card-body p-4 d-flex justify-content-between">
+                                    <div>
+                                        <div class="metric-label mb-2">Applicants</div>
+                                        <div class="metric-value">{{ number_format($myApplicants) }}</div>
+                                    </div>
+                                    <div class="metric-icon bg-primary-subtle text-primary"><i class="ri-team-line"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card metric-card">
+                                <div class="card-body p-4 d-flex justify-content-between">
+                                    <div>
+                                        <div class="metric-label mb-2">Interviews</div>
+                                        <div class="metric-value">{{ number_format($scheduledInterviews) }}</div>
+                                    </div>
+                                    <div class="metric-icon bg-warning-subtle text-warning"><i
+                                            class="ri-calendar-event-line"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card metric-card">
+                                <div class="card-body p-4 d-flex justify-content-between">
+                                    <div>
+                                        <div class="metric-label mb-2">Offered / Selected</div>
+                                        <div class="metric-value">{{ number_format($offered) }}</div>
+                                    </div>
+                                    <div class="metric-icon bg-success-subtle text-success"><i class="ri-user-follow-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
+                </div>
 
-                {{-- Users --}}
-                @can('read', \App\Models\User::class)
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="sz-glassy-card">
-                            <div class="card-body p-4 d-flex justify-content-between align-items-center h-100">
-                                <div>
-                                    <h6 class="sz-card-title">Active Users</h6>
-                                    <h3 class="sz-card-value">{{ $totalUsers }}</h3>
-                                    <a href="{{ route('admin.user.index') }}" class="sz-view-link">View Details <i class="ri-arrow-right-line"></i></a>
-                                </div>
-                                <div class="sz-icon-box">
-                                    <i class="ri-user-line fs-2"></i>
-                                </div>
+                @can('read', \App\Models\ClientRequirement::class)
+                    <div class="card panel-card mb-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div><h5 class="section-title mb-1">Active Requirements</h5><span class="text-muted small">Requirements available for the selected role view</span></div>
+                                <a href="{{ route('admin.client-requirements.index') }}" class="btn btn-sm btn-dark">View all</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light"><tr><th>Client</th><th>Job Role</th><th>Recruiter</th><th>Open Date</th><th class="text-end">Positions</th></tr></thead>
+                                    <tbody>
+                                    @forelse ($activeRequirementList as $requirement)
+                                        <tr>
+                                            <td class="fw-semibold">{{ $requirement->client?->client ?? '-' }}</td>
+                                            <td>{{ $requirement->jobRole?->job_role ?? '-' }}</td>
+                                            <td>{{ $requirement->projectOwner?->recruiter_name ?? 'Unassigned' }}</td>
+                                            <td>{{ $requirement->requirement_open_date?->format('d M Y') ?? '-' }}</td>
+                                            <td class="text-end"><span class="badge bg-danger-subtle text-danger">{{ $requirement->number_of_position }}</span></td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="5" class="text-center text-muted py-4">No active requirements found for this role view.</td></tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 @endcan
 
-                {{-- Settings --}}
-                @if(auth()->user()->can('generalSetting', \App\Models\Setting::class) || auth()->user()->can('emailSetting', \App\Models\Setting::class) || auth()->user()->can('socialSetting', \App\Models\Setting::class))
-                <div class="col-sm-6 col-xl-3">
-                    <div class="sz-glassy-card">
-                        <div class="card-body p-4 d-flex justify-content-between align-items-center h-100">
-                            <div>
-                                <h6 class="sz-card-title">System Roles</h6>
-                                <h3 class="sz-card-value">{{ $totalRoles }}</h3>
-                                <a href="{{ route('admin.role.index') }}" class="sz-view-link">Manage Roles <i class="ri-arrow-right-line"></i></a>
-                            </div>
-                            <div class="sz-icon-box">
-                                <i class="ri-settings-3-line fs-2"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-            </div>
-
-            {{-- CHART & TABLE SECTION --}}
-            @can('read', \App\Models\ContactEnquiry::class)
                 <div class="row g-4 mb-4">
-
-                    {{-- Enquiry Chart --}}
-                    <div class="col-xl-4">
-                        <div class="sz-glassy-card">
-                            <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
-                                <h4 class="card-title mb-0" style="color: #111111; font-weight: 700;">Enquiry Overview</h4>
-                            </div>
-                            <div class="card-body px-4">
-                                <div id="enquiryChart" class="apex-charts mt-3" dir="ltr"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Latest Enquiries Table --}}
-                    <div class="col-xl-8">
-                        <div class="sz-glassy-card">
-                            <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                <h4 class="card-title mb-0" style="color: #111111; font-weight: 700;">Latest Enquiries</h4>
-                                <a href="{{ route('admin.enquiry.index') }}" class="sz-btn-glass btn-sm">
-                                    View All <i class="ri-arrow-right-s-line align-middle ms-1"></i>
-                                </a>
-                            </div>
-                            <div class="card-body px-4 pt-2">
-                                <div class="table-responsive">
-                                    <table class="table sz-glassy-table w-100">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Mobile</th>
-                                                <th>Date Submitted</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($latestEnquiries as $enquiry)
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar-xs me-3">
-                                                                <span class="avatar-title rounded-circle bg-light text-danger fw-bold shadow-sm">
-                                                                    {{ substr($enquiry->name, 0, 1) }}
-                                                                </span>
-                                                            </div>
-                                                            <strong class="text-dark">{{ $enquiry->name }}</strong>
-                                                        </div>
-                                                    </td>
-                                                    <td>{{ $enquiry->mobile }}</td>
-                                                    <td>
-                                                        <span class="sz-table-badge">
-                                                            <i class="ri-calendar-line me-1 text-danger"></i> {{ $enquiry->created_at->format('d M Y') }}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="3" class="text-center py-5">
-                                                        <div class="text-muted">
-                                                            <i class="ri-inbox-line fs-1 mb-3 d-block opacity-50"></i>
-                                                            <span class="fs-5">No enquiries found</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
+                    @can('read', \App\Models\Candidate::class)
+                        <div class="col-xl-8">
+                            <div class="card panel-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <h5 class="section-title mb-1">Applicant Momentum</h5><span
+                                                class="text-muted small">New applicants over the last six months</span>
+                                        </div><span class="badge bg-danger-subtle text-danger">Live</span>
+                                    </div>
+                                    <div id="applicantChart" style="min-height:310px"></div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <div class="col-xl-4">
+                            <div class="card panel-card">
+                                <div class="card-body p-4">
+                                    <h5 class="section-title mb-1">Interview Pipeline</h5>
+                                    <p class="text-muted small mb-4">Level-wise interview activity</p>
+                                    @php($maxLevel = max(1, (int) $interviewLevels->max('total')))
+                                    @forelse($interviewLevels as $level)
+                                        <div class="pipeline-row"><span class="small fw-semibold text-truncate"
+                                                title="{{ $level->level }}">{{ $level->level }}</span>
+                                            <div class="pipeline-track">
+                                                <div class="pipeline-fill"
+                                                    style="width:{{ round(($level->total / $maxLevel) * 100) }}%"></div>
+                                            </div><strong>{{ $level->total }}</strong>
+                                        </div>
+                                    @empty
+                                        <div class="text-center text-muted py-5"><i
+                                                class="ri-bar-chart-grouped-line fs-1 d-block mb-2"></i>No interview data yet
+                                        </div>
+                                    @endforelse
+                                    <div class="row g-2 mt-3 pt-3 border-top text-center">
+                                        <div class="col-6">
+                                            <div class="fw-bold fs-4">{{ $yetToOffer }}</div><small class="text-muted">Yet to
+                                                offer</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="fw-bold fs-4 text-success">{{ $offered }}</div><small
+                                                class="text-muted">Offered</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
                 </div>
-            @endcan
 
+                <div class="row g-4">
+                    @can('read', \App\Models\ClientRequirement::class)
+                        <div class="col-xl-4">
+                            <div class="card panel-card">
+                                <div class="card-body p-4">
+                                    <h5 class="section-title">Revenue Overview</h5>
+                                    <p class="text-muted small">Revenue recorded on visible requirements</p>
+                                    <div class="py-4">
+                                        <div class="metric-label mb-2">Total Pipeline Revenue</div>
+                                        <div class="display-6 fw-bold text-dark">₹{{ number_format($revenue, 2) }}</div>
+                                    </div>
+                                    <div class="rounded-4 bg-danger-subtle text-danger p-3 small"><i
+                                            class="ri-information-line me-1"></i> Values follow your role-based requirement
+                                        access.</div>
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
+                    @can('read', \App\Models\Candidate::class)
+                        <div class="col-xl-8">
+                            <div class="card panel-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <h5 class="section-title mb-1">Upcoming Interviews</h5><span
+                                                class="text-muted small">Date-wise interview calendar</span>
+                                        </div><a href="{{ route('admin.interview-schedules.index') }}"
+                                            class="btn btn-sm btn-dark">View calendar</a>
+                                    </div>
+                                    @forelse($upcomingInterviews as $interview)
+                                        <div class="interview-item d-flex gap-3 align-items-center">
+                                            <div class="date-box"><strong
+                                                    class="d-block fs-5 lh-1">{{ $interview->schedule_date->format('d') }}</strong><small>{{ $interview->schedule_date->format('M') }}</small>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-semibold text-dark">
+                                                    {{ $interview->candidate?->candidate_name ?? 'Candidate' }}</div><small
+                                                    class="text-muted">{{ $interview->client?->client ?? 'No client' }} ·
+                                                    {{ $interview->interviewLevel?->level ?? 'Interview' }}</small>
+                                            </div>
+                                            <div class="text-end"><span
+                                                    class="badge bg-light text-dark">{{ $interview->schedule_date->format('h:i A') }}</span>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="text-center text-muted py-5"><i
+                                                class="ri-calendar-check-line fs-1 d-block mb-2"></i>No upcoming interviews
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
+                </div>
+            </div>
         </div>
     </div>
-
-    {{-- FOOTER --}}
-    <footer class="sz-footer mt-auto">
-        <div class="container-fluid d-flex flex-column flex-sm-row justify-content-between align-items-center py-4 px-4 gap-2">
-            <div>
-                © {{ date('Y') }} <span class="text-dark fw-bold">SZORZO</span>
-            </div>
-            <div>
-                Developed by <strong class="text-danger">SZORZO Technologies</strong>
-            </div>
-        </div>
-    </footer>
-</div>
 @endsection
 
 @section('script')
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const today = @json($todayEnquiries ?? 0);
-    const week  = @json($weekEnquiries ?? 0);
-    const month = @json($monthEnquiries ?? 0);
-
-    // Smooth Chart Configuration for Glassy Theme
-    var options = {
-        chart: {
-            type: 'donut',
-            height: 330,
-            fontFamily: 'inherit',
-            background: 'transparent',
-            dropShadow: {
-                enabled: true,
-                color: '#000',
-                top: 5,
-                left: 0,
-                blur: 10,
-                opacity: 0.05
-            }
-        },
-        series: [today, week, month],
-        labels: ['Today', 'This Week', 'This Month'],
-        colors: ['#b91c1c', '#ea580c', '#111111'],
-        stroke: {
-            width: 3,
-            colors: ['#ffffff'] // Clean white separators for glass effect
-        },
-        plotOptions: {
-            pie: {
-                donut: {
-                    size: '72%',
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var target = document.querySelector('#applicantChart');
+            if (!target || typeof ApexCharts === 'undefined') return;
+            new ApexCharts(target, {
+                chart: {
+                    type: 'area',
+                    height: 310,
+                    toolbar: {
+                        show: false
+                    },
+                    zoom: {
+                        enabled: false
+                    }
+                },
+                series: [{
+                    name: 'Applicants',
+                    data: @json($chartApplicants)
+                }],
+                xaxis: {
+                    categories: @json($chartMonths),
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                yaxis: {
+                    min: 0,
+                    forceNiceScale: true,
                     labels: {
-                        show: true,
-                        name: {
-                            show: true,
-                            fontSize: '13px',
-                            fontWeight: 600,
-                            color: '#6b7280'
-                        },
-                        value: {
-                            show: true,
-                            fontSize: '28px',
-                            fontWeight: 800,
-                            color: '#111111',
-                            offsetY: 5
-                        },
-                        total: {
-                            show: true,
-                            showAlways: true,
-                            label: 'Total',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            color: '#6b7280'
+                        formatter: function(v) {
+                            return Math.round(v);
+                        }
+                    }
+                },
+                colors: ['#b91c1c'],
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: .35,
+                        opacityTo: .03,
+                        stops: [0, 95, 100]
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                grid: {
+                    borderColor: '#eef2f7',
+                    strokeDashArray: 4
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(v) {
+                            return v + ' applicant' + (v === 1 ? '' : 's');
                         }
                     }
                 }
-            }
-        },
-        legend: {
-            position: 'bottom',
-            offsetY: 5,
-            markers: {
-                radius: 12,
-                width: 10,
-                height: 10
-            },
-            itemMargin: {
-                horizontal: 12,
-                vertical: 8
-            },
-            fontWeight: 500,
-            labels: {
-                colors: '#374151'
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        tooltip: {
-            theme: 'light',
-            style: {
-                fontSize: '13px',
-                fontFamily: 'inherit'
-            },
-            y: {
-                formatter: function (val) {
-                    return val + " Enquiries"
-                }
-            }
-        },
-        noData: {
-            text: 'No Enquiry Data',
-            align: 'center',
-            verticalAlign: 'middle',
-            style: {
-                color: '#6b7280',
-                fontSize: '16px'
-            }
-        }
-    };
-
-    var chartEl = document.querySelector("#enquiryChart");
-
-    if (chartEl) {
-        var chart = new ApexCharts(chartEl, options);
-        chart.render();
-    }
-
-});
-</script>
+            }).render();
+        });
+    </script>
 @endsection

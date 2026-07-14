@@ -17,10 +17,12 @@ class Role extends Model
 		'name',
 		'access_level',
 		'status',
+		'its_default',
 	];
 
 	protected $casts = [
 		'status' => 'boolean',
+		'its_default' => 'boolean',
 	];
 
 	public function permissions()

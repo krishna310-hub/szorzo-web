@@ -33,7 +33,7 @@ class RoleController extends Controller
 
                     $buttons = '';
 
-                    if (auth()->user()->can('edit', Role::class)) {
+                    if (!$row->its_default && auth()->user()->can('edit', Role::class)) {
                         $editUrl = route('admin.role.edit', $row->id);
                         $buttons .= '
                             <a href="' . $editUrl . '" class="text-info fs-4 me-1" title="Edit">
@@ -43,7 +43,7 @@ class RoleController extends Controller
                         ';
                     }
 
-                    if (auth()->user()->can('delete', Role::class)) {
+                    if (!$row->its_default && auth()->user()->can('delete', Role::class)) {
                         $buttons .= '
                             <a href="javascript:void(0);" class="text-danger fs-4 ms-1 destroy-ajax" title="Delete"
                             data-id="'.$row->id.'" data-table-id="role-table"
@@ -98,7 +98,10 @@ class RoleController extends Controller
     {
         $this->authorize('edit', Role::class);
 
-        $role        = Role::find($id); 
+        $role        = Role::find($id);
+        if ($role?->its_default) {
+            return redirect()->route('admin.role.index')->with('error', 'Default roles cannot be edited.');
+        }
         if($role){
             $permissions = Permission::get()->groupBy('page');
     
@@ -114,7 +117,10 @@ class RoleController extends Controller
             'role_name' => 'required|string|max:100',
             'status' => 'required|in:0,1',
         ]);
-        $role = Role::where('id', $id)->first();
+        $role = Role::findOrFail($id);
+        if ($role->its_default) {
+            return redirect()->route('admin.role.index')->with('error', 'Default roles cannot be edited.');
+        }
 
         $role->update([
             'name' => $request->role_name,
@@ -134,8 +140,8 @@ class RoleController extends Controller
     {
         $this->authorize('delete', Role::class);
         $role = Role::findOrFail($id);
-        if ($id == 1) {
-            return response()->json(['status' => false, 'message' => 'Role cannot be deleted due to dependency',]);
+        if ($role->its_default) {
+            return response()->json(['status' => false, 'message' => 'Default roles cannot be deleted.'], 422);
         } else {
             $role->permissions()->detach();
             $role->delete();

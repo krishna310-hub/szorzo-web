@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\ContactEnquiry;
+use App\Models\Candidate;
+use App\Models\Client;
+use App\Models\ClientRequirement;
 use App\Models\General;
-use App\Models\Pages;
-use App\Models\Role;
+use App\Models\InterviewSchedule;
+use App\Models\Recruiter;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -16,34 +18,76 @@ use Illuminate\Support\Facades\Hash;
 class AdminController extends Controller
 {
     use AuthorizesRequests;
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('dashboard', General::class);
 
-        $today = now()->toDateString();
-        $startOfWeek = now()->startOfWeek();
-        $endOfWeek = now()->endOfWeek();
-        $currentMonth = now()->month;
+        $user = Auth::user()->loadMissing('role.permissions');
+        $accessLevel = strtolower($user->role?->access_level ?? '');
+        $isRecruiter = (int) $user->role_id === 3 || $accessLevel === 'recruiter';
+        $isDeliveryLead = (int) $user->role_id === 2 || $accessLevel === 'recruiter-dl';
+        $linkedRecruiterId = $isRecruiter
+            ? Recruiter::whereRaw('LOWER(email) = ?', [strtolower($user->email)])->value('id')
+            : null;
 
-        // Single query for all counts
-        $counts = ContactEnquiry::selectRaw("
-            COUNT(*) as total,
-            SUM(CASE WHEN DATE(created_at) = ? THEN 1 ELSE 0 END) as today,
-            SUM(CASE WHEN created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as week,
-            SUM(CASE WHEN MONTH(created_at) = ? THEN 1 ELSE 0 END) as month
-        ", [$today, $startOfWeek, $endOfWeek, $currentMonth])->first();
+        $selectedRecruiterId = $isRecruiter
+            ? ($linkedRecruiterId ?? 0)
+            : ($request->filled('recruiter_id') ? (int) $request->recruiter_id : null);
+        $selectedClientId = !$isRecruiter && $request->filled('client_id')
+            ? (int) $request->client_id
+            : null;
+
+        $requirements = ClientRequirement::query()
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->where('project_owner', $selectedRecruiterId))
+            ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId));
+        $candidates = Candidate::query()
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
+            ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId));
+        $interviews = InterviewSchedule::query()
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->whereHas('candidate',
+                fn ($candidate) => $candidate->where('recruiter_id', $selectedRecruiterId)))
+            ->when($selectedClientId, fn ($query) => $query->where(function ($clientQuery) use ($selectedClientId) {
+                $clientQuery->where('client_id', $selectedClientId)
+                    ->orWhereHas('candidate', fn ($candidate) => $candidate->where('client_id', $selectedClientId));
+            }));
+
+        $interviewLevels = (clone $interviews)
+            ->join('level_of_interviews', 'level_of_interviews.id', '=', 'interview_schedules.level_of_interview_id')
+            ->selectRaw('level_of_interviews.level, COUNT(*) as total')
+            ->groupBy('level_of_interviews.id', 'level_of_interviews.level', 'level_of_interviews.sort_order')
+            ->orderBy('level_of_interviews.sort_order')
+            ->get();
+
+        $monthly = (clone $candidates)
+            ->where('candidates.created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
+            ->groupBy('month_key')->pluck('total', 'month_key');
+        $months = collect(range(5, 0))->map(fn ($offset) => now()->subMonths($offset));
 
         return view('backend.index', [
-            'totalEnquiries'   => $counts->total,
-            'todayEnquiries'   => $counts->today,
-            'weekEnquiries'    => $counts->week,
-            'monthEnquiries'   => $counts->month,
-
-            // Other data (separate queries are fine here)
-            'latestEnquiries'  => ContactEnquiry::latest()->limit(5)->get(),
-            'totalPages'       => Pages::count(),
-            'totalUsers'       => User::where('role_id', '!=', 1)->count(),
-            'totalRoles'       => Role::where('status', 1)->count(),
+            'scopeLabel' => $isRecruiter
+                ? 'My recruitment pipeline'
+                : ($isDeliveryLead ? 'Delivery lead recruitment overview' : 'Management recruitment overview'),
+            'isRecruiterDashboard' => $isRecruiter,
+            'showClientFilter' => !$isRecruiter && !$isDeliveryLead,
+            'recruiterLinked' => !$isRecruiter || (bool) $linkedRecruiterId,
+            'recruiters' => $isRecruiter ? collect() : Recruiter::where('status', true)->orderBy('recruiter_name')->get(),
+            'clients' => (!$isRecruiter && !$isDeliveryLead) ? Client::where('status', true)->orderBy('client')->get() : collect(),
+            'selectedRecruiterId' => $selectedRecruiterId,
+            'selectedClientId' => $selectedClientId,
+            'activeRequirements' => (clone $requirements)->where('status', true)->sum('number_of_position'),
+            'myApplicants' => (clone $candidates)->count(),
+            'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->count(),
+            'yetToOffer' => (clone $interviews)->where('status', 'completed')->count(),
+            'offered' => (clone $interviews)->where('status', 'selected')->count(),
+            'revenue' => (clone $requirements)->sum('revenue_amount'),
+            'interviewLevels' => $interviewLevels,
+            'chartMonths' => $months->map->format('M')->values(),
+            'chartApplicants' => $months->map(fn ($month) => (int) ($monthly[$month->format('Y-m')] ?? 0))->values(),
+            'upcomingInterviews' => (clone $interviews)->with(['candidate', 'client', 'interviewLevel'])
+                ->where('schedule_date', '>=', now())->orderBy('schedule_date')->limit(6)->get(),
+            'activeRequirementList' => (clone $requirements)->with(['client', 'projectOwner', 'jobRole'])
+                ->where('status', true)->latest('requirement_open_date')->limit(8)->get(),
         ]);
     }
 
