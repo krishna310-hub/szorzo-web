@@ -18,11 +18,10 @@
         html {
             margin: 0;
             padding: 0;
-            height: 100%;
+            min-height: 100%;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             background-color: #f8fafc;
-
         }
 
         .animated-gradient-bg {
@@ -32,7 +31,11 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            overflow: hidden;
+            /* Changed overflow to allow vertical scrolling on small screens */
+            overflow-x: hidden; 
+            overflow-y: auto;
+            /* Added padding to prevent the card from touching the screen edges */
+            padding: 2rem 1rem; 
         }
 
         .bg-shape {
@@ -74,15 +77,12 @@
             0% {
                 transform: translate(0, 0) scale(1);
             }
-
             33% {
                 transform: translate(40px, -50px) scale(1.1);
             }
-
             66% {
                 transform: translate(-30px, 30px) scale(0.9);
             }
-
             100% {
                 transform: translate(0, 0) scale(1);
             }
@@ -98,11 +98,11 @@
             overflow: hidden;
             width: 100%;
             max-width: 1050px;
-            margin: 2rem;
+            /* Using auto margins for better centering in flexbox */
+            margin: auto; 
             display: flex;
             flex-wrap: wrap;
             z-index: 10;
-
             opacity: 0;
             transform: translateY(30px);
             animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -115,7 +115,6 @@
             }
         }
 
-        /* 4. Left Side: Brand & Illustration Showcase */
         .image-container {
             position: relative;
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -126,7 +125,6 @@
             overflow: hidden;
         }
 
-        /* Decorative faint circles in the red background */
         .image-container::before {
             content: '';
             position: absolute;
@@ -162,7 +160,6 @@
             transform: scale(1.05);
         }
 
-        /* Wrapper to perfectly center the illustration */
         .illustration-wrapper {
             position: relative;
             background: #ffffff;
@@ -176,30 +173,19 @@
             overflow: hidden;
         }
 
-        /* The actual PNG Illustration styling */
         .side-illustration {
             width: 100%;
             max-width: 360px;
-            /* Keeps the illustration at a beautiful size */
             height: auto;
             object-fit: contain;
             animation: floatImg 5s ease-in-out infinite;
             filter: drop-shadow(0px 25px 35px rgba(130, 0, 0, 0.4));
-            /* Deep red shadow */
         }
 
         @keyframes floatImg {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-15px);
-            }
-
-            100% {
-                transform: translateY(0px);
-            }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
         }
 
         .text-content {
@@ -207,7 +193,6 @@
             z-index: 2;
         }
 
-        /* 5. Right Side: Form UI */
         .form-container {
             padding: 4.5rem 4rem;
             display: flex;
@@ -246,7 +231,6 @@
             background: #fff;
         }
 
-        /* Custom Button */
         .btn-animated {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
             background-size: 200% auto;
@@ -268,16 +252,18 @@
             color: #ffffff;
         }
 
+        /* FIXED FOOTER CREDITS */
         .footer-credits {
-            position: absolute;
-            bottom: 1.5rem;
+            /* Changed from position: absolute to relative document flow */
+            position: relative; 
+            margin-top: 1.5rem;
             color: #64748b;
             font-weight: 500;
             font-size: 0.9rem;
             z-index: 10;
+            text-align: center;
         }
 
-        /* Responsive */
         @media (max-width: 991.98px) {
             .image-container {
                 display: none;
@@ -287,9 +273,11 @@
                 padding: 3rem 2rem;
                 border-radius: 24px;
             }
-
-            .glass-login-card {
-                margin: 1rem;
+        }
+        
+        @media (max-width: 575.98px) {
+            .form-container {
+                padding: 2rem 1.5rem;
             }
         }
     </style>
@@ -298,14 +286,12 @@
 <body>
     <div class="animated-gradient-bg">
 
-        <!-- Animated Background Orbs -->
         <div class="bg-shape shape-1"></div>
         <div class="bg-shape shape-2"></div>
         <div class="bg-shape shape-3"></div>
 
         <div class="glass-login-card row g-0">
 
-            <!-- Left Column: Illustration Showcase -->
             <div class="col-lg-6 image-container">
 
                 <div class="brand-logo-wrapper">
@@ -315,9 +301,8 @@
                     </a>
                 </div>
 
-                <!-- Fixed Illustration without overlay -->
                 <div class="illustration-wrapper">
-                    <img src="{{ asset('frontend/images/adminlogos.png') }}" class="side-illustration"
+                    <img src="{{ asset('frontend/images/loader-about.webp') }}" class="side-illustration"
                         alt="Mobile Login Illustration">
                 </div>
 

@@ -1,25 +1,120 @@
 <style>
-    .sz-logo-wrapper {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 0 !important;
-        line-height: 0 !important;
-        margin-top: 40px !important;
-        margin-bottom: 20px !important;
+    /* -----------------------------------------
+       1. Logo Wrapper Overrides
+    ----------------------------------------- */
+    .sz-logo-wrapper-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        line-height: 0;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        width: 100%;
     }
 
     .sz-logo-top {
-        display: block !important;
-        margin-bottom: -5px !important;
+        display: block;
+        max-width: 100%;
+        height: auto;
+        max-height: 50px;
+        margin-bottom: -5px;
     }
 
     .sz-logo-bottom {
-        display: block !important;
-        margin-top: 0 !important;
+        display: block;
+        width: 100%;
+        max-width: 180px;
+        height: auto;
+        margin-top: 0;
+    }
+
+    .horizontal-logo .logo-lg img {
+        height: 60px;
+        object-fit: cover;
+    }
+
+    /* -----------------------------------------
+       2. Minimized Sidebar Parent Link Hover
+       (Your Custom Red/Dark Gradient)
+    ----------------------------------------- */
+    :is([data-layout=vertical], [data-layout=semibox])[data-sidebar-size=sm] .navbar-menu .navbar-nav .nav-item:hover>a.menu-link {
+        position: relative;
+        width: calc(200px + var(--vz-vertical-menu-width-sm)) !important;
+        -webkit-transition: none !important;
+        transition: none !important;
+
+        /* Applied your custom requested gradient */
+        background: #000000 !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+
+        /* Polished UI Tweaks: white text contrast and rounded top-right edge */
+        color: #ffffff !important;
+        border-top-right-radius: 16px !important;
+        box-shadow: 10px 4px 30px rgba(0, 0, 0, 0.25) !important;
+        z-index: 1001 !important;
+    }
+
+    /* Force the icon inside the hovered parent link to white */
+    :is([data-layout=vertical], [data-layout=semibox])[data-sidebar-size=sm] .navbar-menu .navbar-nav .nav-item:hover>a.menu-link i {
+        color: #ffffff !important;
+    }
+
+    /* -----------------------------------------
+       3. Premium Sidebar Sub-Menu (Flyout)
+    ----------------------------------------- */
+    [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item:hover>.menu-dropdown,
+    [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown.show {
+        /* Applied your custom requested gradient */
+        background: linear-gradient(180deg, #050505 0%, #1a0a0a 15%, #4b0f0f 35%, #b91c1c 65%, #7f1d1d 85%, #111111 100%) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+
+        /* Match the border radius with the parent link hover state */
+        border-radius: 0 0 16px 16px !important;
+        box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3) !important;
+        padding: 12px 0 !important;
+        animation: fadeSlideIn 0.3s ease-out forwards;
+    }
+
+    [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown .nav-link {
+        color: #9ba1a6 !important;
+        padding: 10px 24px !important;
+        margin: 2px 12px !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown .nav-link:hover {
+        background: rgba(255, 255, 255, 0.06) !important;
+        color: #ffffff !important;
+        transform: translateX(4px);
+    }
+
+    [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown .nav-link.active {
+        background: linear-gradient(90deg, rgba(230, 56, 56, 0.1) 0%, transparent 100%) !important;
+        color: #f04444 !important;
+        border-left: 2px solid #f04444 !important;
+    }
+
+    @keyframes fadeSlideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
 </style>
+
 <div class="app-menu navbar-menu">
     <!-- LOGO -->
     <div class="navbar-brand-box">
@@ -27,8 +122,7 @@
         <a href="{{ route('index') }}" class="logo logo-dark">
             <span class="logo-sm">
                 <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp') }}"
-                    alt="" height="22">
-                <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
+                    alt="Small Logo" height="22">
             </span>
             <span class="logo-lg">
                 <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp') }}"
@@ -37,22 +131,24 @@
                     class="logo-second">
             </span>
         </a>
+
         <!-- Light Logo-->
-<a href="{{route('index')}}" class="logo logo-light">
-    {{-- <span class="logo-sm">
-        <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp')}}" alt="" height="22">
-        <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px" class="logo-second">
-    </span> --}}
+        <a href="{{ route('index') }}" class="logo logo-light">
+            <span class="logo-sm">
+                <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/adminlogos.png') }}"
+                    alt="Small Logo" height="22">
+            </span>
 
-    <!-- Added 'sz-logo-wrapper' -->
-    <span class="logo-lg sz-logo-wrapper">
-        <!-- Added 'sz-logo-top' -->
-        <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/adminlogos.png')}}" alt="" height="50" class="sz-logo-top">
+            <span class="logo-lg">
+                <div class="sz-logo-wrapper-inner">
+                    <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/adminlogos.png') }}"
+                        alt="Top Logo" height="50" class="sz-logo-top">
+                    <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Bottom Logo"
+                        class="logo-second sz-logo-bottom">
+                </div>
+            </span>
+        </a>
 
-        <!-- Added 'sz-logo-bottom' (kept 'logo-second' untouched) -->
-        <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="200px" class="logo-second sz-logo-bottom">
-    </span>
-</a>
         <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
             id="vertical-hover">
             <i class="ri-record-circle-line"></i>
@@ -74,7 +170,6 @@
             </span>
         </button>
         <div class="dropdown-menu dropdown-menu-end">
-            <!-- item-->
             <h6 class="dropdown-header">Welcome Anna!</h6>
             <a class="dropdown-item" href="pages-profile.html"><i
                     class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span
@@ -104,11 +199,10 @@
                     data-key="t-logout">Logout</span></a>
         </div>
     </div>
+
     <div id="scrollbar">
         <div class="container-fluid">
-
-            <div id="two-column-menu">
-            </div>
+            <div id="two-column-menu"></div>
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="menu-title"><span data-key="t-menu">Menu</span></li>
                 @can('dashboard', \App\Models\General::class)
@@ -119,7 +213,7 @@
                         </a>
                     </li>
                 @endcan
-                <!-- end Dashboard Menu -->
+
                 @can('read', \App\Models\ContactEnquiry::class)
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/enquiries*') ? 'active' : '' }}"
@@ -128,7 +222,6 @@
                         </a>
                     </li>
                 @endcan
-                <!-- end Dashboard Menu -->
 
                 @can('read', \App\Models\Pages::class)
                     <li class="nav-item">
@@ -139,6 +232,7 @@
                         </a>
                     </li>
                 @endcan
+
                 @can('sitemap', \App\Models\General::class)
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/sitemap*') ? 'active' : '' }}"
@@ -283,9 +377,6 @@
                                             data-key="t-settings"> Users </a>
                                     </li>
                                 @endcan
-                                {{-- <li class="nav-item">
-                                    <a href="apps-chat.html" class="nav-link" data-key="t-settings"> Permission </a>
-                                </li> --}}
                             </ul>
                         </div>
                     </li>
@@ -294,7 +385,6 @@
                 @if (auth()->user()->can('generalSetting', \App\Models\Setting::class) ||
                         auth()->user()->can('emailSetting', \App\Models\Setting::class) ||
                         auth()->user()->can('socialSetting', \App\Models\Setting::class))
-                    {{-- <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-settings">Settings</span></li> --}}
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/settings') ? 'active' : '' }}"
                             href="{{ route('admin.settings.index') }}">
@@ -304,11 +394,6 @@
                 @endif
             </ul>
         </div>
-        <!-- Sidebar -->
     </div>
-
     <div class="sidebar-background"></div>
 </div>
-<!-- Left Sidebar End -->
-<!-- Vertical Overlay-->
-<div class="vertical-overlay"></div>
