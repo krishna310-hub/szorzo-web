@@ -15,6 +15,7 @@ use App\Http\Controllers\backend\RoleController;
 use App\Http\Controllers\backend\SettingsController;
 use App\Http\Controllers\backend\UserController;
 use App\Http\Controllers\backend\ContactController;
+use App\Http\Controllers\backend\InterviewModeController;
 use App\Http\Controllers\backend\JobRoleController;
 use App\Http\Controllers\backend\ModeController;
 use App\Http\Controllers\backend\PageController;
@@ -228,6 +229,15 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         });
 
         Route::prefix('billings')->name('billings.')->controller(BillingController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('interview-modes')->name('interview-modes.')->controller(InterviewModeController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');

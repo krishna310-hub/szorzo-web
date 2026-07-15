@@ -136,60 +136,324 @@
                                 <div class="tab-pane active show" id="personalDetails" role="tabpanel">
                                     <form action="javascript:void(0);">
                                         <div class="row">
-                                            <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label for="firstnameInput" class="form-label">First Name</label>
-                                                    <input type="text" class="form-control" id="firstnameInput" placeholder="Enter your firstname" value="{{ auth()->user()->name }}">
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Personal Information</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-3">
+                                                                <label for="firstnameInput" class="form-label">Name</label>
+                                                                <input type="text" class="form-control" id="firstnameInput" placeholder="Enter your firstname" value="{{ auth()->user()->name }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Date of Birth</label>
+                                                            <input type="date" class="form-control" name="dob">
+                                                        </div>
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Gender</label>
+                                                            <select class="form-select" name="gender">
+                                                                <option value="">Select Gender</option>
+                                                                <option>Male</option>
+                                                                <option>Female</option>
+                                                                <option>Other</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Marital Status</label>
+                                                            <select class="form-select" name="marital_status">
+                                                                <option value="">Select Status</option>
+                                                                <option>Single</option>
+                                                                <option>Married</option>
+                                                                <option>Divorced</option>
+                                                                <option>Widowed</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Nationality</label>
+                                                            <input type="text" class="form-control" name="nationality">
+                                                        </div>
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Blood Group</label>
+                                                            <input type="text" class="form-control" name="blood_group">
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <!--end col-->
-                                            <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label for="lastnameInput" class="form-label">Last Name</label>
-                                                    <input type="text" class="form-control" id="lastnameInput" placeholder="Enter your lastname" value="{{ auth()->user()->last_name }}">
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Employment Details</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-3">
+                                                                <label for="designationInput" class="form-label">Designation</label>
+                                                                <input type="text" class="form-control" id="designationInput" placeholder="Designation" value="{{ auth()->user()->role->name }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-3">
+                                                                <label for="uan_pf_number" class="form-label">UAN / PF Number</label>
+                                                                <input type="text" class="form-control" id="uan_pf_number" name="uan_pf_number"
+                                                                    placeholder="Enter UAN / PF Number">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-3">
+                                                                <label for="esi_number" class="form-label">ESI Number</label>
+                                                                <input type="text" class="form-control" id="esi_number" name="esi_number"
+                                                                    placeholder="Enter ESI Number">
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <!--end col-->
-                                            <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label for="phonenumberInput" class="form-label">Phone Number</label>
-                                                    <input type="text" class="form-control" id="phonenumberInput" placeholder="Enter your phone number" value="{{ auth()->user()->phone }}">
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Contact Information</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-3">
+                                                                <label for="phonenumberInput" class="form-label">Phone Number</label>
+                                                                <input type="text" class="form-control" id="phonenumberInput" placeholder="Enter your phone number" value="{{ auth()->user()->phone_number }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Alternate Mobile Number</label>
+                                                            <input type="text" class="form-control" name="alternate_mobile">
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-3">
+                                                                <label for="emailInput" class="form-label">Official Mail</label>
+                                                                <input type="email" class="form-control" id="emailInput" placeholder="Enter your email" value="{{ auth()->user()->email }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Personal Mail</label>
+                                                            <input type="email" class="form-control" name="personal_email">
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <!--end col-->
-                                            <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label for="emailInput" class="form-label">Email Address</label>
-                                                    <input type="email" class="form-control" id="emailInput" placeholder="Enter your email" value="{{ auth()->user()->email }}">
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Address Details</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Permanent Address</label>
+                                                            <textarea class="form-control" name="permanent_address" rows="3"></textarea>
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Current Residential Address</label>
+                                                            <textarea class="form-control" name="current_address" rows="3"></textarea>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <!--end col-->
-                                            {{-- <div class="col-lg-12">
-                                                <div class="mb-3">
-                                                    <label for="JoiningdatInput" class="form-label">Joining Date</label>
-                                                    <input type="text" class="form-control" data-provider="flatpickr" id="JoiningdatInput" data-date-format="d M, Y" data-deafult-date="24 Nov, 2021" placeholder="Select date">
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Emergency Contact</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Emergency Contact Name</label>
+                                                            <input type="text" class="form-control" name="emergency_contact_name">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Relationship</label>
+                                                            <input type="text" class="form-control" name="emergency_relationship">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Emergency Contact Phone</label>
+                                                            <input type="text" class="form-control" name="emergency_phone">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Emergency Contact Email</label>
+                                                            <input type="email" class="form-control" name="emergency_email">
+                                                        </div>
+
+                                                        <div class="col-lg-12 mb-3">
+                                                            <label class="form-label">Emergency Contact Address</label>
+                                                            <textarea class="form-control" name="emergency_address" rows="3"></textarea>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <!--end col-->
-                                            <div class="col-lg-12">
-                                                <div class="mb-3">
-                                                    <label for="skillsInput" class="form-label">Skills</label>
-                                                    <select class="form-select" name="skillsInput" data-choices="" data-choices-text-unique-true="" multiple="" id="skillsInput">
-                                                        <option value="illustrator">Illustrator</option>
-                                                        <option value="photoshop">Photoshop</option>
-                                                        <option value="css">CSS</option>
-                                                        <option value="html">HTML</option>
-                                                        <option value="javascript" selected="">Javascript</option>
-                                                        <option value="python">Python</option>
-                                                        <option value="php">PHP</option>
-                                                    </select>
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Identity Documents</h5>
                                                 </div>
-                                            </div> --}}
-                                            <!--end col-->
-                                            <div class="col-lg-6">
-                                                <div class="mb-3">
-                                                    <label for="designationInput" class="form-label">Designation</label>
-                                                    <input type="text" class="form-control" id="designationInput" placeholder="Designation" value="{{ auth()->user()->role->name }}">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">PAN Card Number</label>
+                                                            <input type="text" class="form-control" name="pan_number">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Aadhaar Card Number</label>
+                                                            <input type="text" class="form-control" name="aadhaar_number">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Passport Number</label>
+                                                            <input type="text" class="form-control" name="passport_number">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Passport Validity Till</label>
+                                                            <input type="date" class="form-control" name="passport_validity">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Family Information</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Father's Name</label>
+                                                            <input type="text" class="form-control" name="father_name">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Father's Mobile Number</label>
+                                                            <input type="text" class="form-control" name="father_mobile">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Mother's Name</label>
+                                                            <input type="text" class="form-control" name="mother_name">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Sibling(s) Name</label>
+                                                            <input type="text" class="form-control" name="siblings_name">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Husband / Wife Name</label>
+                                                            <input type="text" class="form-control" name="spouse_name">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Husband / Wife DOB</label>
+                                                            <input type="date" class="form-control" name="spouse_dob">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Spouse Mobile Number</label>
+                                                            <input type="text" class="form-control" name="spouse_mobile">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Children's Name & DOB</label>
+                                                            <textarea class="form-control" name="children_details" rows="3"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Bank Details</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Bank Name</label>
+                                                            <input type="text" class="form-control" name="bank_name">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Account Holder's Name</label>
+                                                            <input type="text" class="form-control" name="account_holder_name">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Account Number</label>
+                                                            <input type="text" class="form-control" name="account_number">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Branch & IFSC / SWIFT Code</label>
+                                                            <input type="text" class="form-control" name="ifsc_code">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Mode of Salary Payment</label>
+                                                            <select class="form-select" name="salary_payment_mode">
+                                                                <option value="">Select</option>
+                                                                <option>Bank Transfer</option>
+                                                                <option>Cheque</option>
+                                                                <option>Cash</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">UAN / PF Number</label>
+                                                            <input type="text" class="form-control" name="uan_pf_number">
+                                                        </div>
+
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">ESI Number</label>
+                                                            <input type="text" class="form-control" name="esi_number">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Health Information</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-6 mb-3">
+                                                            <label class="form-label">Do you have any Health Issues?</label>
+                                                            <textarea class="form-control" name="health_issues" rows="2"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card mb-4">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Additional Information</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-lg-12 mb-3">
+                                                            <label class="form-label">What is Your Passion?</label>
+                                                            <textarea class="form-control" name="passion" rows="3"></textarea>
+                                                        </div>
+
+                                                        <div class="col-lg-12 mb-3">
+                                                            <label class="form-label">Awards / Appreciations</label>
+                                                            <textarea class="form-control" name="awards" rows="3"></textarea>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <!--end col-->

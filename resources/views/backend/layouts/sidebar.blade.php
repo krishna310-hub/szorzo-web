@@ -339,6 +339,11 @@
                                             Level of Interview </a>
                                     </li>
                                 @endcan
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.interview-modes.index') }}"
+                                        class="nav-link {{ request()->is('admin/masters/interview-modes*') ? 'active' : '' }}">
+                                        Interview Mode </a>
+                                </li>
                                 @can('read', \App\Models\Location::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.locations.index') }}"

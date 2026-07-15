@@ -50,6 +50,16 @@
         @error('schedule_date')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
+        <label for="interview_mode_id" class="form-label">Interview Mode <span class="text-danger">*</span></label>
+        <select class="form-select" id="interview_mode_id" name="interview_mode_id">
+            <option value="">Select interview mode</option>
+            @foreach ($interviewMode as $mode)
+                <option value="{{ $mode->id }}"{{ old('interview_mode_id', $selectedModeId ?? '') == $mode->id ? 'selected' : '' }}>{{ $mode->interview_mode }}</option>
+            @endforeach
+        </select>
+        @error('interview_mode_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4">
         <label for="level_of_interview_id" class="form-label">Level Of Interview <span class="text-danger">*</span></label>
         <select class="form-select" id="level_of_interview_id" name="level_of_interview_id">
             <option value="">Select level</option>
