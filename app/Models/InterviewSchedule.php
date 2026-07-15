@@ -21,6 +21,7 @@ class InterviewSchedule extends Model
         'candidate_id',
         'client_id',
         'job_role_id',
+        'interview_mode_id',
         'level_of_interview_id',
         'schedule_date',
         'status',
@@ -49,5 +50,10 @@ class InterviewSchedule extends Model
     public function interviewLevel()
     {
         return $this->belongsTo(InterviewLevel::class, 'level_of_interview_id');
+    }
+
+    public function interviewMode()
+    {
+        return $this->belongsTo(InterviewMode::class, 'interview_mode_id');
     }
 }

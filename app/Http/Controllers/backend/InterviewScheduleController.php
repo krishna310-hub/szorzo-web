@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\InterviewLevel;
+use App\Models\InterviewMode;
 use App\Models\InterviewSchedule;
 use App\Models\JobRole;
 use App\Models\Recruiter;
@@ -61,9 +62,11 @@ class InterviewScheduleController extends Controller
         $candidate = $request->filled('candidate_id')
             ? Candidate::with(['client', 'jobRole', 'interviewLevel'])->find($request->candidate_id)
             : null;
+        $interviewMode = InterviewMode::all();
 
         return view('backend.interview-schedules.create', array_merge($data, [
             'selectedCandidate' => $candidate,
+            'interviewMode' => $interviewMode,
         ]));
     }
 
@@ -80,8 +83,13 @@ class InterviewScheduleController extends Controller
     {
         $this->authorize('edit', Candidate::class);
 
+        $interviewSchedule = InterviewSchedule::with('interviewMode')->findOrFail($id);
+
         return view('backend.interview-schedules.edit', array_merge(
-            ['interviewSchedule' => InterviewSchedule::findOrFail($id)],
+            [
+                'interviewSchedule' => $interviewSchedule,
+                'selectedModeId' => $interviewSchedule->interview_mode_id,
+            ],
             $this->formData()
         ));
     }
@@ -136,6 +144,7 @@ class InterviewScheduleController extends Controller
             'candidates' => Candidate::orderBy('candidate_name')->get(),
             'clients' => Client::orderBy('client')->get(),
             'jobRoles' => JobRole::orderBy('job_role')->get(),
+            'interviewMode' => InterviewMode::orderBy('interview_mode')->get(),
             'interviewLevels' => InterviewLevel::orderBy('sort_order')->get(),
             'recruiters' => Recruiter::orderBy('recruiter_name')->get(),
             'statuses' => InterviewSchedule::STATUSES,
@@ -148,6 +157,7 @@ class InterviewScheduleController extends Controller
             'candidate_id' => 'required|exists:candidates,id',
             'client_id' => 'nullable|exists:clients,id',
             'job_role_id' => 'nullable|exists:job_roles,id',
+            'interview_mode_id' => 'required|exists:interview_modes,id',
             'level_of_interview_id' => 'required|exists:level_of_interviews,id',
             'schedule_date' => 'required|date',
             'status' => ['required', Rule::in(array_keys(InterviewSchedule::STATUSES))],
