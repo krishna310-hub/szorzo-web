@@ -215,13 +215,49 @@
                         </div>
                         <div class="col-6 col-xl-3">
                             <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Interviews</div>
-                                        <div class="metric-value">{{ number_format($scheduledInterviews) }}</div>
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <div class="metric-label">Interviews</div>
+                                            <div class="metric-value">
+                                                {{ number_format($scheduledInterviews->count()) }}
+                                            </div>
+                                        </div>
+
+                                        <div class="metric-icon bg-warning-subtle text-warning">
+                                            <i class="ri-calendar-event-line"></i>
+                                        </div>
                                     </div>
-                                    <div class="metric-icon bg-warning-subtle text-warning"><i
-                                            class="ri-calendar-event-line"></i></div>
+
+                                    <div class="row g-2 text-center">
+                                        <div class="col-3">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted d-block">L1</small>
+                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [7,8])->count() ?? 0 }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted d-block">L2</small>
+                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [11,12])->count() ?? 0 }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted d-block">L3</small>
+                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [23,25])->count() ?? 0 }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted d-block">L4</small>
+                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [27,28])->count() ?? 0 }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -229,7 +265,7 @@
                             <div class="card metric-card">
                                 <div class="card-body p-4 d-flex justify-content-between">
                                     <div>
-                                        <div class="metric-label mb-2">Offered / Selected</div>
+                                        <div class="metric-label mb-2">Offered</div>
                                         <div class="metric-value">{{ number_format($offered) }}</div>
                                     </div>
                                     <div class="metric-icon bg-success-subtle text-success"><i class="ri-user-follow-line"></i>
@@ -239,35 +275,6 @@
                         </div>
                     @endcan
                 </div>
-
-                @can('read', \App\Models\ClientRequirement::class)
-                    <div class="card panel-card mb-4">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div><h5 class="section-title mb-1">Active Requirements</h5><span class="text-muted small">Requirements available for the selected role view</span></div>
-                                <a href="{{ route('admin.client-requirements.index') }}" class="btn btn-sm btn-dark">View all</a>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light"><tr><th>Client</th><th>Job Role</th><th>Recruiter</th><th>Open Date</th><th class="text-end">Positions</th></tr></thead>
-                                    <tbody>
-                                    @forelse ($activeRequirementList as $requirement)
-                                        <tr>
-                                            <td class="fw-semibold">{{ $requirement->client?->client ?? '-' }}</td>
-                                            <td>{{ $requirement->jobRole?->job_role ?? '-' }}</td>
-                                            <td>{{ $requirement->projectOwner?->recruiter_name ?? 'Unassigned' }}</td>
-                                            <td>{{ $requirement->requirement_open_date?->format('d M Y') ?? '-' }}</td>
-                                            <td class="text-end"><span class="badge bg-danger-subtle text-danger">{{ $requirement->number_of_position }}</span></td>
-                                        </tr>
-                                    @empty
-                                        <tr><td colspan="5" class="text-center text-muted py-4">No active requirements found for this role view.</td></tr>
-                                    @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                @endcan
 
                 <div class="row g-4 mb-4">
                     @can('read', \App\Models\Candidate::class)

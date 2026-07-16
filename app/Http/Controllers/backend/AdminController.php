@@ -77,8 +77,8 @@ class AdminController extends Controller
             'selectedClientId' => $selectedClientId,
             'activeRequirements' => (clone $requirements)->where('status', true)->sum('number_of_position'),
             'myApplicants' => (clone $candidates)->count(),
-            'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->count(),
-            'yetToOffer' => (clone $interviews)->where('status', 'completed')->count(),
+            'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
+            'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),
             'offered' => (clone $interviews)->where('status', 'selected')->count(),
             'revenue' => (clone $requirements)->sum('revenue_amount'),
             'interviewLevels' => $interviewLevels,
@@ -86,8 +86,6 @@ class AdminController extends Controller
             'chartApplicants' => $months->map(fn ($month) => (int) ($monthly[$month->format('Y-m')] ?? 0))->values(),
             'upcomingInterviews' => (clone $interviews)->with(['candidate', 'client', 'interviewLevel'])
                 ->where('schedule_date', '>=', now())->orderBy('schedule_date')->limit(6)->get(),
-            'activeRequirementList' => (clone $requirements)->with(['client', 'projectOwner', 'jobRole'])
-                ->where('status', true)->latest('requirement_open_date')->limit(8)->get(),
         ]);
     }
 

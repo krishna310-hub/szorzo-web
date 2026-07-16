@@ -32,12 +32,12 @@ class InterviewLevelController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $buttons = '';
-
-                    if (auth()->user()->can('edit', InterviewLevel::class)) {
+                    
+                    if ($row->is_default != 1 && auth()->user()->can('edit', InterviewLevel::class)) {
                         $buttons .= '<a href="' . route('admin.interview-levels.edit', $row->id) . '" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }
 
-                    if (auth()->user()->can('delete', InterviewLevel::class)) {
+                    if ($row->is_default != 1 &&auth()->user()->can('delete', InterviewLevel::class)) {
                         $buttons .= '<button type="button" data-route="' . route('admin.interview-levels.delete', $row->id) . '" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
                     }
 

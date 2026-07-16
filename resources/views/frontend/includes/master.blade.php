@@ -23,9 +23,16 @@
     <meta name="author" content="Awaiken">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <meta
-        name="google-site-verification"
-        content="lqB0UndLURfLDXdqhyq41AEiBl2RZhNUbOP8ppt6QSE">
+    <meta name="google-site-verification" content="r4xkT9w636WL8NAo0laLro4E6liBlqDzniSN0mjOYSI" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3GR0JSC9LC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-3GR0JSC9LC');
+    </script>
 
     <!-- Page Title -->
     <title>
