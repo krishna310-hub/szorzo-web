@@ -32,10 +32,10 @@
             align-items: center;
             position: relative;
             /* Changed overflow to allow vertical scrolling on small screens */
-            overflow-x: hidden; 
+            overflow-x: hidden;
             overflow-y: auto;
             /* Added padding to prevent the card from touching the screen edges */
-            padding: 2rem 1rem; 
+            padding: 2rem 1rem;
         }
 
         .bg-shape {
@@ -99,7 +99,7 @@
             width: 100%;
             max-width: 1050px;
             /* Using auto margins for better centering in flexbox */
-            margin: auto; 
+            margin: auto;
             display: flex;
             flex-wrap: wrap;
             z-index: 10;
@@ -179,7 +179,7 @@
             height: auto;
             object-fit: contain;
             animation: floatImg 5s ease-in-out infinite;
-            filter: drop-shadow(0px 25px 35px rgba(130, 0, 0, 0.4));
+            /* filter: drop-shadow(0px 25px 35px rgba(130, 0, 0, 0.4)); */
         }
 
         @keyframes floatImg {
@@ -255,7 +255,7 @@
         /* FIXED FOOTER CREDITS */
         .footer-credits {
             /* Changed from position: absolute to relative document flow */
-            position: relative; 
+            position: relative;
             margin-top: 1.5rem;
             color: #64748b;
             font-weight: 500;
@@ -274,7 +274,7 @@
                 border-radius: 24px;
             }
         }
-        
+
         @media (max-width: 575.98px) {
             .form-container {
                 padding: 2rem 1.5rem;
