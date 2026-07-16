@@ -233,28 +233,28 @@
                                         <div class="col-3">
                                             <div class="border rounded p-2 bg-light">
                                                 <small class="text-muted d-block">L1</small>
-                                                <strong>{{ $scheduledInterviews->where('level_of_interview_id', 8)->count() ?? 0 }}</strong>
+                                                <strong>{{ $scheduledInterviews->where('level_of_interview_id', [7,8])->count() ?? 0 }}</strong>
                                             </div>
                                         </div>
 
                                         <div class="col-3">
                                             <div class="border rounded p-2 bg-light">
                                                 <small class="text-muted d-block">L2</small>
-                                                <strong>{{ $scheduledInterviews->where('level_of_interview_id', 12)->count() ?? 0 }}</strong>
+                                                <strong>{{ $scheduledInterviews->where('level_of_interview_id', [11,12])->count() ?? 0 }}</strong>
                                             </div>
                                         </div>
 
                                         <div class="col-3">
                                             <div class="border rounded p-2 bg-light">
                                                 <small class="text-muted d-block">L3</small>
-                                                <strong>{{ $scheduledInterviews->where('level_of_interview_id', 25)->count() ?? 0 }}</strong>
+                                                <strong>{{ $scheduledInterviews->where('level_of_interview_id', [23,25])->count() ?? 0 }}</strong>
                                             </div>
                                         </div>
 
                                         <div class="col-3">
                                             <div class="border rounded p-2 bg-light">
                                                 <small class="text-muted d-block">L4</small>
-                                                <strong>{{ $scheduledInterviews->where('level_of_interview_id', 28)->count() ?? 0 }}</strong>
+                                                <strong>{{ $scheduledInterviews->where('level_of_interview_id', [27,28])->count() ?? 0 }}</strong>
                                             </div>
                                         </div>
                                     </div>
