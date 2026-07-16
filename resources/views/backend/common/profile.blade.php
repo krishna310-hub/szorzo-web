@@ -167,8 +167,6 @@
                                                                 <option value="">Select Status</option>
                                                                 <option>Single</option>
                                                                 <option>Married</option>
-                                                                <option>Divorced</option>
-                                                                <option>Widowed</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-lg-6 mb-3">
@@ -191,23 +189,27 @@
                                                     <div class="row">
                                                         <div class="col-lg-6">
                                                             <div class="mb-3">
+                                                                <label for="employee_no" class="form-label">Employee ID</label>
+                                                                <input type="text" class="form-control" id="employee_no" value="">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="mb-3">
                                                                 <label for="designationInput" class="form-label">Designation</label>
-                                                                <input type="text" class="form-control" id="designationInput" placeholder="Designation" value="{{ auth()->user()->role->name }}">
+                                                                <input type="text" class="form-control" id="designationInput" value="{{ auth()->user()->role->name }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-lg-6">
                                                             <div class="mb-3">
                                                                 <label for="uan_pf_number" class="form-label">UAN / PF Number</label>
-                                                                <input type="text" class="form-control" id="uan_pf_number" name="uan_pf_number"
-                                                                    placeholder="Enter UAN / PF Number">
+                                                                <input type="text" class="form-control" id="uan_pf_number" name="uan_pf_number">
                                                             </div>
                                                         </div>
 
                                                         <div class="col-lg-6">
                                                             <div class="mb-3">
                                                                 <label for="esi_number" class="form-label">ESI Number</label>
-                                                                <input type="text" class="form-control" id="esi_number" name="esi_number"
-                                                                    placeholder="Enter ESI Number">
+                                                                <input type="text" class="form-control" id="esi_number" name="esi_number">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -457,12 +459,12 @@
                                                 </div>
                                             </div>
                                             <!--end col-->
-                                            <div class="col-lg-12">
+                                            {{-- <div class="col-lg-12">
                                                 <div class="hstack gap-2 justify-content-end">
                                                     <button type="submit" class="btn btn-primary">Updates</button>
                                                     <button type="button" class="btn btn-soft-success">Cancel</button>
                                                 </div>
-                                            </div>
+                                            </div> --}}
                                             <!--end col-->
                                         </div>
                                         <!--end row-->

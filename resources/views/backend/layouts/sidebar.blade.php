@@ -304,6 +304,11 @@
                                             Client Job Roles </a>
                                     </li>
                                 @endcan
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.employees.index') }}"
+                                        class="nav-link {{ request()->is('admin/masters/employees*') ? 'active' : '' }}">
+                                        Employees </a>
+                                </li>
                                 @can('read', \App\Models\Recruiter::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.recruiters.index') }}"
