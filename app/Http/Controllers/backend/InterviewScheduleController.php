@@ -101,7 +101,7 @@ class InterviewScheduleController extends Controller
         $schedule = InterviewSchedule::findOrFail($id);
         $schedule->update($this->validatedData($request));
         $candidate = Candidate::findOrFail($schedule->candidate_id);
-        if( $candidate->interview_level_id !== $request->level_of_interview_id) {
+        if( $candidate->level_of_interview_id !== $request->level_of_interview_id) {
             $candidate->update(['interview_level_id' => $request->level_of_interview_id]);
         }
         return redirect()->route('admin.interview-schedules.index')->with('success', 'Interview schedule updated successfully.');
