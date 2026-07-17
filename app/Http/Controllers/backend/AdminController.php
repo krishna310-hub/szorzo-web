@@ -82,6 +82,7 @@ class AdminController extends Controller
             'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
             'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),
             'offered' => (clone $interviews)->where('status', 'selected')->count(),
+            'onboarded' => (clone $interviews)->where('status', 'selected')->count(),
             'revenue' => (clone $requirements)->sum('revenue_amount'),
             'interviewLevels' => $interviewLevels,
             'chartMonths' => $months->map->format('M')->values(),

@@ -180,6 +180,13 @@
             background: linear-gradient(90deg, #991b1b, #ef4444);
         }
 
+        .individual-target-summary-value {
+            color: #172033;
+            font-size: 1.65rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
         .kpi-card {
             height: 100%;
             padding: 18px;
@@ -338,6 +345,108 @@
                         not linked to a recruiter record, so your personal dashboard currently has no records.</div>
                 @endunless
 
+                <div class="row g-3 mb-4">
+                    @can('read', \App\Models\ClientRequirement::class)
+                        <div class="col-6 col-xl-2">
+                            <div class="card metric-card">
+                                <div class="card-body p-4 d-flex justify-content-between">
+                                    <div>
+                                        <div class="metric-label mb-2">Active Requirements</div>
+                                        <div class="metric-value">{{ number_format($activeRequirements) }}</div>
+                                    </div>
+                                    <div class="metric-icon bg-danger-subtle text-danger"><i class="ri-briefcase-4-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
+                    @can('read', \App\Models\Candidate::class)
+                        <div class="col-6 col-xl-2">
+                            <div class="card metric-card">
+                                <div class="card-body p-4 d-flex justify-content-between">
+                                    <div>
+                                        <div class="metric-label mb-2">Applicants</div>
+                                        <div class="metric-value">{{ number_format($myApplicants) }}</div>
+                                    </div>
+                                    <div class="metric-icon bg-primary-subtle text-primary"><i class="ri-team-line"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card metric-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <div class="metric-label">Interviews</div>
+                                            <div class="metric-value">
+                                                {{ number_format($scheduledInterviews->count()) }}
+                                            </div>
+                                        </div>
+
+                                        <div class="metric-icon bg-warning-subtle text-warning">
+                                            <i class="ri-calendar-event-line"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-2 text-center">
+                                        <div class="col-3">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted d-block">L1</small>
+                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [7,8])->count() ?? 0 }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted d-block">L2</small>
+                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [11,12])->count() ?? 0 }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted d-block">L3</small>
+                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [23,25])->count() ?? 0 }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="border rounded p-2 bg-light">
+                                                <small class="text-muted d-block">L4</small>
+                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [27,28])->count() ?? 0 }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-2">
+                            <div class="card metric-card">
+                                <div class="card-body p-4 d-flex justify-content-between">
+                                    <div>
+                                        <div class="metric-label mb-2">Offered</div>
+                                        <div class="metric-value">{{ number_format($offered) }}</div>
+                                    </div>
+                                    <div class="metric-icon bg-success-subtle text-success"><i class="ri-user-follow-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-2">
+                            <div class="card metric-card">
+                                <div class="card-body p-4 d-flex justify-content-between">
+                                    <div>
+                                        <div class="metric-label mb-2">Onboarded</div>
+                                        <div class="metric-value">{{ number_format($onboarded) }}</div>
+                                    </div>
+                                    <div class="metric-icon bg-success-subtle text-success"><i class="ri-user-add-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
+                </div>
+
                 @php
                     $dashboardRoleId = (int) auth()->user()->role_id;
                     $isSuperAdminDashboard = $dashboardRoleId === 1;
@@ -350,13 +459,13 @@
                         ? auth()->user()->name
                         : ($selectedDashboardRecruiter?->recruiter_name ?? 'All recruiters');
                     $monthlyKpis = [
-                        ['label' => 'CV Screening', 'target' => '100-200', 'unit' => 'CVs', 'icon' => 'ri-file-search-line'],
+                        ['label' => 'CV Submission', 'target' => '100-200', 'unit' => 'CVs', 'icon' => 'ri-file-search-line'],
                         ['label' => 'Candidate Shortlisting', 'target' => '80-120', 'unit' => 'CVs', 'icon' => 'ri-user-search-line'],
                         ['label' => 'Interviews', 'target' => '60-80', 'unit' => 'rounds', 'icon' => 'ri-calendar-check-line'],
-                        ['label' => 'HR Assessments', 'target' => '45-65', 'unit' => 'screenings', 'icon' => 'ri-survey-line'],
+                        ['label' => 'HR Select', 'target' => '45-65', 'unit' => 'screenings', 'icon' => 'ri-survey-line'],
                         ['label' => 'Offers Released', 'target' => '10-15', 'unit' => 'offers', 'icon' => 'ri-draft-line'],
                         ['label' => 'Offer Acceptance', 'target' => '8-12', 'unit' => 'acceptances', 'icon' => 'ri-user-follow-line'],
-                        ['label' => 'Joining', 'target' => '8-10', 'unit' => 'joiners', 'icon' => 'ri-team-line'],
+                        ['label' => 'Onboarding', 'target' => '8-10', 'unit' => 'joiners', 'icon' => 'ri-team-line'],
                     ];
                 @endphp
 
@@ -425,7 +534,7 @@
                                             </div>
                                             <div class="text-end"><strong class="text-dark">{{ $kpi['target'] }}</strong><small class="d-block text-muted">{{ $kpi['unit'] }}</small></div>
                                         </div>
-                                        <div class="d-flex justify-content-between small mb-2"><span class="text-muted">Completed: 0</span><strong>0%</strong></div>
+                                        <div class="d-flex justify-content-between small mb-2"><span class="text-muted">Completed: 0</span><strong class="individual-target-summary-value">0%</strong></div>
                                         <div class="target-progress"><div class="target-progress-bar" style="width:0%"></div></div>
                                     </div>
                                 </div>
@@ -499,7 +608,7 @@
                                 </div>
                                 <div class="col-6 col-lg-3">
                                     <div class="target-summary">
-                                        <div class="metric-label mb-2">Active Positions</div>
+                                        <div class="metric-label mb-2">Active Requirements</div>
                                         <div class="target-summary-value">{{ number_format($activeRequirements) }}</div>
                                     </div>
                                 </div>
@@ -535,96 +644,6 @@
                         </div>
                     </div>
                 @endif
-
-                <div class="row g-3 mb-4">
-                    @can('read', \App\Models\ClientRequirement::class)
-                        <div class="col-6 col-xl-3">
-                            <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Active Positions</div>
-                                        <div class="metric-value">{{ number_format($activeRequirements) }}</div>
-                                    </div>
-                                    <div class="metric-icon bg-danger-subtle text-danger"><i class="ri-briefcase-4-line"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endcan
-                    @can('read', \App\Models\Candidate::class)
-                        <div class="col-6 col-xl-3">
-                            <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Applicants</div>
-                                        <div class="metric-value">{{ number_format($myApplicants) }}</div>
-                                    </div>
-                                    <div class="metric-icon bg-primary-subtle text-primary"><i class="ri-team-line"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-xl-3">
-                            <div class="card metric-card">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <div class="metric-label">Interviews</div>
-                                            <div class="metric-value">
-                                                {{ number_format($scheduledInterviews->count()) }}
-                                            </div>
-                                        </div>
-
-                                        <div class="metric-icon bg-warning-subtle text-warning">
-                                            <i class="ri-calendar-event-line"></i>
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-2 text-center">
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L1</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [7,8])->count() ?? 0 }}</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L2</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [11,12])->count() ?? 0 }}</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L3</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [23,25])->count() ?? 0 }}</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L4</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [27,28])->count() ?? 0 }}</strong>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-xl-3">
-                            <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Offered</div>
-                                        <div class="metric-value">{{ number_format($offered) }}</div>
-                                    </div>
-                                    <div class="metric-icon bg-success-subtle text-success"><i class="ri-user-follow-line"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endcan
-                </div>
 
                 <div class="row g-4 mb-4">
                     @can('read', \App\Models\Candidate::class)
@@ -694,7 +713,7 @@
                             </div>
                         </div>
                     @endcan
-                    @can('read', \App\Models\Candidate::class)
+                    {{-- @can('read', \App\Models\Candidate::class)
                         <div class="col-xl-8">
                             <div class="card panel-card">
                                 <div class="card-body p-4">
@@ -728,7 +747,7 @@
                                 </div>
                             </div>
                         </div>
-                    @endcan
+                    @endcan --}}
                 </div>
             </div>
         </div>
