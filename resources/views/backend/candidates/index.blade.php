@@ -129,8 +129,7 @@
             </div>
             <div>
                 <label for="filter_level_of_interview_id" class="form-label">Interview Level</label>
-                <select class="form-select" id="filter_level_of_interview_id" name="level_of_interview_id">
-                    <option value="">All interview levels</option>
+                <select class="form-select" id="filter_level_of_interview_id" name="level_of_interview_id[]" multiple>
                     @foreach ($interviewLevels as $level)
                         <option value="{{ $level->id }}">{{ $level->level }}</option>
                     @endforeach
@@ -149,12 +148,24 @@
             var exportBaseUrl = @json(route('admin.candidates.export'));
             var indexUrl = @json(route('admin.candidates.index'));
             var currentFilters = {};
+            var interviewLevelFilter = new Choices('#filter_level_of_interview_id', {
+                removeItemButton: true,
+                shouldSort: false,
+                placeholder: true,
+                placeholderValue: 'Select interview levels'
+            });
 
             function collectFilters() {
                 var filters = {};
                 $('#candidate-filter-form').serializeArray().forEach(function(item) {
                     if (item.value) {
-                        filters[item.name] = item.value;
+                        var name = item.name.replace(/\[\]$/, '');
+                        if (item.name.endsWith('[]')) {
+                            filters[name] = filters[name] || [];
+                            filters[name].push(item.value);
+                        } else {
+                            filters[name] = item.value;
+                        }
                     }
                 });
                 return filters;
@@ -163,7 +174,10 @@
             function updateExportUrl() {
                 var url = new URL(exportBaseUrl, window.location.origin);
                 Object.keys(currentFilters).forEach(function(key) {
-                    url.searchParams.set(key, currentFilters[key]);
+                    var values = Array.isArray(currentFilters[key]) ? currentFilters[key] : [currentFilters[key]];
+                    values.forEach(function(value) {
+                        url.searchParams.append(key + (Array.isArray(currentFilters[key]) ? '[]' : ''), value);
+                    });
                 });
                 $('a[href^="' + exportBaseUrl + '"]').attr('href', url.toString());
             }
@@ -294,6 +308,7 @@
 
             $('#candidate-filter-reset').on('click', function() {
                 $('#candidate-filter-form')[0].reset();
+                interviewLevelFilter.removeActiveItems();
                 currentFilters = {};
                 updateExportUrl();
                 table.ajax.reload();
