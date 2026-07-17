@@ -99,8 +99,7 @@
             </div>
             <div>
                 <label for="filter_level_of_interview_id" class="form-label">Level Of Interview</label>
-                <select class="form-select" id="filter_level_of_interview_id" name="level_of_interview_id">
-                    <option value="">All levels</option>
+                <select class="form-select" id="filter_level_of_interview_id" name="level_of_interview_id[]" multiple>
                     @foreach ($interviewLevels as $level)
                         <option value="{{ $level->id }}">{{ $level->level }}</option>
                     @endforeach
@@ -126,12 +125,24 @@
     <script>
         $(document).ready(function() {
             var currentFilters = {};
+            var interviewLevelFilter = new Choices('#filter_level_of_interview_id', {
+                removeItemButton: true,
+                shouldSort: false,
+                placeholder: true,
+                placeholderValue: 'Select interview levels'
+            });
 
             function collectFilters() {
                 var filters = {};
                 $('#interview-schedule-filter-form').serializeArray().forEach(function(item) {
                     if (item.value) {
-                        filters[item.name] = item.value;
+                        var name = item.name.replace(/\[\]$/, '');
+                        if (item.name.endsWith('[]')) {
+                            filters[name] = filters[name] || [];
+                            filters[name].push(item.value);
+                        } else {
+                            filters[name] = item.value;
+                        }
                     }
                 });
                 return filters;
@@ -216,6 +227,7 @@
 
             $('#interview-schedule-filter-reset').on('click', function() {
                 $('#interview-schedule-filter-form')[0].reset();
+                interviewLevelFilter.removeActiveItems();
                 currentFilters = {};
                 table.ajax.reload();
             });

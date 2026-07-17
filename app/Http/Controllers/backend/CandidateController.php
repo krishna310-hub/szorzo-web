@@ -338,7 +338,11 @@ class CandidateController extends Controller
             ->when($request->filled('recruiter_id'), fn ($query) => $query->where('recruiter_id', $request->recruiter_id))
             ->when($request->filled('job_role_id'), fn ($query) => $query->where('job_role_id', $request->job_role_id))
             ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
-            ->when($request->filled('level_of_interview_id'), fn ($query) => $query->where('level_of_interview_id', $request->level_of_interview_id));
+            ->when($request->filled('level_of_interview_id'), function ($query) use ($request) {
+                $levelIds = array_filter((array) $request->input('level_of_interview_id'));
+
+                return $query->whereIn('level_of_interview_id', $levelIds);
+            });
     }
 
     private function validatedData(Request $request): array
