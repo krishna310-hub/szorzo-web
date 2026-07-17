@@ -23,17 +23,19 @@ class AdminController extends Controller
         $this->authorize('dashboard', General::class);
 
         $user = Auth::user()->loadMissing('role.permissions');
-        $accessLevel = strtolower($user->role?->access_level ?? '');
-        $isRecruiter = (int) $user->role_id === 3 || $accessLevel === 'recruiter';
-        $isDeliveryLead = (int) $user->role_id === 2 || $accessLevel === 'recruiter-dl';
-        $linkedRecruiterId = $isRecruiter
+        $roleId = (int) $user->role_id;
+        $isSuperAdmin = $roleId === 1;
+        $isDeliveryLead = $roleId === 2;
+        $isRecruiter = $roleId === 3;
+        $isPersonalDashboard = !$isSuperAdmin;
+        $linkedRecruiterId = $isPersonalDashboard
             ? Recruiter::whereRaw('LOWER(email) = ?', [strtolower($user->email)])->value('id')
             : null;
 
-        $selectedRecruiterId = $isRecruiter
+        $selectedRecruiterId = $isPersonalDashboard
             ? ($linkedRecruiterId ?? 0)
             : ($request->filled('recruiter_id') ? (int) $request->recruiter_id : null);
-        $selectedClientId = !$isRecruiter && $request->filled('client_id')
+        $selectedClientId = $isSuperAdmin && $request->filled('client_id')
             ? (int) $request->client_id
             : null;
 
@@ -67,12 +69,12 @@ class AdminController extends Controller
         return view('backend.index', [
             'scopeLabel' => $isRecruiter
                 ? 'My recruitment pipeline'
-                : ($isDeliveryLead ? 'Delivery lead recruitment overview' : 'Management recruitment overview'),
-            'isRecruiterDashboard' => $isRecruiter,
-            'showClientFilter' => !$isRecruiter && !$isDeliveryLead,
-            'recruiterLinked' => !$isRecruiter || (bool) $linkedRecruiterId,
-            'recruiters' => $isRecruiter ? collect() : Recruiter::where('status', true)->orderBy('recruiter_name')->get(),
-            'clients' => (!$isRecruiter && !$isDeliveryLead) ? Client::where('status', true)->orderBy('client')->get() : collect(),
+                : ($isDeliveryLead ? 'My delivery lead recruitment pipeline' : 'Management recruitment overview'),
+            'isRecruiterDashboard' => $isPersonalDashboard,
+            'showClientFilter' => $isSuperAdmin,
+            'recruiterLinked' => $isSuperAdmin || (bool) $linkedRecruiterId,
+            'recruiters' => $isSuperAdmin ? Recruiter::where('status', true)->orderBy('recruiter_name')->get() : collect(),
+            'clients' => $isSuperAdmin ? Client::where('status', true)->orderBy('client')->get() : collect(),
             'selectedRecruiterId' => $selectedRecruiterId,
             'selectedClientId' => $selectedClientId,
             'activeRequirements' => (clone $requirements)->where('status', true)->sum('number_of_position'),
