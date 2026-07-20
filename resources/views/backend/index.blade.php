@@ -458,15 +458,7 @@
                     $individualAnalyticsName = $isRecruiterDashboard
                         ? auth()->user()->name
                         : ($selectedDashboardRecruiter?->recruiter_name ?? 'All recruiters');
-                    $monthlyKpis = [
-                        ['label' => 'CV Submission', 'target' => '100-200', 'unit' => 'CVs', 'icon' => 'ri-file-search-line'],
-                        ['label' => 'Candidate Shortlisting', 'target' => '80-120', 'unit' => 'CVs', 'icon' => 'ri-user-search-line'],
-                        ['label' => 'Interviews', 'target' => '60-80', 'unit' => 'rounds', 'icon' => 'ri-calendar-check-line'],
-                        ['label' => 'HR Select', 'target' => '45-65', 'unit' => 'screenings', 'icon' => 'ri-survey-line'],
-                        ['label' => 'Offers Released', 'target' => '10-15', 'unit' => 'offers', 'icon' => 'ri-draft-line'],
-                        ['label' => 'Offer Acceptance', 'target' => '8-12', 'unit' => 'acceptances', 'icon' => 'ri-user-follow-line'],
-                        ['label' => 'Onboarding', 'target' => '8-10', 'unit' => 'joiners', 'icon' => 'ri-team-line'],
-                    ];
+                    $monthlyKpis = $monthlyTargetAnalytics['kpis'];
                 @endphp
 
                 <div class="card panel-card target-panel mb-4">
@@ -475,13 +467,13 @@
                             <div>
                                 <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                                     <h5 class="section-title mb-0">Monthly Target Analytics</h5>
-                                    <span class="badge bg-warning-subtle text-warning">UI preview</span>
+                                    <span class="badge bg-success-subtle text-success">Live records</span>
                                 </div>
                                 <p class="text-muted small mb-0">
                                     @if ($isSuperAdminDashboard)
                                         All-role performance visibility for Super Admin
                                     @elseif ($isDeliveryLeadDashboard)
-                                        Your Recruiter-DL target and process completion
+                                        {{ $selectedDashboardRecruiter ? $selectedDashboardRecruiter->recruiter_name.' target and process completion' : 'Recruiter-DL team target and process completion' }}
                                     @else
                                         Your individual monthly target and process completion
                                     @endif
@@ -495,29 +487,29 @@
                                 <div class="target-summary">
                                     <div class="metric-label mb-2">Overall Completion</div>
                                     <div class="d-flex justify-content-between align-items-end mb-3">
-                                        <div class="target-summary-value">0%</div><small class="text-muted">Not connected</small>
+                                        <div class="target-summary-value">{{ $monthlyTargetAnalytics['overallPercentage'] }}%</div><small class="text-muted">{{ $monthlyTargetAnalytics['targetMultiplier'] > 1 ? $monthlyTargetAnalytics['targetMultiplier'].' recruiters' : 'Monthly target' }}</small>
                                     </div>
-                                    <div class="target-progress"><div class="target-progress-bar" style="width:0%"></div></div>
+                                    <div class="target-progress"><div class="target-progress-bar" style="width:{{ $monthlyTargetAnalytics['overallPercentage'] }}%"></div></div>
                                 </div>
                             </div>
                             <div class="col-sm-6 col-xl-3">
                                 <div class="target-summary">
                                     <div class="metric-label mb-2">Process Completed</div>
-                                    <div class="target-summary-value">0 <small class="fs-6 fw-normal text-muted">/ 7 KPIs</small></div>
+                                    <div class="target-summary-value">{{ $monthlyTargetAnalytics['completedProcesses'] }} <small class="fs-6 fw-normal text-muted">/ 7 KPIs</small></div>
                                     <div class="small text-muted mt-3"><i class="ri-checkbox-circle-line me-1"></i>Monthly workflow</div>
                                 </div>
                             </div>
                             <div class="col-sm-6 col-xl-3">
                                 <div class="target-summary">
                                     <div class="metric-label mb-2">Offers Progress</div>
-                                    <div class="target-summary-value">0 <small class="fs-6 fw-normal text-muted">/ 10-15</small></div>
+                                    <div class="target-summary-value">{{ $monthlyTargetAnalytics['offers']['completed'] }} <small class="fs-6 fw-normal text-muted">/ {{ $monthlyTargetAnalytics['offers']['target'] }}</small></div>
                                     <div class="small text-muted mt-3"><i class="ri-draft-line me-1"></i>Minimum to stretch target</div>
                                 </div>
                             </div>
                             <div class="col-sm-6 col-xl-3">
                                 <div class="target-summary">
                                     <div class="metric-label mb-2">Joining Progress</div>
-                                    <div class="target-summary-value">0 <small class="fs-6 fw-normal text-muted">/ 8-10</small></div>
+                                    <div class="target-summary-value">{{ $monthlyTargetAnalytics['joining']['completed'] }} <small class="fs-6 fw-normal text-muted">/ {{ $monthlyTargetAnalytics['joining']['target'] }}</small></div>
                                     <div class="small text-muted mt-3"><i class="ri-user-add-line me-1"></i>Monthly joiners</div>
                                 </div>
                             </div>
@@ -534,8 +526,8 @@
                                             </div>
                                             <div class="text-end"><strong class="text-dark">{{ $kpi['target'] }}</strong><small class="d-block text-muted">{{ $kpi['unit'] }}</small></div>
                                         </div>
-                                        <div class="d-flex justify-content-between small mb-2"><span class="text-muted">Completed: 0</span><strong class="individual-target-summary-value">0%</strong></div>
-                                        <div class="target-progress"><div class="target-progress-bar" style="width:0%"></div></div>
+                                        <div class="d-flex justify-content-between small mb-2"><span class="text-muted">Completed: {{ number_format($kpi['completed']) }}</span><strong class="individual-target-summary-value">{{ $kpi['percentage'] }}%</strong></div>
+                                        <div class="target-progress"><div class="target-progress-bar" style="width:{{ $kpi['percentage'] }}%"></div></div>
                                     </div>
                                 </div>
                             @endforeach
@@ -549,15 +541,15 @@
                                 </div>
                                 <div class="role-performance-row">
                                     <div class="d-flex align-items-center gap-2"><div class="role-avatar">DL</div><div><div class="fw-semibold text-dark">Recruiter - DL</div><small class="text-muted">Delivery leadership</small></div></div>
-                                    <div class="role-progress-column"><div class="target-progress"><div class="target-progress-bar" style="width:0%"></div></div></div>
-                                    <div class="role-target-column text-muted small">7 KPIs</div><strong class="text-end">0%</strong>
-                                    <span class="btn btn-sm btn-light disabled">Overview</span>
+                                    <div class="role-progress-column"><div class="target-progress"><div class="target-progress-bar" style="width:{{ $deliveryLeadAnalytics['overallPercentage'] }}%"></div></div></div>
+                                    <div class="role-target-column text-muted small">7 KPIs</div><strong class="text-end">{{ $deliveryLeadAnalytics['overallPercentage'] }}%</strong>
+                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-sm {{ $selectedRecruiterId ? 'btn-outline-danger' : 'btn-danger' }}">Overview</a>
                                 </div>
                                 @forelse ($recruiters as $recruiter)
                                     <div class="role-performance-row">
                                         <div class="d-flex align-items-center gap-2"><div class="role-avatar">{{ strtoupper(substr($recruiter->recruiter_name, 0, 1)) }}</div><div><div class="fw-semibold text-dark">{{ $recruiter->recruiter_name }}</div><small class="text-muted">Recruiter</small></div></div>
-                                        <div class="role-progress-column"><div class="target-progress"><div class="target-progress-bar" style="width:0%"></div></div></div>
-                                        <div class="role-target-column text-muted small">7 KPIs</div><strong class="text-end">0%</strong>
+                                        <div class="role-progress-column"><div class="target-progress"><div class="target-progress-bar" style="width:{{ $recruiterPerformance[$recruiter->id] ?? 0 }}%"></div></div></div>
+                                        <div class="role-target-column text-muted small">7 KPIs</div><strong class="text-end">{{ $recruiterPerformance[$recruiter->id] ?? 0 }}%</strong>
                                         <a href="{{ route('admin.dashboard', ['recruiter_id' => $recruiter->id]) }}" class="btn btn-sm {{ (int) $selectedRecruiterId === $recruiter->id ? 'btn-danger' : 'btn-outline-danger' }}">
                                             <i class="ri-line-chart-line me-1"></i>{{ (int) $selectedRecruiterId === $recruiter->id ? 'Viewing' : 'Analytics' }}
                                         </a>

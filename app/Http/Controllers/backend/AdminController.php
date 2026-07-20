@@ -27,14 +27,18 @@ class AdminController extends Controller
         $isSuperAdmin = $roleId === 1;
         $isDeliveryLead = $roleId === 2;
         $isRecruiter = $roleId === 3;
-        $isPersonalDashboard = !$isSuperAdmin;
-        $linkedRecruiterId = $isPersonalDashboard
+        $isPersonalDashboard = $isRecruiter;
+        $linkedRecruiterId = $isRecruiter
             ? Recruiter::whereRaw('LOWER(email) = ?', [strtolower($user->email)])->value('id')
             : null;
 
-        $selectedRecruiterId = $isPersonalDashboard
+        $availableRecruiters = ($isSuperAdmin || $isDeliveryLead)
+            ? Recruiter::where('status', true)->orderBy('recruiter_name')->get()
+            : collect();
+        $requestedRecruiterId = $request->filled('recruiter_id') ? (int) $request->recruiter_id : null;
+        $selectedRecruiterId = $isRecruiter
             ? ($linkedRecruiterId ?? 0)
-            : ($request->filled('recruiter_id') ? (int) $request->recruiter_id : null);
+            : ($availableRecruiters->contains('id', $requestedRecruiterId) ? $requestedRecruiterId : null);
         $selectedClientId = $isSuperAdmin && $request->filled('client_id')
             ? (int) $request->client_id
             : null;
@@ -66,17 +70,37 @@ class AdminController extends Controller
             ->groupBy('month_key')->pluck('total', 'month_key');
         $months = collect(range(5, 0))->map(fn ($offset) => now()->subMonths($offset));
 
+        $targetMultiplier = $selectedRecruiterId
+            ? 1
+            : max(1, $availableRecruiters->count());
+        $monthlyKpis = $this->monthlyTargetAnalytics($candidates, $interviews, $targetMultiplier);
+        $deliveryLeadAnalytics = $this->monthlyTargetAnalytics(
+            Candidate::query(),
+            InterviewSchedule::query(),
+            max(1, $availableRecruiters->count())
+        );
+        $recruiterPerformance = $availableRecruiters->mapWithKeys(function (Recruiter $recruiter) {
+            $candidateQuery = Candidate::where('recruiter_id', $recruiter->id);
+            $interviewQuery = InterviewSchedule::whereHas('candidate',
+                fn ($query) => $query->where('recruiter_id', $recruiter->id));
+
+            return [$recruiter->id => $this->monthlyTargetAnalytics($candidateQuery, $interviewQuery, 1)['overallPercentage']];
+        });
+
         return view('backend.index', [
             'scopeLabel' => $isRecruiter
                 ? 'My recruitment pipeline'
                 : ($isDeliveryLead ? 'My delivery lead recruitment pipeline' : 'Management recruitment overview'),
             'isRecruiterDashboard' => $isPersonalDashboard,
             'showClientFilter' => $isSuperAdmin,
-            'recruiterLinked' => $isSuperAdmin || (bool) $linkedRecruiterId,
-            'recruiters' => $isSuperAdmin ? Recruiter::where('status', true)->orderBy('recruiter_name')->get() : collect(),
+            'recruiterLinked' => !$isRecruiter || (bool) $linkedRecruiterId,
+            'recruiters' => $availableRecruiters,
             'clients' => $isSuperAdmin ? Client::where('status', true)->orderBy('client')->get() : collect(),
             'selectedRecruiterId' => $selectedRecruiterId,
             'selectedClientId' => $selectedClientId,
+            'monthlyTargetAnalytics' => $monthlyKpis,
+            'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
+            'recruiterPerformance' => $recruiterPerformance,
             'activeRequirements' => (clone $requirements)->where('status', true)->sum('number_of_position'),
             'myApplicants' => (clone $candidates)->count(),
             'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
@@ -90,6 +114,50 @@ class AdminController extends Controller
             'upcomingInterviews' => (clone $interviews)->with(['candidate', 'client', 'interviewLevel'])
                 ->where('schedule_date', '>=', now())->orderBy('schedule_date')->limit(6)->get(),
         ]);
+    }
+
+    private function monthlyTargetAnalytics($candidates, $interviews, int $targetMultiplier): array
+    {
+        $monthStart = now()->startOfMonth();
+        $monthEnd = now()->endOfMonth();
+        $monthlyCandidates = (clone $candidates)->whereBetween('candidates.created_at', [$monthStart, $monthEnd]);
+        $monthlyInterviews = (clone $interviews)->whereBetween('interview_schedules.schedule_date', [$monthStart, $monthEnd]);
+
+        $definitions = [
+            ['label' => 'CV Submission', 'min' => 100, 'max' => 200, 'unit' => 'CVs', 'icon' => 'ri-file-search-line',
+                'completed' => (clone $monthlyCandidates)->count()],
+            ['label' => 'Candidate Shortlisting', 'min' => 80, 'max' => 120, 'unit' => 'CVs', 'icon' => 'ri-user-search-line',
+                'completed' => (clone $monthlyCandidates)->whereNotNull('level_of_interview_id')->count()],
+            ['label' => 'Interviews', 'min' => 60, 'max' => 80, 'unit' => 'rounds', 'icon' => 'ri-calendar-check-line',
+                'completed' => (clone $monthlyInterviews)->count()],
+            ['label' => 'HR Select', 'min' => 45, 'max' => 65, 'unit' => 'screenings', 'icon' => 'ri-survey-line',
+                'completed' => (clone $monthlyInterviews)->whereHas('interviewLevel', fn ($query) => $query->where('level', 'like', '%HR%'))->count()],
+            ['label' => 'Offers Released', 'min' => 10, 'max' => 15, 'unit' => 'offers', 'icon' => 'ri-draft-line',
+                'completed' => (clone $monthlyInterviews)->whereHas('interviewLevel', fn ($query) => $query->where('level', 'like', '%offer%'))->distinct('candidate_id')->count('candidate_id')],
+            ['label' => 'Offer Acceptance', 'min' => 8, 'max' => 12, 'unit' => 'acceptances', 'icon' => 'ri-user-follow-line',
+                'completed' => (clone $monthlyInterviews)->where('status', 'selected')->distinct('candidate_id')->count('candidate_id')],
+            ['label' => 'Onboarding', 'min' => 8, 'max' => 10, 'unit' => 'joiners', 'icon' => 'ri-team-line',
+                'completed' => (clone $monthlyInterviews)->whereHas('interviewLevel', fn ($query) => $query->where(function ($level) {
+                    $level->where('level', 'like', '%onboard%')->orWhere('level', 'like', '%join%');
+                }))->distinct('candidate_id')->count('candidate_id')],
+        ];
+
+        $kpis = collect($definitions)->map(function (array $kpi) use ($targetMultiplier) {
+            $kpi['min'] *= $targetMultiplier;
+            $kpi['max'] *= $targetMultiplier;
+            $kpi['target'] = $kpi['min'].'-'.$kpi['max'];
+            $kpi['percentage'] = min(100, (int) round(($kpi['completed'] / max(1, $kpi['min'])) * 100));
+            return $kpi;
+        });
+
+        return [
+            'kpis' => $kpis,
+            'overallPercentage' => (int) round($kpis->avg('percentage')),
+            'completedProcesses' => $kpis->where('percentage', '>=', 100)->count(),
+            'offers' => $kpis->firstWhere('label', 'Offers Released'),
+            'joining' => $kpis->firstWhere('label', 'Onboarding'),
+            'targetMultiplier' => $targetMultiplier,
+        ];
     }
 
     public function profile()
