@@ -432,7 +432,7 @@
                     <div class="card-body p-3 p-lg-4">
                         <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3 align-items-end">
                             @unless ($isRecruiterDashboard)
-                                <div class="col-md-{{ $showClientFilter ? '3' : '5' }}">
+                                <div class="col-md-6 col-xl-{{ $showClientFilter ? '2' : '3' }}">
                                     <label for="dashboard_recruiter_id" class="form-label fw-semibold">Recruiter</label>
                                     <select id="dashboard_recruiter_id" name="recruiter_id" class="form-select">
                                         <option value="">All recruiters</option>
@@ -443,7 +443,7 @@
                                 </div>
                             @endunless
                             @if ($showClientFilter)
-                                <div class="col-md-3">
+                                <div class="col-md-6 col-xl-2">
                                     <label for="dashboard_client_id" class="form-label fw-semibold">Client</label>
                                     <select id="dashboard_client_id" name="client_id" class="form-select">
                                         <option value="">All clients</option>
@@ -453,24 +453,33 @@
                                     </select>
                                 </div>
                             @endif
-                            <div class="col-md-{{ $isRecruiterDashboard ? '9' : ($showClientFilter ? '3' : '4') }}">
-                                <label for="dashboard_date" class="form-label fw-semibold">Date</label>
-                                <input type="date" id="dashboard_date" name="dashboard_date"
-                                    class="form-control {{ $dateFilterError ? 'is-invalid' : '' }}"
-                                    value="{{ $selectedDate }}">
-                                @if ($dateFilterError)
-                                    <div class="invalid-feedback">{{ $dateFilterError }}</div>
+                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : '3' }}">
+                                <label for="dashboard_from_date" class="form-label fw-semibold">From Date</label>
+                                <input type="date" id="dashboard_from_date" name="dashboard_from_date"
+                                    class="form-control {{ $fromDateError ? 'is-invalid' : '' }}"
+                                    value="{{ $selectedFromDate }}">
+                                @if ($fromDateError)
+                                    <div class="invalid-feedback">{{ $fromDateError }}</div>
                                 @endif
                             </div>
-                            <div class="col-md-3 d-flex gap-2">
+                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : '3' }}">
+                                <label for="dashboard_to_date" class="form-label fw-semibold">To Date</label>
+                                <input type="date" id="dashboard_to_date" name="dashboard_to_date"
+                                    class="form-control {{ $toDateError ? 'is-invalid' : '' }}"
+                                    value="{{ $selectedToDate }}">
+                                @if ($toDateError)
+                                    <div class="invalid-feedback">{{ $toDateError }}</div>
+                                @endif
+                            </div>
+                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : ($showClientFilter ? '2' : '3') }} d-flex gap-2">
                                 <button type="submit" class="btn btn-danger flex-grow-1">
                                     <i class="ri-filter-3-line me-1"></i>Apply
                                 </button>
-                                @if ($selectedDate)
+                                @if ($selectedFromDate || $selectedToDate)
                                     <a href="{{ route('admin.dashboard', array_filter([
                                         'recruiter_id' => $isRecruiterDashboard ? null : $selectedRecruiterId,
                                         'client_id' => $selectedClientId,
-                                    ])) }}" class="btn btn-outline-primary" title="Remove selected date" aria-label="Remove selected date">
+                                    ])) }}" class="btn btn-outline-primary" title="Remove date range" aria-label="Remove date range">
                                         <i class="ri-calendar-close-line"></i>
                                     </a>
                                 @endif
@@ -589,14 +598,14 @@
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
-                                                <div class="small text-muted mb-1">Offered</div>
-                                                <div class="metric-value">{{ number_format($offered ?? 0) }}</div>
+                                                <div class="small text-muted mb-1">HR Selected</div>
+                                                <div class="metric-value">{{ number_format($hrSelected ?? 0) }}</div>
                                             </div>
                                         </div>
                                         <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
-                                                <div class="small text-muted mb-1">HR Selected</div>
-                                                <div class="metric-value">{{ number_format($hrSelected ?? 0) }}</div>
+                                                <div class="small text-muted mb-1">Offered</div>
+                                                <div class="metric-value">{{ number_format($offered ?? 0) }}</div>
                                             </div>
                                         </div>
                                     </div>

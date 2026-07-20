@@ -12,6 +12,7 @@ use App\Models\InterviewSchedule;
 use App\Models\Recruiter;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,17 +25,31 @@ class AdminController extends Controller
     {
         $this->authorize('dashboard', General::class);
 
-        $dateValidator = validator($request->only('dashboard_date'), [
-            'dashboard_date' => ['nullable', 'date_format:Y-m-d'],
+        $toDateRules = ['nullable', 'date_format:Y-m-d'];
+        if ($request->filled('dashboard_from_date')) {
+            $toDateRules[] = 'after_or_equal:dashboard_from_date';
+        }
+        $dateValidator = validator($request->only(['dashboard_from_date', 'dashboard_to_date']), [
+            'dashboard_from_date' => ['nullable', 'date_format:Y-m-d'],
+            'dashboard_to_date' => $toDateRules,
+        ], [], [
+            'dashboard_from_date' => 'from date',
+            'dashboard_to_date' => 'to date',
         ]);
-        $selectedDate = $dateValidator->passes() && $request->filled('dashboard_date')
-            ? $request->string('dashboard_date')->toString()
+        $datesAreValid = $dateValidator->passes();
+        $selectedFromDate = $datesAreValid && $request->filled('dashboard_from_date')
+            ? $request->string('dashboard_from_date')->toString()
             : null;
-        $dateFilterError = $dateValidator->fails()
-            ? 'Choose a valid dashboard date.'
+        $selectedToDate = $datesAreValid && $request->filled('dashboard_to_date')
+            ? $request->string('dashboard_to_date')->toString()
             : null;
-        $selectedDay = $selectedDate
-            ? CarbonImmutable::createFromFormat('!Y-m-d', $selectedDate)
+        $fromDateError = $dateValidator->errors()->first('dashboard_from_date');
+        $toDateError = $dateValidator->errors()->first('dashboard_to_date');
+        $dateFrom = $selectedFromDate
+            ? CarbonImmutable::createFromFormat('!Y-m-d', $selectedFromDate)->startOfDay()
+            : null;
+        $dateTo = $selectedToDate
+            ? CarbonImmutable::createFromFormat('!Y-m-d', $selectedToDate)->endOfDay()
             : null;
 
         $user = Auth::user()->loadMissing('role.permissions');
@@ -61,17 +76,13 @@ class AdminController extends Controller
         $requirements = ClientRequirement::query()
             ->when($selectedRecruiterId !== null, fn ($query) => $query->where('project_owner', $selectedRecruiterId))
             ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId))
-            ->when($selectedDay, fn ($query) => $query->whereBetween('client_requirements.created_at', [
-                $selectedDay->startOfDay(),
-                $selectedDay->endOfDay(),
-            ]));
+            ->when($dateFrom, fn ($query) => $query->where('client_requirements.created_at', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->where('client_requirements.created_at', '<=', $dateTo));
         $candidates = Candidate::query()
             ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
             ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId))
-            ->when($selectedDay, fn ($query) => $query->whereBetween('candidates.created_at', [
-                $selectedDay->startOfDay(),
-                $selectedDay->endOfDay(),
-            ]));
+            ->when($dateFrom, fn ($query) => $query->where('candidates.created_at', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->where('candidates.created_at', '<=', $dateTo));
         $interviews = InterviewSchedule::query()
             ->when($selectedRecruiterId !== null, fn ($query) => $query->whereHas('candidate',
                 fn ($candidate) => $candidate->where('recruiter_id', $selectedRecruiterId)))
@@ -79,19 +90,15 @@ class AdminController extends Controller
                 $clientQuery->where('client_id', $selectedClientId)
                     ->orWhereHas('candidate', fn ($candidate) => $candidate->where('client_id', $selectedClientId));
             }))
-            ->when($selectedDay, fn ($query) => $query->whereBetween('interview_schedules.schedule_date', [
-                $selectedDay->startOfDay(),
-                $selectedDay->endOfDay(),
-            ]));
+            ->when($dateFrom, fn ($query) => $query->where('interview_schedules.schedule_date', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->where('interview_schedules.schedule_date', '<=', $dateTo));
 
-        $candidateLevelScope = function ($query) use ($selectedRecruiterId, $selectedClientId, $selectedDay) {
+        $candidateLevelScope = function ($query) use ($selectedRecruiterId, $selectedClientId, $dateFrom, $dateTo) {
             $query
                 ->when($selectedRecruiterId !== null, fn ($candidate) => $candidate->where('recruiter_id', $selectedRecruiterId))
                 ->when($selectedClientId, fn ($candidate) => $candidate->where('client_id', $selectedClientId))
-                ->when($selectedDay, fn ($candidate) => $candidate->whereBetween('candidates.created_at', [
-                    $selectedDay->startOfDay(),
-                    $selectedDay->endOfDay(),
-                ]));
+                ->when($dateFrom, fn ($candidate) => $candidate->where('candidates.created_at', '>=', $dateFrom))
+                ->when($dateTo, fn ($candidate) => $candidate->where('candidates.created_at', '<=', $dateTo));
         };
         $candidateLevels = InterviewLevel::query()
             ->whereHas('candidates', $candidateLevelScope)
@@ -113,18 +120,26 @@ class AdminController extends Controller
         $targetMultiplier = $selectedRecruiterId
             ? 1
             : max(1, $availableRecruiters->count());
-        $monthlyKpis = $this->monthlyTargetAnalytics($candidates, $interviews, $targetMultiplier);
+        $monthlyKpis = $this->monthlyTargetAnalytics($candidates, $interviews, $targetMultiplier, $dateFrom, $dateTo);
         $deliveryLeadAnalytics = $this->monthlyTargetAnalytics(
             Candidate::query(),
             InterviewSchedule::query(),
-            max(1, $availableRecruiters->count())
+            max(1, $availableRecruiters->count()),
+            $dateFrom,
+            $dateTo
         );
-        $recruiterPerformance = $availableRecruiters->mapWithKeys(function (Recruiter $recruiter) {
+        $recruiterPerformance = $availableRecruiters->mapWithKeys(function (Recruiter $recruiter) use ($dateFrom, $dateTo) {
             $candidateQuery = Candidate::where('recruiter_id', $recruiter->id);
             $interviewQuery = InterviewSchedule::whereHas('candidate',
                 fn ($query) => $query->where('recruiter_id', $recruiter->id));
 
-            return [$recruiter->id => $this->monthlyTargetAnalytics($candidateQuery, $interviewQuery, 1)['overallPercentage']];
+            return [$recruiter->id => $this->monthlyTargetAnalytics(
+                $candidateQuery,
+                $interviewQuery,
+                1,
+                $dateFrom,
+                $dateTo
+            )['overallPercentage']];
         });
 
         return view('backend.index', [
@@ -138,8 +153,10 @@ class AdminController extends Controller
             'clients' => $isSuperAdmin ? Client::where('status', true)->orderBy('client')->get() : collect(),
             'selectedRecruiterId' => $selectedRecruiterId,
             'selectedClientId' => $selectedClientId,
-            'selectedDate' => $selectedDate,
-            'dateFilterError' => $dateFilterError,
+            'selectedFromDate' => $selectedFromDate,
+            'selectedToDate' => $selectedToDate,
+            'fromDateError' => $fromDateError,
+            'toDateError' => $toDateError,
             'monthlyTargetAnalytics' => $monthlyKpis,
             'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
             'recruiterPerformance' => $recruiterPerformance,
@@ -160,15 +177,27 @@ class AdminController extends Controller
         ]);
     }
 
-    private function monthlyTargetAnalytics($candidates, $interviews, int $targetMultiplier): array
+    private function monthlyTargetAnalytics(
+        $candidates,
+        $interviews,
+        int $targetMultiplier,
+        ?CarbonInterface $dateFrom = null,
+        ?CarbonInterface $dateTo = null
+    ): array
     {
-        $monthStart = now()->startOfMonth();
-        $monthEnd = now()->endOfMonth();
-        $monthlyCandidates = (clone $candidates)->whereBetween('candidates.created_at', [$monthStart, $monthEnd]);
-        $monthlyInterviews = (clone $interviews)->whereBetween('interview_schedules.schedule_date', [$monthStart, $monthEnd]);
+        $periodStart = $dateFrom ?? ($dateTo ? null : now()->startOfMonth());
+        $periodEnd = $dateTo ?? ($dateFrom ? null : now()->endOfMonth());
+
+        $periodCandidates = (clone $candidates)
+            ->when($periodStart, fn ($query) => $query->where('candidates.created_at', '>=', $periodStart))
+            ->when($periodEnd, fn ($query) => $query->where('candidates.created_at', '<=', $periodEnd));
+        $periodInterviews = (clone $interviews)
+            ->when($periodStart, fn ($query) => $query->where('interview_schedules.schedule_date', '>=', $periodStart))
+            ->when($periodEnd, fn ($query) => $query->where('interview_schedules.schedule_date', '<=', $periodEnd))
+            ->where('status', '!=', 'cancelled');
 
         // Fixed IDs from the Level of Interviews master.
-        $screenRejectId = 4;
+        $shortlistedLevelIds = array_merge([3], range(7, 30));
         $interviewLevelIds = [7, 8, 9, 10, 11, 12, 13, 23, 24, 25, 27, 28, 29];
         $hrSelectId = 15;
         $offerReleasedIds = [22, 30];
@@ -177,22 +206,23 @@ class AdminController extends Controller
 
         $definitions = [
             ['label' => 'CV Submission', 'min' => 100, 'max' => 200, 'unit' => 'CVs', 'icon' => 'ri-file-search-line',
-                'completed' => (clone $monthlyCandidates)->count()],
+                'completed' => (clone $periodCandidates)->count()],
             ['label' => 'Candidate Shortlisting', 'min' => 80, 'max' => 120, 'unit' => 'CVs', 'icon' => 'ri-user-search-line',
-                'completed' => (clone $monthlyCandidates)->where(function ($query) use ($screenRejectId) {
-                    $query->whereNull('level_of_interview_id')
-                        ->orWhere('level_of_interview_id', '!=', $screenRejectId);
-                })->count()],
+                'completed' => (clone $periodCandidates)->whereIn('level_of_interview_id', $shortlistedLevelIds)->count()],
             ['label' => 'Interviews', 'min' => 60, 'max' => 80, 'unit' => 'rounds', 'icon' => 'ri-calendar-check-line',
-                'completed' => (clone $monthlyInterviews)->whereIn('level_of_interview_id', $interviewLevelIds)->count()],
+                'completed' => (clone $periodInterviews)->whereIn('level_of_interview_id', $interviewLevelIds)->count()],
             ['label' => 'HR Select', 'min' => 45, 'max' => 65, 'unit' => 'screenings', 'icon' => 'ri-survey-line',
-                'completed' => (clone $monthlyInterviews)->where('level_of_interview_id', $hrSelectId)->count()],
+                'completed' => (clone $periodInterviews)->where('level_of_interview_id', $hrSelectId)
+                    ->distinct()->count('candidate_id')],
             ['label' => 'Offers Released', 'min' => 10, 'max' => 15, 'unit' => 'offers', 'icon' => 'ri-draft-line',
-                'completed' => (clone $monthlyInterviews)->whereIn('level_of_interview_id', $offerReleasedIds)->distinct('candidate_id')->count('candidate_id')],
+                'completed' => (clone $periodInterviews)->whereIn('level_of_interview_id', $offerReleasedIds)
+                    ->distinct()->count('candidate_id')],
             ['label' => 'Offer Acceptance', 'min' => 8, 'max' => 12, 'unit' => 'acceptances', 'icon' => 'ri-user-follow-line',
-                'completed' => (clone $monthlyInterviews)->where('level_of_interview_id', $offerAcceptedId)->distinct('candidate_id')->count('candidate_id')],
+                'completed' => (clone $periodInterviews)->where('level_of_interview_id', $offerAcceptedId)
+                    ->distinct()->count('candidate_id')],
             ['label' => 'Onboarding', 'min' => 8, 'max' => 10, 'unit' => 'joiners', 'icon' => 'ri-team-line',
-                'completed' => (clone $monthlyInterviews)->where('level_of_interview_id', $onboardedId)->distinct('candidate_id')->count('candidate_id')],
+                'completed' => (clone $periodInterviews)->where('level_of_interview_id', $onboardedId)
+                    ->distinct()->count('candidate_id')],
         ];
 
         $kpis = collect($definitions)->map(function (array $kpi) use ($targetMultiplier) {
