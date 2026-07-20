@@ -11,6 +11,7 @@ use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
 use App\Models\Recruiter;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,19 @@ class AdminController extends Controller
     public function index(Request $request)
     {
         $this->authorize('dashboard', General::class);
+
+        $dateValidator = validator($request->only('dashboard_date'), [
+            'dashboard_date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+        $selectedDate = $dateValidator->passes() && $request->filled('dashboard_date')
+            ? $request->string('dashboard_date')->toString()
+            : null;
+        $dateFilterError = $dateValidator->fails()
+            ? 'Choose a valid dashboard date.'
+            : null;
+        $selectedDay = $selectedDate
+            ? CarbonImmutable::createFromFormat('!Y-m-d', $selectedDate)
+            : null;
 
         $user = Auth::user()->loadMissing('role.permissions');
         $roleId = (int) $user->role_id;
@@ -46,21 +60,42 @@ class AdminController extends Controller
 
         $requirements = ClientRequirement::query()
             ->when($selectedRecruiterId !== null, fn ($query) => $query->where('project_owner', $selectedRecruiterId))
-            ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId));
+            ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId))
+            ->when($selectedDay, fn ($query) => $query->whereBetween('client_requirements.created_at', [
+                $selectedDay->startOfDay(),
+                $selectedDay->endOfDay(),
+            ]));
         $candidates = Candidate::query()
             ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
-            ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId));
+            ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId))
+            ->when($selectedDay, fn ($query) => $query->whereBetween('candidates.created_at', [
+                $selectedDay->startOfDay(),
+                $selectedDay->endOfDay(),
+            ]));
         $interviews = InterviewSchedule::query()
             ->when($selectedRecruiterId !== null, fn ($query) => $query->whereHas('candidate',
                 fn ($candidate) => $candidate->where('recruiter_id', $selectedRecruiterId)))
             ->when($selectedClientId, fn ($query) => $query->where(function ($clientQuery) use ($selectedClientId) {
                 $clientQuery->where('client_id', $selectedClientId)
                     ->orWhereHas('candidate', fn ($candidate) => $candidate->where('client_id', $selectedClientId));
-            }));
+            }))
+            ->when($selectedDay, fn ($query) => $query->whereBetween('interview_schedules.schedule_date', [
+                $selectedDay->startOfDay(),
+                $selectedDay->endOfDay(),
+            ]));
 
+        $candidateLevelScope = function ($query) use ($selectedRecruiterId, $selectedClientId, $selectedDay) {
+            $query
+                ->when($selectedRecruiterId !== null, fn ($candidate) => $candidate->where('recruiter_id', $selectedRecruiterId))
+                ->when($selectedClientId, fn ($candidate) => $candidate->where('client_id', $selectedClientId))
+                ->when($selectedDay, fn ($candidate) => $candidate->whereBetween('candidates.created_at', [
+                    $selectedDay->startOfDay(),
+                    $selectedDay->endOfDay(),
+                ]));
+        };
         $candidateLevels = InterviewLevel::query()
-            ->has('candidates')
-            ->withCount('candidates')
+            ->whereHas('candidates', $candidateLevelScope)
+            ->withCount(['candidates' => $candidateLevelScope])
             ->orderBy('sort_order')
             ->get();
 
@@ -103,6 +138,8 @@ class AdminController extends Controller
             'clients' => $isSuperAdmin ? Client::where('status', true)->orderBy('client')->get() : collect(),
             'selectedRecruiterId' => $selectedRecruiterId,
             'selectedClientId' => $selectedClientId,
+            'selectedDate' => $selectedDate,
+            'dateFilterError' => $dateFilterError,
             'monthlyTargetAnalytics' => $monthlyKpis,
             'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
             'recruiterPerformance' => $recruiterPerformance,

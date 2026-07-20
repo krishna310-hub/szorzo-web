@@ -134,6 +134,50 @@
             text-overflow: ellipsis;
         }
 
+        .interview-summary {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .interview-stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .interview-stat {
+            min-width: 0;
+            padding: 8px 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .interview-stat-label {
+            display: block;
+            margin-bottom: 3px;
+            color: #64748b;
+            font-size: .7rem;
+            font-weight: 700;
+        }
+
+        .interview-stat-value {
+            color: #111827;
+            font-size: 1rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        @media (max-width: 767.98px) {
+            .interview-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
         .section-title {
             font-weight: 800;
             color: #172033;
@@ -237,8 +281,8 @@
             color: #15803d;
         }
 
-        .individual-target-summary-value.percentage-yellow {
-            color: #ca8a04;
+        .individual-target-summary-value.percentage-blue {
+            color: #2563eb;
         }
 
         .individual-target-summary-value.percentage-red {
@@ -249,8 +293,8 @@
             background: linear-gradient(90deg, #16a34a, #22c55e);
         }
 
-        .target-progress-bar.percentage-yellow {
-            background: linear-gradient(90deg, #eab308, #facc15);
+        .target-progress-bar.percentage-blue {
+            background: linear-gradient(90deg, #2563eb, #60a5fa);
         }
 
         .target-progress-bar.percentage-red {
@@ -384,11 +428,11 @@
                     </div>
                 </div>
 
-                @unless ($isRecruiterDashboard)
-                    <div class="card panel-card mb-4">
-                        <div class="card-body p-3 p-lg-4">
-                            <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3 align-items-end">
-                                <div class="col-md-{{ $showClientFilter ? '5' : '9' }}">
+                <div class="card panel-card mb-4">
+                    <div class="card-body p-3 p-lg-4">
+                        <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3 align-items-end">
+                            @unless ($isRecruiterDashboard)
+                                <div class="col-md-{{ $showClientFilter ? '3' : '5' }}">
                                     <label for="dashboard_recruiter_id" class="form-label fw-semibold">Recruiter</label>
                                     <select id="dashboard_recruiter_id" name="recruiter_id" class="form-select">
                                         <option value="">All recruiters</option>
@@ -397,25 +441,46 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                @if ($showClientFilter)
-                                    <div class="col-md-4">
-                                        <label for="dashboard_client_id" class="form-label fw-semibold">Client</label>
-                                        <select id="dashboard_client_id" name="client_id" class="form-select">
-                                            <option value="">All clients</option>
-                                            @foreach ($clients as $client)
-                                                <option value="{{ $client->id }}" @selected((int) $selectedClientId === $client->id)>{{ $client->client }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endif
-                                <div class="col-md-3 d-flex gap-2">
-                                    <button type="submit" class="btn btn-danger flex-grow-1"><i class="ri-filter-3-line me-1"></i>Apply</button>
-                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-light" title="Clear filters"><i class="ri-refresh-line"></i></a>
+                            @endunless
+                            @if ($showClientFilter)
+                                <div class="col-md-3">
+                                    <label for="dashboard_client_id" class="form-label fw-semibold">Client</label>
+                                    <select id="dashboard_client_id" name="client_id" class="form-select">
+                                        <option value="">All clients</option>
+                                        @foreach ($clients as $client)
+                                            <option value="{{ $client->id }}" @selected((int) $selectedClientId === $client->id)>{{ $client->client }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                            </form>
-                        </div>
+                            @endif
+                            <div class="col-md-{{ $isRecruiterDashboard ? '9' : ($showClientFilter ? '3' : '4') }}">
+                                <label for="dashboard_date" class="form-label fw-semibold">Date</label>
+                                <input type="date" id="dashboard_date" name="dashboard_date"
+                                    class="form-control {{ $dateFilterError ? 'is-invalid' : '' }}"
+                                    value="{{ $selectedDate }}">
+                                @if ($dateFilterError)
+                                    <div class="invalid-feedback">{{ $dateFilterError }}</div>
+                                @endif
+                            </div>
+                            <div class="col-md-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-danger flex-grow-1">
+                                    <i class="ri-filter-3-line me-1"></i>Apply
+                                </button>
+                                @if ($selectedDate)
+                                    <a href="{{ route('admin.dashboard', array_filter([
+                                        'recruiter_id' => $isRecruiterDashboard ? null : $selectedRecruiterId,
+                                        'client_id' => $selectedClientId,
+                                    ])) }}" class="btn btn-outline-primary" title="Remove selected date" aria-label="Remove selected date">
+                                        <i class="ri-calendar-close-line"></i>
+                                    </a>
+                                @endif
+                                <a href="{{ route('admin.dashboard') }}" class="btn btn-light" title="Clear all filters" aria-label="Clear all filters">
+                                    <i class="ri-refresh-line"></i>
+                                </a>
+                            </div>
+                        </form>
                     </div>
-                @endunless
+                </div>
 
                 @unless ($recruiterLinked)
                     <div class="alert alert-warning border-0 shadow-sm"><i class="ri-alert-line me-2"></i>Your login email is
@@ -424,7 +489,7 @@
 
                 <div class="row g-3 mb-4">
                     @can('read', \App\Models\ClientRequirement::class)
-                        <div class="col-6 col-xl-2">
+                        <div class="col-6 col-xl-3">
                             <div class="card metric-card requirements-card">
                                 <div class="card-body p-3 p-lg-4">
                                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
@@ -452,60 +517,61 @@
                         </div>
                     @endcan
                     @can('read', \App\Models\Candidate::class)
-                        <div class="col-6 col-xl-2">
+                        <div class="col-6 col-xl-3">
                             <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Applicants</div>
-                                        <div class="metric-value">{{ number_format($myApplicants) }}</div>
+                                <div class="card-body p-3 p-lg-4">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                                        <div class="metric-label">Candidate Status</div>
+                                        <div class="metric-icon bg-primary-subtle text-primary">
+                                            <i class="ri-team-line"></i>
+                                        </div>
                                     </div>
-                                    <div class="metric-icon bg-primary-subtle text-primary"><i class="ri-team-line"></i></div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="border rounded-3 bg-light p-2 h-100">
+                                                <div class="small text-muted mb-1">Applicants</div>
+                                                <div class="metric-value">{{ number_format($myApplicants ?? 0) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="border rounded-3 bg-light p-2 h-100">
+                                                <div class="small text-muted mb-1">Onboarded</div>
+                                                <div class="metric-value">{{ number_format($onboarded ?? 0) }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-6 col-xl-3">
                             <div class="card metric-card">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="card-body p-3 p-lg-4">
+                                    <div class="interview-summary">
                                         <div>
-                                            <div class="metric-label">Interviews</div>
-                                            <div class="metric-value">
-                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7,8,11,12,23,25,27,28])->count()) }}
-                                            </div>
+                                            <div class="metric-label mb-2">Interviews</div>
+                                            <div class="metric-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8, 11, 12, 23, 25, 27, 28])->count()) }}</div>
                                         </div>
-
                                         <div class="metric-icon bg-warning-subtle text-warning">
                                             <i class="ri-calendar-event-line"></i>
                                         </div>
                                     </div>
 
-                                    <div class="row g-2 text-center">
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L1</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [7,8])->count() ?? 0 }}</strong>
-                                            </div>
+                                    <div class="interview-stats">
+                                        <div class="interview-stat">
+                                            <span class="interview-stat-label">L1</span>
+                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8])->count()) }}</div>
                                         </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L2</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [11,12])->count() ?? 0 }}</strong>
-                                            </div>
+                                        <div class="interview-stat">
+                                            <span class="interview-stat-label">L2</span>
+                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [11, 12])->count()) }}</div>
                                         </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L3</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [23,25])->count() ?? 0 }}</strong>
-                                            </div>
+                                        <div class="interview-stat">
+                                            <span class="interview-stat-label">L3</span>
+                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [23, 25])->count()) }}</div>
                                         </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L4</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [27,28])->count() ?? 0 }}</strong>
-                                            </div>
+                                        <div class="interview-stat">
+                                            <span class="interview-stat-label">L4</span>
+                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [27, 28])->count()) }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -533,18 +599,6 @@
                                                 <div class="metric-value">{{ number_format($hrSelected ?? 0) }}</div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-xl-2">
-                            <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Onboarded</div>
-                                        <div class="metric-value">{{ number_format($onboarded) }}</div>
-                                    </div>
-                                    <div class="metric-icon bg-success-subtle text-success"><i class="ri-user-add-line"></i>
                                     </div>
                                 </div>
                             </div>
@@ -625,7 +679,7 @@
                                 @php
                                     $percentageColor = $kpi['percentage'] > 80
                                         ? 'percentage-green'
-                                        : ($kpi['percentage'] >= 60 ? 'percentage-yellow' : 'percentage-red');
+                                        : ($kpi['percentage'] >= 60 ? 'percentage-blue' : 'percentage-red');
                                 @endphp
                                 <div class="col-md-6 col-xl-{{ $loop->last ? '6' : '4' }}">
                                     <div class="kpi-card">
