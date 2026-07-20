@@ -420,7 +420,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-xl-2">
+                        <div class="col-6 col-xl-3">
                             <div class="card metric-card">
                                 <div class="card-body p-4 d-flex justify-content-between">
                                     <div>
