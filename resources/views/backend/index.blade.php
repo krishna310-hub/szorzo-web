@@ -81,6 +81,59 @@
             font-weight: 700;
         }
 
+        .requirements-card {
+            position: relative;
+            background: linear-gradient(145deg, #ffffff 0%, #fff7f7 100%);
+        }
+
+        .requirements-card:before {
+            content: '';
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            background: linear-gradient(180deg, #ef4444, #991b1b);
+        }
+
+        .requirement-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .requirement-stat {
+            min-width: 0;
+            padding: 10px;
+            border: 1px solid #fee2e2;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .8);
+        }
+
+        .requirement-stat-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+            color: #64748b;
+            font-size: .7rem;
+            font-weight: 700;
+        }
+
+        .requirement-status-dot {
+            width: 7px;
+            height: 7px;
+            flex: 0 0 7px;
+            border-radius: 50%;
+        }
+
+        .requirement-stat-value {
+            overflow: hidden;
+            color: #111827;
+            font-size: 1.35rem;
+            font-weight: 800;
+            line-height: 1;
+            text-overflow: ellipsis;
+        }
+
         .section-title {
             font-weight: 800;
             color: #172033;
@@ -178,6 +231,30 @@
             height: 100%;
             border-radius: inherit;
             background: linear-gradient(90deg, #991b1b, #ef4444);
+        }
+
+        .individual-target-summary-value.percentage-green {
+            color: #15803d;
+        }
+
+        .individual-target-summary-value.percentage-yellow {
+            color: #ca8a04;
+        }
+
+        .individual-target-summary-value.percentage-red {
+            color: #dc2626;
+        }
+
+        .target-progress-bar.percentage-green {
+            background: linear-gradient(90deg, #16a34a, #22c55e);
+        }
+
+        .target-progress-bar.percentage-yellow {
+            background: linear-gradient(90deg, #eab308, #facc15);
+        }
+
+        .target-progress-bar.percentage-red {
+            background: linear-gradient(90deg, #dc2626, #ef4444);
         }
 
         .individual-target-summary-value {
@@ -348,13 +425,27 @@
                 <div class="row g-3 mb-4">
                     @can('read', \App\Models\ClientRequirement::class)
                         <div class="col-6 col-xl-2">
-                            <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Active Requirements</div>
-                                        <div class="metric-value">{{ number_format($activeRequirements) }}</div>
+                            <div class="card metric-card requirements-card">
+                                <div class="card-body p-3 p-lg-4">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                                        <div class="metric-label">Requirements</div>
+                                        <div class="metric-icon bg-danger-subtle text-danger">
+                                            <i class="ri-briefcase-4-line"></i>
+                                        </div>
                                     </div>
-                                    <div class="metric-icon bg-danger-subtle text-danger"><i class="ri-briefcase-4-line"></i>
+                                    <div class="requirement-stats">
+                                        <div class="requirement-stat">
+                                            <div class="requirement-stat-label">
+                                                <span class="requirement-status-dot bg-success"></span>Active
+                                            </div>
+                                            <div class="requirement-stat-value">{{ number_format($activeRequirements ?? 0) }}</div>
+                                        </div>
+                                        <div class="requirement-stat">
+                                            <div class="requirement-stat-label">
+                                                <span class="requirement-status-dot bg-secondary"></span>Inactive
+                                            </div>
+                                            <div class="requirement-stat-value">{{ number_format($inActiveRequirements ?? 0) }}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -422,12 +513,26 @@
                         </div>
                         <div class="col-6 col-xl-3">
                             <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Offered</div>
-                                        <div class="metric-value">{{ number_format($offered) }}</div>
+                                <div class="card-body p-3 p-lg-4">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                                        <div class="metric-label">Offer Status</div>
+                                        <div class="metric-icon bg-success-subtle text-success">
+                                            <i class="ri-user-follow-line"></i>
+                                        </div>
                                     </div>
-                                    <div class="metric-icon bg-success-subtle text-success"><i class="ri-user-follow-line"></i>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="border rounded-3 bg-light p-2 h-100">
+                                                <div class="small text-muted mb-1">Offered</div>
+                                                <div class="metric-value">{{ number_format($offered ?? 0) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="border rounded-3 bg-light p-2 h-100">
+                                                <div class="small text-muted mb-1">HR Selected</div>
+                                                <div class="metric-value">{{ number_format($hrSelected ?? 0) }}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -517,6 +622,11 @@
 
                         <div class="row g-3">
                             @foreach ($monthlyKpis as $kpi)
+                                @php
+                                    $percentageColor = $kpi['percentage'] > 80
+                                        ? 'percentage-green'
+                                        : ($kpi['percentage'] >= 60 ? 'percentage-yellow' : 'percentage-red');
+                                @endphp
                                 <div class="col-md-6 col-xl-{{ $loop->last ? '6' : '4' }}">
                                     <div class="kpi-card">
                                         <div class="d-flex justify-content-between gap-3 mb-3">
@@ -526,8 +636,8 @@
                                             </div>
                                             <div class="text-end"><strong class="text-dark">{{ $kpi['target'] }}</strong><small class="d-block text-muted">{{ $kpi['unit'] }}</small></div>
                                         </div>
-                                        <div class="d-flex justify-content-between small mb-2"><span class="text-muted">Completed: {{ number_format($kpi['completed']) }}</span><strong class="individual-target-summary-value">{{ $kpi['percentage'] }}%</strong></div>
-                                        <div class="target-progress"><div class="target-progress-bar" style="width:{{ $kpi['percentage'] }}%"></div></div>
+                                        <div class="d-flex justify-content-between small mb-2"><span class="text-muted">Completed: {{ number_format($kpi['completed']) }}</span><strong class="individual-target-summary-value {{ $percentageColor }}">{{ $kpi['percentage'] }}%</strong></div>
+                                        <div class="target-progress"><div class="target-progress-bar {{ $percentageColor }}" style="width:{{ $kpi['percentage'] }}%"></div></div>
                                     </div>
                                 </div>
                             @endforeach
@@ -657,18 +767,33 @@
                                 <div class="card-body p-4">
                                     <h5 class="section-title mb-1">Interview Pipeline</h5>
                                     <p class="text-muted small mb-4">Level-wise interview activity</p>
-                                    @php($maxLevel = max(1, (int) $interviewLevels->max('total')))
-                                    @forelse($interviewLevels as $level)
-                                        <div class="pipeline-row"><span class="small fw-semibold text-truncate"
-                                                title="{{ $level->level }}">{{ $level->level }}</span>
+                                    @php
+                                        $maxLevel = max(1, (int) $candidateLevels->max('candidates_count'));
+                                    @endphp
+                                    @forelse($candidateLevels as $level)
+                                        @php
+                                            $levelTotal = (int) $level->candidates_count;
+                                            $percentage = round(($levelTotal / $maxLevel) * 100);
+                                        @endphp
+
+                                        <div class="pipeline-row">
+                                            <span class="small fw-semibold text-truncate"
+                                                title="{{ $level->level }}">
+                                                {{ $level->level }}
+                                            </span>
+
                                             <div class="pipeline-track">
                                                 <div class="pipeline-fill"
-                                                    style="width:{{ round(($level->total / $maxLevel) * 100) }}%"></div>
-                                            </div><strong>{{ $level->total }}</strong>
+                                                    style="width: {{ $percentage }}%">
+                                                </div>
+                                            </div>
+
+                                            <strong>{{ number_format($levelTotal) }}</strong>
                                         </div>
                                     @empty
-                                        <div class="text-center text-muted py-5"><i
-                                                class="ri-bar-chart-grouped-line fs-1 d-block mb-2"></i>No interview data yet
+                                        <div class="text-center text-muted py-5">
+                                            <i class="ri-bar-chart-grouped-line fs-1 d-block mb-2"></i>
+                                            No candidate data yet
                                         </div>
                                     @endforelse
                                     <div class="row g-2 mt-3 pt-3 border-top text-center">

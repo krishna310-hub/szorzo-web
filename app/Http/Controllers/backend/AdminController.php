@@ -7,6 +7,7 @@ use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\ClientRequirement;
 use App\Models\General;
+use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
 use App\Models\Recruiter;
 use App\Models\User;
@@ -57,12 +58,16 @@ class AdminController extends Controller
                     ->orWhereHas('candidate', fn ($candidate) => $candidate->where('client_id', $selectedClientId));
             }));
 
-        $interviewLevels = (clone $interviews)
-            ->join('level_of_interviews', 'level_of_interviews.id', '=', 'interview_schedules.level_of_interview_id')
-            ->selectRaw('level_of_interviews.level, COUNT(*) as total')
-            ->groupBy('level_of_interviews.id', 'level_of_interviews.level', 'level_of_interviews.sort_order')
-            ->orderBy('level_of_interviews.sort_order')
+        $candidateLevels = InterviewLevel::query()
+            ->has('candidates')
+            ->withCount('candidates')
+            ->orderBy('sort_order')
             ->get();
+
+        $maxLevel = max(
+            (int) $candidateLevels->max('candidates_count'),
+            1
+        );
 
         $monthly = (clone $candidates)
             ->where('candidates.created_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -102,13 +107,15 @@ class AdminController extends Controller
             'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
             'recruiterPerformance' => $recruiterPerformance,
             'activeRequirements' => (clone $requirements)->where('status', true)->sum('number_of_position'),
+            'inActiveRequirements' => (clone $requirements)->where('status', false)->sum('number_of_position'),
             'myApplicants' => (clone $candidates)->count(),
             'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
             'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),
             'offered' => (clone $interviews)->where('level_of_interview_id', 30)->count(),
+            'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
             'onboarded' => (clone $interviews)->where('level_of_interview_id', 20)->count(),
             'revenue' => (clone $requirements)->sum('revenue_amount'),
-            'interviewLevels' => $interviewLevels,
+            'candidateLevels' => $candidateLevels,
             'chartMonths' => $months->map->format('M')->values(),
             'chartApplicants' => $months->map(fn ($month) => (int) ($monthly[$month->format('Y-m')] ?? 0))->values(),
             'upcomingInterviews' => (clone $interviews)->with(['candidate', 'client', 'interviewLevel'])
