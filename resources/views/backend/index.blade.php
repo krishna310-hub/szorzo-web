@@ -379,7 +379,7 @@
                                         <div>
                                             <div class="metric-label">Interviews</div>
                                             <div class="metric-value">
-                                                {{ number_format($scheduledInterviews->count()) }}
+                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7,8,11,12,23,25,27,28])->count()) }}
                                             </div>
                                         </div>
 
