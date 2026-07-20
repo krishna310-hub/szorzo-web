@@ -533,11 +533,11 @@
                             @endforeach
                         </div>
 
-                        @if ($isSuperAdminDashboard)
+                        @if ($isSuperAdminDashboard || $isDeliveryLeadDashboard)
                             <div class="mt-4 pt-4 border-top">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                     <div><h6 class="section-title mb-1">All Roles Performance</h6><span class="text-muted small">Role-wise monthly target completion</span></div>
-                                    <span class="badge bg-light text-dark">Super Admin view</span>
+                                    <span class="badge bg-light text-dark">{{ $isDeliveryLeadDashboard ? 'Recruiter-DL view' : 'Super Admin view' }}</span>
                                 </div>
                                 <div class="role-performance-row">
                                     <div class="d-flex align-items-center gap-2"><div class="role-avatar">DL</div><div><div class="fw-semibold text-dark">Recruiter - DL</div><small class="text-muted">Delivery leadership</small></div></div>
