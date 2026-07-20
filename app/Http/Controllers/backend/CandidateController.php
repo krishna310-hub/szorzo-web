@@ -14,6 +14,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
@@ -122,7 +123,7 @@ class CandidateController extends Controller
 
         $candidate = Candidate::findOrFail($id);
 
-        $data = $this->validatedData($request);
+        $data = $this->validatedData($request, $candidate);
 
         if ($request->hasFile('upload_cv')) {
 
@@ -223,6 +224,8 @@ class CandidateController extends Controller
 
         $validRows = [];
         $errors = [];
+        $seenMobiles = [];
+        $seenEmails = [];
 
         foreach ($rows as $index => $row) {
             $number = $index + 2;
@@ -241,8 +244,12 @@ class CandidateController extends Controller
                 'client_id' => MasterDataSpreadsheet::lookup(Client::class, 'client', $client),
                 'job_role_id' => MasterDataSpreadsheet::lookup(JobRole::class, 'job_role', $jobRole),
                 'candidate_name' => trim((string) ($row['candidate_name'] ?? '')),
-                'mobile_no' => MasterDataSpreadsheet::text($row['mobile_no'] ?? null),
-                'email' => MasterDataSpreadsheet::text($row['email'] ?? null),
+                'mobile_no' => ($mobile = MasterDataSpreadsheet::text($row['mobile_no'] ?? null)) !== null
+                    ? trim($mobile)
+                    : null,
+                'email' => ($email = MasterDataSpreadsheet::text($row['email'] ?? null)) !== null
+                    ? strtolower(trim($email))
+                    : null,
                 'qualification' => MasterDataSpreadsheet::text($row['qualification'] ?? null),
                 'total_experience' => $row['total_experience'] ?? null,
                 'relevant_experience' => $row['relevant_experience'] ?? null,
@@ -265,8 +272,18 @@ class CandidateController extends Controller
                 'client_id' => 'nullable|exists:clients,id',
                 'job_role_id' => 'nullable|exists:job_roles,id',
                 'candidate_name' => 'required|string|max:255',
-                'mobile_no' => 'nullable|string|max:30',
-                'email' => 'nullable|email|max:255',
+                'mobile_no' => [
+                    'nullable',
+                    'string',
+                    'max:30',
+                    Rule::unique('candidates', 'mobile_no')->ignore((int) $data['id'])->whereNull('deleted_at'),
+                ],
+                'email' => [
+                    'nullable',
+                    'email',
+                    'max:255',
+                    Rule::unique('candidates', 'email')->ignore((int) $data['id'])->whereNull('deleted_at'),
+                ],
                 'qualification' => 'nullable|string|max:255',
                 'total_experience' => 'nullable|numeric|min:0',
                 'relevant_experience' => 'nullable|numeric|min:0',
@@ -283,7 +300,15 @@ class CandidateController extends Controller
                 'status' => 'required|in:0,1',
             ]);
 
-            $validator->after(function ($validator) use ($recruiter, $client, $jobRole, $interviewLevel, $data) {
+            $validator->after(function ($validator) use (
+                $recruiter,
+                $client,
+                $jobRole,
+                $interviewLevel,
+                $data,
+                &$seenMobiles,
+                &$seenEmails
+            ) {
                 $lookups = [
                     ['value' => $recruiter, 'id' => $data['recruiter_id'], 'label' => 'Recruiter'],
                     ['value' => $client, 'id' => $data['client_id'], 'label' => 'Client'],
@@ -296,12 +321,28 @@ class CandidateController extends Controller
                         $validator->errors()->add('lookup', $lookup['label'].' "'.$lookup['value'].'" was not found.');
                     }
                 }
+
+                if ($data['mobile_no'] && isset($seenMobiles[$data['mobile_no']])) {
+                    $validator->errors()->add('mobile_no', 'The mobile number is duplicated in the import file.');
+                }
+
+                if ($data['email'] && isset($seenEmails[$data['email']])) {
+                    $validator->errors()->add('email', 'The email address is duplicated in the import file.');
+                }
             });
 
             if ($validator->fails()) {
                 $errors[] = 'Row '.$number.': '.implode(', ', $validator->errors()->all());
             } else {
                 $validRows[] = $data;
+
+                if ($data['mobile_no']) {
+                    $seenMobiles[$data['mobile_no']] = true;
+                }
+
+                if ($data['email']) {
+                    $seenEmails[$data['email']] = true;
+                }
             }
         }
 
@@ -345,15 +386,30 @@ class CandidateController extends Controller
             });
     }
 
-    private function validatedData(Request $request): array
+    private function validatedData(Request $request, ?Candidate $candidate = null): array
     {
+        $request->merge([
+            'mobile_no' => $request->filled('mobile_no') ? trim((string) $request->mobile_no) : null,
+            'email' => $request->filled('email') ? strtolower(trim((string) $request->email)) : null,
+        ]);
+
         return $request->validate([
             'recruiter_id' => 'nullable|exists:recruiters,id',
             'client_id' => 'nullable|exists:clients,id',
             'job_role_id' => 'nullable|exists:job_roles,id',
             'candidate_name' => 'required|string|max:255',
-            'mobile_no' => 'nullable|string|max:30',
-            'email' => 'nullable|email|max:255',
+            'mobile_no' => [
+                'nullable',
+                'string',
+                'max:30',
+                Rule::unique('candidates', 'mobile_no')->ignore($candidate?->id)->whereNull('deleted_at'),
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                Rule::unique('candidates', 'email')->ignore($candidate?->id)->whereNull('deleted_at'),
+            ],
             'qualification' => 'nullable|string|max:255',
             'total_experience' => 'nullable|numeric|min:0',
             'relevant_experience' => 'nullable|numeric|min:0',
@@ -369,6 +425,9 @@ class CandidateController extends Controller
             'level_of_interview_id' => 'nullable|exists:level_of_interviews,id',
             'upload_cv' => 'nullable|mimes:pdf,doc,docx|max:2048',
             'status' => 'required|in:0,1',
+        ], [
+            'mobile_no.unique' => 'This mobile number is already registered for another candidate.',
+            'email.unique' => 'This email address is already registered for another candidate.',
         ]);
     }
 
