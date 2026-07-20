@@ -853,7 +853,7 @@
                         </div>
                     </div>
                 @endif
-                <div class="row g-4">
+                <div class="row g-4 mb-4">
                     @can('read', \App\Models\Candidate::class)
                         <div class="col-12">
                             <div class="card panel-card">
@@ -940,7 +940,7 @@
                         </div>
                     @endcan --}}
                 </div>
-                <div class="row g-4 mb-4">
+                <div class="row g-4">
                     @can('read', \App\Models\Candidate::class)
                         <div class="col-xl-8">
                             <div class="card panel-card">
