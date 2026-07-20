@@ -183,12 +183,44 @@
             color: #172033;
         }
 
-        .pipeline-row {
+        .pipeline-grid {
             display: grid;
-            grid-template-columns: minmax(90px, 1fr) 4fr 45px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .pipeline-item {
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
+        }
+
+        .pipeline-item-header {
+            display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 12px;
-            margin-bottom: 17px;
+            margin-bottom: 12px;
+        }
+
+        .pipeline-item-label {
+            min-width: 0;
+            overflow: hidden;
+            color: #334155;
+            font-size: .82rem;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .pipeline-item-value {
+            flex: 0 0 auto;
+            color: #111827;
+            font-size: 1.2rem;
+            font-weight: 800;
+            line-height: 1;
         }
 
         .pipeline-track {
@@ -202,6 +234,22 @@
             height: 100%;
             border-radius: 20px;
             background: linear-gradient(90deg, #ef4444, #7f1d1d);
+        }
+
+        .pipeline-empty {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 991.98px) {
+            .pipeline-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .pipeline-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .interview-item {
@@ -384,10 +432,6 @@
         @media (max-width: 576px) {
             .dashboard-hero {
                 border-radius: 16px;
-            }
-
-            .pipeline-row {
-                grid-template-columns: 80px 1fr 35px;
             }
 
             .role-performance-row {
@@ -809,23 +853,9 @@
                         </div>
                     </div>
                 @endif
-
-                <div class="row g-4 mb-4">
+                <div class="row g-4">
                     @can('read', \App\Models\Candidate::class)
-                        <div class="col-xl-8">
-                            <div class="card panel-card">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <h5 class="section-title mb-1">Applicant Momentum</h5><span
-                                                class="text-muted small">New applicants over the last six months</span>
-                                        </div><span class="badge bg-danger-subtle text-danger">Live</span>
-                                    </div>
-                                    <div id="applicantChart" style="min-height:310px"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-4">
+                        <div class="col-12">
                             <div class="card panel-card">
                                 <div class="card-body p-4">
                                     <h5 class="section-title mb-1">Interview Pipeline</h5>
@@ -833,32 +863,33 @@
                                     @php
                                         $maxLevel = max(1, (int) $candidateLevels->max('candidates_count'));
                                     @endphp
-                                    @forelse($candidateLevels as $level)
-                                        @php
-                                            $levelTotal = (int) $level->candidates_count;
-                                            $percentage = round(($levelTotal / $maxLevel) * 100);
-                                        @endphp
+                                    <div class="pipeline-grid">
+                                        @forelse($candidateLevels as $level)
+                                            @php
+                                                $levelTotal = (int) $level->candidates_count;
+                                                $percentage = round(($levelTotal / $maxLevel) * 100);
+                                            @endphp
 
-                                        <div class="pipeline-row">
-                                            <span class="small fw-semibold text-truncate"
-                                                title="{{ $level->level }}">
-                                                {{ $level->level }}
-                                            </span>
-
-                                            <div class="pipeline-track">
-                                                <div class="pipeline-fill"
-                                                    style="width: {{ $percentage }}%">
+                                            <div class="pipeline-item">
+                                                <div class="pipeline-item-header">
+                                                    <span class="pipeline-item-label" title="{{ $level->level }}">
+                                                        {{ $level->level }}
+                                                    </span>
+                                                    <span class="pipeline-item-value">{{ number_format($levelTotal) }}</span>
+                                                </div>
+                                                <div class="pipeline-track" role="progressbar"
+                                                    aria-label="{{ $level->level }}"
+                                                    aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                                    <div class="pipeline-fill" style="width: {{ $percentage }}%"></div>
                                                 </div>
                                             </div>
-
-                                            <strong>{{ number_format($levelTotal) }}</strong>
-                                        </div>
-                                    @empty
-                                        <div class="text-center text-muted py-5">
-                                            <i class="ri-bar-chart-grouped-line fs-1 d-block mb-2"></i>
-                                            No candidate data yet
-                                        </div>
-                                    @endforelse
+                                        @empty
+                                            <div class="pipeline-empty text-center text-muted py-5">
+                                                <i class="ri-bar-chart-grouped-line fs-1 d-block mb-2"></i>
+                                                No candidate data yet
+                                            </div>
+                                        @endforelse
+                                    </div>
                                     <div class="row g-2 mt-3 pt-3 border-top text-center">
                                         <div class="col-6">
                                             <div class="fw-bold fs-4">{{ $yetToOffer }}</div><small class="text-muted">Yet to
@@ -869,26 +900,6 @@
                                                 class="text-muted">Offered</small>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endcan
-                </div>
-
-                <div class="row g-4">
-                    @can('read', \App\Models\ClientRequirement::class)
-                        <div class="col-xl-4">
-                            <div class="card panel-card">
-                                <div class="card-body p-4">
-                                    <h5 class="section-title">Revenue Overview</h5>
-                                    <p class="text-muted small">Revenue recorded on visible requirements</p>
-                                    <div class="py-4">
-                                        <div class="metric-label mb-2">Total Pipeline Revenue</div>
-                                        <div class="display-6 fw-bold text-dark">&#8377;{{ number_format($revenue, 2) }}</div>
-                                    </div>
-                                    <div class="rounded-4 bg-danger-subtle text-danger p-3 small"><i
-                                            class="ri-information-line me-1"></i> Values follow your role-based requirement
-                                        access.</div>
                                 </div>
                             </div>
                         </div>
@@ -928,6 +939,38 @@
                             </div>
                         </div>
                     @endcan --}}
+                </div>
+                <div class="row g-4 mb-4">
+                    @can('read', \App\Models\Candidate::class)
+                        <div class="col-xl-8">
+                            <div class="card panel-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <h5 class="section-title mb-1">Applicant Momentum</h5><span
+                                                class="text-muted small">New applicants over the last six months</span>
+                                        </div><span class="badge bg-danger-subtle text-danger">Live</span>
+                                    </div>
+                                    <div id="applicantChart" style="min-height:310px"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="card panel-card">
+                                <div class="card-body p-4">
+                                    <h5 class="section-title">Revenue Overview</h5>
+                                    <p class="text-muted small">Revenue recorded on visible requirements</p>
+                                    <div class="py-4">
+                                        <div class="metric-label mb-2">Total Pipeline Revenue</div>
+                                        <div class="display-6 fw-bold text-dark">&#8377;{{ number_format($revenue, 2) }}</div>
+                                    </div>
+                                    <div class="rounded-4 bg-danger-subtle text-danger p-3 small"><i
+                                            class="ri-information-line me-1"></i> Values follow your role-based requirement
+                                        access.</div>
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
                 </div>
             </div>
         </div>
