@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InterviewLevel extends Model
@@ -20,4 +21,9 @@ class InterviewLevel extends Model
     protected $casts = [
         'status' => 'boolean',
     ];
+
+    public function candidates(): HasMany
+    {
+        return $this->hasMany(Candidate::class, 'level_of_interview_id');
+    }
 }

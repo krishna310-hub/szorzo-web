@@ -7,6 +7,7 @@ use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\ClientRequirement;
 use App\Models\General;
+use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
 use App\Models\Recruiter;
 use App\Models\User;
@@ -57,12 +58,16 @@ class AdminController extends Controller
                     ->orWhereHas('candidate', fn ($candidate) => $candidate->where('client_id', $selectedClientId));
             }));
 
-        $interviewLevels = (clone $interviews)
-            ->join('level_of_interviews', 'level_of_interviews.id', '=', 'interview_schedules.level_of_interview_id')
-            ->selectRaw('level_of_interviews.level, COUNT(*) as total')
-            ->groupBy('level_of_interviews.id', 'level_of_interviews.level', 'level_of_interviews.sort_order')
-            ->orderBy('level_of_interviews.sort_order')
+        $candidateLevels = InterviewLevel::query()
+            ->has('candidates')
+            ->withCount('candidates')
+            ->orderBy('sort_order')
             ->get();
+
+        $maxLevel = max(
+            (int) $candidateLevels->max('candidates_count'),
+            1
+        );
 
         $monthly = (clone $candidates)
             ->where('candidates.created_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -102,13 +107,15 @@ class AdminController extends Controller
             'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
             'recruiterPerformance' => $recruiterPerformance,
             'activeRequirements' => (clone $requirements)->where('status', true)->sum('number_of_position'),
+            'inActiveRequirements' => (clone $requirements)->where('status', false)->sum('number_of_position'),
             'myApplicants' => (clone $candidates)->count(),
             'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
             'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),
-            'offered' => (clone $interviews)->where('status', 'selected')->count(),
-            'onboarded' => (clone $interviews)->where('status', 'selected')->count(),
+            'offered' => (clone $interviews)->where('level_of_interview_id', 30)->count(),
+            'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
+            'onboarded' => (clone $interviews)->where('level_of_interview_id', 20)->count(),
             'revenue' => (clone $requirements)->sum('revenue_amount'),
-            'interviewLevels' => $interviewLevels,
+            'candidateLevels' => $candidateLevels,
             'chartMonths' => $months->map->format('M')->values(),
             'chartApplicants' => $months->map(fn ($month) => (int) ($monthly[$month->format('Y-m')] ?? 0))->values(),
             'upcomingInterviews' => (clone $interviews)->with(['candidate', 'client', 'interviewLevel'])
@@ -123,23 +130,32 @@ class AdminController extends Controller
         $monthlyCandidates = (clone $candidates)->whereBetween('candidates.created_at', [$monthStart, $monthEnd]);
         $monthlyInterviews = (clone $interviews)->whereBetween('interview_schedules.schedule_date', [$monthStart, $monthEnd]);
 
+        // Fixed IDs from the Level of Interviews master.
+        $screenRejectId = 4;
+        $interviewLevelIds = [7, 8, 9, 10, 11, 12, 13, 23, 24, 25, 27, 28, 29];
+        $hrSelectId = 15;
+        $offerReleasedIds = [22, 30];
+        $offerAcceptedId = 30;
+        $onboardedId = 20;
+
         $definitions = [
             ['label' => 'CV Submission', 'min' => 100, 'max' => 200, 'unit' => 'CVs', 'icon' => 'ri-file-search-line',
                 'completed' => (clone $monthlyCandidates)->count()],
             ['label' => 'Candidate Shortlisting', 'min' => 80, 'max' => 120, 'unit' => 'CVs', 'icon' => 'ri-user-search-line',
-                'completed' => (clone $monthlyCandidates)->whereNotNull('level_of_interview_id')->count()],
+                'completed' => (clone $monthlyCandidates)->where(function ($query) use ($screenRejectId) {
+                    $query->whereNull('level_of_interview_id')
+                        ->orWhere('level_of_interview_id', '!=', $screenRejectId);
+                })->count()],
             ['label' => 'Interviews', 'min' => 60, 'max' => 80, 'unit' => 'rounds', 'icon' => 'ri-calendar-check-line',
-                'completed' => (clone $monthlyInterviews)->count()],
+                'completed' => (clone $monthlyInterviews)->whereIn('level_of_interview_id', $interviewLevelIds)->count()],
             ['label' => 'HR Select', 'min' => 45, 'max' => 65, 'unit' => 'screenings', 'icon' => 'ri-survey-line',
-                'completed' => (clone $monthlyInterviews)->whereHas('interviewLevel', fn ($query) => $query->where('level', 'like', '%HR%'))->count()],
+                'completed' => (clone $monthlyInterviews)->where('level_of_interview_id', $hrSelectId)->count()],
             ['label' => 'Offers Released', 'min' => 10, 'max' => 15, 'unit' => 'offers', 'icon' => 'ri-draft-line',
-                'completed' => (clone $monthlyInterviews)->whereHas('interviewLevel', fn ($query) => $query->where('level', 'like', '%offer%'))->distinct('candidate_id')->count('candidate_id')],
+                'completed' => (clone $monthlyInterviews)->whereIn('level_of_interview_id', $offerReleasedIds)->distinct('candidate_id')->count('candidate_id')],
             ['label' => 'Offer Acceptance', 'min' => 8, 'max' => 12, 'unit' => 'acceptances', 'icon' => 'ri-user-follow-line',
-                'completed' => (clone $monthlyInterviews)->where('status', 'selected')->distinct('candidate_id')->count('candidate_id')],
+                'completed' => (clone $monthlyInterviews)->where('level_of_interview_id', $offerAcceptedId)->distinct('candidate_id')->count('candidate_id')],
             ['label' => 'Onboarding', 'min' => 8, 'max' => 10, 'unit' => 'joiners', 'icon' => 'ri-team-line',
-                'completed' => (clone $monthlyInterviews)->whereHas('interviewLevel', fn ($query) => $query->where(function ($level) {
-                    $level->where('level', 'like', '%onboard%')->orWhere('level', 'like', '%join%');
-                }))->distinct('candidate_id')->count('candidate_id')],
+                'completed' => (clone $monthlyInterviews)->where('level_of_interview_id', $onboardedId)->distinct('candidate_id')->count('candidate_id')],
         ];
 
         $kpis = collect($definitions)->map(function (array $kpi) use ($targetMultiplier) {
