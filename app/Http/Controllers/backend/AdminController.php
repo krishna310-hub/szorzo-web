@@ -109,7 +109,7 @@ class AdminController extends Controller
             ->get();
 
         $levelGroups = [
-            'Sourcing' => [
+            'Sourcing Stage' => [
                 'CV Shared to DL',
                 'Internal Duplicate',
                 'Profile Feedback Pending',
@@ -117,7 +117,7 @@ class AdminController extends Controller
                 'Screen Select',
                 'Screen Reject',
             ],
-            'Interview' => [
+            'Interview Stage' => [
                 'L1 Scheduled',
                 'L1 Select',
                 'L1 Reject',
@@ -135,7 +135,7 @@ class AdminController extends Controller
                 'L4 Reject',
                 'L4 Re-Schedule',
             ],
-            'Offer' => [
+            'Offer Stage' => [
                 'HR Discussion Pending',
                 'HR Select',
                 'HR Reject',
@@ -143,7 +143,7 @@ class AdminController extends Controller
                 'Offer Accepted',
                 'Offer Declined',
             ],
-            'Onboarding' => [
+            'Onboarding Stage' => [
                 'Onboarded with Client',
                 'Joiner Declined',
                 'Position Hold',
@@ -217,8 +217,8 @@ class AdminController extends Controller
             'monthlyTargetAnalytics' => $monthlyKpis,
             'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
             'recruiterPerformance' => $recruiterPerformance,
-            'activeRequirements' => (clone $requirements)->where('status', true)->sum('number_of_position'),
-            'inActiveRequirements' => (clone $requirements)->where('status', false)->sum('number_of_position'),
+            'activeRequirements' => (clone $requirements)->where('status', true)->count(),
+            'inActiveRequirements' => (clone $requirements)->where('status', false)->count(),
             'myApplicants' => (clone $candidates)->count(),
             'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
             'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),

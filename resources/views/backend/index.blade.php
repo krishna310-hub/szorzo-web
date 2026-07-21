@@ -193,7 +193,7 @@
 
         .pipeline-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 14px;
         }
 
@@ -455,13 +455,13 @@
                 display: none;
             }
 
-            .role-performance-row > strong {
+            .role-performance-row>strong {
                 grid-column: 1;
                 grid-row: 3;
                 text-align: left !important;
             }
 
-            .role-performance-row > .btn {
+            .role-performance-row>.btn {
                 grid-column: 2;
                 grid-row: 3;
             }
@@ -489,7 +489,8 @@
                                     <select id="dashboard_recruiter_id" name="recruiter_id" class="form-select">
                                         <option value="">All recruiters</option>
                                         @foreach ($recruiters as $recruiter)
-                                            <option value="{{ $recruiter->id }}" @selected((int) $selectedRecruiterId === $recruiter->id)>{{ $recruiter->recruiter_name }}</option>
+                                            <option value="{{ $recruiter->id }}" @selected((int) $selectedRecruiterId === $recruiter->id)>
+                                                {{ $recruiter->recruiter_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -500,7 +501,8 @@
                                     <select id="dashboard_client_id" name="client_id" class="form-select">
                                         <option value="">All clients</option>
                                         @foreach ($clients as $client)
-                                            <option value="{{ $client->id }}" @selected((int) $selectedClientId === $client->id)>{{ $client->client }}</option>
+                                            <option value="{{ $client->id }}" @selected((int) $selectedClientId === $client->id)>
+                                                {{ $client->client }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -523,19 +525,26 @@
                                     <div class="invalid-feedback">{{ $toDateError }}</div>
                                 @endif
                             </div>
-                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : ($showClientFilter ? '2' : '3') }} d-flex gap-2">
+                            <div
+                                class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : ($showClientFilter ? '2' : '3') }} d-flex gap-2">
                                 <button type="submit" class="btn btn-danger flex-grow-1">
                                     <i class="ri-filter-3-line me-1"></i>Apply
                                 </button>
                                 @if ($selectedFromDate || $selectedToDate)
-                                    <a href="{{ route('admin.dashboard', array_filter([
-                                        'recruiter_id' => $isRecruiterDashboard ? null : $selectedRecruiterId,
-                                        'client_id' => $selectedClientId,
-                                    ])) }}" class="btn btn-outline-primary" title="Remove date range" aria-label="Remove date range">
+                                    <a href="{{ route(
+                                        'admin.dashboard',
+                                        array_filter([
+                                            'recruiter_id' => $isRecruiterDashboard ? null : $selectedRecruiterId,
+                                            'client_id' => $selectedClientId,
+                                        ]),
+                                    ) }}"
+                                        class="btn btn-outline-primary" title="Remove date range"
+                                        aria-label="Remove date range">
                                         <i class="ri-calendar-close-line"></i>
                                     </a>
                                 @endif
-                                <a href="{{ route('admin.dashboard') }}" class="btn btn-light" title="Clear all filters" aria-label="Clear all filters">
+                                <a href="{{ route('admin.dashboard') }}" class="btn btn-light" title="Clear all filters"
+                                    aria-label="Clear all filters">
                                     <i class="ri-refresh-line"></i>
                                 </a>
                             </div>
@@ -556,7 +565,8 @@
                                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
                                         <div class="metric-label">Requirements</div>
                                         <div class="metric-icon">
-                                            <img src="{{ asset('frontend/Images/rhino-logo.png') }}" alt="SZORZO Logo" class="metric-logo">
+                                            <img src="{{ asset('frontend/images/adminlogos.png') }}" alt="SZORZO Logo"
+                                                class="metric-logo">
                                         </div>
                                     </div>
                                     <div class="requirement-stats">
@@ -564,13 +574,15 @@
                                             <div class="requirement-stat-label">
                                                 <span class="requirement-status-dot bg-success"></span>Active
                                             </div>
-                                            <div class="requirement-stat-value">{{ number_format($activeRequirements ?? 0) }}</div>
+                                            <div class="requirement-stat-value">{{ number_format($activeRequirements ?? 0) }}
+                                            </div>
                                         </div>
                                         <div class="requirement-stat">
                                             <div class="requirement-stat-label">
                                                 <span class="requirement-status-dot bg-secondary"></span>Inactive
                                             </div>
-                                            <div class="requirement-stat-value">{{ number_format($inActiveRequirements ?? 0) }}</div>
+                                            <div class="requirement-stat-value">{{ number_format($inActiveRequirements ?? 0) }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -584,7 +596,8 @@
                                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
                                         <div class="metric-label">Candidate Stage</div>
                                         <div class="metric-icon">
-                                            <img src="{{ asset('frontend/Images/rhino-logo.png') }}" alt="SZORZO Logo" class="metric-logo">
+                                            <img src="{{ asset('frontend/images/adminlogos.png') }}" alt="SZORZO Logo"
+                                                class="metric-logo">
                                         </div>
                                     </div>
                                     <div class="row g-2">
@@ -610,29 +623,40 @@
                                     <div class="interview-summary">
                                         <div>
                                             <div class="metric-label mb-2">Interview Stage</div>
-                                            <div class="metric-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8, 11, 12, 23, 25, 27, 28])->count()) }}</div>
+                                            <div class="metric-value">
+                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8, 11, 12, 23, 25, 27, 28])->count()) }}
+                                            </div>
                                         </div>
                                         <div class="metric-icon">
-                                            <img src="{{ asset('frontend/Images/rhino-logo.png') }}" alt="SZORZO Logo" class="metric-logo">
+                                            <img src="{{ asset('frontend/images/adminlogos.png') }}" alt="SZORZO Logo"
+                                                class="metric-logo">
                                         </div>
                                     </div>
 
                                     <div class="interview-stats">
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L1</span>
-                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8])->count()) }}</div>
+                                            <div class="interview-stat-value">
+                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8])->count()) }}
+                                            </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L2</span>
-                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [11, 12])->count()) }}</div>
+                                            <div class="interview-stat-value">
+                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [11, 12])->count()) }}
+                                            </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L3</span>
-                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [23, 25])->count()) }}</div>
+                                            <div class="interview-stat-value">
+                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [23, 25])->count()) }}
+                                            </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L4</span>
-                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [27, 28])->count()) }}</div>
+                                            <div class="interview-stat-value">
+                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [27, 28])->count()) }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -644,7 +668,8 @@
                                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
                                         <div class="metric-label">Offer Stage</div>
                                         <div class="metric-icon">
-                                            <img src="{{ asset('frontend/Images/rhino-logo.png') }}" alt="SZORZO Logo" class="metric-logo">
+                                            <img src="{{ asset('frontend/images/adminlogos.png') }}" alt="SZORZO Logo"
+                                                class="metric-logo">
                                         </div>
                                     </div>
                                     <div class="row g-2">
@@ -677,7 +702,7 @@
                     $individualAnalyticsVisible = $isRecruiterDashboard || (bool) $selectedDashboardRecruiter;
                     $individualAnalyticsName = $isRecruiterDashboard
                         ? auth()->user()->name
-                        : ($selectedDashboardRecruiter?->recruiter_name ?? 'All recruiters');
+                        : $selectedDashboardRecruiter?->recruiter_name ?? 'All recruiters';
                     $monthlyKpis = $monthlyTargetAnalytics['kpis'];
                 @endphp
 
@@ -693,7 +718,7 @@
                                     @if ($isSuperAdminDashboard)
                                         All-role performance visibility for Super Admin
                                     @elseif ($isDeliveryLeadDashboard)
-                                        {{ $selectedDashboardRecruiter ? $selectedDashboardRecruiter->recruiter_name.' target and process completion' : 'Recruiter-DL team target and process completion' }}
+                                        {{ $selectedDashboardRecruiter ? $selectedDashboardRecruiter->recruiter_name . ' target and process completion' : 'Recruiter-DL team target and process completion' }}
                                     @else
                                         Your individual monthly target and process completion
                                     @endif
@@ -738,21 +763,36 @@
                         <div class="row g-3">
                             @foreach ($monthlyKpis as $kpi)
                                 @php
-                                    $percentageColor = $kpi['percentage'] > 80
-                                        ? 'percentage-green'
-                                        : ($kpi['percentage'] >= 60 ? 'percentage-blue' : 'percentage-red');
+                                    $percentageColor =
+                                        $kpi['percentage'] > 80
+                                            ? 'percentage-green'
+                                            : ($kpi['percentage'] >= 60
+                                                ? 'percentage-blue'
+                                                : 'percentage-red');
                                 @endphp
                                 <div class="col-md-6 col-xl-4">
                                     <div class="kpi-card">
                                         <div class="d-flex justify-content-between gap-3 mb-3">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="kpi-icon"><i class="{{ $kpi['icon'] }}"></i></div>
-                                                <div><div class="fw-bold text-dark">{{ $kpi['label'] }}</div><small class="text-muted">Monthly target</small></div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">{{ $kpi['label'] }}</div><small
+                                                        class="text-muted">Monthly target</small>
+                                                </div>
                                             </div>
-                                            <div class="text-end"><strong class="text-dark">{{ $kpi['target'] }}</strong><small class="d-block text-muted">{{ $kpi['unit'] }}</small></div>
+                                            <div class="text-end"><strong
+                                                    class="text-dark">{{ $kpi['target'] }}</strong><small
+                                                    class="d-block text-muted">{{ $kpi['unit'] }}</small></div>
                                         </div>
-                                        <div class="d-flex justify-content-between small mb-2"><span class="text-muted">Completed: {{ number_format($kpi['completed']) }}</span><strong class="individual-target-summary-value {{ $percentageColor }}">{{ $kpi['percentage'] }}%</strong></div>
-                                        <div class="target-progress"><div class="target-progress-bar {{ $percentageColor }}" style="width:{{ $kpi['percentage'] }}%"></div></div>
+                                        <div class="d-flex justify-content-between small mb-2"><span
+                                                class="text-muted">Completed:
+                                                {{ number_format($kpi['completed']) }}</span><strong
+                                                class="individual-target-summary-value {{ $percentageColor }}">{{ $kpi['percentage'] }}%</strong>
+                                        </div>
+                                        <div class="target-progress">
+                                            <div class="target-progress-bar {{ $percentageColor }}"
+                                                style="width:{{ $kpi['percentage'] }}%"></div>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -761,26 +801,60 @@
                         @if ($isSuperAdminDashboard || $isDeliveryLeadDashboard)
                             <div class="mt-4 pt-4 border-top">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                                    <div><h6 class="section-title mb-1">All Roles Performance</h6><span class="text-muted small">Role-wise monthly target completion</span></div>
-                                    <span class="badge bg-light text-dark">{{ $isDeliveryLeadDashboard ? 'Recruiter-DL view' : 'Super Admin view' }}</span>
+                                    <div>
+                                        <h6 class="section-title mb-1">All Roles Performance</h6><span
+                                            class="text-muted small">Role-wise monthly target completion</span>
+                                    </div>
+                                    <span
+                                        class="badge bg-light text-dark">{{ $isDeliveryLeadDashboard ? 'Recruiter-DL view' : 'Super Admin view' }}</span>
                                 </div>
                                 <div class="role-performance-row">
-                                    <div class="d-flex align-items-center gap-2"><div class="role-avatar">DL</div><div><div class="fw-semibold text-dark">Recruiter - DL</div><small class="text-muted">Delivery leadership</small></div></div>
-                                    <div class="role-progress-column"><div class="target-progress"><div class="target-progress-bar" style="width:{{ $deliveryLeadAnalytics['overallPercentage'] }}%"></div></div></div>
-                                    <div class="role-target-column text-muted small">7 KPIs</div><strong class="text-end">{{ $deliveryLeadAnalytics['overallPercentage'] }}%</strong>
-                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-sm {{ $selectedRecruiterId ? 'btn-outline-danger' : 'btn-danger' }}">Overview</a>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="role-avatar">DL</div>
+                                        <div>
+                                            <div class="fw-semibold text-dark">Recruiter - DL</div><small
+                                                class="text-muted">Delivery leadership</small>
+                                        </div>
+                                    </div>
+                                    <div class="role-progress-column">
+                                        <div class="target-progress">
+                                            <div class="target-progress-bar"
+                                                style="width:{{ $deliveryLeadAnalytics['overallPercentage'] }}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="role-target-column text-muted small">7 KPIs</div><strong
+                                        class="text-end">{{ $deliveryLeadAnalytics['overallPercentage'] }}%</strong>
+                                    <a href="{{ route('admin.dashboard') }}"
+                                        class="btn btn-sm {{ $selectedRecruiterId ? 'btn-outline-danger' : 'btn-danger' }}">Overview</a>
                                 </div>
                                 @forelse ($recruiters as $recruiter)
                                     <div class="role-performance-row">
-                                        <div class="d-flex align-items-center gap-2"><div class="role-avatar">{{ strtoupper(substr($recruiter->recruiter_name, 0, 1)) }}</div><div><div class="fw-semibold text-dark">{{ $recruiter->recruiter_name }}</div><small class="text-muted">Recruiter</small></div></div>
-                                        <div class="role-progress-column"><div class="target-progress"><div class="target-progress-bar" style="width:{{ $recruiterPerformance[$recruiter->id] ?? 0 }}%"></div></div></div>
-                                        <div class="role-target-column text-muted small">7 KPIs</div><strong class="text-end">{{ $recruiterPerformance[$recruiter->id] ?? 0 }}%</strong>
-                                        <a href="{{ route('admin.dashboard', ['recruiter_id' => $recruiter->id]) }}" class="btn btn-sm {{ (int) $selectedRecruiterId === $recruiter->id ? 'btn-danger' : 'btn-outline-danger' }}">
-                                            <i class="ri-line-chart-line me-1"></i>{{ (int) $selectedRecruiterId === $recruiter->id ? 'Viewing' : 'Analytics' }}
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="role-avatar">
+                                                {{ strtoupper(substr($recruiter->recruiter_name, 0, 1)) }}</div>
+                                            <div>
+                                                <div class="fw-semibold text-dark">{{ $recruiter->recruiter_name }}</div>
+                                                <small class="text-muted">Recruiter</small>
+                                            </div>
+                                        </div>
+                                        <div class="role-progress-column">
+                                            <div class="target-progress">
+                                                <div class="target-progress-bar"
+                                                    style="width:{{ $recruiterPerformance[$recruiter->id] ?? 0 }}%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="role-target-column text-muted small">7 KPIs</div><strong
+                                            class="text-end">{{ $recruiterPerformance[$recruiter->id] ?? 0 }}%</strong>
+                                        <a href="{{ route('admin.dashboard', ['recruiter_id' => $recruiter->id]) }}"
+                                            class="btn btn-sm {{ (int) $selectedRecruiterId === $recruiter->id ? 'btn-danger' : 'btn-outline-danger' }}">
+                                            <i
+                                                class="ri-line-chart-line me-1"></i>{{ (int) $selectedRecruiterId === $recruiter->id ? 'Viewing' : 'Analytics' }}
                                         </a>
                                     </div>
                                 @empty
-                                    <div class="text-center text-muted py-4"><i class="ri-team-line fs-2 d-block mb-1"></i>No recruiter rows available for preview</div>
+                                    <div class="text-center text-muted py-4"><i
+                                            class="ri-team-line fs-2 d-block mb-1"></i>No recruiter rows available for
+                                        preview</div>
                                 @endforelse
                             </div>
                         @endif
@@ -796,11 +870,16 @@
                                         <h5 class="section-title mb-0">Individual Recruiter Analytics</h5>
                                         <span class="badge bg-success-subtle text-success">Live records</span>
                                     </div>
-                                    <p class="text-muted small mb-0">Monthly candidate-profile activity and visible recruitment pipeline</p>
+                                    <p class="text-muted small mb-0">Monthly candidate-profile activity and visible
+                                        recruitment pipeline</p>
                                 </div>
                                 <div class="analytics-person">
-                                    <div class="role-avatar">{{ strtoupper(substr($individualAnalyticsName, 0, 1)) }}</div>
-                                    <div><div class="fw-bold text-dark">{{ $individualAnalyticsName }}</div><small class="text-muted">{{ $isRecruiterDashboard ? 'My analytics' : 'Selected recruiter' }}</small></div>
+                                    <div class="role-avatar">{{ strtoupper(substr($individualAnalyticsName, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ $individualAnalyticsName }}</div><small
+                                            class="text-muted">{{ $isRecruiterDashboard ? 'My analytics' : 'Selected recruiter' }}</small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -834,8 +913,13 @@
                             <div class="row g-4 align-items-stretch">
                                 <div class="col-xl-8">
                                     <div class="border rounded-4 h-100 p-3">
-                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
-                                            <div><h6 class="section-title mb-1">Monthly Profile Completion</h6><span class="text-muted small">Candidate profiles recorded during the last six months</span></div>
+                                        <div
+                                            class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
+                                            <div>
+                                                <h6 class="section-title mb-1">Monthly Profile Completion</h6><span
+                                                    class="text-muted small">Candidate profiles recorded during the last
+                                                    six months</span>
+                                            </div>
                                             <span class="badge bg-danger-subtle text-danger">Target: 100/month</span>
                                         </div>
                                         <div id="individualCompletionChart" class="analytics-chart-wrap"></div>
@@ -846,7 +930,9 @@
                                         <h6 class="section-title mb-1">Current Month Completion</h6>
                                         <p class="text-muted small mb-4">Against the minimum profile target</p>
                                         <div id="individualRadialChart" style="min-height:220px"></div>
-                                        <div class="analytics-note"><i class="ri-information-line me-1"></i>This graph uses actual candidate records. HR assessments, acceptances and joining will appear after those data fields are connected.</div>
+                                        <div class="analytics-note"><i class="ri-information-line me-1"></i>This graph
+                                            uses actual candidate records. HR assessments, acceptances and joining will
+                                            appear after those data fields are connected.</div>
                                     </div>
                                 </div>
                             </div>
@@ -855,9 +941,11 @@
                 @elseif ($isSuperAdminDashboard)
                     <div class="card panel-card mb-4">
                         <div class="card-body text-center py-5">
-                            <div class="metric-icon bg-danger-subtle text-danger mx-auto mb-3"><i class="ri-user-search-line"></i></div>
+                            <div class="metric-icon bg-danger-subtle text-danger mx-auto mb-3"><i
+                                    class="ri-user-search-line"></i></div>
                             <h5 class="section-title">Select a recruiter to view individual analytics</h5>
-                            <p class="text-muted mb-0">Use the recruiter filter or an Analytics button in the role-performance list.</p>
+                            <p class="text-muted mb-0">Use the recruiter filter or an Analytics button in the
+                                role-performance list.</p>
                         </div>
                     </div>
                 @endif
@@ -873,53 +961,50 @@
                                     @endphp
                                     <div class="pipeline-groups">
 
-    @foreach($groupedLevels as $group)
+                                        @foreach ($groupedLevels as $group)
+                                            <div class="mb-4">
 
-        <div class="mb-4">
+                                                <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                                                    {{ $group['title'] }}
+                                                </h5>
 
-            <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
-                {{ $group['title'] }}
-            </h6>
+                                                <div class="pipeline-grid">
 
-            <div class="pipeline-grid">
+                                                    @foreach ($group['levels'] as $level)
+                                                        @php
+                                                            $count = (int) $level->candidates_count;
+                                                            $percentage = round(($count / $maxLevel) * 100);
+                                                        @endphp
 
-                @foreach($group['levels'] as $level)
+                                                        <div class="pipeline-item">
+                                                            <div class="pipeline-item-header">
+                                                                <span class="pipeline-item-label">
+                                                                    {{ $level->level }}
+                                                                </span>
 
-                    @php
-                        $count = (int) $level->candidates_count;
-                        $percentage = round(($count / $maxLevel) * 100);
-                    @endphp
+                                                                <span class="pipeline-item-value">
+                                                                    {{ number_format($count) }}
+                                                                </span>
+                                                            </div>
 
-                    <div class="pipeline-item">
-                        <div class="pipeline-item-header">
-                            <span class="pipeline-item-label">
-                                {{ $level->level }}
-                            </span>
+                                                            <div class="pipeline-track">
+                                                                <div class="pipeline-fill"
+                                                                    style="width: {{ $percentage }}%">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
 
-                            <span class="pipeline-item-value">
-                                {{ number_format($count) }}
-                            </span>
-                        </div>
+                                                </div>
 
-                        <div class="pipeline-track">
-                            <div class="pipeline-fill"
-                                 style="width: {{ $percentage }}%">
-                            </div>
-                        </div>
-                    </div>
+                                            </div>
+                                        @endforeach
 
-                @endforeach
-
-            </div>
-
-        </div>
-
-    @endforeach
-
-</div>
+                                    </div>
                                     <div class="row g-2 mt-3 pt-3 border-top text-center">
                                         <div class="col-6">
-                                            <div class="fw-bold fs-4">{{ $yetToOffer }}</div><small class="text-muted">Yet to
+                                            <div class="fw-bold fs-4">{{ $yetToOffer }}</div><small class="text-muted">Yet
+                                                to
                                                 offer</small>
                                         </div>
                                         <div class="col-6">
@@ -982,7 +1067,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-4">
+                        {{-- <div class="col-xl-4">
                             <div class="card panel-card">
                                 <div class="card-body p-4">
                                     <h5 class="section-title">Revenue Overview</h5>
@@ -996,7 +1081,7 @@
                                         access.</div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                     @endcan
                 </div>
             </div>
@@ -1085,25 +1170,110 @@
 
             if (completionTarget) {
                 new ApexCharts(completionTarget, {
-                    chart: { type: 'bar', height: 310, toolbar: { show: false } },
-                    series: [{ name: 'Completed profiles', data: monthlyProfiles }],
-                    xaxis: { categories: @json($chartMonths), axisBorder: { show: false }, axisTicks: { show: false } },
-                    yaxis: { min: 0, forceNiceScale: true, labels: { formatter: function(value) { return Math.round(value); } } },
+                    chart: {
+                        type: 'bar',
+                        height: 310,
+                        toolbar: {
+                            show: false
+                        }
+                    },
+                    series: [{
+                        name: 'Completed profiles',
+                        data: monthlyProfiles
+                    }],
+                    xaxis: {
+                        categories: @json($chartMonths),
+                        axisBorder: {
+                            show: false
+                        },
+                        axisTicks: {
+                            show: false
+                        }
+                    },
+                    yaxis: {
+                        min: 0,
+                        forceNiceScale: true,
+                        labels: {
+                            formatter: function(value) {
+                                return Math.round(value);
+                            }
+                        }
+                    },
                     colors: ['#b91c1c'],
-                    plotOptions: { bar: { borderRadius: 7, columnWidth: '48%' } },
-                    dataLabels: { enabled: false },
-                    grid: { borderColor: '#eef2f7', strokeDashArray: 4 },
-                    annotations: { yaxis: [{ y: profileTarget, borderColor: '#f59e0b', strokeDashArray: 5, label: { text: 'Minimum target 100', style: { background: '#f59e0b', color: '#fff' } } }] },
-                    tooltip: { y: { formatter: function(value) { return value + ' candidate profile' + (value === 1 ? '' : 's'); } } }
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 7,
+                            columnWidth: '48%'
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    grid: {
+                        borderColor: '#eef2f7',
+                        strokeDashArray: 4
+                    },
+                    annotations: {
+                        yaxis: [{
+                            y: profileTarget,
+                            borderColor: '#f59e0b',
+                            strokeDashArray: 5,
+                            label: {
+                                text: 'Minimum target 100',
+                                style: {
+                                    background: '#f59e0b',
+                                    color: '#fff'
+                                }
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(value) {
+                                return value + ' candidate profile' + (value === 1 ? '' : 's');
+                            }
+                        }
+                    }
                 }).render();
             }
 
             if (radialTarget) {
                 new ApexCharts(radialTarget, {
-                    chart: { type: 'radialBar', height: 235, sparkline: { enabled: true } },
+                    chart: {
+                        type: 'radialBar',
+                        height: 235,
+                        sparkline: {
+                            enabled: true
+                        }
+                    },
                     series: [completionPercent],
                     colors: ['#b91c1c'],
-                    plotOptions: { radialBar: { hollow: { size: '62%' }, track: { background: '#f1f5f9' }, dataLabels: { name: { show: true, offsetY: 22, color: '#64748b' }, value: { offsetY: -14, fontSize: '28px', fontWeight: 800, color: '#172033', formatter: function(value) { return Math.round(value) + '%'; } } } } },
+                    plotOptions: {
+                        radialBar: {
+                            hollow: {
+                                size: '62%'
+                            },
+                            track: {
+                                background: '#f1f5f9'
+                            },
+                            dataLabels: {
+                                name: {
+                                    show: true,
+                                    offsetY: 22,
+                                    color: '#64748b'
+                                },
+                                value: {
+                                    offsetY: -14,
+                                    fontSize: '28px',
+                                    fontWeight: 800,
+                                    color: '#172033',
+                                    formatter: function(value) {
+                                        return Math.round(value) + '%';
+                                    }
+                                }
+                            }
+                        }
+                    },
                     labels: [currentMonthProfiles + ' of ' + profileTarget + ' profiles']
                 }).render();
             }
