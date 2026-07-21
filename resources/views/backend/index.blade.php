@@ -862,7 +862,7 @@
                 </div>
 
                 @if ($individualAnalyticsVisible)
-                    <div class="card panel-card mb-4">
+                    <div class="card panel-card mb-4 target-panel">
                         <div class="card-body p-3 p-lg-4">
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                                 <div>
@@ -939,7 +939,7 @@
                         </div>
                     </div>
                 @elseif ($isSuperAdminDashboard)
-                    <div class="card panel-card mb-4">
+                    <div class="card panel-card mb-4 target-panel">
                         <div class="card-body text-center py-5">
                             <div class="metric-icon bg-danger-subtle text-danger mx-auto mb-3"><i
                                     class="ri-user-search-line"></i></div>
@@ -952,7 +952,7 @@
                 <div class="row g-4 mb-4">
                     @can('read', \App\Models\Candidate::class)
                         <div class="col-12">
-                            <div class="card panel-card">
+                            <div class="card panel-card target-panel">
                                 <div class="card-body p-4">
                                     <h5 class="section-title mb-1">Interview Pipeline</h5>
                                     <p class="text-muted small mb-4">Level-wise interview activity</p>
@@ -1055,7 +1055,7 @@
                 <div class="row g-4">
                     @can('read', \App\Models\Candidate::class)
                         <div class="col-xl-8">
-                            <div class="card panel-card">
+                            <div class="card panel-card target-panel">
                                 <div class="card-body p-4">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div>
