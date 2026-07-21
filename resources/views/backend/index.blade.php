@@ -58,12 +58,20 @@
         }
 
         .metric-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 15px;
-            display: grid;
-            place-items: center;
-            font-size: 1.35rem;
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            /* background: #fde8e8; */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        .metric-logo {
+            width: 80px;
+            height: auto;
+            transform: translate(0px, 8px);
         }
 
         .metric-value {
@@ -134,17 +142,93 @@
             text-overflow: ellipsis;
         }
 
+        .interview-summary {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .interview-stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .interview-stat {
+            min-width: 0;
+            padding: 8px 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .interview-stat-label {
+            display: block;
+            margin-bottom: 3px;
+            color: #64748b;
+            font-size: .7rem;
+            font-weight: 700;
+        }
+
+        .interview-stat-value {
+            color: #111827;
+            font-size: 1rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        @media (max-width: 767.98px) {
+            .interview-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
         .section-title {
             font-weight: 800;
             color: #172033;
         }
 
-        .pipeline-row {
+        .pipeline-grid {
             display: grid;
-            grid-template-columns: minmax(90px, 1fr) 4fr 45px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .pipeline-item {
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
+        }
+
+        .pipeline-item-header {
+            display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 12px;
-            margin-bottom: 17px;
+            margin-bottom: 12px;
+        }
+
+        .pipeline-item-label {
+            min-width: 0;
+            overflow: hidden;
+            color: #334155;
+            font-size: .82rem;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .pipeline-item-value {
+            flex: 0 0 auto;
+            color: #111827;
+            font-size: 1.2rem;
+            font-weight: 800;
+            line-height: 1;
         }
 
         .pipeline-track {
@@ -158,6 +242,22 @@
             height: 100%;
             border-radius: 20px;
             background: linear-gradient(90deg, #ef4444, #7f1d1d);
+        }
+
+        .pipeline-empty {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 991.98px) {
+            .pipeline-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .pipeline-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .interview-item {
@@ -237,8 +337,8 @@
             color: #15803d;
         }
 
-        .individual-target-summary-value.percentage-yellow {
-            color: #ca8a04;
+        .individual-target-summary-value.percentage-blue {
+            color: #2563eb;
         }
 
         .individual-target-summary-value.percentage-red {
@@ -249,8 +349,8 @@
             background: linear-gradient(90deg, #16a34a, #22c55e);
         }
 
-        .target-progress-bar.percentage-yellow {
-            background: linear-gradient(90deg, #eab308, #facc15);
+        .target-progress-bar.percentage-blue {
+            background: linear-gradient(90deg, #2563eb, #60a5fa);
         }
 
         .target-progress-bar.percentage-red {
@@ -342,10 +442,6 @@
                 border-radius: 16px;
             }
 
-            .pipeline-row {
-                grid-template-columns: 80px 1fr 35px;
-            }
-
             .role-performance-row {
                 grid-template-columns: 1fr 60px;
             }
@@ -384,11 +480,11 @@
                     </div>
                 </div>
 
-                @unless ($isRecruiterDashboard)
-                    <div class="card panel-card mb-4">
-                        <div class="card-body p-3 p-lg-4">
-                            <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3 align-items-end">
-                                <div class="col-md-{{ $showClientFilter ? '5' : '9' }}">
+                <div class="card panel-card mb-4">
+                    <div class="card-body p-3 p-lg-4">
+                        <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3 align-items-end">
+                            @unless ($isRecruiterDashboard)
+                                <div class="col-md-6 col-xl-{{ $showClientFilter ? '2' : '3' }}">
                                     <label for="dashboard_recruiter_id" class="form-label fw-semibold">Recruiter</label>
                                     <select id="dashboard_recruiter_id" name="recruiter_id" class="form-select">
                                         <option value="">All recruiters</option>
@@ -397,25 +493,55 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                @if ($showClientFilter)
-                                    <div class="col-md-4">
-                                        <label for="dashboard_client_id" class="form-label fw-semibold">Client</label>
-                                        <select id="dashboard_client_id" name="client_id" class="form-select">
-                                            <option value="">All clients</option>
-                                            @foreach ($clients as $client)
-                                                <option value="{{ $client->id }}" @selected((int) $selectedClientId === $client->id)>{{ $client->client }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endif
-                                <div class="col-md-3 d-flex gap-2">
-                                    <button type="submit" class="btn btn-danger flex-grow-1"><i class="ri-filter-3-line me-1"></i>Apply</button>
-                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-light" title="Clear filters"><i class="ri-refresh-line"></i></a>
+                            @endunless
+                            @if ($showClientFilter)
+                                <div class="col-md-6 col-xl-2">
+                                    <label for="dashboard_client_id" class="form-label fw-semibold">Client</label>
+                                    <select id="dashboard_client_id" name="client_id" class="form-select">
+                                        <option value="">All clients</option>
+                                        @foreach ($clients as $client)
+                                            <option value="{{ $client->id }}" @selected((int) $selectedClientId === $client->id)>{{ $client->client }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                            </form>
-                        </div>
+                            @endif
+                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : '3' }}">
+                                <label for="dashboard_from_date" class="form-label fw-semibold">From Date</label>
+                                <input type="date" id="dashboard_from_date" name="dashboard_from_date"
+                                    class="form-control {{ $fromDateError ? 'is-invalid' : '' }}"
+                                    value="{{ $selectedFromDate }}">
+                                @if ($fromDateError)
+                                    <div class="invalid-feedback">{{ $fromDateError }}</div>
+                                @endif
+                            </div>
+                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : '3' }}">
+                                <label for="dashboard_to_date" class="form-label fw-semibold">To Date</label>
+                                <input type="date" id="dashboard_to_date" name="dashboard_to_date"
+                                    class="form-control {{ $toDateError ? 'is-invalid' : '' }}"
+                                    value="{{ $selectedToDate }}">
+                                @if ($toDateError)
+                                    <div class="invalid-feedback">{{ $toDateError }}</div>
+                                @endif
+                            </div>
+                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : ($showClientFilter ? '2' : '3') }} d-flex gap-2">
+                                <button type="submit" class="btn btn-danger flex-grow-1">
+                                    <i class="ri-filter-3-line me-1"></i>Apply
+                                </button>
+                                @if ($selectedFromDate || $selectedToDate)
+                                    <a href="{{ route('admin.dashboard', array_filter([
+                                        'recruiter_id' => $isRecruiterDashboard ? null : $selectedRecruiterId,
+                                        'client_id' => $selectedClientId,
+                                    ])) }}" class="btn btn-outline-primary" title="Remove date range" aria-label="Remove date range">
+                                        <i class="ri-calendar-close-line"></i>
+                                    </a>
+                                @endif
+                                <a href="{{ route('admin.dashboard') }}" class="btn btn-light" title="Clear all filters" aria-label="Clear all filters">
+                                    <i class="ri-refresh-line"></i>
+                                </a>
+                            </div>
+                        </form>
                     </div>
-                @endunless
+                </div>
 
                 @unless ($recruiterLinked)
                     <div class="alert alert-warning border-0 shadow-sm"><i class="ri-alert-line me-2"></i>Your login email is
@@ -424,13 +550,13 @@
 
                 <div class="row g-3 mb-4">
                     @can('read', \App\Models\ClientRequirement::class)
-                        <div class="col-6 col-xl-2">
+                        <div class="col-6 col-xl-3">
                             <div class="card metric-card requirements-card">
                                 <div class="card-body p-3 p-lg-4">
                                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
                                         <div class="metric-label">Requirements</div>
-                                        <div class="metric-icon bg-danger-subtle text-danger">
-                                            <i class="ri-briefcase-4-line"></i>
+                                        <div class="metric-icon">
+                                            <img src="{{ asset('frontend/Images/rhino-logo.png') }}" alt="SZORZO Logo" class="metric-logo">
                                         </div>
                                     </div>
                                     <div class="requirement-stats">
@@ -452,79 +578,20 @@
                         </div>
                     @endcan
                     @can('read', \App\Models\Candidate::class)
-                        <div class="col-6 col-xl-2">
-                            <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Applicants</div>
-                                        <div class="metric-value">{{ number_format($myApplicants) }}</div>
-                                    </div>
-                                    <div class="metric-icon bg-primary-subtle text-primary"><i class="ri-team-line"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-xl-3">
-                            <div class="card metric-card">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <div class="metric-label">Interviews</div>
-                                            <div class="metric-value">
-                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7,8,11,12,23,25,27,28])->count()) }}
-                                            </div>
-                                        </div>
-
-                                        <div class="metric-icon bg-warning-subtle text-warning">
-                                            <i class="ri-calendar-event-line"></i>
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-2 text-center">
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L1</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [7,8])->count() ?? 0 }}</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L2</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [11,12])->count() ?? 0 }}</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L3</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [23,25])->count() ?? 0 }}</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-3">
-                                            <div class="border rounded p-2 bg-light">
-                                                <small class="text-muted d-block">L4</small>
-                                                <strong>{{ $scheduledInterviews->whereIn('level_of_interview_id', [27,28])->count() ?? 0 }}</strong>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="col-6 col-xl-3">
                             <div class="card metric-card">
                                 <div class="card-body p-3 p-lg-4">
                                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                                        <div class="metric-label">Offer Status</div>
-                                        <div class="metric-icon bg-success-subtle text-success">
-                                            <i class="ri-user-follow-line"></i>
+                                        <div class="metric-label">Candidate Stage</div>
+                                        <div class="metric-icon">
+                                            <img src="{{ asset('frontend/Images/rhino-logo.png') }}" alt="SZORZO Logo" class="metric-logo">
                                         </div>
                                     </div>
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
-                                                <div class="small text-muted mb-1">Offered</div>
-                                                <div class="metric-value">{{ number_format($offered ?? 0) }}</div>
+                                                <div class="small text-muted mb-1">Applicants</div>
+                                                <div class="metric-value">{{ number_format($myApplicants ?? 0) }}</div>
                                             </div>
                                         </div>
                                         <div class="col-6">
@@ -537,14 +604,62 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-xl-2">
+                        <div class="col-6 col-xl-3">
                             <div class="card metric-card">
-                                <div class="card-body p-4 d-flex justify-content-between">
-                                    <div>
-                                        <div class="metric-label mb-2">Onboarded</div>
-                                        <div class="metric-value">{{ number_format($onboarded) }}</div>
+                                <div class="card-body p-3 p-lg-4">
+                                    <div class="interview-summary">
+                                        <div>
+                                            <div class="metric-label mb-2">Interview Stage</div>
+                                            <div class="metric-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8, 11, 12, 23, 25, 27, 28])->count()) }}</div>
+                                        </div>
+                                        <div class="metric-icon">
+                                            <img src="{{ asset('frontend/Images/rhino-logo.png') }}" alt="SZORZO Logo" class="metric-logo">
+                                        </div>
                                     </div>
-                                    <div class="metric-icon bg-success-subtle text-success"><i class="ri-user-add-line"></i>
+
+                                    <div class="interview-stats">
+                                        <div class="interview-stat">
+                                            <span class="interview-stat-label">L1</span>
+                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8])->count()) }}</div>
+                                        </div>
+                                        <div class="interview-stat">
+                                            <span class="interview-stat-label">L2</span>
+                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [11, 12])->count()) }}</div>
+                                        </div>
+                                        <div class="interview-stat">
+                                            <span class="interview-stat-label">L3</span>
+                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [23, 25])->count()) }}</div>
+                                        </div>
+                                        <div class="interview-stat">
+                                            <span class="interview-stat-label">L4</span>
+                                            <div class="interview-stat-value">{{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [27, 28])->count()) }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card metric-card">
+                                <div class="card-body p-3 p-lg-4">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                                        <div class="metric-label">Offer Stage</div>
+                                        <div class="metric-icon">
+                                            <img src="{{ asset('frontend/Images/rhino-logo.png') }}" alt="SZORZO Logo" class="metric-logo">
+                                        </div>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="border rounded-3 bg-light p-2 h-100">
+                                                <div class="small text-muted mb-1">Offered</div>
+                                                <div class="metric-value">{{ number_format($offered ?? 0) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="border rounded-3 bg-light p-2 h-100">
+                                                <div class="small text-muted mb-1">Onboarded</div>
+                                                <div class="metric-value">{{ number_format($onboarded ?? 0) }}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -587,7 +702,7 @@
                             <div class="target-month"><i class="ri-calendar-2-line"></i>{{ now()->format('F Y') }}</div>
                         </div>
 
-                        <div class="row g-3 mb-4">
+                        {{-- <div class="row g-3 mb-4">
                             <div class="col-sm-6 col-xl-3">
                                 <div class="target-summary">
                                     <div class="metric-label mb-2">Overall Completion</div>
@@ -618,14 +733,14 @@
                                     <div class="small text-muted mt-3"><i class="ri-user-add-line me-1"></i>Monthly joiners</div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <div class="row g-3">
                             @foreach ($monthlyKpis as $kpi)
                                 @php
                                     $percentageColor = $kpi['percentage'] > 80
                                         ? 'percentage-green'
-                                        : ($kpi['percentage'] >= 60 ? 'percentage-yellow' : 'percentage-red');
+                                        : ($kpi['percentage'] >= 60 ? 'percentage-blue' : 'percentage-red');
                                 @endphp
                                 <div class="col-md-6 col-xl-{{ $loop->last ? '6' : '4' }}">
                                     <div class="kpi-card">
@@ -689,7 +804,7 @@
                                 </div>
                             </div>
 
-                            <div class="row g-3 mb-3">
+                            {{-- <div class="row g-3 mb-3">
                                 <div class="col-6 col-lg-3">
                                     <div class="target-summary">
                                         <div class="metric-label mb-2">Visible Applicants</div>
@@ -714,7 +829,7 @@
                                         <div class="target-summary-value">{{ number_format($activeRequirements) }}</div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <div class="row g-4 align-items-stretch">
                                 <div class="col-xl-8">
@@ -746,23 +861,9 @@
                         </div>
                     </div>
                 @endif
-
                 <div class="row g-4 mb-4">
                     @can('read', \App\Models\Candidate::class)
-                        <div class="col-xl-8">
-                            <div class="card panel-card">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <h5 class="section-title mb-1">Applicant Momentum</h5><span
-                                                class="text-muted small">New applicants over the last six months</span>
-                                        </div><span class="badge bg-danger-subtle text-danger">Live</span>
-                                    </div>
-                                    <div id="applicantChart" style="min-height:310px"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-4">
+                        <div class="col-12">
                             <div class="card panel-card">
                                 <div class="card-body p-4">
                                     <h5 class="section-title mb-1">Interview Pipeline</h5>
@@ -770,32 +871,52 @@
                                     @php
                                         $maxLevel = max(1, (int) $candidateLevels->max('candidates_count'));
                                     @endphp
-                                    @forelse($candidateLevels as $level)
-                                        @php
-                                            $levelTotal = (int) $level->candidates_count;
-                                            $percentage = round(($levelTotal / $maxLevel) * 100);
-                                        @endphp
+                                    <div class="pipeline-groups">
 
-                                        <div class="pipeline-row">
-                                            <span class="small fw-semibold text-truncate"
-                                                title="{{ $level->level }}">
-                                                {{ $level->level }}
-                                            </span>
+    @foreach($groupedLevels as $group)
 
-                                            <div class="pipeline-track">
-                                                <div class="pipeline-fill"
-                                                    style="width: {{ $percentage }}%">
-                                                </div>
-                                            </div>
+        <div class="mb-4">
 
-                                            <strong>{{ number_format($levelTotal) }}</strong>
-                                        </div>
-                                    @empty
-                                        <div class="text-center text-muted py-5">
-                                            <i class="ri-bar-chart-grouped-line fs-1 d-block mb-2"></i>
-                                            No candidate data yet
-                                        </div>
-                                    @endforelse
+            <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                {{ $group['title'] }}
+            </h6>
+
+            <div class="pipeline-grid">
+
+                @foreach($group['levels'] as $level)
+
+                    @php
+                        $count = (int) $level->candidates_count;
+                        $percentage = round(($count / $maxLevel) * 100);
+                    @endphp
+
+                    <div class="pipeline-item">
+                        <div class="pipeline-item-header">
+                            <span class="pipeline-item-label">
+                                {{ $level->level }}
+                            </span>
+
+                            <span class="pipeline-item-value">
+                                {{ number_format($count) }}
+                            </span>
+                        </div>
+
+                        <div class="pipeline-track">
+                            <div class="pipeline-fill"
+                                 style="width: {{ $percentage }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                @endforeach
+
+            </div>
+
+        </div>
+
+    @endforeach
+
+</div>
                                     <div class="row g-2 mt-3 pt-3 border-top text-center">
                                         <div class="col-6">
                                             <div class="fw-bold fs-4">{{ $yetToOffer }}</div><small class="text-muted">Yet to
@@ -806,26 +927,6 @@
                                                 class="text-muted">Offered</small>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endcan
-                </div>
-
-                <div class="row g-4">
-                    @can('read', \App\Models\ClientRequirement::class)
-                        <div class="col-xl-4">
-                            <div class="card panel-card">
-                                <div class="card-body p-4">
-                                    <h5 class="section-title">Revenue Overview</h5>
-                                    <p class="text-muted small">Revenue recorded on visible requirements</p>
-                                    <div class="py-4">
-                                        <div class="metric-label mb-2">Total Pipeline Revenue</div>
-                                        <div class="display-6 fw-bold text-dark">&#8377;{{ number_format($revenue, 2) }}</div>
-                                    </div>
-                                    <div class="rounded-4 bg-danger-subtle text-danger p-3 small"><i
-                                            class="ri-information-line me-1"></i> Values follow your role-based requirement
-                                        access.</div>
                                 </div>
                             </div>
                         </div>
@@ -865,6 +966,38 @@
                             </div>
                         </div>
                     @endcan --}}
+                </div>
+                <div class="row g-4">
+                    @can('read', \App\Models\Candidate::class)
+                        <div class="col-xl-8">
+                            <div class="card panel-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <h5 class="section-title mb-1">Applicant Momentum</h5><span
+                                                class="text-muted small">New applicants over the last six months</span>
+                                        </div><span class="badge bg-danger-subtle text-danger">Live</span>
+                                    </div>
+                                    <div id="applicantChart" style="min-height:310px"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="card panel-card">
+                                <div class="card-body p-4">
+                                    <h5 class="section-title">Revenue Overview</h5>
+                                    <p class="text-muted small">Revenue recorded on visible requirements</p>
+                                    <div class="py-4">
+                                        <div class="metric-label mb-2">Total Pipeline Revenue</div>
+                                        <div class="display-6 fw-bold text-dark">&#8377;{{ number_format($revenue, 2) }}</div>
+                                    </div>
+                                    <div class="rounded-4 bg-danger-subtle text-danger p-3 small"><i
+                                            class="ri-information-line me-1"></i> Values follow your role-based requirement
+                                        access.</div>
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
                 </div>
             </div>
         </div>

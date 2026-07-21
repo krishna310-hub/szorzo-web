@@ -195,40 +195,6 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::delete('/{id}', 'destroy')->name('delete');
         });
 
-        Route::prefix('client-requirements')->name('client-requirements.')->controller(ClientRequirementController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/export', 'export')->name('export');
-            Route::get('/import-template', 'importTemplate')->name('import-template');
-            Route::post('/import', 'import')->name('import');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/store', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}/update', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('delete');
-        });
-
-        Route::prefix('candidates')->name('candidates.')->controller(CandidateController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/export', 'export')->name('export');
-            Route::get('/import-template', 'importTemplate')->name('import-template');
-            Route::post('/import', 'import')->name('import');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/store', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}/update', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('delete');
-        });
-
-        Route::prefix('interview-schedules')->name('interview-schedules.')->controller(InterviewScheduleController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/store', 'store')->name('store');
-            Route::get('/candidate/{candidateId}', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}/update', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('delete');
-        });
-
         Route::prefix('billings')->name('billings.')->controller(BillingController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
@@ -255,6 +221,40 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::put('/{id}/update', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('delete');
         });
+    });
+
+    Route::prefix('client-requirements')->name('client-requirements.')->controller(ClientRequirementController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/export', 'export')->name('export');
+        Route::get('/import-template', 'importTemplate')->name('import-template');
+        Route::post('/import', 'import')->name('import');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::put('/{id}/update', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('delete');
+    });
+
+    Route::prefix('candidates')->name('candidates.')->controller(CandidateController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/export', 'export')->name('export');
+        Route::get('/import-template', 'importTemplate')->name('import-template');
+        Route::post('/import', 'import')->name('import');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::put('/{id}/update', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('delete');
+    });
+
+    Route::prefix('interview-schedules')->name('interview-schedules.')->controller(InterviewScheduleController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/candidate/{candidateId}', 'show')->name('show');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::put('/{id}/update', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('delete');
     });
 
     Route::prefix('sitemap')->name('sitemap.')->controller(SitemapRobotsController::class)->group(function () {

@@ -99,7 +99,7 @@ class CandidateController extends Controller
 
             $data['upload_cv'] = 'uploads/candidates/' . $filename;
         }
-    
+
         Candidate::create($data);
 
         return redirect()
@@ -394,40 +394,42 @@ class CandidateController extends Controller
         ]);
 
         return $request->validate([
-            'recruiter_id' => 'nullable|exists:recruiters,id',
-            'client_id' => 'nullable|exists:clients,id',
-            'job_role_id' => 'nullable|exists:job_roles,id',
+            'recruiter_id' => 'required|exists:recruiters,id',
+            'client_id' => 'required|exists:clients,id',
+            'job_role_id' => 'required|exists:job_roles,id',
             'candidate_name' => 'required|string|max:255',
             'mobile_no' => [
-                'nullable',
+                'required',
                 'string',
                 'max:30',
                 Rule::unique('candidates', 'mobile_no')->ignore($candidate?->id)->whereNull('deleted_at'),
             ],
             'email' => [
-                'nullable',
+                'required',
                 'email',
                 'max:255',
                 Rule::unique('candidates', 'email')->ignore($candidate?->id)->whereNull('deleted_at'),
             ],
             'qualification' => 'nullable|string|max:255',
-            'total_experience' => 'nullable|numeric|min:0',
-            'relevant_experience' => 'nullable|numeric|min:0',
+            'total_experience' => 'required|numeric|min:0',
+            'relevant_experience' => 'required|numeric|min:0',
             'take_home' => 'nullable|numeric|min:0',
             'variable' => 'nullable|numeric|min:0',
-            'current_ctc' => 'nullable|numeric|min:0',
-            'expected_ctc' => 'nullable|numeric|min:0',
-            'notice_period' => 'nullable|string|max:255',
-            'current_company' => 'nullable|string|max:255',
-            'current_location' => 'nullable|string|max:255',
-            'preferred_location' => 'nullable|string|max:255',
+            'current_ctc' => 'required|integer|min:0',
+            'expected_ctc' => 'required|integer|min:0',
+            'notice_period' => 'required|string|max:255',
+            'current_company' => 'required|string|max:255',
+            'current_location' => 'required|string|max:255',
+            'preferred_location' => 'required|string|max:255',
             'reason_for_change' => 'nullable|string',
-            'level_of_interview_id' => 'nullable|exists:level_of_interviews,id',
+            'level_of_interview_id' => 'required|exists:level_of_interviews,id',
             'upload_cv' => 'nullable|mimes:pdf,doc,docx|max:2048',
             'status' => 'required|in:0,1',
         ], [
             'mobile_no.unique' => 'This mobile number is already registered for another candidate.',
             'email.unique' => 'This email address is already registered for another candidate.',
+            'current_ctc.integer' => 'Current CTC must be entered as a whole amount (e.g. 650000).',
+            'expected_ctc.integer' => 'Expected CTC must be entered as a whole amount (e.g. 800000).',
         ]);
     }
 

@@ -59,12 +59,49 @@
         </select>
         @error('interview_mode_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+
+    @php
+        $sourcingLevels = [
+            'L1 Scheduled',
+            'L1 Select',
+            'L1 Reject',
+            'L1 Re-Schedule',
+            'L2 Scheduled',
+            'L2 Select',
+            'L2 Reject',
+            'L2 Re-Schedule',
+            'L3 Scheduled',
+            'L3 Select',
+            'L3 Reject',
+            'L3 Re-Schedule',
+            'L4 Scheduled',
+            'L4 Select',
+            'L4 Reject',
+            'L4 Re-Schedule',
+            'HR Discussion Pending',
+            'HR Select',
+            'HR Reject',
+            'Offer Released',
+            'Offer Accepted',
+            'Offer Declined',
+            'Onboarded with Client',
+            'Joiner Declined',
+            'Position Hold',
+            'Candidate Not Interested',
+            'Candidate Not Responding',
+        ];
+    @endphp
     <div class="col-md-4">
         <label for="level_of_interview_id" class="form-label">Level Of Interview <span class="text-danger">*</span></label>
         <select class="form-select" id="level_of_interview_id" name="level_of_interview_id">
             <option value="">Select level</option>
             @foreach ($interviewLevels as $level)
-                <option value="{{ $level->id }}" {{ (string) $selectedLevelId === (string) $level->id ? 'selected' : '' }}>{{ $level->level }}</option>
+                @if(in_array($level->level, $sourcingLevels))
+                    <option value="{{ $level->id }}"
+                        {{ (string) old('level_of_interview_id', $selectedLevelId) === (string) $level->id ? 'selected' : '' }}>
+                        {{ $level->level }}
+                    </option>
+                @endif
             @endforeach
         </select>
         @error('level_of_interview_id')<span class="text-danger small">{{ $message }}</span>@enderror
