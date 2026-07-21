@@ -742,7 +742,7 @@
                                         ? 'percentage-green'
                                         : ($kpi['percentage'] >= 60 ? 'percentage-blue' : 'percentage-red');
                                 @endphp
-                                <div class="col-md-6 col-xl-{{ $loop->last ? '6' : '4' }}">
+                                <div class="col-md-6 col-xl-4">
                                     <div class="kpi-card">
                                         <div class="d-flex justify-content-between gap-3 mb-3">
                                             <div class="d-flex align-items-center gap-3">
