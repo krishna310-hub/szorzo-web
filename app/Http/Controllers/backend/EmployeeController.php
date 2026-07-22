@@ -66,7 +66,7 @@ class EmployeeController extends Controller
     public function update(Request $request, $id)
     {
         $employee = Employee::findOrFail($id);
-        $employee->update($this->validatedData($request, $employee->id));
+        $data = $this->validatedData($request, $employee->id);
 
         if ($request->hasFile('employee_image')) {
 
