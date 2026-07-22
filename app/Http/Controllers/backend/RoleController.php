@@ -33,7 +33,7 @@ class RoleController extends Controller
 
                     $buttons = '';
 
-                    if (!$row->its_default && auth()->user()->can('edit', Role::class)) {
+                    if (!$row->its_default || auth()->user()->can('edit', Role::class)) {
                         $editUrl = route('admin.role.edit', $row->id);
                         $buttons .= '
                             <a href="' . $editUrl . '" class="text-info fs-4 me-1" title="Edit">
@@ -43,7 +43,7 @@ class RoleController extends Controller
                         ';
                     }
 
-                    if (!$row->its_default && auth()->user()->can('delete', Role::class)) {
+                    if (!$row->its_default || auth()->user()->can('delete', Role::class)) {
                         $buttons .= '
                             <a href="javascript:void(0);" class="text-danger fs-4 ms-1 destroy-ajax" title="Delete"
                             data-id="'.$row->id.'" data-table-id="role-table"

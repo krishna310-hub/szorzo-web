@@ -31,6 +31,9 @@ class CandidateController extends Controller
             $query = $this->candidateQuery($request)->latest();
 
             return DataTables::of($query)
+                ->filterColumn('candidate_name', function ($query, $keyword) {
+                    $query->where('candidate_name', 'LIKE', "%{$keyword}%");
+                })
                 ->addIndexColumn()
                 ->addColumn('recruiter_name', fn ($row) => $row->recruiter->recruiter_name ?? '-')
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')

@@ -217,8 +217,8 @@ class AdminController extends Controller
             'monthlyTargetAnalytics' => $monthlyKpis,
             'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
             'recruiterPerformance' => $recruiterPerformance,
-            'activeRequirements' => (clone $requirements)->where('status', true)->count(),
-            'inActiveRequirements' => (clone $requirements)->where('status', false)->count(),
+            'activeRequirements' => (clone $requirements)->where('status', true)->count(),//sum('number_of_position')
+            'inActiveRequirements' => (clone $requirements)->where('status', false)->count(),//sum('number_of_position')
             'myApplicants' => (clone $candidates)->count(),
             'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
             'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),
@@ -255,7 +255,7 @@ class AdminController extends Controller
             ->where('status', '!=', 'cancelled');
 
         // Fixed IDs from the Level of Interviews master.
-        $shortlistedLevelIds = array_merge([3], range(7, 30));
+        $shortlistedLevelIds = [3];
         $interviewLevelIds = [7, 8, 9, 10, 11, 12, 13, 23, 24, 25, 27, 28, 29];
         $hrSelectId = 15;
         $offerReleasedIds = [22, 30];
