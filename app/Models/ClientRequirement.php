@@ -13,6 +13,7 @@ class ClientRequirement extends Model
         'client_id',
         'billing_id',
         'revenue_amount',
+        'payment_cycle',
         'job_description_id',
         'mode_id',
         'requirement_open_date',

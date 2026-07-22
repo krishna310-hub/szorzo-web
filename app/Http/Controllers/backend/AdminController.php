@@ -109,7 +109,7 @@ class AdminController extends Controller
             ->get();
 
         $levelGroups = [
-            'Sourcing' => [
+            'Sourcing Stage' => [
                 'CV Shared to DL',
                 'Internal Duplicate',
                 'Profile Feedback Pending',
@@ -117,7 +117,7 @@ class AdminController extends Controller
                 'Screen Select',
                 'Screen Reject',
             ],
-            'Interview' => [
+            'Interview Stage' => [
                 'L1 Scheduled',
                 'L1 Select',
                 'L1 Reject',
@@ -135,7 +135,7 @@ class AdminController extends Controller
                 'L4 Reject',
                 'L4 Re-Schedule',
             ],
-            'Offer' => [
+            'Offer Stage' => [
                 'HR Discussion Pending',
                 'HR Select',
                 'HR Reject',
@@ -143,7 +143,7 @@ class AdminController extends Controller
                 'Offer Accepted',
                 'Offer Declined',
             ],
-            'Onboarding' => [
+            'Onboarding Stage' => [
                 'Onboarded with Client',
                 'Joiner Declined',
                 'Position Hold',

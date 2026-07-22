@@ -78,7 +78,7 @@
             'L4 Select',
             'L4 Reject',
             'L4 Re-Schedule',
-            'HR Discussion Pending',
+            'HR Discussion',
             'HR Select',
             'HR Reject',
             'Offer Released',

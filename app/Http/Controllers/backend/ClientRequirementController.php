@@ -33,6 +33,11 @@ class ClientRequirementController extends Controller
 
             return DataTables::of($query)
                 ->addIndexColumn()
+                ->addColumn('payment_cycle', function ($row) {
+                    return $row->payment_cycle > 0
+                        ? $row->payment_cycle . ' Days'
+                        : '-';
+                })
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_description_name', fn ($row) => $row->jobDescription->job_description ?? '-')
                 ->addColumn('mode_name', fn ($row) => $row->mode->mode ?? '-')
@@ -116,6 +121,7 @@ class ClientRequirementController extends Controller
                 $item->client?->client,
                 $item->billing?->value,
                 $item->revenue_amount,
+                $item->payment_cycle,
                 $item->jobDescription?->job_description,
                 $item->mode?->mode,
                 $item->requirement_open_date?->format('Y-m-d'),
@@ -283,6 +289,7 @@ class ClientRequirementController extends Controller
             'client_id' => 'required|exists:clients,id',
             'billing_id' => 'nullable|exists:billings,id',
             'revenue_amount' => 'nullable|numeric|min:0',
+            'payment_cycle' => 'nullable|integer|min:0',
             'job_description_id' => 'nullable|exists:client_job_roles,id',
             'mode_id' => 'nullable|exists:modes,id',
             'requirement_open_date' => 'nullable|date',
@@ -300,6 +307,6 @@ class ClientRequirementController extends Controller
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Location', 'Status'];
+        return ['Record ID', 'Client', 'Billing', 'Payment Cycle', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Location', 'Status'];
     }
 }

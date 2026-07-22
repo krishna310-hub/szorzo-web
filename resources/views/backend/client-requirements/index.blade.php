@@ -30,6 +30,7 @@
                                                 <th>S.No</th>
                                                 <th>Client</th>
                                                 <th>Billing</th>
+                                                <th>Payment Cycle</th>
                                                 <th>Job Role</th>
                                                 {{-- <th>Job Description</th> --}}
                                                 <th>Mode</th>
@@ -82,11 +83,14 @@
                     data: 'billing_value',
                     name: 'billing_value'
                 }, {
+                    data: 'payment_cycle',
+                    name: 'payment_cycle'
+                }, {
                     data: 'job_role_name',
                     name: 'job_role_name',
                     orderable: false,
                     searchable: false
-                }, 
+                },
                 // {
                 //     data: 'job_description_name',
                 //     name: 'job_description_name',
