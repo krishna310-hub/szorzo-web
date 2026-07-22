@@ -62,6 +62,13 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    <div class="col-md-4"><label for="payment_cycle" class="form-label">Payment Cycle</label><input
+            type="number" min="0" class="form-control" id="payment_cycle" name="payment_cycle"
+            value="{{ old('payment_cycle', $clientRequirement->payment_cycle ?? 0) }}">
+        @error('payment_cycle')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
     {{-- <div class="col-md-4"><label for="job_description_id" class="form-label">Job Description</label><select
             class="form-select" id="job_description_id" name="job_description_id">
             <option value="">Select job description</option>
