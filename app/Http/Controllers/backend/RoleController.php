@@ -43,7 +43,7 @@ class RoleController extends Controller
                         ';
                     }
 
-                    if (!$row->its_default || auth()->user()->can('delete', Role::class)) {
+                    if (!$row->its_default) {
                         $buttons .= '
                             <a href="javascript:void(0);" class="text-danger fs-4 ms-1 destroy-ajax" title="Delete"
                             data-id="'.$row->id.'" data-table-id="role-table"
@@ -99,9 +99,7 @@ class RoleController extends Controller
         $this->authorize('edit', Role::class);
 
         $role        = Role::find($id);
-        if ($role?->its_default) {
-            return redirect()->route('admin.role.index')->with('error', 'Default roles cannot be edited.');
-        }
+        
         if($role){
             $permissions = Permission::get()->groupBy('page');
     
@@ -118,9 +116,6 @@ class RoleController extends Controller
             'status' => 'required|in:0,1',
         ]);
         $role = Role::findOrFail($id);
-        if ($role->its_default) {
-            return redirect()->route('admin.role.index')->with('error', 'Default roles cannot be edited.');
-        }
 
         $role->update([
             'name' => $request->role_name,
