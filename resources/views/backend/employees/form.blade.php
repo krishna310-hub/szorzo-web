@@ -10,6 +10,43 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+
+    @if(!empty($employee->employee_image))
+    <div class="modal fade" id="employeeImageModal" tabindex="-1" aria-labelledby="employeeImageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="employeeImageModalLabel">
+                        Employee Image
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body text-center">
+                    <img src="{{ asset('uploads/employees/'.$employee->employee_image) }}"
+                        class="img-fluid rounded"
+                        alt="Employee Image">
+                </div>
+
+            </div>
+        </div>
+    </div>
+    @endif
+    <div class="col-md-4">
+        <label for="employee_image" class="form-label">Employee Image
+            @if(!empty($employee->employee_image))
+                <a href="#" data-bs-toggle="modal" data-bs-target="#employeeImageModal" class="ms-2">
+                    <i class="ri-image-line fs-5"></i>
+                </a>
+            @endif
+        </label>
+        <input type="file" class="form-control" id="employee_image" name="employee_image" accept="image/*">
+        @error('employee_image')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
     <div class="col-md-4">
         <label for="dob" class="form-label">Date of Birth</label>
         <input type="date" class="form-control" id="dob" name="dob"
@@ -18,7 +55,7 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 mt-3">
         <label for="gender" class="form-label">Gender</label>
         <select class="form-select" id="gender" name="gender">
             <option value="">Select Gender</option>
