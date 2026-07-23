@@ -24,6 +24,7 @@
         </select>
         @error('candidate_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+
     <div class="col-md-4">
         <label for="client_id" class="form-label">Client</label>
         <select class="form-select" id="client_id" name="client_id">
@@ -97,7 +98,7 @@
             <option value="">Select level</option>
             @foreach ($interviewLevels as $level)
                 @if(in_array($level->level, $sourcingLevels))
-                    <option value="{{ $level->id }}"
+                    <option value="{{ $level->id }}" data-level="{{ $level->level }}"
                         {{ (string) old('level_of_interview_id', $selectedLevelId) === (string) $level->id ? 'selected' : '' }}>
                         {{ $level->level }}
                     </option>
@@ -105,6 +106,13 @@
             @endforeach
         </select>
         @error('level_of_interview_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4" id="onboardingDateDiv" style="display: none;">
+        <label for="onboarding_date" class="form-label">Onboarding Date <span class="text-danger">*</span></label>
+        <input type="date" class="form-control" id="onboarding_date" name="onboarding_date" value="{{ old('onboarding_date', $onboarding_candidate->onboarding_date ?? '') }}">
+        @error('onboarding_date')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
     </div>
     <div class="col-md-4">
         <label for="statuss" class="form-label">Status <span class="text-danger">*</span></label>

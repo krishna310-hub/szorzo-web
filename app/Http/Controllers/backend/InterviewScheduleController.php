@@ -246,10 +246,12 @@ class InterviewScheduleController extends Controller
         $this->authorize('edit', Candidate::class);
 
         $interviewSchedule = InterviewSchedule::with('interviewMode')->findOrFail($id);
+        $onboarding_candidate = Candidate::findOrFail($interviewSchedule->candidate_id);
 
         return view('backend.interview-schedules.edit', array_merge(
             [
                 'interviewSchedule' => $interviewSchedule,
+                'onboarding_candidate' => $onboarding_candidate,
                 'selectedModeId' => $interviewSchedule->interview_mode_id,
             ],
             $this->formData()
@@ -260,11 +262,26 @@ class InterviewScheduleController extends Controller
     {
         $this->authorize('edit', Candidate::class);
 
+        $level = InterviewLevel::find($request->level_of_interview_id);
+        if ($level && $level->level === 'Offer Released' && !$request->filled('onboarding_date')) {
+            return back()
+                ->withErrors([
+                    'onboarding_date' => 'Onboarding Date is mandatory when the interview level is Offer Released.'
+                ])
+                ->withInput();
+        }
         $schedule = InterviewSchedule::findOrFail($id);
         $schedule->update($this->validatedData($request));
         $candidate = Candidate::findOrFail($schedule->candidate_id);
+        $candidateData = [];
         if ($candidate->level_of_interview_id != $request->level_of_interview_id) {
             $candidate->update(['level_of_interview_id' => $request->level_of_interview_id]);
+        }
+        if ($request->onboarding_date) {
+            $candidateData['onboarding_date'] = $request->onboarding_date;
+        }
+        if (!empty($candidateData)) {
+            $candidate->update($candidateData);
         }
 
         return redirect()->route('admin.interview-schedules.index')->with('success', 'Interview schedule updated successfully.');

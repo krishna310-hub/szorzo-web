@@ -211,6 +211,12 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    <div class="col-md-4" id="onboardingDateDiv"></div>
+    <div class="col-md-4" id="onboardingDateDiv" style="{{ !empty($candidate->onboarding_date) ? 'display:block;' : 'display:none;' }}">
+        <label for="onboarding_date" class="form-label">Onboarding Date</label>
+        <input type="date" class="form-control" id="onboarding_date" name="onboarding_date"
+            value="{{ old('onboarding_date', $candidate->onboarding_date ?? '') }}" readonly>
+    </div>
 </div>
 <div class="d-flex gap-3 mt-5 justify-content-center"><button type="reset"
         class="btn btn-danger">Clear</button><button type="submit" class="btn btn-success">Submit</button></div>

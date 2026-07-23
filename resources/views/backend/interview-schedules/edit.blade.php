@@ -25,3 +25,27 @@
         </div>
     </div>
 @endsection
+@section('script')
+<script>
+    $(document).ready(function () {
+
+        function toggleOnboardingDate() {
+
+            var selectedLevel = $('#level_of_interview_id option:selected').text().trim();
+            var onboardingDate = $('#onboarding_date').val();
+
+            if (selectedLevel === 'Offer Released' || onboardingDate !== '') {
+                $('#onboardingDateDiv').show();
+            } else {
+                $('#onboardingDateDiv').hide();
+            }
+        }
+
+        $('#level_of_interview_id').on('change', function () {
+            toggleOnboardingDate();
+        });
+
+        toggleOnboardingDate();
+    });
+</script>
+@endsection

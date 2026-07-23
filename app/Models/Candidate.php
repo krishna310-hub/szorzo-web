@@ -31,6 +31,7 @@ class Candidate extends Model
         'level_of_interview_id',
         'status',
         'upload_cv',
+        'onboarding_date',
     ];
 
     protected $casts = [
