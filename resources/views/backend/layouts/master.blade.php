@@ -10,6 +10,7 @@
     <meta content="Themesbrand" name="author" /> --}}
     <!-- App favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('frontend/images/favicon.png') }}">
+    <link rel="stylesheet" href="{{ asset('frontend/css/remixicon.css') }}">
 
     @include('backend.layouts.css_master')
 
