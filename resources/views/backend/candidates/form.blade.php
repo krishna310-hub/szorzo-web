@@ -89,28 +89,28 @@
     </div>
     <div class="col-md-4"><label for="take_home" class="form-label">Take Home</label><input type="number"
             step="0.01" min="0" class="form-control" id="take_home" name="take_home"
-            value="{{ old('take_home', $candidate->take_home ?? '') }}">
+            value="{{ old('take_home', isset($candidate) ? (int) $candidate->take_home : '') }}">
         @error('take_home')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
     <div class="col-md-4"><label for="variable" class="form-label">Variable</label><input type="number" step="0.01"
             min="0" class="form-control" id="variable" name="variable"
-            value="{{ old('variable', $candidate->variable ?? '') }}">
+            value="{{ old('variable', isset($candidate) ? (int) $candidate->variable : '') }}">
         @error('variable')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
     <div class="col-md-4"><label for="current_ctc" class="form-label">Current CTC <span class="text-danger">*</span></label><input type="number"
             step="0.01" min="0" class="form-control" id="current_ctc" name="current_ctc"
-            value="{{ old('current_ctc', $candidate->current_ctc ?? '') }}">
+            value="{{ old('current_ctc', isset($candidate) ? (int) $candidate->current_ctc : '') }}">
         @error('current_ctc')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
     <div class="col-md-4"><label for="expected_ctc" class="form-label">Expected CTC <span class="text-danger">*</span></label><input type="number"
             step="0.01" min="0" class="form-control" id="expected_ctc" name="expected_ctc"
-            value="{{ old('expected_ctc', $candidate->expected_ctc ?? '') }}">
+            value="{{ old('expected_ctc', isset($candidate) ? (int) $candidate->expected_ctc : '') }}">
         @error('expected_ctc')
             <span class="text-danger small">{{ $message }}</span>
         @enderror

@@ -39,7 +39,19 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
-        Employee::create($this->validatedData($request));
+         $data = $this->validatedData($request);
+
+        if ($request->hasFile('employee_image')) {
+
+            $image = $request->file('employee_image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+            $image->move(public_path('uploads/employees'), $imageName);
+
+            $data['employee_image'] = $imageName;
+        }
+
+        Employee::create($data);
 
         return redirect()->route('admin.employees.index')->with('success', 'Employee created successfully.');
     }
@@ -54,7 +66,23 @@ class EmployeeController extends Controller
     public function update(Request $request, $id)
     {
         $employee = Employee::findOrFail($id);
-        $employee->update($this->validatedData($request, $employee->id));
+        $data = $this->validatedData($request, $employee->id);
+
+        if ($request->hasFile('employee_image')) {
+
+        if ($employee->employee_image && file_exists(public_path('uploads/employees/' . $employee->employee_image))) {
+                unlink(public_path('uploads/employees/' . $employee->employee_image));
+            }
+
+            $image = $request->file('employee_image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+            $image->move(public_path('uploads/employees'), $imageName);
+
+            $data['employee_image'] = $imageName;
+        }
+
+        $employee->update($data);
 
         return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully.');
     }
@@ -71,6 +99,7 @@ class EmployeeController extends Controller
         return $request->validate([
             // Personal Information
             'employee_name' => 'required|string|max:255',
+            'employee_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'dob' => 'nullable|date',
             'gender' => 'nullable|in:Male,Female,Other',
             'marital_status' => 'nullable|in:Single,Married,Divorced,Widowed',
