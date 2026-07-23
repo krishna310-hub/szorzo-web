@@ -12,6 +12,7 @@ use App\Models\JobRole;
 use App\Models\Recruiter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -98,18 +99,11 @@ class InterviewScheduleController extends Controller
                                 ->orWhere('notes', 'like', "%{$search}%");
 
                             // Status search
-                            $statusMap = [
-                                'scheduled' => 0,
-                                'completed' => 1,
-                                'cancelled' => 2,
-                                'rescheduled' => 3,
-                            ];
-
                             $searchStatus = strtolower($search);
 
-                            foreach ($statusMap as $statusName => $statusValue) {
+                            foreach (array_keys(InterviewSchedule::STATUSES) as $statusName) {
                                 if (str_contains($statusName, $searchStatus)) {
-                                    $q->orWhere('status', $statusValue);
+                                    $q->orWhere('status', $statusName);
                                 }
                             }
                         });
@@ -235,7 +229,14 @@ class InterviewScheduleController extends Controller
     {
         $this->authorize('create', Candidate::class);
 
-        InterviewSchedule::create($this->validatedData($request));
+        $data = $this->validatedData($request);
+
+        DB::transaction(function () use ($data) {
+            InterviewSchedule::create($data);
+            Candidate::whereKey($data['candidate_id'])->update([
+                'level_of_interview_id' => $data['level_of_interview_id'],
+            ]);
+        });
 
         return redirect()->route('admin.interview-schedules.index')->with('success', 'Interview schedule created successfully.');
     }
