@@ -219,12 +219,14 @@ class AdminController extends Controller
             'recruiterPerformance' => $recruiterPerformance,
             'activeRequirements' => (clone $requirements)->where('status', true)->count(),//sum('number_of_position')
             'inActiveRequirements' => (clone $requirements)->where('status', false)->count(),//sum('number_of_position')
+
             'myApplicants' => (clone $candidates)->count(),
             'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
             'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),
             'offered' => (clone $interviews)->where('level_of_interview_id', 30)->count(),
             'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
             'onboarded' => (clone $interviews)->where('level_of_interview_id', 20)->count(),
+
             'revenue' => (clone $requirements)->sum('revenue_amount'),
             'candidateLevels' => $candidateLevels,
             'chartMonths' => $months->map->format('M')->values(),
@@ -255,11 +257,11 @@ class AdminController extends Controller
             ->where('status', '!=', 'cancelled');
 
         // Fixed IDs from the Level of Interviews master.
-        $shortlistedLevelIds = [3];
-        $interviewLevelIds = [7, 8, 9, 10, 11, 12, 13, 23, 24, 25, 27, 28, 29];
-        $hrSelectId = 15;
-        $offerReleasedIds = [22, 30];
-        $offerAcceptedId = 30;
+        $shortlistedLevelIds = [3, 7, 8, 9, 31, 11, 12, 13, 32, 23, 25, 24, 33, 27, 28, 29, 34, 14, 15, 16, 35, 22, 20, 21, 36, 5];
+        $interviewLevelIds = [7, 8, 9, 31, 11, 12, 13, 32, 23, 24, 25, 33, 27, 28, 29, 34, 15, 35, 30, 22, 20, 21];
+        $hrSelectId = [15, 35, 30, 22, 20, 21];
+        $offerReleasedIds = [35, 30, 22, 20, 21];
+        $offerAcceptedId = [30, 20];
         $onboardedId = 20;
 
         $definitions = [
