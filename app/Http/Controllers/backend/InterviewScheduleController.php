@@ -24,167 +24,164 @@ class InterviewScheduleController extends Controller
         $this->authorize('read', Candidate::class);
 
         if ($request->ajax()) {
-            $query = $this->scheduleQuery($request)
-                ->latest('schedule_date');
+            return DataTables::of(
+                $this->scheduleQuery($request)->latest('schedule_date')
+            )
+                ->filter(function ($query) use ($request) {
+                    $search = trim((string) $request->input('search.value'));
 
-            return DataTables::of($query)
+                    if ($search !== '') {
+                        $query->where(function ($q) use ($search) {
+
+                            // Candidate name, mobile, recruiter, client and job role
+                            $q->whereHas('candidate', function ($candidateQuery) use ($search) {
+                                $candidateQuery
+                                    ->where('candidate_name', 'like', "%{$search}%")
+                                    ->orWhere('mobile_no', 'like', "%{$search}%")
+                                    ->orWhereHas('recruiter', function ($recruiterQuery) use ($search) {
+                                        $recruiterQuery->where(
+                                            'recruiter_name',
+                                            'like',
+                                            "%{$search}%"
+                                        );
+                                    })
+                                    ->orWhereHas('client', function ($clientQuery) use ($search) {
+                                        $clientQuery->where(
+                                            'client',
+                                            'like',
+                                            "%{$search}%"
+                                        );
+                                    })
+                                    ->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
+                                        $jobRoleQuery->where(
+                                            'job_role',
+                                            'like',
+                                            "%{$search}%"
+                                        );
+                                    });
+                            })
+
+                                // Direct client relation
+                                ->orWhereHas('client', function ($clientQuery) use ($search) {
+                                    $clientQuery->where(
+                                        'client',
+                                        'like',
+                                        "%{$search}%"
+                                    );
+                                })
+
+                                // Direct job role relation
+                                ->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
+                                    $jobRoleQuery->where(
+                                        'job_role',
+                                        'like',
+                                        "%{$search}%"
+                                    );
+                                })
+
+                                // Interview level
+                                ->orWhereHas('interviewLevel', function ($levelQuery) use ($search) {
+                                    $levelQuery->where(
+                                        'level',
+                                        'like',
+                                        "%{$search}%"
+                                    );
+                                })
+
+                                // Schedule date
+                                ->orWhereRaw(
+                                    "DATE_FORMAT(schedule_date, '%d-%m-%Y %H:%i') LIKE ?",
+                                    ["%{$search}%"]
+                                )
+
+                                // Notes
+                                ->orWhere('notes', 'like', "%{$search}%");
+
+                            // Status search
+                            $statusMap = [
+                                'scheduled' => 0,
+                                'completed' => 1,
+                                'cancelled' => 2,
+                                'rescheduled' => 3,
+                            ];
+
+                            $searchStatus = strtolower($search);
+
+                            foreach ($statusMap as $statusName => $statusValue) {
+                                if (str_contains($statusName, $searchStatus)) {
+                                    $q->orWhere('status', $statusValue);
+                                }
+                            }
+                        });
+                    }
+                })
                 ->addIndexColumn()
 
                 ->addColumn(
                     'candidate_name',
-                    fn ($row) => $row->candidate?->candidate_name ?? '-'
+                    fn($row) => $row->candidate?->candidate_name ?? '-'
                 )
-                ->filterColumn('candidate_name', function ($query, $keyword) {
-                    $query->whereHas('candidate', function ($candidateQuery) use ($keyword) {
-                        $candidateQuery->where(
-                            'candidate_name',
-                            'like',
-                            "%{$keyword}%"
-                        );
-                    });
-                })
 
                 ->addColumn(
                     'candidate_mobile',
-                    fn ($row) => $row->candidate?->mobile_no ?? '-'
+                    fn($row) => $row->candidate?->mobile_no ?? '-'
                 )
-                ->filterColumn('candidate_mobile', function ($query, $keyword) {
-                    $query->whereHas('candidate', function ($candidateQuery) use ($keyword) {
-                        $candidateQuery->where(
-                            'mobile_no',
-                            'like',
-                            "%{$keyword}%"
-                        );
-                    });
-                })
 
                 ->addColumn(
                     'recruiter_name',
-                    fn ($row) => $row->candidate?->recruiter?->recruiter_name ?? '-'
+                    fn($row) => $row->candidate?->recruiter?->recruiter_name ?? '-'
                 )
-                ->filterColumn('recruiter_name', function ($query, $keyword) {
-                    $query->whereHas('candidate.recruiter', function ($recruiterQuery) use ($keyword) {
-                        $recruiterQuery->where(
-                            'recruiter_name',
-                            'like',
-                            "%{$keyword}%"
-                        );
-                    });
-                })
 
                 ->addColumn(
                     'client_name',
-                    fn ($row) => $row->client?->client
+                    fn($row) => $row->client?->client
                         ?? $row->candidate?->client?->client
                         ?? '-'
                 )
-                ->filterColumn('client_name', function ($query, $keyword) {
-                    $query->where(function ($subQuery) use ($keyword) {
-                        $subQuery
-                            ->whereHas('client', function ($clientQuery) use ($keyword) {
-                                $clientQuery->where(
-                                    'client',
-                                    'like',
-                                    "%{$keyword}%"
-                                );
-                            })
-                            ->orWhereHas('candidate.client', function ($clientQuery) use ($keyword) {
-                                $clientQuery->where(
-                                    'client',
-                                    'like',
-                                    "%{$keyword}%"
-                                );
-                            });
-                    });
-                })
 
                 ->addColumn(
                     'job_role_name',
-                    fn ($row) => $row->jobRole?->job_role
+                    fn($row) => $row->jobRole?->job_role
                         ?? $row->candidate?->jobRole?->job_role
                         ?? '-'
                 )
-                ->filterColumn('job_role_name', function ($query, $keyword) {
-                    $query->where(function ($subQuery) use ($keyword) {
-                        $subQuery
-                            ->whereHas('jobRole', function ($roleQuery) use ($keyword) {
-                                $roleQuery->where(
-                                    'job_role',
-                                    'like',
-                                    "%{$keyword}%"
-                                );
-                            })
-                            ->orWhereHas('candidate.jobRole', function ($roleQuery) use ($keyword) {
-                                $roleQuery->where(
-                                    'job_role',
-                                    'like',
-                                    "%{$keyword}%"
-                                );
-                            });
-                    });
-                })
 
                 ->addColumn(
                     'interview_level',
-                    fn ($row) => $row->interviewLevel?->level ?? '-'
+                    fn($row) => $row->interviewLevel?->level ?? '-'
                 )
-                ->filterColumn('interview_level', function ($query, $keyword) {
-                    $query->whereHas('interviewLevel', function ($levelQuery) use ($keyword) {
-                        $levelQuery->where(
-                            'level',
-                            'like',
-                            "%{$keyword}%"
-                        );
-                    });
-                })
 
                 ->editColumn(
                     'schedule_date',
-                    fn ($row) => $row->schedule_date?->format('d-m-Y H:i') ?? '-'
+                    fn($row) => $row->schedule_date?->format('d-m-Y H:i') ?? '-'
                 )
-                ->filterColumn('schedule_date', function ($query, $keyword) {
-                    $query->whereRaw(
-                        "DATE_FORMAT(schedule_date, '%d-%m-%Y %H:%i') LIKE ?",
-                        ["%{$keyword}%"]
-                    );
-                })
 
                 ->editColumn(
                     'status',
-                    fn ($row) => $this->statusBadge($row->status)
+                    fn($row) => $this->statusBadge($row->status)
                 )
-                ->filterColumn('status', function ($query, $keyword) {
-                    $statusMap = [
-                        'scheduled'   => 0,
-                        'completed'   => 1,
-                        'cancelled'   => 2,
-                        'rescheduled' => 3,
-                    ];
-
-                    $keyword = strtolower(trim($keyword));
-
-                    if (array_key_exists($keyword, $statusMap)) {
-                        $query->where('status', $statusMap[$keyword]);
-                    } else {
-                        $query->where('status', 'like', "%{$keyword}%");
-                    }
-                })
 
                 ->editColumn(
                     'notes',
-                    fn ($row) => $row->notes ?: '-'
+                    fn($row) => $row->notes ?: '-'
                 )
 
                 ->addColumn('action', function ($row) {
-                    $buttons = '<a href="'.
-                        route('admin.interview-schedules.show', $row->candidate_id).
+                    $buttons = '<a href="' .
+                        route(
+                            'admin.interview-schedules.show',
+                            $row->candidate_id
+                        ) .
                         '" class="text-primary fs-4 me-1" title="History">
                             <i class="ri-history-line"></i>
                         </a>';
 
                     if (auth()->user()->can('edit', Candidate::class)) {
-                        $buttons .= '<a href="'.
-                            route('admin.interview-schedules.edit', $row->id).
+                        $buttons .= '<a href="' .
+                            route(
+                                'admin.interview-schedules.edit',
+                                $row->id
+                            ) .
                             '" class="text-info fs-4 me-1" title="Edit">
                                 <i class="bx bxs-edit"></i>
                             </a>';
@@ -193,8 +190,11 @@ class InterviewScheduleController extends Controller
                     if (auth()->user()->can('delete', Candidate::class)) {
                         $buttons .= '<button
                             type="button"
-                            data-route="'.
-                            route('admin.interview-schedules.delete', $row->id).
+                            data-route="' .
+                            route(
+                                'admin.interview-schedules.delete',
+                                $row->id
+                            ) .
                             '"
                             class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record"
                             title="Delete">
@@ -262,9 +262,10 @@ class InterviewScheduleController extends Controller
         $schedule = InterviewSchedule::findOrFail($id);
         $schedule->update($this->validatedData($request));
         $candidate = Candidate::findOrFail($schedule->candidate_id);
-        if( $candidate->level_of_interview_id != $request->level_of_interview_id) {
+        if ($candidate->level_of_interview_id != $request->level_of_interview_id) {
             $candidate->update(['level_of_interview_id' => $request->level_of_interview_id]);
         }
+
         return redirect()->route('admin.interview-schedules.index')->with('success', 'Interview schedule updated successfully.');
     }
 
@@ -293,18 +294,18 @@ class InterviewScheduleController extends Controller
     private function scheduleQuery(Request $request)
     {
         return InterviewSchedule::with(['candidate.recruiter', 'candidate.client', 'candidate.jobRole', 'client', 'jobRole', 'interviewLevel'])
-            ->when($request->filled('from_date'), fn ($query) => $query->whereDate('schedule_date', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn ($query) => $query->whereDate('schedule_date', '<=', $request->to_date))
-            ->when($request->filled('candidate_id'), fn ($query) => $query->where('candidate_id', $request->candidate_id))
-            ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
-            ->when($request->filled('job_role_id'), fn ($query) => $query->where('job_role_id', $request->job_role_id))
+            ->when($request->filled('from_date'), fn($query) => $query->whereDate('schedule_date', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn($query) => $query->whereDate('schedule_date', '<=', $request->to_date))
+            ->when($request->filled('candidate_id'), fn($query) => $query->where('candidate_id', $request->candidate_id))
+            ->when($request->filled('client_id'), fn($query) => $query->where('client_id', $request->client_id))
+            ->when($request->filled('job_role_id'), fn($query) => $query->where('job_role_id', $request->job_role_id))
             ->when($request->filled('level_of_interview_id'), function ($query) use ($request) {
                 $levelIds = array_filter((array) $request->input('level_of_interview_id'));
 
                 return $query->whereIn('level_of_interview_id', $levelIds);
             })
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->status))
-            ->when($request->filled('recruiter_id'), fn ($query) => $query->whereHas('candidate', fn ($candidateQuery) => $candidateQuery->where('recruiter_id', $request->recruiter_id)));
+            ->when($request->filled('status'), fn($query) => $query->where('status', $request->status))
+            ->when($request->filled('recruiter_id'), fn($query) => $query->whereHas('candidate', fn($candidateQuery) => $candidateQuery->where('recruiter_id', $request->recruiter_id)));
     }
 
     private function formData(): array
@@ -347,6 +348,6 @@ class InterviewScheduleController extends Controller
         $label = InterviewSchedule::STATUSES[$status] ?? ucfirst($status);
         $class = $classes[$status] ?? 'bg-secondary-subtle text-secondary';
 
-        return '<span class="badge '.$class.'">'.$label.'</span>';
+        return '<span class="badge ' . $class . '">' . $label . '</span>';
     }
 }
