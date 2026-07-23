@@ -221,7 +221,7 @@ class AdminController extends Controller
             'inActiveRequirements' => (clone $requirements)->where('status', false)->count(),//sum('number_of_position')
 
             'myApplicants' => (clone $candidates)->count(),
-            'scheduledInterviews' => (clone $interviews)->where('status', 'scheduled')->get(),
+            'scheduledInterviews' => (clone $interviews)->whereIn('status', ['scheduled', 'completed', 'selected'])->get(),
             'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),
             'offered' => (clone $interviews)->where('level_of_interview_id', 30)->count(),
             'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),

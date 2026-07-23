@@ -46,12 +46,12 @@
         @error('job_role_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
-        <label for="schedule_date" class="form-label">Schedule Date <span class="text-danger">*</span></label>
+        <label for="schedule_date" class="form-label">Schedule Date </label>
         <input type="datetime-local" class="form-control" id="schedule_date" name="schedule_date" value="{{ old('schedule_date', $schedule?->schedule_date?->format('Y-m-d\TH:i')) }}">
         @error('schedule_date')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
-        <label for="interview_mode_id" class="form-label">Interview Mode <span class="text-danger">*</span></label>
+        <label for="interview_mode_id" class="form-label">Interview Mode</label>
         <select class="form-select" id="interview_mode_id" name="interview_mode_id">
             <option value="">Select interview mode</option>
             @foreach ($interviewMode as $mode)

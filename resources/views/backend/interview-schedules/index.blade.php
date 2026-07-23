@@ -33,6 +33,7 @@
                                                 <th>Schedule Date</th>
                                                 <th>Status</th>
                                                 <th>Notes</th>
+                                                <th>Created At</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -205,6 +206,9 @@
                 }, {
                     data: 'notes',
                     name: 'notes'
+                }, {
+                    data: 'created_at',
+                    name: 'created_at',
                 }, {
                     data: 'action',
                     name: 'action',

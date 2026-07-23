@@ -55,6 +55,7 @@
                                                 <th>Recruiter</th>
                                                 <th>Client</th>
                                                 <th>Job Role</th>
+                                                <th>Level Of Interview</th>
                                                 <th>Mobile No</th>
                                                 <th>Email</th>
                                                 <th>Qualification</th>
@@ -69,7 +70,6 @@
                                                 <th>Current Location</th>
                                                 <th>Preferred Location</th>
                                                 <th>Reason For Change</th>
-                                                <th>Level Of Interview</th>
                                                 <th>Status</th>
                                                 <th>Created At</th>
                                                 <th>Action</th>
@@ -223,8 +223,12 @@
                         name: 'job_role_name',
                         orderable: false,
                         searchable: false
-                    },
-                    {
+                    }, {
+                        data: 'interview_level',
+                        name: 'interview_level',
+                        orderable: false,
+                        searchable: false
+                    }, {
                         data: 'mobile_no',
                         name: 'mobile_no'
                     }, {
@@ -269,12 +273,6 @@
                     }, {
                         data: 'reason_for_change',
                         name: 'reason_for_change'
-                    },
-                    {
-                        data: 'interview_level',
-                        name: 'interview_level',
-                        orderable: false,
-                        searchable: false
                     }, {
                         data: 'status',
                         name: 'status',

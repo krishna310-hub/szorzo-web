@@ -160,6 +160,11 @@ class InterviewScheduleController extends Controller
                     fn($row) => $row->notes ?: '-'
                 )
 
+                ->editColumn(
+                    'created_at',
+                    fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-'
+                )
+
                 ->addColumn('action', function ($row) {
                     $buttons = '<a href="' .
                         route(
@@ -231,10 +236,20 @@ class InterviewScheduleController extends Controller
 
         $data = $this->validatedData($request);
 
+        $level = InterviewLevel::find($request->level_of_interview_id);
+        if ($level && $level->level === 'Offer Released' && !$request->filled('onboarding_date')) {
+            return back()
+                ->withErrors([
+                    'onboarding_date' => 'Onboarding Date is mandatory when the interview level is Offer Released.'
+                ])
+                ->withInput();
+        }
+
         DB::transaction(function () use ($data) {
             InterviewSchedule::create($data);
             Candidate::whereKey($data['candidate_id'])->update([
                 'level_of_interview_id' => $data['level_of_interview_id'],
+                'onboarding_date'       => $data['onboarding_date'],
             ]);
         });
 
@@ -345,11 +360,12 @@ class InterviewScheduleController extends Controller
             'candidate_id' => 'required|exists:candidates,id',
             'client_id' => 'nullable|exists:clients,id',
             'job_role_id' => 'nullable|exists:job_roles,id',
-            'interview_mode_id' => 'required|exists:interview_modes,id',
+            'interview_mode_id' => 'nullable|exists:interview_modes,id',
             'level_of_interview_id' => 'required|exists:level_of_interviews,id',
-            'schedule_date' => 'required|date',
+            'schedule_date' => 'nullable|date',
             'status' => ['required', Rule::in(array_keys(InterviewSchedule::STATUSES))],
             'notes' => 'nullable|string',
+            'onboarding_date' => 'nullable|date',
         ]);
     }
 
