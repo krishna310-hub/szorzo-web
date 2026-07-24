@@ -17,7 +17,7 @@
     <div class="card-body">
         @include('backend.partials.import-feedback')
         <div class="table-responsive">
-        <table id="clients-table" class="table table-bordered dt-responsive nowrap w-100"><thead><tr>
+        <table id="clients-table" class="table table-bordered nowrap w-100"><thead><tr>
             <th>S.No</th><th>Client</th><th>Billing</th><th>Location</th><th>PoC Name</th><th>Signed Date</th><th>Renewal Date</th><th>Division</th><th>Contact Number</th><th>Email</th><th>Status</th><th>Created At</th><th>Action</th>
         </tr></thead><tbody></tbody></table>
     </div></div>

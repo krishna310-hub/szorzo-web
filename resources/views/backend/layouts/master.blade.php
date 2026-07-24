@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="gradient-4" data-sidebar-size="lg" data-sidebar-image="img-3" data-preloader="disable" data-theme="default" data-theme-colors="blue">
+<html lang="en" data-layout="horizontal" data-topbar="light" data-preloader="disable" data-theme="default" data-theme-colors="blue">
 
 <head>
     <meta charset="utf-8" />
@@ -108,7 +108,7 @@
         </div>
     </div>
 
-    @include('backend.layouts.theme_setting')
+    {{-- @include('backend.layouts.theme_setting') --}}
 
     @include('backend.layouts.js_master')
     @yield('script')
