@@ -39,6 +39,7 @@ class CandidateController extends Controller
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
                 ->addColumn('interview_level', fn ($row) => $row->interviewLevel->level ?? '-')
+                ->editColumn('onboarding_date', fn($row) => $row->onboarding_date?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')

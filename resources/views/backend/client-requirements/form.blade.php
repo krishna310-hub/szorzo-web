@@ -25,6 +25,23 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    <div class="col-md-4"><label for="position_level" class="form-label">Position Level</label>
+        <select class="form-select" id="position_level" name="position_level">
+            <option value="">Select Position Level</option>
+            <option value="Junior" {{ old('position_level', $clientRequirement->position_level ?? '') == 'Junior' ? 'selected' : '' }}>
+                Junior
+            </option>
+            <option value="Mid" {{ old('position_level', $clientRequirement->position_level ?? '') == 'Mid' ? 'selected' : '' }}>
+                Mid
+            </option>
+            <option value="Senior" {{ old('position_level', $clientRequirement->position_level ?? '') == 'Senior' ? 'selected' : '' }}>
+                Senior
+            </option>
+        </select>
+        @error('position_level')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
     <div class="col-md-4"><label for="mode_id" class="form-label">Mode</label><select class="form-select"
             id="mode_id" name="mode_id">
             <option value="">Select mode</option>
@@ -59,13 +76,6 @@
             class="form-control" id="revenue_amount" name="revenue_amount"
             value="" readonly>
         @error('revenue_amount')
-            <span class="text-danger small">{{ $message }}</span>
-        @enderror
-    </div>
-    <div class="col-md-4"><label for="payment_cycle" class="form-label">Payment Cycle</label><input
-            type="number" min="0" class="form-control" id="payment_cycle" name="payment_cycle"
-            value="{{ old('payment_cycle', $clientRequirement->payment_cycle ?? 0) }}">
-        @error('payment_cycle')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>

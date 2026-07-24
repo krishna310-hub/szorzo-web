@@ -18,7 +18,7 @@
         @include('backend.partials.import-feedback')
         <div class="table-responsive">
         <table id="clients-table" class="table table-bordered nowrap w-100"><thead><tr>
-            <th>S.No</th><th>Client</th><th>Billing</th><th>Location</th><th>PoC Name</th><th>Signed Date</th><th>Renewal Date</th><th>Division</th><th>Contact Number</th><th>Email</th><th>Status</th><th>Created At</th><th>Action</th>
+            <th>S.No</th><th>Client</th><th>Agreement</th><th>Billing</th><th>Payment Cycle</th><th>Location</th><th>PoC Name</th><th>Signed Date</th><th>Renewal Date</th><th>Division</th><th>Contact Number</th><th>Email</th><th>Status</th><th>Created At</th><th>Action</th>
         </tr></thead><tbody></tbody></table>
     </div></div>
 </div></div></div></div></div></div>
@@ -32,7 +32,9 @@ $(document).ready(function () {
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'client', name: 'client' },
+            { data: 'agreement_preview', name: 'agreement_preview', orderable: false, searchable: false},
             { data: 'billing_value', name: 'billing_value', orderable: false, searchable: false  },
+            { data: 'payment_cycle', name: 'payment_cycle', orderable: false, searchable: false  },
             { data: 'location_name', name: 'location_name', orderable: false, searchable: false },
             { data: 'poc_name', name: 'poc_name' }, { data: 'signed_date', name: 'signed_date' },
             { data: 'renewal_date', name: 'renewal_date' },

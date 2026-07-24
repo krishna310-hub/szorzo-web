@@ -70,6 +70,7 @@
                                                 <th>Current Location</th>
                                                 <th>Preferred Location</th>
                                                 <th>Reason For Change</th>
+                                                <th>Onboarding Date</th>
                                                 <th>Status</th>
                                                 <th>Created At</th>
                                                 <th>Action</th>
@@ -273,6 +274,11 @@
                     }, {
                         data: 'reason_for_change',
                         name: 'reason_for_change'
+                    }, {
+                        data: 'onboarding_date',
+                        name: 'onboarding_date',
+                        orderable: false,
+                        searchable: false
                     }, {
                         data: 'status',
                         name: 'status',

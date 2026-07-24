@@ -36,6 +36,7 @@ class Candidate extends Model
 
     protected $casts = [
         'status' => 'boolean',
+        'onboarding_date' => 'date',
     ];
 
     public function recruiter()

@@ -30,9 +30,8 @@
                                                 <th>S.No</th>
                                                 <th>Client</th>
                                                 <th>Billing</th>
-                                                <th>Payment Cycle</th>
                                                 <th>Job Role</th>
-                                                {{-- <th>Job Description</th> --}}
+                                                <th>Position Level</th>
                                                 <th>Mode</th>
                                                 <th>Requirement Open Date</th>
                                                 <th>Number Of Position</th>
@@ -65,6 +64,11 @@
                 processing: true,
                 serverSide: true,
                 scrollX: true,
+                scrollCollapse: true,
+                autoWidth: false,
+                fixedColumns: {
+                    leftColumns: 3
+                },
                 ajax: {
                     url: '{{ route('admin.client-requirements.index') }}',
                     type: 'GET'
@@ -83,21 +87,16 @@
                     data: 'billing_value',
                     name: 'billing_value'
                 }, {
-                    data: 'payment_cycle',
-                    name: 'payment_cycle'
-                }, {
                     data: 'job_role_name',
                     name: 'job_role_name',
                     orderable: false,
                     searchable: false
-                },
-                // {
-                //     data: 'job_description_name',
-                //     name: 'job_description_name',
-                //     orderable: false,
-                //     searchable: false
-                // }
-                {
+                }, {
+                    data: 'psoition_level',
+                    name: 'psoition_level',
+                    orderable: false,
+                    searchable: false
+                },{
                     data: 'mode_name',
                     name: 'mode_name',
                     orderable: false,

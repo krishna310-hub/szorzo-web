@@ -33,13 +33,9 @@ class ClientRequirementController extends Controller
 
             return DataTables::of($query)
                 ->addIndexColumn()
-                ->addColumn('payment_cycle', function ($row) {
-                    return $row->payment_cycle > 0
-                        ? $row->payment_cycle . ' Days'
-                        : '-';
-                })
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_description_name', fn ($row) => $row->jobDescription->job_description ?? '-')
+                ->addColumn('psoition_level', fn ($row) => $row->position_level ?? '-')
                 ->addColumn('mode_name', fn ($row) => $row->mode->mode ?? '-')
                 ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
                 ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
@@ -121,7 +117,6 @@ class ClientRequirementController extends Controller
                 $item->client?->client,
                 $item->billing?->value,
                 $item->revenue_amount,
-                $item->payment_cycle,
                 $item->jobDescription?->job_description,
                 $item->mode?->mode,
                 $item->requirement_open_date?->format('Y-m-d'),
@@ -288,8 +283,8 @@ class ClientRequirementController extends Controller
         return $request->validate([
             'client_id' => 'required|exists:clients,id',
             'billing_id' => 'nullable|exists:billings,id',
+            'position_level' => 'nullable|string',
             'revenue_amount' => 'nullable|numeric|min:0',
-            'payment_cycle' => 'nullable|integer|min:0',
             'job_description_id' => 'nullable|exists:client_job_roles,id',
             'mode_id' => 'nullable|exists:modes,id',
             'requirement_open_date' => 'nullable|date',
@@ -307,6 +302,6 @@ class ClientRequirementController extends Controller
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Client', 'Billing', 'Payment Cycle', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Location', 'Status'];
+        return ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Location', 'Status'];
     }
 }

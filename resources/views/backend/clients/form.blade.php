@@ -1,7 +1,7 @@
 <div class="row gy-4">
     <div class="col-md-4">
         <label for="client" class="form-label">Client <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="client" name="client" value="{{ old('client', $client->client ?? '') }}">
+        <input type="text" class="form-control" id="client" name="client" placeholder="Enter client name" value="{{ old('client', $client->client ?? '') }}">
         @error('client')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
@@ -15,6 +15,13 @@
         </select>
         @error('billing_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+    <div class="col-md-4"><label for="payment_cycle" class="form-label">Payment Cycle</label><input
+            type="number" min="0" class="form-control" id="payment_cycle" name="payment_cycle"
+            value="{{ old('payment_cycle', $client->payment_cycle ?? 0) }}">
+        @error('payment_cycle')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
     <div class="col-md-4">
         <label for="location_id" class="form-label">Location</label>
         <select class="form-select" id="location_id" name="location_id">
@@ -27,7 +34,7 @@
     </div>
     <div class="col-md-4">
         <label for="poc_name" class="form-label">PoC Name</label>
-        <input type="text" class="form-control" id="poc_name" name="poc_name" value="{{ old('poc_name', $client->poc_name ?? '') }}">
+        <input type="text" class="form-control" id="poc_name" placeholder="Enter poc name" name="poc_name" value="{{ old('poc_name', $client->poc_name ?? '') }}">
         @error('poc_name')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
@@ -52,13 +59,32 @@
     </div>
     <div class="col-md-4">
         <label for="contact_number" class="form-label">Contact Number</label>
-        <input type="text" class="form-control" id="contact_number" name="contact_number" value="{{ old('contact_number', $client->contact_number ?? '') }}">
+        <input type="text" class="form-control" id="contact_number" placeholder="Enter contact number" name="contact_number" value="{{ old('contact_number', $client->contact_number ?? '') }}">
         @error('contact_number')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4">
         <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $client->email ?? '') }}">
+        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" value="{{ old('email', $client->email ?? '') }}">
         @error('email')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4">
+        <label for="upload_agreement" class="form-label">
+            Upload Agreement
+
+            @if(isset($client) && $client->upload_agreement)
+                <a href="{{ asset($client->upload_agreement) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    View Agreement
+                </a>
+            @endif
+        </label>
+
+        <input type="file" class="form-control" id="upload_agreement" name="upload_agreement">
+
+        <span class="text-danger small">Maximum file size is 2MB</span>
+
+        @error('upload_agreement')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
     </div>
     <div class="col-md-4">
         <label class="form-label">Status</label>

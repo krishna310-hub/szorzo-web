@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
 
 class ClientController extends Controller
 {
@@ -30,12 +31,23 @@ class ClientController extends Controller
                 ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
                 ->addColumn('division_name', fn ($row) => $row->division->name ?? '-')
                 ->addColumn('billing_value', fn ($row) => $row->billing ? $row->billing->value.'%' : '-')
+                ->addColumn('payment_cycle', function ($row) {
+                    return $row->payment_cycle > 0
+                        ? $row->payment_cycle . ' Days'
+                        : '-';
+                })
                 ->editColumn('signed_date', fn ($row) => $row->signed_date?->format('d-m-Y') ?? '-')
                 ->editColumn('renewal_date', fn ($row) => $row->renewal_date?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
                 ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
+                ->addColumn('agreement_preview', function ($row) {
+                    if ($row->upload_agreement) {
+                        return '<a href="'.asset($row->upload_agreement).'" target="_blank" class="btn btn-sm btn-outline-primary">View Agreement</a>';
+                    }
+                    return '-';
+                })
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', Client::class)) {
@@ -47,7 +59,7 @@ class ClientController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['status', 'action', 'agreement_preview'])
                 ->make(true);
         }
 
@@ -63,8 +75,27 @@ class ClientController extends Controller
 
     public function store(Request $request)
     {
+        ini_set('upload_max_filesize', '20M');
+        ini_set('post_max_size', '25M');
         $this->authorize('create', Client::class);
-        Client::create($this->validatedData($request));
+
+        $data = $this->validatedData($request);
+
+        if ($request->hasFile('upload_agreement')) {
+
+            $file = $request->file('upload_agreement');
+
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+
+            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
+
+            $file->move(public_path('uploads/clients'), $filename);
+
+            $data['upload_agreement'] = 'uploads/clients/' . $filename;
+        }
+
+        Client::create($data);
 
         return redirect()->route('admin.clients.index')->with('success', 'Client created successfully.');
     }
@@ -83,6 +114,27 @@ class ClientController extends Controller
     {
         $this->authorize('edit', Client::class);
         Client::findOrFail($id)->update($this->validatedData($request));
+
+        $client = Client::findOrFail($id);
+
+        $data = $this->validatedData($request, $client);
+
+        if ($request->hasFile('upload_agreement')) {
+
+            if ($client->upload_agreement && file_exists(public_path($client->upload_agreement))) {
+                unlink(public_path($client->upload_agreement));
+            }
+
+            $file = $request->file('upload_agreement');
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
+            $file->move(public_path('uploads/candidates'), $filename);
+
+            $data['upload_agreement'] = 'uploads/candidates/' . $filename;
+        }
+
+        $client->update($data);
 
         return redirect()->route('admin.clients.index')->with('success', 'Client updated successfully.');
     }
@@ -231,6 +283,7 @@ class ClientController extends Controller
         return $request->validate([
             'client' => 'required|string|max:255',
             'billing_id' => 'nullable|exists:billings,id',
+            'payment_cycle' => 'nullable|integer|min:0',
             'location_id' => 'nullable|exists:locations,id',
             'poc_name' => 'nullable|string|max:255',
             'signed_date' => 'nullable|date',
@@ -238,13 +291,13 @@ class ClientController extends Controller
             'division_id' => 'nullable|exists:divisions,id',
             'contact_number' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
-            'mobile_number' => 'nullable|string|max:30',
+            'upload_agreement' => 'nullable|mimes:pdf,doc,docx|max:2048',
             'status' => 'required|in:0,1',
         ]);
     }
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Client', 'Billing', 'Location', 'PoC Name', 'Signed Date', 'Renewal Date', 'Division', 'Contact Number', 'Email', 'Mobile Number', 'Status'];
+        return ['Record ID', 'Client', 'Billing', 'Payment Cycle', 'Location', 'PoC Name', 'Signed Date', 'Renewal Date', 'Division', 'Contact Number', 'Email', 'Mobile Number', 'Status'];
     }
 }

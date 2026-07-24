@@ -12,6 +12,7 @@ class Client extends Model
     protected $fillable = [
         'client',
         'billing_id',
+        'payment_cycle',
         'location_id',
         'poc_name',
         'signed_date',
@@ -20,6 +21,7 @@ class Client extends Model
         'contact_number',
         'email',
         'mobile_number',
+        'upload_agreement',
         'status',
     ];
 
