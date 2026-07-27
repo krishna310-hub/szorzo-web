@@ -1,5 +1,6 @@
 <div class="row gy-4">
-
+    <div class="col-md-4"><label for="invoice_number" class="form-label">Invoice Number</label><input class="form-control" id="invoice_number" name="invoice_number" value="{{ old('invoice_number', $billing->invoice_number ?? '') }}">@error('invoice_number')<span class="text-danger small">{{ $message }}</span>@enderror</div>
+    <div class="col-md-4"><label for="title" class="form-label">Invoice Title</label><input class="form-control" id="title" name="title" value="{{ old('title', $billing->title ?? '') }}">@error('title')<span class="text-danger small">{{ $message }}</span>@enderror</div>
     <div class="col-md-4"><label for="value" class="form-label">Value <span class="text-danger">*</span></label><input type="number" step="0.01"
             min="0" max="100" class="form-control" id="value" name="value"
             value="{{ old('value', $billing->value ?? '') }}">
@@ -7,6 +8,9 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    <div class="col-md-4"><label for="invoice_date" class="form-label">Invoice Date</label><input type="date" class="form-control" id="invoice_date" name="invoice_date" value="{{ old('invoice_date', isset($billing) && $billing->invoice_date ? $billing->invoice_date->format('Y-m-d') : '') }}">@error('invoice_date')<span class="text-danger small">{{ $message }}</span>@enderror</div>
+    <div class="col-md-4"><label for="amount" class="form-label">Invoice Amount</label><input type="number" step="0.01" min="0" class="form-control" id="amount" name="amount" value="{{ old('amount', $billing->amount ?? '') }}">@error('amount')<span class="text-danger small">{{ $message }}</span>@enderror</div>
+    <div class="col-md-8"><label for="notes" class="form-label">Invoice Notes</label><textarea class="form-control" id="notes" name="notes" rows="3">{{ old('notes', $billing->notes ?? '') }}</textarea>@error('notes')<span class="text-danger small">{{ $message }}</span>@enderror</div>
 
 
     <div class="col-md-6"><label class="form-label">Status</label>

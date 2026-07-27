@@ -42,16 +42,20 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-4"><label for="mode_id" class="form-label">Mode</label><select class="form-select"
-            id="mode_id" name="mode_id">
-            <option value="">Select mode</option>
+    @php
+        $selectedModes = array_map('strval', (array) old('mode_ids', $clientRequirement->mode_ids ?? array_filter([$clientRequirement->mode_id ?? null])));
+        $selectedLocations = array_map('strval', (array) old('location_ids', $clientRequirement->location_ids ?? array_filter([$clientRequirement->location_id ?? null])));
+    @endphp
+    <div class="col-md-4"><label for="mode_ids" class="form-label">Modes</label><select class="form-select"
+            id="mode_ids" name="mode_ids[]" multiple>
             @foreach ($modes as $mode)
                 <option value="{{ $mode->id }}"
-                    {{ old('mode_id', $clientRequirement->mode_id ?? '') == $mode->id ? 'selected' : '' }}>
+                    {{ in_array((string)$mode->id, $selectedModes, true) ? 'selected' : '' }}>
                     {{ $mode->mode }}</option>
             @endforeach
         </select>
-        @error('mode_id')
+        <small class="text-muted">Search and select one or more modes.</small>
+        @error('mode_ids')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
@@ -140,16 +144,16 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-4"><label for="location_id" class="form-label">Location</label><select class="form-select"
-            id="location_id" name="location_id">
-            <option value="">Select location</option>
+    <div class="col-md-4"><label for="location_ids" class="form-label">Locations</label><select class="form-select"
+            id="location_ids" name="location_ids[]" multiple>
             @foreach ($locations as $location)
                 <option value="{{ $location->id }}"
-                    {{ old('location_id', $clientRequirement->location_id ?? '') == $location->id ? 'selected' : '' }}>
+                    {{ in_array((string)$location->id, $selectedLocations, true) ? 'selected' : '' }}>
                     {{ $location->location }}</option>
             @endforeach
         </select>
-        @error('location_id')
+        <small class="text-muted">Search and select one or more locations.</small>
+        @error('location_ids')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
@@ -171,3 +175,49 @@
 </div>
 <div class="d-flex gap-3 mt-5 justify-content-center"><button type="reset"
         class="btn btn-danger">Clear</button><button type="submit" class="btn btn-success">Submit</button></div>
+
+@push('script')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Choices === 'undefined') {
+        return;
+    }
+
+    const settings = {
+        removeItemButton: true,
+        searchEnabled: true,
+        shouldSort: false,
+        duplicateItemsAllowed: false,
+        itemSelectText: '',
+        noResultsText: 'No matching options found',
+        noChoicesText: 'No more options available'
+    };
+
+    ['mode_ids', 'location_ids'].forEach(function (id) {
+        const select = document.getElementById(id);
+        if (!select || select.dataset.choicesInitialized === 'true') {
+            return;
+        }
+
+        const initialValues = Array.from(select.selectedOptions).map(function (option) {
+            return option.value;
+        });
+        const choices = new Choices(select, {
+            ...settings,
+            placeholder: true,
+            placeholderValue: id === 'mode_ids' ? 'Select modes' : 'Select locations'
+        });
+
+        select.dataset.choicesInitialized = 'true';
+        select.closest('form').addEventListener('reset', function () {
+            window.setTimeout(function () {
+                choices.removeActiveItems();
+                if (initialValues.length) {
+                    choices.setChoiceByValue(initialValues);
+                }
+            }, 0);
+        });
+    });
+});
+</script>
+@endpush

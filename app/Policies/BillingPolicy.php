@@ -40,10 +40,14 @@ class BillingPolicy
             : false;
     }
 
-    public function before($user, $ability)
+    /**
+     * Billing and invoice data is restricted to the primary administrator.
+     *
+     * Returning false here is intentional: it prevents other users from
+     * accessing the module even if their role contains billing permissions.
+     */
+    public function before(User $user, string $ability): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
+        return (int) $user->id === 1;
     }
 }

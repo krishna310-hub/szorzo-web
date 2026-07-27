@@ -601,18 +601,29 @@
                                         </div>
                                     </div>
                                     <div class="row g-2">
-                                        <div class="col-6">
+                                        <div class="col-4">
                                             <div class="border rounded-3 bg-light p-2 h-100">
                                                 <div class="small text-muted mb-1">Applicants</div>
                                                 <div class="metric-value">{{ number_format($myApplicants ?? 0) }}</div>
                                             </div>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="col-4">
+                                            <div class="border rounded-3 bg-success-subtle p-2 h-100" title="Candidates with an onboarding date in the current month">
+                                                <div class="small text-muted mb-1">Monthly Joining</div>
+                                                <div class="metric-value text-success">{{ number_format($monthlyJoiningTotal ?? 0) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
                                             <div class="border rounded-3 bg-light p-2 h-100">
                                                 <div class="small text-muted mb-1">HR Selected</div>
                                                 <div class="metric-value">{{ number_format($hrSelected ?? 0) }}</div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
+                                        @foreach($monthlyJoiningDetails as $joiningMonth)
+                                            <span class="badge bg-light text-dark">{{ $joiningMonth['label'] }}: {{ $joiningMonth['total'] }}</span>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>

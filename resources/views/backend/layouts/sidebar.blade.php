@@ -276,7 +276,7 @@
                         auth()->user()->can('read', \App\Models\Recruiter::class) ||
                         auth()->user()->can('read', \App\Models\JobRole::class) ||
                         auth()->user()->can('read', \App\Models\Mode::class) ||
-                        auth()->user()->can('read', \App\Models\Billing::class) ||
+                        ((int) auth()->id() === 1 && auth()->user()->can('read', \App\Models\Billing::class)) ||
                         auth()->user()->can('read', \App\Models\InterviewLevel::class) ||
                         auth()->user()->can('read', \App\Models\Location::class) ||
                         auth()->user()->can('read', \App\Models\Division::class))
@@ -330,13 +330,13 @@
                                             Modes </a>
                                     </li>
                                 @endcan
-                                @can('read', \App\Models\Billing::class)
+                                @if ((int) auth()->id() === 1 && auth()->user()->can('read', \App\Models\Billing::class))
                                     <li class="nav-item">
                                         <a href="{{ route('admin.billings.index') }}"
                                             class="nav-link {{ request()->is('admin/masters/billings*') ? 'active' : '' }}">
                                             Billings </a>
                                     </li>
-                                @endcan
+                                @endif
                                 @can('read', \App\Models\InterviewLevel::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.interview-levels.index') }}"

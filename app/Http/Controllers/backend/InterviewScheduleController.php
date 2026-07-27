@@ -5,6 +5,7 @@ namespace App\Http\Controllers\backend;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Client;
+use App\Models\ClientJobRole;
 use App\Models\InterviewLevel;
 use App\Models\InterviewMode;
 use App\Models\InterviewSchedule;
@@ -347,6 +348,10 @@ class InterviewScheduleController extends Controller
             'candidates' => Candidate::orderBy('candidate_name')->get(),
             'clients' => Client::orderBy('client')->get(),
             'jobRoles' => JobRole::orderBy('job_role')->get(),
+            'clientJobRoleMap' => ClientJobRole::where('status', true)
+                ->get(['client_id', 'job_role_id'])
+                ->groupBy('client_id')
+                ->map(fn ($rows) => $rows->pluck('job_role_id')->unique()->values()),
             'interviewMode' => InterviewMode::orderBy('interview_mode')->get(),
             'interviewLevels' => InterviewLevel::orderBy('sort_order')->get(),
             'recruiters' => Recruiter::orderBy('recruiter_name')->get(),
@@ -356,7 +361,7 @@ class InterviewScheduleController extends Controller
 
     private function validatedData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'candidate_id' => 'required|exists:candidates,id',
             'client_id' => 'nullable|exists:clients,id',
             'job_role_id' => 'nullable|exists:job_roles,id',
@@ -367,6 +372,15 @@ class InterviewScheduleController extends Controller
             'notes' => 'nullable|string',
             'onboarding_date' => 'nullable|date',
         ]);
+
+        if ($data['client_id'] && $data['job_role_id'] && ! ClientJobRole::where('client_id', $data['client_id'])
+            ->where('job_role_id', $data['job_role_id'])->where('status', true)->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'job_role_id' => 'The selected job role is not assigned to this client.',
+            ]);
+        }
+
+        return $data;
     }
 
     private function statusBadge(string $status): string

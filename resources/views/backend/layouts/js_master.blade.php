@@ -40,7 +40,7 @@
 <script src="{{ asset('admin/js/datatables/dataTables.bootstrap5.min.js')}}"></script>
 <script src="{{ asset('admin/js/datatables/dataTables.responsive.min.js')}}"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script src="{{ asset('admin/js/choices.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js"></script>

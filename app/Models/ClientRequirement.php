@@ -17,6 +17,7 @@ class ClientRequirement extends Model
         'payment_cycle',
         'job_description_id',
         'mode_id',
+        'mode_ids',
         'requirement_open_date',
         'job_role_id',
         'number_of_position',
@@ -26,12 +27,15 @@ class ClientRequirement extends Model
         'project_owner',
         'ctc',
         'location_id',
+        'location_ids',
         'status',
     ];
 
     protected $casts = [
         'requirement_open_date' => 'date',
         'closure_target_date' => 'date',
+        'mode_ids' => 'array',
+        'location_ids' => 'array',
         'status' => 'boolean',
     ];
 
@@ -43,6 +47,11 @@ class ClientRequirement extends Model
     public function mode()
     {
         return $this->belongsTo(Mode::class);
+    }
+
+    public function modes()
+    {
+        return Mode::whereIn('id', $this->mode_ids ?: array_filter([$this->mode_id]))->get();
     }
 
     public function jobDescription()
@@ -58,6 +67,11 @@ class ClientRequirement extends Model
     public function location()
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function locations()
+    {
+        return Location::whereIn('id', $this->location_ids ?: array_filter([$this->location_id]))->get();
     }
 
     public function projectOwner()

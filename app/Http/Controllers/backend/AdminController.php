@@ -171,6 +171,16 @@ class AdminController extends Controller
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
         $months = collect(range(5, 0))->map(fn($offset) => now()->subMonths($offset));
+        $monthlyJoinings = (clone $candidates)
+            ->whereNotNull('onboarding_date')
+            ->where('onboarding_date', '>=', now()->subMonths(5)->startOfMonth())
+            ->selectRaw("DATE_FORMAT(onboarding_date, '%Y-%m') as month_key, COUNT(*) as total")
+            ->groupBy('month_key')
+            ->pluck('total', 'month_key');
+        $monthlyJoiningDetails = $months->map(fn ($month) => [
+            'label' => $month->format('M Y'),
+            'total' => (int) ($monthlyJoinings[$month->format('Y-m')] ?? 0),
+        ]);
 
         $targetMultiplier = $selectedRecruiterId
             ? 1
@@ -226,6 +236,11 @@ class AdminController extends Controller
             'offered' => (clone $interviews)->where('level_of_interview_id', 30)->count(),
             'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
             'onboarded' => (clone $interviews)->where('level_of_interview_id', 20)->count(),
+            'monthlyJoiningTotal' => (clone $candidates)
+                ->whereNotNull('onboarding_date')
+                ->whereBetween('onboarding_date', [now()->startOfMonth(), now()->endOfMonth()])
+                ->count(),
+            'monthlyJoiningDetails' => $monthlyJoiningDetails,
 
             'revenue' => (clone $requirements)->sum('revenue_amount'),
             'candidateLevels' => $candidateLevels,

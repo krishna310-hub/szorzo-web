@@ -130,6 +130,34 @@
         @error('notes')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const client = document.getElementById('client_id');
+    const role = document.getElementById('job_role_id');
+    const candidate = document.getElementById('candidate_id');
+    const roleMap = @json($clientJobRoleMap);
+    const original = Array.from(role.options).map(o => ({value:o.value, text:o.text}));
+    function filterRoles(preferred) {
+        const selected = preferred || role.value;
+        const allowed = (roleMap[client.value] || []).map(String);
+        role.innerHTML = '';
+        original.forEach(item => {
+            if (!item.value || allowed.includes(String(item.value))) {
+                role.add(new Option(item.text, item.value, false, String(item.value) === String(selected)));
+            }
+        });
+        role.disabled = !client.value;
+    }
+    client.addEventListener('change', () => filterRoles());
+    candidate.addEventListener('change', function () {
+        const option = this.options[this.selectedIndex];
+        if (!option || !option.value) return;
+        client.value = option.dataset.clientId || '';
+        filterRoles(option.dataset.jobRoleId || '');
+    });
+    filterRoles(@json((string) $selectedJobRoleId));
+});
+</script>
 
 <div class="d-flex gap-3 mt-5 justify-content-center">
     <button type="reset" class="btn btn-danger">Clear</button>

@@ -218,5 +218,29 @@
             value="{{ old('onboarding_date', $candidate->onboarding_date ?? '') }}" readonly>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const client = document.getElementById('client_id');
+    const role = document.getElementById('job_role_id');
+    const roleMap = @json($clientJobRoleMap);
+    const original = Array.from(role.options).map(option => ({
+        value: option.value, text: option.text, selected: option.selected
+    }));
+    function filterRoles() {
+        const selected = role.value;
+        const allowed = (roleMap[client.value] || []).map(String);
+        role.innerHTML = '';
+        original.forEach(item => {
+            if (!item.value || allowed.includes(String(item.value))) {
+                role.add(new Option(item.text, item.value, false, String(item.value) === String(selected)));
+            }
+        });
+        if (selected && !allowed.includes(String(selected))) role.value = '';
+        role.disabled = !client.value;
+    }
+    client.addEventListener('change', filterRoles);
+    filterRoles();
+});
+</script>
 <div class="d-flex gap-3 mt-5 justify-content-center"><button type="reset"
         class="btn btn-danger">Clear</button><button type="submit" class="btn btn-success">Submit</button></div>

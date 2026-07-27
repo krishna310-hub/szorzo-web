@@ -6,6 +6,7 @@ use App\Exports\MasterDataExport;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Client;
+use App\Models\ClientJobRole;
 use App\Models\InterviewLevel;
 use App\Models\JobRole;
 use App\Models\Recruiter;
@@ -371,6 +372,10 @@ class CandidateController extends Controller
             'recruiters' => Recruiter::where('status', true)->orderBy('recruiter_name')->get(),
             'clients' => Client::where('status', true)->orderBy('client')->get(),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
+            'clientJobRoleMap' => ClientJobRole::where('status', true)
+                ->get(['client_id', 'job_role_id'])
+                ->groupBy('client_id')
+                ->map(fn ($rows) => $rows->pluck('job_role_id')->unique()->values()),
             'interviewLevels' => InterviewLevel::where('status', true)->orderBy('sort_order')->get(),
         ];
     }
@@ -397,7 +402,7 @@ class CandidateController extends Controller
             'email' => $request->filled('email') ? strtolower(trim((string) $request->email)) : null,
         ]);
 
-        return $request->validate([
+        $data = $request->validate([
             'recruiter_id' => 'required|exists:recruiters,id',
             'client_id' => 'required|exists:clients,id',
             'job_role_id' => 'required|exists:job_roles,id',
@@ -435,6 +440,18 @@ class CandidateController extends Controller
             'current_ctc.integer' => 'Current CTC must be entered as a whole amount (e.g. 650000).',
             'expected_ctc.integer' => 'Expected CTC must be entered as a whole amount (e.g. 800000).',
         ]);
+
+        $isAssigned = ClientJobRole::where('client_id', $data['client_id'])
+            ->where('job_role_id', $data['job_role_id'])
+            ->where('status', true)
+            ->exists();
+        if (! $isAssigned) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'job_role_id' => 'The selected job role is not assigned to this client.',
+            ]);
+        }
+
+        return $data;
     }
 
     private function importHeadings(): array

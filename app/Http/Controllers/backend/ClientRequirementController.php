@@ -29,6 +29,8 @@ class ClientRequirementController extends Controller
         $this->authorize('read', ClientRequirement::class);
 
         if ($request->ajax()) {
+            $modeNames = Mode::pluck('mode', 'id');
+            $locationNames = Location::pluck('location', 'id');
             $query = ClientRequirement::with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner', 'billing'])->latest();
 
             return DataTables::of($query)
@@ -36,9 +38,11 @@ class ClientRequirementController extends Controller
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_description_name', fn ($row) => $row->jobDescription->job_description ?? '-')
                 ->addColumn('psoition_level', fn ($row) => $row->position_level ?? '-')
-                ->addColumn('mode_name', fn ($row) => $row->mode->mode ?? '-')
+                ->addColumn('mode_name', fn ($row) => collect($row->mode_ids ?: array_filter([$row->mode_id]))
+                    ->map(fn ($id) => $modeNames->get((int) $id))->filter()->join(', ') ?: '-')
                 ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
-                ->addColumn('location_name', fn ($row) => $row->location->location ?? '-')
+                ->addColumn('location_name', fn ($row) => collect($row->location_ids ?: array_filter([$row->location_id]))
+                    ->map(fn ($id) => $locationNames->get((int) $id))->filter()->join(', ') ?: '-')
                 ->addColumn('project_owner_name', fn ($row) => $row->projectOwner->recruiter_name ?? '-')
                 ->addColumn('billing_value', fn ($row) => $row->billing ? $row->billing->value.'%' : '-')
                 ->editColumn('requirement_open_date', fn ($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
@@ -110,6 +114,8 @@ class ClientRequirementController extends Controller
     public function export()
     {
         $this->authorize('read', ClientRequirement::class);
+        $modeNames = Mode::pluck('mode', 'id');
+        $locationNames = Location::pluck('location', 'id');
 
         $rows = ClientRequirement::with(['client', 'billing', 'jobDescription', 'mode', 'jobRole', 'projectOwner', 'location'])
             ->latest()->get()->map(fn ($item) => [
@@ -118,7 +124,8 @@ class ClientRequirementController extends Controller
                 $item->billing?->value,
                 $item->revenue_amount,
                 $item->jobDescription?->job_description,
-                $item->mode?->mode,
+                collect($item->mode_ids ?: array_filter([$item->mode_id]))
+                    ->map(fn ($id) => $modeNames->get((int) $id))->filter()->join(', '),
                 $item->requirement_open_date?->format('Y-m-d'),
                 $item->jobRole?->job_role,
                 $item->number_of_position,
@@ -127,7 +134,8 @@ class ClientRequirementController extends Controller
                 $item->cv_uploaded,
                 $item->projectOwner?->recruiter_name,
                 $item->ctc,
-                $item->location?->location,
+                collect($item->location_ids ?: array_filter([$item->location_id]))
+                    ->map(fn ($id) => $locationNames->get((int) $id))->filter()->join(', '),
                 $item->status ? 'Active' : 'Inactive',
             ])->all();
 
@@ -139,8 +147,8 @@ class ClientRequirementController extends Controller
         $this->authorize('create', ClientRequirement::class);
 
         return Excel::download(new MasterDataExport($this->importHeadings(), [[
-            null, 'Existing Client Name', '8.5', null, null, 'Onsite', '2026-07-01', 'Existing Job Role',
-            2, '2026-07-31', 10, 0, 'Existing Recruiter', 500000, 'Chennai', 'Active',
+            null, 'Existing Client Name', '8.5', null, null, 'C2H, Contract', '2026-07-01', 'Existing Job Role',
+            2, '2026-07-31', 10, 0, 'Existing Recruiter', 500000, 'Chennai, Bangalore', 'Active',
         ]]), 'client-requirements-import-template.xlsx');
     }
 
@@ -167,10 +175,12 @@ class ClientRequirementController extends Controller
             $clientName = $row['client'] ?? null;
             $billingValue = MasterDataSpreadsheet::cleanPercent($row['billing'] ?? null);
             $jobDescription = $row['job_description'] ?? null;
-            $mode = $row['mode'] ?? null;
+            $mode = $row['modes'] ?? $row['mode'] ?? null;
             $jobRole = $row['job_role'] ?? null;
             $projectOwner = $row['project_owner'] ?? null;
-            $location = $row['location'] ?? null;
+            $location = $row['locations'] ?? $row['location'] ?? null;
+            [$modeIds, $missingModes] = $this->masterIdsFromList(Mode::class, 'mode', $mode);
+            [$locationIds, $missingLocations] = $this->masterIdsFromList(Location::class, 'location', $location);
             $clientId = MasterDataSpreadsheet::lookup(Client::class, 'client', $clientName);
             $billingId = MasterDataSpreadsheet::lookupNumeric(Billing::class, 'value', $billingValue);
             $jobDescriptionId = null;
@@ -193,7 +203,8 @@ class ClientRequirementController extends Controller
                 'billing_id' => $billingId,
                 'revenue_amount' => $revenue,
                 'job_description_id' => $jobDescriptionId,
-                'mode_id' => MasterDataSpreadsheet::lookup(Mode::class, 'mode', $mode),
+                'mode_id' => $modeIds[0] ?? null,
+                'mode_ids' => $modeIds,
                 'requirement_open_date' => MasterDataSpreadsheet::date($row['requirement_open_date'] ?? null),
                 'job_role_id' => MasterDataSpreadsheet::lookup(JobRole::class, 'job_role', $jobRole),
                 'number_of_position' => $row['number_of_position'] ?? 0,
@@ -202,7 +213,8 @@ class ClientRequirementController extends Controller
                 'cv_uploaded' => $row['cv_uploaded'] ?? 0,
                 'project_owner' => MasterDataSpreadsheet::lookup(Recruiter::class, 'recruiter_name', $projectOwner),
                 'ctc' => $ctc,
-                'location_id' => MasterDataSpreadsheet::lookup(Location::class, 'location', $location),
+                'location_id' => $locationIds[0] ?? null,
+                'location_ids' => $locationIds,
                 'status' => MasterDataSpreadsheet::status($row['status'] ?? null),
             ];
 
@@ -213,6 +225,8 @@ class ClientRequirementController extends Controller
                 'revenue_amount' => 'nullable|numeric|min:0',
                 'job_description_id' => 'nullable|exists:client_job_roles,id',
                 'mode_id' => 'nullable|exists:modes,id',
+                'mode_ids' => 'nullable|array',
+                'mode_ids.*' => 'integer|distinct|exists:modes,id',
                 'requirement_open_date' => 'nullable|date',
                 'job_role_id' => 'nullable|exists:job_roles,id',
                 'number_of_position' => 'nullable|integer|min:0',
@@ -222,24 +236,30 @@ class ClientRequirementController extends Controller
                 'project_owner' => 'nullable|exists:recruiters,id',
                 'ctc' => 'nullable|numeric|min:0',
                 'location_id' => 'nullable|exists:locations,id',
+                'location_ids' => 'nullable|array',
+                'location_ids.*' => 'integer|distinct|exists:locations,id',
                 'status' => 'required|in:0,1',
             ], [
                 'client_id.required' => 'Client "'.$clientName.'" was not found.',
             ]);
 
-            $validator->after(function ($validator) use ($billingValue, $jobDescription, $mode, $jobRole, $projectOwner, $location, $data) {
+            $validator->after(function ($validator) use ($billingValue, $jobDescription, $jobRole, $projectOwner, $data, $missingModes, $missingLocations) {
                 $lookups = [
                     ['value' => $billingValue, 'id' => $data['billing_id'], 'label' => 'Billing'],
                     ['value' => $jobDescription, 'id' => $data['job_description_id'], 'label' => 'Job description'],
-                    ['value' => $mode, 'id' => $data['mode_id'], 'label' => 'Mode'],
                     ['value' => $jobRole, 'id' => $data['job_role_id'], 'label' => 'Job role'],
                     ['value' => $projectOwner, 'id' => $data['project_owner'], 'label' => 'Project owner'],
-                    ['value' => $location, 'id' => $data['location_id'], 'label' => 'Location'],
                 ];
                 foreach ($lookups as $lookup) {
                     if ($lookup['value'] !== null && trim((string) $lookup['value']) !== '' && ! $lookup['id']) {
                         $validator->errors()->add('lookup', $lookup['label'].' "'.$lookup['value'].'" was not found.');
                     }
+                }
+                foreach ($missingModes as $name) {
+                    $validator->errors()->add('mode_ids', 'Mode "'.$name.'" was not found.');
+                }
+                foreach ($missingLocations as $name) {
+                    $validator->errors()->add('location_ids', 'Location "'.$name.'" was not found.');
                 }
             });
 
@@ -280,13 +300,14 @@ class ClientRequirementController extends Controller
 
     private function validatedData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'billing_id' => 'nullable|exists:billings,id',
             'position_level' => 'nullable|string',
             'revenue_amount' => 'nullable|numeric|min:0',
             'job_description_id' => 'nullable|exists:client_job_roles,id',
-            'mode_id' => 'nullable|exists:modes,id',
+            'mode_ids' => 'nullable|array',
+            'mode_ids.*' => 'integer|distinct|exists:modes,id',
             'requirement_open_date' => 'nullable|date',
             'job_role_id' => 'nullable|exists:job_roles,id',
             'number_of_position' => 'nullable|integer|min:0',
@@ -295,13 +316,54 @@ class ClientRequirementController extends Controller
             'cv_uploaded' => 'nullable|integer|min:0',
             'project_owner' => 'nullable|exists:recruiters,id',
             'ctc' => 'nullable|numeric|min:0',
-            'location_id' => 'nullable|exists:locations,id',
+            'location_ids' => 'nullable|array',
+            'location_ids.*' => 'integer|distinct|exists:locations,id',
             'status' => 'required|in:0,1',
         ]);
+
+        $data['mode_ids'] = array_values(array_unique(array_map('intval', $data['mode_ids'] ?? [])));
+        $data['location_ids'] = array_values(array_unique(array_map('intval', $data['location_ids'] ?? [])));
+        // Keep the original columns populated for backward compatibility with reports/imports.
+        $data['mode_id'] = $data['mode_ids'][0] ?? null;
+        $data['location_id'] = $data['location_ids'][0] ?? null;
+
+        return $data;
     }
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Location', 'Status'];
+        return ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Modes', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Locations', 'Status'];
+    }
+
+    /**
+     * Resolve a comma-separated spreadsheet cell into unique master IDs.
+     *
+     * @return array{0: array<int>, 1: array<string>}
+     */
+    private function masterIdsFromList(string $model, string $column, mixed $value): array
+    {
+        $names = collect(preg_split('/[,;|]/', (string) $value))
+            ->map(fn ($name) => trim($name))
+            ->filter()
+            ->unique(fn ($name) => mb_strtolower($name))
+            ->values();
+
+        if ($names->isEmpty()) {
+            return [[], []];
+        }
+
+        $records = $model::query()
+            ->whereIn(DB::raw('LOWER('.$column.')'), $names->map(fn ($name) => mb_strtolower($name)))
+            ->get(['id', $column])
+            ->keyBy(fn ($record) => mb_strtolower($record->{$column}));
+
+        $ids = [];
+        $missing = [];
+        foreach ($names as $name) {
+            $record = $records->get(mb_strtolower($name));
+            $record ? $ids[] = (int) $record->id : $missing[] = $name;
+        }
+
+        return [array_values(array_unique($ids)), $missing];
     }
 }
