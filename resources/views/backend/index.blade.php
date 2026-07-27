@@ -1001,7 +1001,7 @@
                                         @endforeach
 
                                     </div>
-                                    <div class="row g-2 mt-3 pt-3 border-top text-center">
+                                    {{-- <div class="row g-2 mt-3 pt-3 border-top text-center">
                                         <div class="col-6">
                                             <div class="fw-bold fs-4">{{ $yetToOffer }}</div><small class="text-muted">Yet
                                                 to
@@ -1011,7 +1011,7 @@
                                             <div class="fw-bold fs-4 text-success">{{ $offered }}</div><small
                                                 class="text-muted">Offered</small>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                         </div>

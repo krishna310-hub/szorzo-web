@@ -244,6 +244,7 @@ class CandidateController extends Controller
 
             $data = [
                 'id' => $row['record_id'] ?? null,
+                'created_at' => $row['created_at'] ?? null,
                 'recruiter_id' => MasterDataSpreadsheet::lookup(Recruiter::class, 'recruiter_name', $recruiter),
                 'client_id' => MasterDataSpreadsheet::lookup(Client::class, 'client', $client),
                 'job_role_id' => MasterDataSpreadsheet::lookup(JobRole::class, 'job_role', $jobRole),
@@ -272,6 +273,7 @@ class CandidateController extends Controller
 
             $validator = Validator::make($data, [
                 'id' => 'nullable|integer|exists:candidates,id',
+                'created_at' => 'nullable|date',
                 'recruiter_id' => 'nullable|exists:recruiters,id',
                 'client_id' => 'nullable|exists:clients,id',
                 'job_role_id' => 'nullable|exists:job_roles,id',

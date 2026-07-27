@@ -116,6 +116,8 @@ class AdminController extends Controller
                 'Client Duplicate',
                 'Screen Select',
                 'Screen Reject',
+                'Position Hold',
+                'Candidate Not Interested',
             ],
             'Interview Stage' => [
                 'L1 Scheduled',
@@ -146,8 +148,6 @@ class AdminController extends Controller
             'Onboarding Stage' => [
                 'Onboarded with Client',
                 'Joiner Declined',
-                'Position Hold',
-                'Candidate Not Interested',
             ],
         ];
 
@@ -222,8 +222,8 @@ class AdminController extends Controller
 
             'myApplicants' => (clone $candidates)->count(),
             'scheduledInterviews' => (clone $interviews)->whereIn('status', ['scheduled', 'completed', 'selected'])->get(),
-            'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 14)->count(),
-            'offered' => (clone $interviews)->where('level_of_interview_id', 30)->count(),
+            'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
+            'offered' => (clone $interviews)->whereIn('level_of_interview_id', [30, 35])->count(),
             'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
             'onboarded' => (clone $interviews)->where('level_of_interview_id', 20)->count(),
 
