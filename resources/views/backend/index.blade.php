@@ -601,29 +601,18 @@
                                         </div>
                                     </div>
                                     <div class="row g-2">
-                                        <div class="col-4">
+                                        <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
                                                 <div class="small text-muted mb-1">Applicants</div>
                                                 <div class="metric-value">{{ number_format($myApplicants ?? 0) }}</div>
                                             </div>
                                         </div>
-                                        <div class="col-4">
-                                            <div class="border rounded-3 bg-success-subtle p-2 h-100" title="Candidates with an onboarding date in the current month">
-                                                <div class="small text-muted mb-1">Monthly Joining</div>
-                                                <div class="metric-value text-success">{{ number_format($monthlyJoiningTotal ?? 0) }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
+                                        <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
                                                 <div class="small text-muted mb-1">HR Selected</div>
                                                 <div class="metric-value">{{ number_format($hrSelected ?? 0) }}</div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
-                                        @foreach($monthlyJoiningDetails as $joiningMonth)
-                                            <span class="badge bg-light text-dark">{{ $joiningMonth['label'] }}: {{ $joiningMonth['total'] }}</span>
-                                        @endforeach
                                     </div>
                                 </div>
                             </div>
@@ -677,20 +666,26 @@
                             <div class="card metric-card">
                                 <div class="card-body p-3 p-lg-4">
                                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                                        <div class="metric-label">Offer Stage</div>
+                                        <div class="metric-label">Offer &amp; Onboarding Stage</div>
                                         <div class="metric-icon">
                                             <img src="{{ asset('frontend/images/adminlogos.png') }}" alt="SZORZO Logo"
                                                 class="metric-logo">
                                         </div>
                                     </div>
                                     <div class="row g-2">
-                                        <div class="col-6">
+                                        <div class="col-4">
                                             <div class="border rounded-3 bg-light p-2 h-100">
                                                 <div class="small text-muted mb-1">Offered</div>
                                                 <div class="metric-value">{{ number_format($offered ?? 0) }}</div>
                                             </div>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="col-4">
+                                            <div class="border rounded-3 bg-success-subtle p-2 h-100">
+                                                <div class="small text-muted mb-1">Joining This Month</div>
+                                                <div class="metric-value text-success">{{ number_format($monthlyJoiningTotal ?? 0) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
                                             <div class="border rounded-3 bg-light p-2 h-100">
                                                 <div class="small text-muted mb-1">Onboarded</div>
                                                 <div class="metric-value">{{ number_format($onboarded ?? 0) }}</div>
@@ -979,34 +974,49 @@
                                                     {{ $group['title'] }}
                                                 </h5>
 
-                                                <div class="pipeline-grid">
-
-                                                    @foreach ($group['levels'] as $level)
-                                                        @php
-                                                            $count = (int) $level->candidates_count;
-                                                            $percentage = round(($count / $maxLevel) * 100);
-                                                        @endphp
-
-                                                        <div class="pipeline-item">
-                                                            <div class="pipeline-item-header">
-                                                                <span class="pipeline-item-label">
-                                                                    {{ $level->level }}
-                                                                </span>
-
-                                                                <span class="pipeline-item-value">
-                                                                    {{ number_format($count) }}
-                                                                </span>
+                                                @if ($group['title'] === 'Monthly Joining Details')
+                                                    <div class="border rounded-4 bg-light p-3 p-lg-4">
+                                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                                                            <div>
+                                                                <div class="fw-semibold text-dark">Last Five Months Joining Total</div>
+                                                                <small class="text-muted">Based on candidate onboarding dates</small>
                                                             </div>
+                                                            <span class="badge bg-success-subtle text-success">
+                                                                This month: {{ number_format($monthlyJoiningTotal ?? 0) }}
+                                                            </span>
+                                                        </div>
+                                                        <div id="pipelineMonthlyJoiningBarChart" style="min-height: 250px;"></div>
+                                                    </div>
+                                                @else
+                                                    <div class="pipeline-grid">
 
-                                                            <div class="pipeline-track">
-                                                                <div class="pipeline-fill"
-                                                                    style="width: {{ $percentage }}%">
+                                                        @foreach ($group['levels'] as $level)
+                                                            @php
+                                                                $count = (int) $level->candidates_count;
+                                                                $percentage = round(($count / $maxLevel) * 100);
+                                                            @endphp
+
+                                                            <div class="pipeline-item">
+                                                                <div class="pipeline-item-header">
+                                                                    <span class="pipeline-item-label">
+                                                                        {{ $level->level }}
+                                                                    </span>
+
+                                                                    <span class="pipeline-item-value">
+                                                                        {{ number_format($count) }}
+                                                                    </span>
+                                                                </div>
+
+                                                                <div class="pipeline-track">
+                                                                    <div class="pipeline-fill"
+                                                                        style="width: {{ $percentage }}%">
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    @endforeach
+                                                        @endforeach
 
-                                                </div>
+                                                    </div>
+                                                @endif
 
                                             </div>
                                         @endforeach
@@ -1167,6 +1177,73 @@
                     }
                 }
             }).render();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var joiningChartTarget = document.querySelector('#pipelineMonthlyJoiningBarChart');
+            if (joiningChartTarget && typeof ApexCharts !== 'undefined') {
+                new ApexCharts(joiningChartTarget, {
+                    chart: {
+                        type: 'bar',
+                        height: 250,
+                        toolbar: { show: false },
+                        sparkline: { enabled: false }
+                    },
+                    series: [{
+                        name: 'Joinings',
+                        data: @json($joiningChartTotals)
+                    }],
+                    xaxis: {
+                        categories: @json($joiningChartMonths),
+                        labels: {
+                            rotate: -35,
+                            trim: true,
+                            style: { fontSize: '10px' }
+                        },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: {
+                        min: 0,
+                        forceNiceScale: true,
+                        labels: {
+                            formatter: function(value) {
+                                return Number.isInteger(value) ? value : '';
+                            }
+                        }
+                    },
+                    colors: ['#10b981'],
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 4,
+                            columnWidth: '52%',
+                            dataLabels: { position: 'top' }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        offsetY: -16,
+                        formatter: function(value) { return value; },
+                        style: {
+                            fontSize: '10px',
+                            colors: ['#334155']
+                        }
+                    },
+                    grid: {
+                        borderColor: '#eef2f7',
+                        strokeDashArray: 3,
+                        padding: { top: 15, right: 0, bottom: 0, left: 0 }
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(value) {
+                                return value + ' joining' + (value === 1 ? '' : 's');
+                            }
+                        }
+                    },
+                    noData: { text: 'No joining data' }
+                }).render();
+            }
         });
 
         document.addEventListener('DOMContentLoaded', function() {

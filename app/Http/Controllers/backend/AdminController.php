@@ -143,6 +143,9 @@ class AdminController extends Controller
                 'Offer Accepted',
                 'Offer Declined',
             ],
+            // Rendered as a five-month onboarding-date bar chart in the
+            // interview pipeline, between Offer and Onboarding stages.
+            'Monthly Joining Details' => [],
             'Onboarding Stage' => [
                 'Onboarded with Client',
                 'Joiner Declined',
@@ -171,13 +174,14 @@ class AdminController extends Controller
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
         $months = collect(range(5, 0))->map(fn($offset) => now()->subMonths($offset));
+        $joiningMonths = collect(range(4, 0))->map(fn ($offset) => now()->subMonths($offset));
         $monthlyJoinings = (clone $candidates)
             ->whereNotNull('onboarding_date')
-            ->where('onboarding_date', '>=', now()->subMonths(5)->startOfMonth())
+            ->where('onboarding_date', '>=', now()->subMonths(4)->startOfMonth())
             ->selectRaw("DATE_FORMAT(onboarding_date, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')
             ->pluck('total', 'month_key');
-        $monthlyJoiningDetails = $months->map(fn ($month) => [
+        $monthlyJoiningDetails = $joiningMonths->map(fn ($month) => [
             'label' => $month->format('M Y'),
             'total' => (int) ($monthlyJoinings[$month->format('Y-m')] ?? 0),
         ]);
@@ -241,6 +245,8 @@ class AdminController extends Controller
                 ->whereBetween('onboarding_date', [now()->startOfMonth(), now()->endOfMonth()])
                 ->count(),
             'monthlyJoiningDetails' => $monthlyJoiningDetails,
+            'joiningChartMonths' => $monthlyJoiningDetails->pluck('label')->values(),
+            'joiningChartTotals' => $monthlyJoiningDetails->pluck('total')->values(),
 
             'revenue' => (clone $requirements)->sum('revenue_amount'),
             'candidateLevels' => $candidateLevels,
