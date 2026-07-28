@@ -10,6 +10,7 @@ class Candidate extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'created_at',
         'recruiter_id',
         'client_id',
         'job_role_id',

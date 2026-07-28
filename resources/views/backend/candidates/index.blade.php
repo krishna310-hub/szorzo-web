@@ -17,6 +17,7 @@
                                         'showExportFilters' => true,
                                         'fields' => [
                                             'Record ID',
+                                            'Created Date',
                                             'Recruiter',
                                             'Client',
                                             'Job Role',

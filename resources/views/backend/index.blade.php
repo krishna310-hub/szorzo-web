@@ -972,8 +972,8 @@
                                                     <div class="border rounded-4 bg-light p-3 p-lg-4">
                                                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                                             <div>
-                                                                <div class="fw-semibold text-dark">Six Months Joining Details</div>
-                                                                <small class="text-muted">Previous three and upcoming three months for offer-accepted candidates</small>
+                                                                <div class="fw-semibold text-dark">Monthly Joining Details</div>
+                                                                <small class="text-muted">Previous three months, current month and upcoming three months for offer-accepted candidates</small>
                                                             </div>
                                                         </div>
                                                         <div id="pipelineMonthlyJoiningBarChart" style="min-height: 250px;"></div>
@@ -1173,6 +1173,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             var joiningChartTarget = document.querySelector('#pipelineMonthlyJoiningBarChart');
             if (joiningChartTarget && typeof ApexCharts !== 'undefined') {
+                var joiningThemeColor = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--vz-primary').trim() || '#405189';
                 new ApexCharts(joiningChartTarget, {
                     chart: {
                         type: 'bar',
@@ -1203,7 +1205,7 @@
                             }
                         }
                     },
-                    colors: ['#10b981'],
+                    colors: [joiningThemeColor],
                     plotOptions: {
                         bar: {
                             borderRadius: 4,

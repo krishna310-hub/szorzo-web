@@ -205,10 +205,11 @@ class CandidateController extends Controller
         ];
 
         return Excel::download(new MasterDataExport($this->importHeadings(), [[
-            null, 'Existing Recruiter', 'Existing Client', 'Existing Job Role', 'Example Candidate',
+            null, now()->format('Y-m-d'), $dropdowns['Recruiter'][0] ?? null,
+            $dropdowns['Client'][0] ?? null, $dropdowns['Job Role'][0] ?? null, 'Example Candidate',
             '9876543210', 'candidate@example.com', 'B.Tech', 5, 3, 60000, 5000, 900000,
             1100000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
-            'Screening', 'Active',
+            $dropdowns['Level Of Interview'][0] ?? null, 'Active',
         ]], $dropdowns), 'candidates-import-template.xlsx');
     }
 
@@ -245,7 +246,7 @@ class CandidateController extends Controller
 
             $data = [
                 'id' => $row['record_id'] ?? null,
-                'created_at' => $row['created_at'] ?? null,
+                'created_at' => MasterDataSpreadsheet::date($row['created_date'] ?? null),
                 'recruiter_id' => MasterDataSpreadsheet::lookup(Recruiter::class, 'recruiter_name', $recruiter),
                 'client_id' => MasterDataSpreadsheet::lookup(Client::class, 'client', $client),
                 'job_role_id' => MasterDataSpreadsheet::lookup(JobRole::class, 'job_role', $jobRole),

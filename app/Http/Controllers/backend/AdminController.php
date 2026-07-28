@@ -145,7 +145,7 @@ class AdminController extends Controller
                 'Offer Accepted',
                 'Offer Declined',
             ],
-            // Rendered as a six-month onboarding-date bar chart in the
+            // Rendered as a seven-month onboarding-date bar chart in the
             // interview pipeline, between Offer and Onboarding stages.
             'Monthly Joining Details' => [],
             'Onboarding Stage' => [
@@ -174,7 +174,7 @@ class AdminController extends Controller
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
         $months = collect(range(5, 0))->map(fn($offset) => now()->subMonths($offset));
-        $joiningMonths = collect([-3, -2, -1, 1, 2, 3])
+        $joiningMonths = collect(range(-3, 3))
             ->map(fn ($offset) => now()->addMonthsNoOverflow($offset));
         $monthlyJoinings = (clone $candidates)
             ->where('level_of_interview_id', 30)
