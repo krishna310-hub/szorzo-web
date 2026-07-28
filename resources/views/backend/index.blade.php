@@ -1174,7 +1174,7 @@
             var joiningChartTarget = document.querySelector('#pipelineMonthlyJoiningBarChart');
             if (joiningChartTarget && typeof ApexCharts !== 'undefined') {
                 var joiningThemeColor = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--vz-primary').trim() || '#405189';
+                    .getPropertyValue('--vz-success').trim() || '#3cd188';
                 new ApexCharts(joiningChartTarget, {
                     chart: {
                         type: 'bar',
