@@ -63,4 +63,9 @@ class Candidate extends Model
     {
         return $this->hasMany(InterviewSchedule::class);
     }
+
+    public function revenue()
+    {
+        return $this->hasOne(Revenue::class);
+    }
 }

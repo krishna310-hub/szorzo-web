@@ -263,6 +263,16 @@
                     </li>
                 @endcan
 
+                @if ((int) auth()->id() === 1)
+                    <li class="nav-item">
+                        <a href="{{ route('admin.revenues.index') }}"
+                            class="nav-link menu-link {{ request()->is('admin/revenues*') ? 'active' : '' }}">
+                            <i class="ri-money-rupee-circle-line"></i>
+                            <span>Revenue</span>
+                        </a>
+                    </li>
+                @endif
+
                 <li class="nav-item">
                     <a href="{{ route('admin.interview-schedules.index') }}"
                         class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">

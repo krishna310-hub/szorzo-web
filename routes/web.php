@@ -21,6 +21,7 @@ use App\Http\Controllers\backend\JobRoleController;
 use App\Http\Controllers\backend\ModeController;
 use App\Http\Controllers\backend\PageController;
 use App\Http\Controllers\backend\RecruiterController;
+use App\Http\Controllers\backend\RevenueController;
 use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
@@ -246,6 +247,16 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/{id}/edit', 'edit')->name('edit');
         Route::put('/{id}/update', 'update')->name('update');
         Route::delete('/{id}', 'destroy')->name('delete');
+    });
+
+    Route::middleware('revenue.admin')->prefix('revenues')->name('revenues.')->controller(RevenueController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{revenue}', 'show')->name('show');
+        Route::get('/{revenue}/edit', 'edit')->name('edit');
+        Route::put('/{revenue}', 'update')->name('update');
+        Route::get('/{revenue}/download', 'download')->name('download');
     });
 
     Route::prefix('interview-schedules')->name('interview-schedules.')->controller(InterviewScheduleController::class)->group(function () {

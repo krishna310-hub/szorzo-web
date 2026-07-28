@@ -145,7 +145,7 @@ class AdminController extends Controller
                 'Offer Accepted',
                 'Offer Declined',
             ],
-            // Rendered as a five-month onboarding-date bar chart in the
+            // Rendered as a six-month onboarding-date bar chart in the
             // interview pipeline, between Offer and Onboarding stages.
             'Monthly Joining Details' => [],
             'Onboarding Stage' => [
@@ -174,10 +174,15 @@ class AdminController extends Controller
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
         $months = collect(range(5, 0))->map(fn($offset) => now()->subMonths($offset));
-        $joiningMonths = collect(range(4, 0))->map(fn ($offset) => now()->subMonths($offset));
+        $joiningMonths = collect([-3, -2, -1, 1, 2, 3])
+            ->map(fn ($offset) => now()->addMonthsNoOverflow($offset));
         $monthlyJoinings = (clone $candidates)
+            ->where('level_of_interview_id', 30)
             ->whereNotNull('onboarding_date')
-            ->where('onboarding_date', '>=', now()->subMonths(4)->startOfMonth())
+            ->whereBetween('onboarding_date', [
+                now()->subMonthsNoOverflow(3)->startOfMonth(),
+                now()->addMonthsNoOverflow(3)->endOfMonth(),
+            ])
             ->selectRaw("DATE_FORMAT(onboarding_date, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')
             ->pluck('total', 'month_key');
@@ -240,10 +245,6 @@ class AdminController extends Controller
             'offered' => (clone $interviews)->whereIn('level_of_interview_id', [30, 35])->count(),
             'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
             'onboarded' => (clone $interviews)->where('level_of_interview_id', 20)->count(),
-            'monthlyJoiningTotal' => (clone $candidates)
-                ->whereNotNull('onboarding_date')
-                ->whereBetween('onboarding_date', [now()->startOfMonth(), now()->endOfMonth()])
-                ->count(),
             'monthlyJoiningDetails' => $monthlyJoiningDetails,
             'joiningChartMonths' => $monthlyJoiningDetails->pluck('label')->values(),
             'joiningChartTotals' => $monthlyJoiningDetails->pluck('total')->values(),

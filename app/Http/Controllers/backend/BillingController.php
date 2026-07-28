@@ -19,11 +19,7 @@ class BillingController extends Controller
         if ($request->ajax()) {
             return DataTables::of(Billing::latest())
                 ->addIndexColumn()
-                ->editColumn('invoice_number', fn ($row) => $row->invoice_number ?: '-')
-                ->editColumn('title', fn ($row) => $row->title ?: '-')
                 ->editColumn('value', fn ($row) => $row->value !== null ? $row->value . '%' : '-')
-                ->editColumn('invoice_date', fn ($row) => $row->invoice_date?->format('d-m-Y') ?? '-')
-                ->editColumn('amount', fn ($row) => $row->amount !== null ? number_format((float) $row->amount, 2) : '-')
                 ->editColumn('status', fn($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -33,7 +29,6 @@ class BillingController extends Controller
                     if (auth()->user()->can('edit', Billing::class)) {
                         $buttons .= '<a href="' . route('admin.billings.edit', $row->id) . '" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }
-                    $buttons .= '<a href="' . route('admin.billings.invoice', $row->id) . '" class="text-primary fs-4 me-1" title="Download invoice"><i class="ri-download-2-line"></i></a>';
                     if (auth()->user()->can('delete', Billing::class)) {
                         $buttons .= '<button type="button" data-route="' . route('admin.billings.delete', $row->id) . '" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
                     }
@@ -79,27 +74,10 @@ class BillingController extends Controller
         return response()->json(['status' => true, 'message' => 'Billing deleted successfully.']);
     }
 
-    public function downloadInvoice($id)
-    {
-        $this->authorize('read', Billing::class);
-        $billing = Billing::findOrFail($id);
-        $filename = 'invoice-'.($billing->invoice_number ?: $billing->id).'.html';
-
-        return response()
-            ->view('backend.billings.invoice', compact('billing'))
-            ->header('Content-Type', 'text/html; charset=UTF-8')
-            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
-    }
-
     private function validatedData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
-            'invoice_number' => ['nullable', 'string', 'max:100', Rule::unique('billings', 'invoice_number')->ignore($ignoreId)->whereNull('deleted_at')],
-            'title' => 'nullable|string|max:255',
-            'value'  => 'required|numeric|min:0|max:100',
-            'invoice_date' => 'nullable|date',
-            'amount' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string|max:2000',
+            'value'  => 'nullable|numeric|min:0|max:100',
             'status' => 'required|in:0,1',
         ]);
     }

@@ -673,19 +673,13 @@
                                         </div>
                                     </div>
                                     <div class="row g-2">
-                                        <div class="col-4">
+                                        <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
                                                 <div class="small text-muted mb-1">Offered</div>
                                                 <div class="metric-value">{{ number_format($offered ?? 0) }}</div>
                                             </div>
                                         </div>
-                                        <div class="col-4">
-                                            <div class="border rounded-3 bg-success-subtle p-2 h-100">
-                                                <div class="small text-muted mb-1">Joining This Month</div>
-                                                <div class="metric-value text-success">{{ number_format($monthlyJoiningTotal ?? 0) }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
+                                        <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
                                                 <div class="small text-muted mb-1">Onboarded</div>
                                                 <div class="metric-value">{{ number_format($onboarded ?? 0) }}</div>
@@ -978,12 +972,9 @@
                                                     <div class="border rounded-4 bg-light p-3 p-lg-4">
                                                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                                             <div>
-                                                                <div class="fw-semibold text-dark">Last Five Months Joining Total</div>
-                                                                <small class="text-muted">Based on candidate onboarding dates</small>
+                                                                <div class="fw-semibold text-dark">Six Months Joining Details</div>
+                                                                <small class="text-muted">Previous three and upcoming three months for offer-accepted candidates</small>
                                                             </div>
-                                                            <span class="badge bg-success-subtle text-success">
-                                                                This month: {{ number_format($monthlyJoiningTotal ?? 0) }}
-                                                            </span>
                                                         </div>
                                                         <div id="pipelineMonthlyJoiningBarChart" style="min-height: 250px;"></div>
                                                     </div>

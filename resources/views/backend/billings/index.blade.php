@@ -8,7 +8,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header d-flex align-items-center">
-                                <h5 class="card-title mb-0 flex-grow-1">Billing & Invoice Master</h5>
+                                <h5 class="card-title mb-0 flex-grow-1">Billings</h5>
                                 @can('create', \App\Models\Billing::class)
                                     <a href="{{ route('admin.billings.create') }}" class="btn btn-sm btn-primary">Add
                                         Billing %</a>
@@ -20,7 +20,7 @@
                                         <thead>
                                             <tr>
                                                 <th>S.No</th>
-                                                <th>Invoice No.</th><th>Title</th><th>Billing %</th><th>Invoice Date</th><th>Amount</th>
+                                                <th>Billing %</th>
                                                 <th>Status</th>
                                                 <th>Created At</th>
                                                 <th>Action</th>
@@ -54,16 +54,8 @@
                     orderable: false,
                     searchable: false
                 }, {
-                    data: 'invoice_number', name: 'invoice_number'
-                }, {
-                    data: 'title', name: 'title'
-                }, {
                     data: 'value',
                     name: 'value'
-                }, {
-                    data: 'invoice_date', name: 'invoice_date'
-                }, {
-                    data: 'amount', name: 'amount'
                 }, {
                     data: 'status',
                     name: 'status',

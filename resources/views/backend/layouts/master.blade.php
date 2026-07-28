@@ -18,7 +18,32 @@
 
 
 <body>
-    @if(session('status') === 'success')
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+    </script>
+    <script>
+        @if(session('success'))
+            toastr.success("{{ session('success') }}");
+        @endif
+
+        @if(session('error'))
+            toastr.error("{{ session('error') }}");
+        @endif
+
+        @if(session('warning'))
+            toastr.warning("{{ session('warning') }}");
+        @endif
+
+        @if(session('info'))
+            toastr.info("{{ session('info') }}");
+        @endif
+    </script>
+    {{-- @if(session('status') === 'success')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 flasher
@@ -26,7 +51,7 @@
                     .success(@json(session('message', 'Action completed successfully!')), 'Success');
             });
         </script>
-    @endif
+    @endif --}}
 
     <!-- Begin page -->
     <div id="layout-wrapper">

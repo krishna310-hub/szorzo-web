@@ -1,5 +1,4 @@
 <!-- Custom Script -->
-<script src="{{ asset('admin/js/jquery.min.js')}}"></script>
 
 <script src="{{asset('admin/js/custom-script.js')}}"></script>
 <!-- JAVASCRIPT -->

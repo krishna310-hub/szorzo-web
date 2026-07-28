@@ -179,6 +179,42 @@
 @push('script')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const client = document.getElementById('client_id');
+    const jobRole = document.getElementById('job_role_id');
+    const clientJobRoleMap = @json($clientJobRoleMap);
+    const jobRoleOptions = Array.from(jobRole.options).map(function (option) {
+        return {
+            value: option.value,
+            text: option.text,
+            selected: option.selected
+        };
+    });
+
+    function filterJobRoles() {
+        const selectedRole = jobRole.value;
+        const allowedRoles = (clientJobRoleMap[client.value] || []).map(String);
+
+        jobRole.innerHTML = '';
+        jobRoleOptions.forEach(function (option) {
+            if (!option.value || allowedRoles.includes(String(option.value))) {
+                jobRole.add(new Option(
+                    option.text,
+                    option.value,
+                    false,
+                    String(option.value) === String(selectedRole)
+                ));
+            }
+        });
+
+        if (selectedRole && !allowedRoles.includes(String(selectedRole))) {
+            jobRole.value = '';
+        }
+        jobRole.disabled = !client.value;
+    }
+
+    client.addEventListener('change', filterJobRoles);
+    filterJobRoles();
+
     if (typeof Choices === 'undefined') {
         return;
     }
