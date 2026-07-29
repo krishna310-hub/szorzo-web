@@ -31,6 +31,7 @@ class ClientRequirementController extends Controller
         if ($request->ajax()) {
             $modeNames = Mode::pluck('mode', 'id');
             $locationNames = Location::pluck('location', 'id');
+            $recruiterNames = Recruiter::pluck('recruiter_name', 'id');
             $query = ClientRequirement::with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner', 'billing'])->latest();
 
             return DataTables::of($query)
@@ -43,7 +44,8 @@ class ClientRequirementController extends Controller
                 ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
                 ->addColumn('location_name', fn ($row) => collect($row->location_ids ?: array_filter([$row->location_id]))
                     ->map(fn ($id) => $locationNames->get((int) $id))->filter()->join(', ') ?: '-')
-                ->addColumn('project_owner_name', fn ($row) => $row->projectOwner->recruiter_name ?? '-')
+                ->addColumn('project_owner_name', fn ($row) => collect($row->project_owner_ids ?: array_filter([$row->project_owner]))
+                    ->map(fn ($id) => $recruiterNames->get((int) $id))->filter()->join(', ') ?: '-')
                 ->addColumn('billing_value', fn ($row) => $row->billing ? $row->billing->value.'%' : '-')
                 ->editColumn('requirement_open_date', fn ($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
                 ->editColumn('closure_target_date', fn ($row) => $row->closure_target_date?->format('d-m-Y') ?? '-')
@@ -51,6 +53,9 @@ class ClientRequirementController extends Controller
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
+                ->addColumn('priority', fn ($row) => $row->is_priority
+                    ? '<span class="badge bg-warning-subtle text-warning">Priority</span>'
+                    : '-')
                 ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
@@ -63,7 +68,7 @@ class ClientRequirementController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['status', 'priority', 'action'])
                 ->make(true);
         }
 
@@ -116,6 +121,7 @@ class ClientRequirementController extends Controller
         $this->authorize('read', ClientRequirement::class);
         $modeNames = Mode::pluck('mode', 'id');
         $locationNames = Location::pluck('location', 'id');
+        $recruiterNames = Recruiter::pluck('recruiter_name', 'id');
 
         $rows = ClientRequirement::with(['client', 'billing', 'jobDescription', 'mode', 'jobRole', 'projectOwner', 'location'])
             ->latest()->get()->map(fn ($item) => [
@@ -132,7 +138,9 @@ class ClientRequirementController extends Controller
                 $item->closure_target_date?->format('Y-m-d'),
                 $item->cv_required,
                 $item->cv_uploaded,
-                $item->projectOwner?->recruiter_name,
+                collect($item->project_owner_ids ?: array_filter([$item->project_owner]))
+                    ->map(fn ($id) => $recruiterNames->get((int) $id))->filter()->join(', '),
+                $item->is_priority ? 'Yes' : 'No',
                 $item->ctc,
                 collect($item->location_ids ?: array_filter([$item->location_id]))
                     ->map(fn ($id) => $locationNames->get((int) $id))->filter()->join(', '),
@@ -148,7 +156,7 @@ class ClientRequirementController extends Controller
 
         return Excel::download(new MasterDataExport($this->importHeadings(), [[
             null, 'Existing Client Name', '8.5', null, null, 'C2H, Contract', '2026-07-01', 'Existing Job Role',
-            2, '2026-07-31', 10, 0, 'Existing Recruiter', 500000, 'Chennai, Bangalore', 'Active',
+            2, '2026-07-31', 10, 0, 'Existing Recruiter', 'No', 500000, 'Chennai, Bangalore', 'Active',
         ]]), 'client-requirements-import-template.xlsx');
     }
 
@@ -181,6 +189,7 @@ class ClientRequirementController extends Controller
             $location = $row['locations'] ?? $row['location'] ?? null;
             [$modeIds, $missingModes] = $this->masterIdsFromList(Mode::class, 'mode', $mode);
             [$locationIds, $missingLocations] = $this->masterIdsFromList(Location::class, 'location', $location);
+            [$projectOwnerIds, $missingProjectOwners] = $this->masterIdsFromList(Recruiter::class, 'recruiter_name', $projectOwner);
             $clientId = MasterDataSpreadsheet::lookup(Client::class, 'client', $clientName);
             $billingId = MasterDataSpreadsheet::lookupNumeric(Billing::class, 'value', $billingValue);
             $jobDescriptionId = null;
@@ -211,7 +220,9 @@ class ClientRequirementController extends Controller
                 'closure_target_date' => MasterDataSpreadsheet::date($row['closure_target_date'] ?? null),
                 'cv_required' => $row['cv_required'] ?? 0,
                 'cv_uploaded' => $row['cv_uploaded'] ?? 0,
-                'project_owner' => MasterDataSpreadsheet::lookup(Recruiter::class, 'recruiter_name', $projectOwner),
+                'project_owner' => $projectOwnerIds[0] ?? null,
+                'project_owner_ids' => $projectOwnerIds,
+                'is_priority' => $this->spreadsheetBoolean($row['priority'] ?? null),
                 'ctc' => $ctc,
                 'location_id' => $locationIds[0] ?? null,
                 'location_ids' => $locationIds,
@@ -234,6 +245,9 @@ class ClientRequirementController extends Controller
                 'cv_required' => 'nullable|integer|min:0',
                 'cv_uploaded' => 'nullable|integer|min:0',
                 'project_owner' => 'nullable|exists:recruiters,id',
+                'project_owner_ids' => 'nullable|array',
+                'project_owner_ids.*' => 'integer|distinct|exists:recruiters,id',
+                'is_priority' => 'required|boolean',
                 'ctc' => 'nullable|numeric|min:0',
                 'location_id' => 'nullable|exists:locations,id',
                 'location_ids' => 'nullable|array',
@@ -243,12 +257,11 @@ class ClientRequirementController extends Controller
                 'client_id.required' => 'Client "'.$clientName.'" was not found.',
             ]);
 
-            $validator->after(function ($validator) use ($billingValue, $jobDescription, $jobRole, $projectOwner, $data, $missingModes, $missingLocations) {
+            $validator->after(function ($validator) use ($billingValue, $jobDescription, $jobRole, $data, $missingModes, $missingLocations, $missingProjectOwners) {
                 $lookups = [
                     ['value' => $billingValue, 'id' => $data['billing_id'], 'label' => 'Billing'],
                     ['value' => $jobDescription, 'id' => $data['job_description_id'], 'label' => 'Job description'],
                     ['value' => $jobRole, 'id' => $data['job_role_id'], 'label' => 'Job role'],
-                    ['value' => $projectOwner, 'id' => $data['project_owner'], 'label' => 'Project owner'],
                 ];
                 foreach ($lookups as $lookup) {
                     if ($lookup['value'] !== null && trim((string) $lookup['value']) !== '' && ! $lookup['id']) {
@@ -260,6 +273,9 @@ class ClientRequirementController extends Controller
                 }
                 foreach ($missingLocations as $name) {
                     $validator->errors()->add('location_ids', 'Location "'.$name.'" was not found.');
+                }
+                foreach ($missingProjectOwners as $name) {
+                    $validator->errors()->add('project_owner_ids', 'Project owner "'.$name.'" was not found.');
                 }
             });
 
@@ -318,7 +334,9 @@ class ClientRequirementController extends Controller
             'closure_target_date' => 'nullable|date|after_or_equal:requirement_open_date',
             'cv_required' => 'nullable|integer|min:0',
             'cv_uploaded' => 'nullable|integer|min:0',
-            'project_owner' => 'nullable|exists:recruiters,id',
+            'project_owner_ids' => 'nullable|array',
+            'project_owner_ids.*' => 'integer|distinct|exists:recruiters,id',
+            'is_priority' => 'required|boolean',
             'ctc' => 'nullable|numeric|min:0',
             'location_ids' => 'nullable|array',
             'location_ids.*' => 'integer|distinct|exists:locations,id',
@@ -327,6 +345,7 @@ class ClientRequirementController extends Controller
 
         $data['mode_ids'] = array_values(array_unique(array_map('intval', $data['mode_ids'] ?? [])));
         $data['location_ids'] = array_values(array_unique(array_map('intval', $data['location_ids'] ?? [])));
+        $data['project_owner_ids'] = array_values(array_unique(array_map('intval', $data['project_owner_ids'] ?? [])));
 
         if ($data['job_role_id'] && ! ClientJobRole::where('client_id', $data['client_id'])
             ->where('job_role_id', $data['job_role_id'])
@@ -340,13 +359,19 @@ class ClientRequirementController extends Controller
         // Keep the original columns populated for backward compatibility with reports/imports.
         $data['mode_id'] = $data['mode_ids'][0] ?? null;
         $data['location_id'] = $data['location_ids'][0] ?? null;
+        $data['project_owner'] = $data['project_owner_ids'][0] ?? null;
 
         return $data;
     }
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Modes', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Locations', 'Status'];
+        return ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Modes', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'Priority', 'CTC', 'Locations', 'Status'];
+    }
+
+    private function spreadsheetBoolean(mixed $value): bool
+    {
+        return in_array(mb_strtolower(trim((string) $value)), ['1', 'yes', 'true', 'priority'], true);
     }
 
     /**

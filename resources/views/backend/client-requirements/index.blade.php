@@ -14,7 +14,7 @@
                                         'routePrefix' => 'client-requirements',
                                         'moduleName' => 'Client Requirements',
                                         'model' => \App\Models\ClientRequirement::class,
-                                        'fields' => ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'CTC', 'Location', 'Status'],
+                                        'fields' => ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'Priority', 'CTC', 'Location', 'Status'],
                                     ])
                                     @can('create', \App\Models\ClientRequirement::class)
                                         <a href="{{ route('admin.client-requirements.create') }}" class="btn btn-sm btn-primary">Add Client Requirement</a>
@@ -39,6 +39,7 @@
                                                 <th>CV's Required</th>
                                                 <th>CV's Uploaded</th>
                                                 <th>Project Owner</th>
+                                                <th>Priority</th>
                                                 <th>CTC</th>
                                                 <th>Location</th>
                                                 <th>Status</th>
@@ -119,6 +120,11 @@
                 }, {
                     data: 'project_owner_name',
                     name: 'project_owner_name',
+                    orderable: false,
+                    searchable: false
+                }, {
+                    data: 'priority',
+                    name: 'priority',
                     orderable: false,
                     searchable: false
                 }, {

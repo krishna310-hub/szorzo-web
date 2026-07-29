@@ -104,7 +104,7 @@
 
         .requirement-stats {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 8px;
         }
 
@@ -114,11 +114,13 @@
             border: 1px solid #fee2e2;
             border-radius: 12px;
             background: rgba(255, 255, 255, .8);
+            text-align: center;
         }
 
         .requirement-stat-label {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 5px;
             margin-bottom: 5px;
             color: #64748b;
@@ -579,6 +581,13 @@
                                         </div>
                                         <div class="requirement-stat">
                                             <div class="requirement-stat-label">
+                                                <span class="requirement-status-dot bg-warning"></span>Priority
+                                            </div>
+                                            <div class="requirement-stat-value">{{ number_format($priorityRequirements ?? 0) }}
+                                            </div>
+                                        </div>
+                                        <div class="requirement-stat">
+                                            <div class="requirement-stat-label">
                                                 <span class="requirement-status-dot bg-secondary"></span>Inactive
                                             </div>
                                             <div class="requirement-stat-value">{{ number_format($inActiveRequirements ?? 0) }}
@@ -973,10 +982,20 @@
                                                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                                             <div>
                                                                 <div class="fw-semibold text-dark">Monthly Joining Details</div>
-                                                                <small class="text-muted">Previous three months, current month and upcoming three months for offer-accepted candidates</small>
+                                                                <small class="text-muted">Offer Accepted (green) and Offer Declined (red) by onboarding month</small>
                                                             </div>
                                                         </div>
                                                         <div id="pipelineMonthlyJoiningBarChart" style="min-height: 250px;"></div>
+                                                    </div>
+                                                @elseif($group['title'] === 'Monthly Onboarding Details')
+                                                    <div class="border rounded-4 bg-light p-3 p-lg-4">
+                                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                                                            <div>
+                                                                <div class="fw-semibold text-dark">Monthly Onboarding Details</div>
+                                                                <small class="text-muted">Onboarded with Client (green) and Joiner Declined (red) by onboarding month</small>
+                                                            </div>
+                                                        </div>
+                                                        <div id="pipelineMonthlyOnboardingBarChart" style="min-height: 250px;"></div>
                                                     </div>
                                                 @else
                                                     <div class="pipeline-grid">
@@ -1064,6 +1083,22 @@
                         </div>
                     @endcan --}}
                 </div>
+                @if ($isSuperAdminDashboard)
+                    @can('read', \App\Models\ClientRequirement::class)
+                        <div class="card panel-card target-panel mb-4">
+                            <div class="card-body p-4">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                    <div>
+                                        <h5 class="section-title mb-1">Monthly Revenue</h5>
+                                        <p class="text-muted small mb-0">Client Requirement Revenue Amount totals for the last seven months</p>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success">Admin only</span>
+                                </div>
+                                <div id="monthlyRevenueBarChart" style="min-height: 300px;"></div>
+                            </div>
+                        </div>
+                    @endcan
+                @endif
                 <div class="row g-4">
                     @can('read', \App\Models\Candidate::class)
                         <div class="col-xl-8">
@@ -1172,20 +1207,24 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             var joiningChartTarget = document.querySelector('#pipelineMonthlyJoiningBarChart');
-            if (joiningChartTarget && typeof ApexCharts !== 'undefined') {
-                var joiningThemeColor = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--vz-success').trim() || '#3cd188';
-                new ApexCharts(joiningChartTarget, {
+            var onboardingChartTarget = document.querySelector('#pipelineMonthlyOnboardingBarChart');
+            if (typeof ApexCharts === 'undefined') return;
+
+            function renderMonthlyOutcomeChart(target, positiveName, positiveData, negativeName, negativeData) {
+                if (!target) return;
+
+                new ApexCharts(target, {
                     chart: {
                         type: 'bar',
                         height: 250,
                         toolbar: { show: false },
-                        sparkline: { enabled: false }
+                        sparkline: { enabled: false },
+                        stacked: true
                     },
-                    series: [{
-                        name: 'Joinings',
-                        data: @json($joiningChartTotals)
-                    }],
+                    series: [
+                        { name: positiveName, data: positiveData },
+                        { name: negativeName, data: negativeData }
+                    ],
                     xaxis: {
                         categories: @json($joiningChartMonths),
                         labels: {
@@ -1205,7 +1244,7 @@
                             }
                         }
                     },
-                    colors: [joiningThemeColor],
+                    colors: ['#22c55e', '#ef4444'],
                     plotOptions: {
                         bar: {
                             borderRadius: 4,
@@ -1216,7 +1255,7 @@
                     dataLabels: {
                         enabled: true,
                         offsetY: -16,
-                        formatter: function(value) { return value; },
+                        formatter: function(value) { return value > 0 ? value : ''; },
                         style: {
                             fontSize: '10px',
                             colors: ['#334155']
@@ -1230,13 +1269,97 @@
                     tooltip: {
                         y: {
                             formatter: function(value) {
-                                return value + ' joining' + (value === 1 ? '' : 's');
+                                return value + ' candidate' + (value === 1 ? '' : 's');
                             }
                         }
                     },
-                    noData: { text: 'No joining data' }
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'right'
+                    },
+                    noData: { text: 'No monthly data' }
                 }).render();
             }
+
+            renderMonthlyOutcomeChart(
+                joiningChartTarget,
+                'Offer Accepted',
+                @json($offerAcceptedChartTotals),
+                'Offer Declined',
+                @json($offerDeclinedChartTotals)
+            );
+            renderMonthlyOutcomeChart(
+                onboardingChartTarget,
+                'Onboarded with Client',
+                @json($onboardedChartTotals),
+                'Joiner Declined',
+                @json($joinerDeclinedChartTotals)
+            );
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var revenueTarget = document.querySelector('#monthlyRevenueBarChart');
+            if (!revenueTarget || typeof ApexCharts === 'undefined') return;
+
+            new ApexCharts(revenueTarget, {
+                chart: {
+                    type: 'bar',
+                    height: 300,
+                    toolbar: { show: false }
+                },
+                series: [{
+                    name: 'Revenue Amount',
+                    data: @json($revenueChartTotals)
+                }],
+                xaxis: {
+                    categories: @json($revenueChartMonths),
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                },
+                yaxis: {
+                    min: 0,
+                    labels: {
+                        formatter: function(value) {
+                            return '₹' + Number(value).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+                        }
+                    }
+                },
+                colors: ['#2563eb'],
+                plotOptions: {
+                    bar: {
+                        borderRadius: 5,
+                        columnWidth: '48%',
+                        dataLabels: { position: 'top' }
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    offsetY: -18,
+                    formatter: function(value) {
+                        return value > 0 ? '₹' + Number(value).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '';
+                    },
+                    style: {
+                        fontSize: '10px',
+                        colors: ['#334155']
+                    }
+                },
+                grid: {
+                    borderColor: '#eef2f7',
+                    strokeDashArray: 3,
+                    padding: { top: 20 }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(value) {
+                            return '₹' + Number(value).toLocaleString('en-IN', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        }
+                    }
+                },
+                noData: { text: 'No revenue data' }
+            }).render();
         });
 
         document.addEventListener('DOMContentLoaded', function() {

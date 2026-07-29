@@ -45,6 +45,7 @@
     @php
         $selectedModes = array_map('strval', (array) old('mode_ids', $clientRequirement->mode_ids ?? array_filter([$clientRequirement->mode_id ?? null])));
         $selectedLocations = array_map('strval', (array) old('location_ids', $clientRequirement->location_ids ?? array_filter([$clientRequirement->location_id ?? null])));
+        $selectedProjectOwners = array_map('strval', (array) old('project_owner_ids', $clientRequirement->project_owner_ids ?? array_filter([$clientRequirement->project_owner ?? null])));
     @endphp
     <div class="col-md-4"><label for="mode_ids" class="form-label">Modes</label><select class="form-select"
             id="mode_ids" name="mode_ids[]" multiple>
@@ -131,16 +132,16 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-4"><label for="project_owner" class="form-label">Project Owner</label><select
-            class="form-select" id="project_owner" name="project_owner">
-            <option value="">Select project owner</option>
+    <div class="col-md-4"><label for="project_owner_ids" class="form-label">Project Owners</label><select
+            class="form-select" id="project_owner_ids" name="project_owner_ids[]" multiple>
             @foreach ($recruiters as $recruiter)
                 <option value="{{ $recruiter->id }}"
-                    {{ old('project_owner', $clientRequirement->project_owner ?? '') == $recruiter->id ? 'selected' : '' }}>
+                    {{ in_array((string) $recruiter->id, $selectedProjectOwners, true) ? 'selected' : '' }}>
                     {{ $recruiter->recruiter_name }}</option>
             @endforeach
         </select>
-        @error('project_owner')
+        <small class="text-muted">Search and select one or more project owners.</small>
+        @error('project_owner_ids')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
@@ -169,6 +170,18 @@
                     class="form-check-label" for="status_inactive">Inactive</label></div>
         </div>
         @error('status')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-4">
+        <label class="form-label d-block" for="is_priority">Priority</label>
+        <div class="form-check form-switch pt-2">
+            <input type="hidden" name="is_priority" value="0">
+            <input class="form-check-input" type="checkbox" role="switch" id="is_priority" name="is_priority"
+                value="1" {{ old('is_priority', isset($clientRequirement) ? (int) $clientRequirement->is_priority : 0) == 1 ? 'checked' : '' }}>
+            <label class="form-check-label" for="is_priority">Mark as priority requirement</label>
+        </div>
+        @error('is_priority')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
@@ -229,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
         noChoicesText: 'No more options available'
     };
 
-    ['mode_ids', 'location_ids'].forEach(function (id) {
+    ['mode_ids', 'project_owner_ids', 'location_ids'].forEach(function (id) {
         const select = document.getElementById(id);
         if (!select || select.dataset.choicesInitialized === 'true') {
             return;
@@ -241,7 +254,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const choices = new Choices(select, {
             ...settings,
             placeholder: true,
-            placeholderValue: id === 'mode_ids' ? 'Select modes' : 'Select locations'
+            placeholderValue: id === 'mode_ids'
+                ? 'Select modes'
+                : (id === 'project_owner_ids' ? 'Select project owners' : 'Select locations')
         });
 
         select.dataset.choicesInitialized = 'true';

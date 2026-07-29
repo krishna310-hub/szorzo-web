@@ -25,6 +25,8 @@ class ClientRequirement extends Model
         'cv_required',
         'cv_uploaded',
         'project_owner',
+        'project_owner_ids',
+        'is_priority',
         'ctc',
         'location_id',
         'location_ids',
@@ -36,6 +38,8 @@ class ClientRequirement extends Model
         'closure_target_date' => 'date',
         'mode_ids' => 'array',
         'location_ids' => 'array',
+        'project_owner_ids' => 'array',
+        'is_priority' => 'boolean',
         'status' => 'boolean',
     ];
 
@@ -77,6 +81,14 @@ class ClientRequirement extends Model
     public function projectOwner()
     {
         return $this->belongsTo(Recruiter::class, 'project_owner');
+    }
+
+    public function projectOwners()
+    {
+        return Recruiter::whereIn(
+            'id',
+            $this->project_owner_ids ?: array_filter([$this->project_owner])
+        )->get();
     }
 
     public function billing()

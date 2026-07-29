@@ -74,7 +74,13 @@ class AdminController extends Controller
             : null;
 
         $requirements = ClientRequirement::query()
-            ->when($selectedRecruiterId !== null, fn($query) => $query->where('project_owner', $selectedRecruiterId))
+            ->when($selectedRecruiterId !== null, fn($query) => $query->where(function ($ownerQuery) use ($selectedRecruiterId) {
+                $ownerQuery->whereJsonContains('project_owner_ids', $selectedRecruiterId)
+                    ->orWhere(function ($legacyQuery) use ($selectedRecruiterId) {
+                        $legacyQuery->whereNull('project_owner_ids')
+                            ->where('project_owner', $selectedRecruiterId);
+                    });
+            }))
             ->when($selectedClientId, fn($query) => $query->where('client_id', $selectedClientId))
             ->when($dateFrom, fn($query) => $query->where('client_requirements.created_at', '>=', $dateFrom))
             ->when($dateTo, fn($query) => $query->where('client_requirements.created_at', '<=', $dateTo));
@@ -152,6 +158,7 @@ class AdminController extends Controller
                 'Onboarded with Client',
                 'Joiner Declined',
             ],
+            'Monthly Onboarding Details' => [],
         ];
 
         $groupedLevels = collect($levelGroups)->map(function ($levels, $heading) use ($candidateLevels) {
@@ -176,20 +183,42 @@ class AdminController extends Controller
         $months = collect(range(5, 0))->map(fn($offset) => now()->subMonths($offset));
         $joiningMonths = collect(range(-3, 3))
             ->map(fn ($offset) => now()->addMonthsNoOverflow($offset));
-        $monthlyJoinings = (clone $candidates)
-            ->where('level_of_interview_id', 30)
-            ->whereNotNull('onboarding_date')
-            ->whereBetween('onboarding_date', [
-                now()->subMonthsNoOverflow(3)->startOfMonth(),
-                now()->addMonthsNoOverflow(3)->endOfMonth(),
-            ])
-            ->selectRaw("DATE_FORMAT(onboarding_date, '%Y-%m') as month_key, COUNT(*) as total")
-            ->groupBy('month_key')
-            ->pluck('total', 'month_key');
+
+        $monthlyCandidateLevelCounts = function (string $level) use ($candidates) {
+            return (clone $candidates)
+                ->whereHas('interviewLevel', fn ($query) => $query->where('level', $level))
+                ->whereNotNull('onboarding_date')
+                ->whereBetween('onboarding_date', [
+                    now()->subMonthsNoOverflow(3)->startOfMonth(),
+                    now()->addMonthsNoOverflow(3)->endOfMonth(),
+                ])
+                ->selectRaw("DATE_FORMAT(onboarding_date, '%Y-%m') as month_key, COUNT(*) as total")
+                ->groupBy('month_key')
+                ->pluck('total', 'month_key');
+        };
+
+        $monthlyOfferAccepted = $monthlyCandidateLevelCounts('Offer Accepted');
+        $monthlyOfferDeclined = $monthlyCandidateLevelCounts('Offer Declined');
+        $monthlyOnboarded = $monthlyCandidateLevelCounts('Onboarded with Client');
+        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts('Joiner Declined');
         $monthlyJoiningDetails = $joiningMonths->map(fn ($month) => [
             'label' => $month->format('M Y'),
-            'total' => (int) ($monthlyJoinings[$month->format('Y-m')] ?? 0),
+            'offer_accepted' => (int) ($monthlyOfferAccepted[$month->format('Y-m')] ?? 0),
+            'offer_declined' => (int) ($monthlyOfferDeclined[$month->format('Y-m')] ?? 0),
+            'onboarded' => (int) ($monthlyOnboarded[$month->format('Y-m')] ?? 0),
+            'joiner_declined' => (int) ($monthlyJoinerDeclined[$month->format('Y-m')] ?? 0),
         ]);
+
+        $revenueMonths = collect(range(6, 0))->map(fn ($offset) => now()->subMonthsNoOverflow($offset));
+        $monthlyRevenue = (clone $requirements)
+            ->whereNotNull('revenue_amount')
+            ->whereRaw(
+                'COALESCE(requirement_open_date, client_requirements.created_at) >= ?',
+                [now()->subMonthsNoOverflow(6)->startOfMonth()]
+            )
+            ->selectRaw("DATE_FORMAT(COALESCE(requirement_open_date, client_requirements.created_at), '%Y-%m') as month_key, SUM(revenue_amount) as total")
+            ->groupBy('month_key')
+            ->pluck('total', 'month_key');
 
         $targetMultiplier = $selectedRecruiterId
             ? 1
@@ -237,6 +266,7 @@ class AdminController extends Controller
             'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
             'recruiterPerformance' => $recruiterPerformance,
             'activeRequirements' => (clone $requirements)->where('status', true)->count(),//sum('number_of_position')
+            'priorityRequirements' => (clone $requirements)->where('is_priority', true)->count(),
             'inActiveRequirements' => (clone $requirements)->where('status', false)->count(),//sum('number_of_position')
 
             'myApplicants' => (clone $candidates)->count(),
@@ -247,7 +277,14 @@ class AdminController extends Controller
             'onboarded' => (clone $interviews)->where('level_of_interview_id', 20)->count(),
             'monthlyJoiningDetails' => $monthlyJoiningDetails,
             'joiningChartMonths' => $monthlyJoiningDetails->pluck('label')->values(),
-            'joiningChartTotals' => $monthlyJoiningDetails->pluck('total')->values(),
+            'offerAcceptedChartTotals' => $monthlyJoiningDetails->pluck('offer_accepted')->values(),
+            'offerDeclinedChartTotals' => $monthlyJoiningDetails->pluck('offer_declined')->values(),
+            'onboardedChartTotals' => $monthlyJoiningDetails->pluck('onboarded')->values(),
+            'joinerDeclinedChartTotals' => $monthlyJoiningDetails->pluck('joiner_declined')->values(),
+            'revenueChartMonths' => $revenueMonths->map->format('M Y')->values(),
+            'revenueChartTotals' => $revenueMonths
+                ->map(fn ($month) => round((float) ($monthlyRevenue[$month->format('Y-m')] ?? 0), 2))
+                ->values(),
 
             'revenue' => (clone $requirements)->sum('revenue_amount'),
             'candidateLevels' => $candidateLevels,
