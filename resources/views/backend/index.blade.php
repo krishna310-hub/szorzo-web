@@ -156,6 +156,7 @@
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 8px;
+            margin-top: 20px;
         }
 
         .interview-stat {
@@ -675,7 +676,7 @@
                             <div class="card metric-card">
                                 <div class="card-body p-3 p-lg-4">
                                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                                        <div class="metric-label">Offer &amp; Onboarding Stage</div>
+                                        <div class="metric-label">Onboarding Stage</div>
                                         <div class="metric-icon">
                                             <img src="{{ asset('frontend/images/adminlogos.png') }}" alt="SZORZO Logo"
                                                 class="metric-logo">
