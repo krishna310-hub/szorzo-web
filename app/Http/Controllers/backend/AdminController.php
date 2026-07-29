@@ -277,7 +277,7 @@ class AdminController extends Controller
             'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
             'offered' => (clone $interviews)->whereIn('level_of_interview_id', [30, 35])->count(),
             'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
-            'onboarded' => (clone $interviews)->where('level_of_interview_id', 20)->count(),
+            'onboarded' => (clone $candidates)->where('level_of_interview_id', 20)->count(),
             'monthlyJoiningDetails' => $monthlyJoiningDetails,
             'joiningChartMonths' => $monthlyJoiningDetails->pluck('label')->values(),
             'offerAcceptedChartTotals' => $monthlyJoiningDetails->pluck('offer_accepted')->values(),
