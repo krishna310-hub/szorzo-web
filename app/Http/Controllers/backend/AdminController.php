@@ -206,7 +206,7 @@ class AdminController extends Controller
             'offer_accepted' => (int) ($monthlyOfferAccepted[$month->format('Y-m')] ?? 0),
             'offer_declined' => (int) ($monthlyOfferDeclined[$month->format('Y-m')] ?? 0),
             'onboarded' => (int) ($monthlyOnboarded[$month->format('Y-m')] ?? 0),
-            'joiner_declined' => (int) ($monthlyJoinerDeclined[$month->format('Y-m')] ?? 0),
+            'Joiner Declined' => (int) ($monthlyJoinerDeclined[$month->format('Y-m')] ?? 0),
         ]);
 
         $revenueMonths = collect(range(6, 0))->map(fn ($offset) => now()->subMonthsNoOverflow($offset));
