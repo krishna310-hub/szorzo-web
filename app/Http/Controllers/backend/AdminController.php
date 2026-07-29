@@ -184,29 +184,32 @@ class AdminController extends Controller
         $joiningMonths = collect(range(-3, 3))
             ->map(fn ($offset) => now()->addMonthsNoOverflow($offset));
 
-        $monthlyCandidateLevelCounts = function (string $level) use ($candidates) {
+        $monthlyCandidateLevelCounts = function (int $levelId) use ($candidates) {
             return (clone $candidates)
-                ->whereHas('interviewLevel', fn ($query) => $query->where('level', $level))
-                ->whereNotNull('onboarding_date')
-                ->whereBetween('onboarding_date', [
-                    now()->subMonthsNoOverflow(3)->startOfMonth(),
-                    now()->addMonthsNoOverflow(3)->endOfMonth(),
-                ])
-                ->selectRaw("DATE_FORMAT(onboarding_date, '%Y-%m') as month_key, COUNT(*) as total")
+                ->where('level_of_interview_id', $levelId)
+                ->whereRaw(
+                    'COALESCE(onboarding_date, candidates.updated_at) BETWEEN ? AND ?',
+                    [
+                        now()->subMonthsNoOverflow(3)->startOfMonth(),
+                        now()->addMonthsNoOverflow(3)->endOfMonth(),
+                    ]
+                )
+                ->selectRaw("DATE_FORMAT(COALESCE(onboarding_date, candidates.updated_at), '%Y-%m') as month_key, COUNT(*) as total")
                 ->groupBy('month_key')
                 ->pluck('total', 'month_key');
         };
 
-        $monthlyOfferAccepted = $monthlyCandidateLevelCounts('Offer Accepted');
-        $monthlyOfferDeclined = $monthlyCandidateLevelCounts('Offer Declined');
-        $monthlyOnboarded = $monthlyCandidateLevelCounts('Onboarded with Client');
-        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts('Joiner Declined');
+        // IDs are taken from level_of_interviews and candidates.level_of_interview_id.
+        $monthlyOfferAccepted = $monthlyCandidateLevelCounts(30);
+        $monthlyOfferDeclined = $monthlyCandidateLevelCounts(22);
+        $monthlyOnboarded = $monthlyCandidateLevelCounts(20);
+        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts(21);
         $monthlyJoiningDetails = $joiningMonths->map(fn ($month) => [
             'label' => $month->format('M Y'),
             'offer_accepted' => (int) ($monthlyOfferAccepted[$month->format('Y-m')] ?? 0),
             'offer_declined' => (int) ($monthlyOfferDeclined[$month->format('Y-m')] ?? 0),
             'onboarded' => (int) ($monthlyOnboarded[$month->format('Y-m')] ?? 0),
-            'Joiner Declined' => (int) ($monthlyJoinerDeclined[$month->format('Y-m')] ?? 0),
+            'joiner_declined' => (int) ($monthlyJoinerDeclined[$month->format('Y-m')] ?? 0),
         ]);
 
         $revenueMonths = collect(range(6, 0))->map(fn ($offset) => now()->subMonthsNoOverflow($offset));
