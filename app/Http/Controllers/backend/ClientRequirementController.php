@@ -32,7 +32,9 @@ class ClientRequirementController extends Controller
             $modeNames = Mode::pluck('mode', 'id');
             $locationNames = Location::pluck('location', 'id');
             $recruiterNames = Recruiter::pluck('recruiter_name', 'id');
-            $query = ClientRequirement::with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner', 'billing'])->latest();
+            $query = ClientRequirement::visibleTo($request->user())
+                ->with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner', 'billing'])
+                ->latest();
 
             return DataTables::of($query)
                 ->addIndexColumn()
@@ -123,7 +125,8 @@ class ClientRequirementController extends Controller
         $locationNames = Location::pluck('location', 'id');
         $recruiterNames = Recruiter::pluck('recruiter_name', 'id');
 
-        $rows = ClientRequirement::with(['client', 'billing', 'jobDescription', 'mode', 'jobRole', 'projectOwner', 'location'])
+        $rows = ClientRequirement::visibleTo(request()->user())
+            ->with(['client', 'billing', 'jobDescription', 'mode', 'jobRole', 'projectOwner', 'location'])
             ->latest()->get()->map(fn ($item) => [
                 $item->id,
                 $item->client?->client,
