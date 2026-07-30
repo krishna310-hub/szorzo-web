@@ -188,6 +188,11 @@
                 processing: true,
                 serverSide: true,
                 scrollX: true,
+                scrollCollapse: true,
+                autoWidth: false,
+                fixedColumns: {
+                    leftColumns: 4
+                },
                 ajax: {
                     url: indexUrl,
                     type: 'GET',

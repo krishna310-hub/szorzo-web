@@ -124,6 +124,7 @@ class AdminController extends Controller
                 'Screen Reject',
                 'Position Hold',
                 'Candidate Not Interested',
+                'Candidate Not Responding',
             ],
             'Interview Stage' => [
                 'L1 Scheduled',
