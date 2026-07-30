@@ -634,7 +634,7 @@
                                         <div>
                                             <div class="metric-label mb-2">Interview Stage</div>
                                             <div class="metric-value">
-                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8, 11, 12, 23, 25, 27, 28])->count()) }}
+                                                {{ number_format($candidateInterviewStages->count()) }}
                                             </div>
                                         </div>
                                         <div class="metric-icon">
@@ -647,25 +647,25 @@
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L1</span>
                                             <div class="interview-stat-value">
-                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [7, 8])->count()) }}
+                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [7, 8])->count()) }}
                                             </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L2</span>
                                             <div class="interview-stat-value">
-                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [11, 12])->count()) }}
+                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [11, 12])->count()) }}
                                             </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L3</span>
                                             <div class="interview-stat-value">
-                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [23, 25])->count()) }}
+                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [23, 25])->count()) }}
                                             </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L4</span>
                                             <div class="interview-stat-value">
-                                                {{ number_format($scheduledInterviews->whereIn('level_of_interview_id', [27, 28])->count()) }}
+                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [27, 28])->count()) }}
                                             </div>
                                         </div>
                                     </div>
@@ -902,8 +902,8 @@
                                 </div>
                                 <div class="col-6 col-lg-3">
                                     <div class="target-summary">
-                                        <div class="metric-label mb-2">Scheduled Interviews</div>
-                                        <div class="target-summary-value">{{ number_format($scheduledInterviews->count()) }}</div>
+                                        <div class="metric-label mb-2">Interview Stage</div>
+                                        <div class="target-summary-value">{{ number_format($candidateInterviewStages->count()) }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-lg-3">

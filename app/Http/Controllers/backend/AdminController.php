@@ -227,24 +227,18 @@ class AdminController extends Controller
         $targetMultiplier = $selectedRecruiterId
             ? 1
             : max(1, $availableRecruiters->count());
-        $monthlyKpis = $this->monthlyTargetAnalytics($candidates, $interviews, $targetMultiplier, $dateFrom, $dateTo);
+        $monthlyKpis = $this->monthlyTargetAnalytics($candidates, $targetMultiplier, $dateFrom, $dateTo);
         $deliveryLeadAnalytics = $this->monthlyTargetAnalytics(
             Candidate::query(),
-            InterviewSchedule::query(),
             max(1, $availableRecruiters->count()),
             $dateFrom,
             $dateTo
         );
         $recruiterPerformance = $availableRecruiters->mapWithKeys(function (Recruiter $recruiter) use ($dateFrom, $dateTo) {
             $candidateQuery = Candidate::where('recruiter_id', $recruiter->id);
-            $interviewQuery = InterviewSchedule::whereHas(
-                'candidate',
-                fn($query) => $query->where('recruiter_id', $recruiter->id)
-            );
 
             return [$recruiter->id => $this->monthlyTargetAnalytics(
                 $candidateQuery,
-                $interviewQuery,
                 1,
                 $dateFrom,
                 $dateTo
@@ -274,10 +268,12 @@ class AdminController extends Controller
             'inActiveRequirements' => (clone $requirements)->where('status', false)->count(),//sum('number_of_position')
 
             'myApplicants' => (clone $candidates)->count(),
-            'scheduledInterviews' => (clone $interviews)->whereIn('status', ['scheduled', 'completed', 'selected'])->get(),
-            'yetToOffer' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
-            'offered' => (clone $interviews)->whereIn('level_of_interview_id', [30, 35])->count(),
-            'hrSelected' => (clone $interviews)->where('level_of_interview_id', 15)->count(),
+            'candidateInterviewStages' => (clone $candidates)
+                ->whereIn('level_of_interview_id', [7, 8, 11, 12, 23, 25, 27, 28])
+                ->get(['id', 'level_of_interview_id']),
+            'yetToOffer' => (clone $candidates)->where('level_of_interview_id', 15)->count(),
+            'offered' => (clone $candidates)->whereIn('level_of_interview_id', [30, 35])->count(),
+            'hrSelected' => (clone $candidates)->where('level_of_interview_id', 15)->count(),
             'onboarded' => (clone $candidates)->where('level_of_interview_id', 20)->count(),
             'monthlyJoiningDetails' => $monthlyJoiningDetails,
             'joiningChartMonths' => $monthlyJoiningDetails->pluck('label')->values(),
@@ -303,7 +299,6 @@ class AdminController extends Controller
 
     private function monthlyTargetAnalytics(
         $candidates,
-        $interviews,
         int $targetMultiplier,
         ?CarbonInterface $dateFrom = null,
         ?CarbonInterface $dateTo = null
@@ -314,10 +309,6 @@ class AdminController extends Controller
         $periodCandidates = (clone $candidates)
             ->when($periodStart, fn($query) => $query->where('candidates.created_at', '>=', $periodStart))
             ->when($periodEnd, fn($query) => $query->where('candidates.created_at', '<=', $periodEnd));
-        $periodInterviews = (clone $interviews)
-            ->when($periodStart, fn($query) => $query->where('interview_schedules.schedule_date', '>=', $periodStart))
-            ->when($periodEnd, fn($query) => $query->where('interview_schedules.schedule_date', '<=', $periodEnd))
-            ->where('status', '!=', 'cancelled');
 
         // Fixed IDs from the Level of Interviews master.
         $shortlistedLevelIds = [3, 7, 8, 9, 31, 11, 12, 13, 32, 23, 25, 24, 33, 27, 28, 29, 34, 14, 15, 16, 35, 22, 20, 21, 36, 5];
@@ -347,39 +338,35 @@ class AdminController extends Controller
                 'target' => 70,
                 'unit' => 'rounds',
                 'icon' => 'ri-calendar-check-line',
-                'completed' => (clone $periodInterviews)->whereIn('level_of_interview_id', $interviewLevelIds)->count()
+                'completed' => (clone $periodCandidates)->whereIn('level_of_interview_id', $interviewLevelIds)->count()
             ],
             [
                 'label' => 'HR Select',
                 'target' => 25,
                 'unit' => 'screenings',
                 'icon' => 'ri-survey-line',
-                'completed' => (clone $periodInterviews)->where('level_of_interview_id', $hrSelectId)
-                    ->distinct()->count('candidate_id')
+                'completed' => (clone $periodCandidates)->whereIn('level_of_interview_id', $hrSelectId)->count()
             ],
             [
                 'label' => 'Offers Released',
                 'target' => 15,
                 'unit' => 'offers',
                 'icon' => 'ri-draft-line',
-                'completed' => (clone $periodInterviews)->whereIn('level_of_interview_id', $offerReleasedIds)
-                    ->distinct()->count('candidate_id')
+                'completed' => (clone $periodCandidates)->whereIn('level_of_interview_id', $offerReleasedIds)->count()
             ],
             [
                 'label' => 'Offer Acceptance',
                 'target' => 12,
                 'unit' => 'acceptances',
                 'icon' => 'ri-user-follow-line',
-                'completed' => (clone $periodInterviews)->where('level_of_interview_id', $offerAcceptedId)
-                    ->distinct()->count('candidate_id')
+                'completed' => (clone $periodCandidates)->whereIn('level_of_interview_id', $offerAcceptedId)->count()
             ],
             [
                 'label' => 'Onboarding',
                 'target' => 10,
                 'unit' => 'joiners',
                 'icon' => 'ri-team-line',
-                'completed' => (clone $periodInterviews)->where('level_of_interview_id', $onboardedId)
-                    ->distinct()->count('candidate_id')
+                'completed' => (clone $periodCandidates)->where('level_of_interview_id', $onboardedId)->count()
             ],
         ];
 
