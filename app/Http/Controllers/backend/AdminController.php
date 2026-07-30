@@ -58,22 +58,25 @@ class AdminController extends Controller
         $isDeliveryLead = $roleId === 2;
         $isRecruiter = $roleId === 3;
         $isPersonalDashboard = $isRecruiter;
-        $linkedRecruiterId = $isRecruiter
-            ? Recruiter::whereRaw('LOWER(email) = ?', [strtolower($user->email)])->value('id')
+        $linkedRecruiter = $isRecruiter
+            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->first()
             : null;
+        $linkedRecruiterId = $linkedRecruiter?->id;
 
         $availableRecruiters = ($isSuperAdmin || $isDeliveryLead)
             ? Recruiter::where('status', true)->orderBy('recruiter_name')->get()
             : collect();
+        $availableClients = Client::where('status', true)->orderBy('client')->get();
         $requestedRecruiterId = $request->filled('recruiter_id') ? (int) $request->recruiter_id : null;
         $selectedRecruiterId = $isRecruiter
             ? ($linkedRecruiterId ?? 0)
             : ($availableRecruiters->contains('id', $requestedRecruiterId) ? $requestedRecruiterId : null);
-        $selectedClientId = $isSuperAdmin && $request->filled('client_id')
-            ? (int) $request->client_id
+        $requestedClientId = $request->filled('client_id') ? (int) $request->client_id : null;
+        $selectedClientId = $availableClients->contains('id', $requestedClientId)
+            ? $requestedClientId
             : null;
 
-        $requirements = ClientRequirement::query()
+        $requirements = ClientRequirement::visibleTo($user)
             ->when($selectedRecruiterId !== null, fn($query) => $query->where(function ($ownerQuery) use ($selectedRecruiterId) {
                 $ownerQuery->whereJsonContains('project_owner_ids', $selectedRecruiterId)
                     ->orWhere(function ($legacyQuery) use ($selectedRecruiterId) {
@@ -250,10 +253,11 @@ class AdminController extends Controller
                 ? 'My recruitment pipeline'
                 : ($isDeliveryLead ? 'My delivery lead recruitment pipeline' : 'Management recruitment overview'),
             'isRecruiterDashboard' => $isPersonalDashboard,
-            'showClientFilter' => $isSuperAdmin,
+            'showClientFilter' => true,
             'recruiterLinked' => !$isRecruiter || (bool) $linkedRecruiterId,
+            'linkedRecruiter' => $linkedRecruiter,
             'recruiters' => $availableRecruiters,
-            'clients' => $isSuperAdmin ? Client::where('status', true)->orderBy('client')->get() : collect(),
+            'clients' => $availableClients,
             'selectedRecruiterId' => $selectedRecruiterId,
             'selectedClientId' => $selectedClientId,
             'selectedFromDate' => $selectedFromDate,

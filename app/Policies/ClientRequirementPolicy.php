@@ -7,7 +7,10 @@ use App\Models\User;
 
 class ClientRequirementPolicy
 {
-    public function read(User $user) { return $this->getPermission($user, 'Read'); }
+    public function read(User $user)
+    {
+        return (int) $user->role_id === 3 || $this->getPermission($user, 'Read');
+    }
     public function create(User $user) { return $this->getPermission($user, 'Create'); }
     public function edit(User $user) { return $this->getPermission($user, 'Edit'); }
     public function delete(User $user) { return $this->getPermission($user, 'Delete'); }

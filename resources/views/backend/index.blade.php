@@ -487,13 +487,13 @@
                     <div class="card-body p-3 p-lg-4">
                         <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3 align-items-end">
                             @unless ($isRecruiterDashboard)
-                                <div class="col-md-6 col-xl-{{ $showClientFilter ? '2' : '3' }}">
+                                <div class="col-md-6 col-xl-2">
                                     <label for="dashboard_recruiter_id" class="form-label fw-semibold">Recruiter</label>
                                     <select id="dashboard_recruiter_id" name="recruiter_id" class="form-select">
                                         <option value="">All recruiters</option>
                                         @foreach ($recruiters as $recruiter)
                                             <option value="{{ $recruiter->id }}" @selected((int) $selectedRecruiterId === $recruiter->id)>
-                                                {{ $recruiter->recruiter_name }}</option>
+                                            {{ $recruiter->recruiter_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -561,7 +561,7 @@
                 @endunless
 
                 <div class="row g-3 mb-4">
-                    @can('read', \App\Models\ClientRequirement::class)
+                    @if ($isRecruiterDashboard || auth()->user()->can('read', \App\Models\ClientRequirement::class))
                         <div class="col-6 col-xl-3">
                             <div class="card metric-card requirements-card">
                                 <div class="card-body p-3 p-lg-4">
@@ -598,7 +598,7 @@
                                 </div>
                             </div>
                         </div>
-                    @endcan
+                    @endif
                     @can('read', \App\Models\Candidate::class)
                         <div class="col-6 col-xl-3">
                             <div class="card metric-card">

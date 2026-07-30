@@ -73,12 +73,21 @@
             </div>
             <div>
                 <label for="filter_recruiter_id" class="form-label">Recruiter</label>
-                <select class="form-select" id="filter_recruiter_id" name="recruiter_id">
-                    <option value="">All recruiters</option>
-                    @foreach ($recruiters as $recruiter)
-                        <option value="{{ $recruiter->id }}">{{ $recruiter->recruiter_name }}</option>
-                    @endforeach
-                </select>
+                @if ($isRecruiterScheduleList)
+                    <select class="form-select" id="filter_recruiter_id" disabled>
+                        <option selected>{{ $linkedRecruiter?->recruiter_name ?? 'Recruiter not linked' }}</option>
+                    </select>
+                    @if ($linkedRecruiter)
+                        <input type="hidden" name="recruiter_id" value="{{ $linkedRecruiter->id }}">
+                    @endif
+                @else
+                    <select class="form-select" id="filter_recruiter_id" name="recruiter_id">
+                        <option value="">All recruiters</option>
+                        @foreach ($recruiters as $recruiter)
+                            <option value="{{ $recruiter->id }}">{{ $recruiter->recruiter_name }}</option>
+                        @endforeach
+                    </select>
+                @endif
             </div>
             <div>
                 <label for="filter_client_id" class="form-label">Client</label>

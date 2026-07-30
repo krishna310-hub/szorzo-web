@@ -327,7 +327,17 @@ class InterviewScheduleController extends Controller
 
     private function scheduleQuery(Request $request)
     {
+        $user = auth()->user();
+        $isRecruiter = (int) $user->role_id === 3;
+        $linkedRecruiterId = $isRecruiter
+            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id')
+            : null;
+
         return InterviewSchedule::with(['candidate.recruiter', 'candidate.client', 'candidate.jobRole', 'client', 'jobRole', 'interviewLevel'])
+            ->when($isRecruiter, fn ($query) => $query->whereHas(
+                'candidate',
+                fn ($candidateQuery) => $candidateQuery->where('recruiter_id', $linkedRecruiterId ?? 0)
+            ))
             ->when($request->filled('from_date'), fn($query) => $query->whereDate('schedule_date', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn($query) => $query->whereDate('schedule_date', '<=', $request->to_date))
             ->when($request->filled('candidate_id'), fn($query) => $query->where('candidate_id', $request->candidate_id))
@@ -339,13 +349,23 @@ class InterviewScheduleController extends Controller
                 return $query->whereIn('level_of_interview_id', $levelIds);
             })
             ->when($request->filled('status'), fn($query) => $query->where('status', $request->status))
-            ->when($request->filled('recruiter_id'), fn($query) => $query->whereHas('candidate', fn($candidateQuery) => $candidateQuery->where('recruiter_id', $request->recruiter_id)));
+            ->when(! $isRecruiter && $request->filled('recruiter_id'), fn($query) => $query->whereHas('candidate', fn($candidateQuery) => $candidateQuery->where('recruiter_id', $request->recruiter_id)));
     }
 
     private function formData(): array
     {
+        $isRecruiter = (int) auth()->user()->role_id === 3;
+        $linkedRecruiter = $isRecruiter
+            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower(auth()->user()->email)])->first()
+            : null;
+
         return [
-            'candidates' => Candidate::orderBy('candidate_name')->get(),
+            'candidates' => Candidate::query()
+                ->when($isRecruiter, fn ($query) => $query->where('recruiter_id', $linkedRecruiter?->id ?? 0))
+                ->orderBy('candidate_name')
+                ->get(),
+            'isRecruiterScheduleList' => $isRecruiter,
+            'linkedRecruiter' => $linkedRecruiter,
             'clients' => Client::orderBy('client')->get(),
             'jobRoles' => JobRole::orderBy('job_role')->get(),
             'clientJobRoleMap' => ClientJobRole::where('status', true)
