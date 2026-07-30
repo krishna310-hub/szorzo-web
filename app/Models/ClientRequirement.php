@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -42,6 +43,33 @@ class ClientRequirement extends Model
         'is_priority' => 'boolean',
         'status' => 'boolean',
     ];
+
+    /**
+     * Recruiters may only see requirements assigned to their recruiter record.
+     * Delivery leads, administrators, and all other permitted roles remain
+     * unscoped.
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if ((int) $user->role_id !== 3) {
+            return $query;
+        }
+
+        $recruiterId = Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])
+            ->value('id');
+
+        if (! $recruiterId) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function (Builder $ownerQuery) use ($recruiterId) {
+            $ownerQuery->whereJsonContains('project_owner_ids', (int) $recruiterId)
+                ->orWhere(function (Builder $legacyQuery) use ($recruiterId) {
+                    $legacyQuery->whereNull('project_owner_ids')
+                        ->where('project_owner', $recruiterId);
+                });
+        });
+    }
 
     public function client()
     {
