@@ -58,10 +58,9 @@ class AdminController extends Controller
         $isDeliveryLead = $roleId === 2;
         $isRecruiter = $roleId === 3;
         $isPersonalDashboard = $isRecruiter;
-        $linkedRecruiter = $isRecruiter
-            ? Recruiter::whereRaw('LOWER(email) = ?', [strtolower($user->email)])->first()
+        $linkedRecruiterId = $isRecruiter
+            ? Recruiter::whereRaw('LOWER(email) = ?', [strtolower($user->email)])->value('id')
             : null;
-        $linkedRecruiterId = $linkedRecruiter?->id;
 
         $availableRecruiters = ($isSuperAdmin || $isDeliveryLead)
             ? Recruiter::where('status', true)->orderBy('recruiter_name')->get()
@@ -253,7 +252,6 @@ class AdminController extends Controller
             'isRecruiterDashboard' => $isPersonalDashboard,
             'showClientFilter' => $isSuperAdmin,
             'recruiterLinked' => !$isRecruiter || (bool) $linkedRecruiterId,
-            'linkedRecruiter' => $linkedRecruiter,
             'recruiters' => $availableRecruiters,
             'clients' => $isSuperAdmin ? Client::where('status', true)->orderBy('client')->get() : collect(),
             'selectedRecruiterId' => $selectedRecruiterId,
