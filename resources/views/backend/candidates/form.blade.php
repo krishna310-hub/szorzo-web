@@ -215,7 +215,7 @@
     <div class="col-md-4" id="onboardingDateDiv" style="{{ !empty($candidate->onboarding_date) ? 'display:block;' : 'display:none;' }}">
         <label for="onboarding_date" class="form-label">Onboarding Date</label>
         <input type="date" class="form-control" id="onboarding_date" name="onboarding_date"
-            value="{{ old('onboarding_date', $candidate->onboarding_date ?? '') }}" readonly>
+            value="{{ old('onboarding_date', optional($candidate->onboarding_date)->format('Y-m-d')) }}" readonly>
     </div>
 </div>
 <script>
