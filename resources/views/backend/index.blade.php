@@ -510,7 +510,7 @@
                                     </select>
                                 </div>
                             @endif
-                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : '3' }}">
+                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '3' : '3' }}">
                                 <label for="dashboard_from_date" class="form-label fw-semibold">From Date</label>
                                 <input type="date" id="dashboard_from_date" name="dashboard_from_date"
                                     class="form-control {{ $fromDateError ? 'is-invalid' : '' }}"
@@ -519,7 +519,7 @@
                                     <div class="invalid-feedback">{{ $fromDateError }}</div>
                                 @endif
                             </div>
-                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '4' : '3' }}">
+                            <div class="col-md-6 col-xl-{{ $isRecruiterDashboard ? '3' : '3' }}">
                                 <label for="dashboard_to_date" class="form-label fw-semibold">To Date</label>
                                 <input type="date" id="dashboard_to_date" name="dashboard_to_date"
                                     class="form-control {{ $toDateError ? 'is-invalid' : '' }}"
