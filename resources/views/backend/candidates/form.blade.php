@@ -177,25 +177,95 @@
             'Client Duplicate',
             'Screen Select',
             'Screen Reject',
+            'Position Hold',
+            'Candidate Not Interested',
+            'Candidate Not Responding',
         ];
+        $interviewLevelsList = [
+            'L1 Scheduled',
+            'L1 Select',
+            'L1 Reject',
+            'L1 Re-Schedule',
+
+            'L2 Scheduled',
+            'L2 Select',
+            'L2 Reject',
+            'L2 Re-Schedule',
+
+            'L3 Scheduled',
+            'L3 Select',
+            'L3 Reject',
+            'L3 Re-Schedule',
+
+            'L4 Scheduled',
+            'L4 Select',
+            'L4 Reject',
+            'L4 Re-Schedule',
+        ];
+
+        $onboardingLevels = [
+            'HR Discussion Pending',
+            'HR Select',
+            'HR Reject',
+            'Offer Released',
+            'Offer Accepted',
+            'Offer Declined',
+            'Onboarded with Client',
+            'Joiner Declined',
+        ];
+        $selectedLevel = old('level_of_interview_id', $candidate->level_of_interview_id ?? '');
     @endphp
     <div class="col-md-4">
-        <label for="level_of_interview_id" class="form-label">Level Of Interview <span class="text-danger">*</span></label>
-        <select class="form-select" id="level_of_interview_id" name="level_of_interview_id">
-            <option value="">Select level</option>
+    <label for="level_of_interview_id" class="form-label">
+        Level Of Interview <span class="text-danger">*</span>
+    </label>
+
+    <select class="form-select" id="level_of_interview_id" name="level_of_interview_id">
+        <option value="">Select Level</option>
+
+        {{-- Sourcing Stage --}}
+        <optgroup label="Sourcing Stage">
             @foreach ($interviewLevels as $level)
                 @if(in_array($level->level, $sourcingLevels))
                     <option value="{{ $level->id }}"
-                        {{ old('level_of_interview_id', $candidate->level_of_interview_id ?? '') == $level->id ? 'selected' : '' }}>
+                        {{ $selectedLevel == $level->id ? 'selected' : '' }}>
                         {{ $level->level }}
                     </option>
                 @endif
             @endforeach
-        </select>
-        @error('level_of_interview_id')
-            <span class="text-danger small">{{ $message }}</span>
-        @enderror
-    </div>
+        </optgroup>
+
+        {{-- Interview Stage --}}
+        <optgroup label="Interview Stage">
+            @foreach ($interviewLevels as $level)
+                @if(in_array($level->level, $interviewLevelsList))
+                    <option value="{{ $level->id }}"
+                        {{ $selectedLevel == $level->id ? 'selected' : '' }}
+                        {{ $selectedLevel != $level->id ? 'disabled' : '' }}>
+                        {{ $level->level }}
+                    </option>
+                @endif
+            @endforeach
+        </optgroup>
+
+        {{-- Onboarding Stage --}}
+        <optgroup label="Onboarding Stage">
+            @foreach ($interviewLevels as $level)
+                @if(in_array($level->level, $onboardingLevels))
+                    <option value="{{ $level->id }}"
+                        {{ $selectedLevel == $level->id ? 'selected' : '' }}
+                        {{ $selectedLevel != $level->id ? 'disabled' : '' }}>
+                        {{ $level->level }}
+                    </option>
+                @endif
+            @endforeach
+        </optgroup>
+    </select>
+
+    @error('level_of_interview_id')
+        <span class="text-danger small">{{ $message }}</span>
+    @enderror
+</div>
     <div class="col-md-4"><label class="form-label">Status</label>
         <div class="d-flex">
             <div class="form-check form-radio-success me-3"><input class="form-check-input" type="radio"
@@ -215,7 +285,7 @@
     <div class="col-md-4" id="onboardingDateDiv" style="{{ !empty($candidate->onboarding_date) ? 'display:block;' : 'display:none;' }}">
         <label for="onboarding_date" class="form-label">Onboarding Date</label>
         <input type="date" class="form-control" id="onboarding_date" name="onboarding_date"
-            value="{{ old('onboarding_date', optional($candidate->onboarding_date)->format('Y-m-d')) }}" readonly>
+            value="{{ old('onboarding_date', isset($candidate) && $candidate->onboarding_date ? $candidate->onboarding_date->format('Y-m-d') : '') }}" readonly>
     </div>
 </div>
 <script>
