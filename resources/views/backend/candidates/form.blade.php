@@ -204,7 +204,7 @@
         ];
 
         $onboardingLevels = [
-            'HR Discussion Pending',
+            'HR Discussion',
             'HR Select',
             'HR Reject',
             'Offer Released',
