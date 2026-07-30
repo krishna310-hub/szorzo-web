@@ -486,18 +486,27 @@
                 <div class="card panel-card mb-4">
                     <div class="card-body p-3 p-lg-4">
                         <form method="GET" action="{{ route('admin.dashboard') }}" class="row g-3 align-items-end">
-                            @unless ($isRecruiterDashboard)
-                                <div class="col-md-6 col-xl-{{ $showClientFilter ? '2' : '3' }}">
-                                    <label for="dashboard_recruiter_id" class="form-label fw-semibold">Recruiter</label>
+                            <div class="col-md-6 col-xl-{{ $showClientFilter ? '2' : '3' }}">
+                                <label for="dashboard_recruiter_id" class="form-label fw-semibold">Recruiter</label>
+                                @if ($isRecruiterDashboard)
+                                    <select id="dashboard_recruiter_id" class="form-select" disabled>
+                                        <option selected>
+                                            {{ $linkedRecruiter?->recruiter_name ?? 'Recruiter not linked' }}
+                                        </option>
+                                    </select>
+                                    @if ($linkedRecruiter)
+                                        <input type="hidden" name="recruiter_id" value="{{ $linkedRecruiter->id }}">
+                                    @endif
+                                @else
                                     <select id="dashboard_recruiter_id" name="recruiter_id" class="form-select">
                                         <option value="">All recruiters</option>
                                         @foreach ($recruiters as $recruiter)
                                             <option value="{{ $recruiter->id }}" @selected((int) $selectedRecruiterId === $recruiter->id)>
-                                                {{ $recruiter->recruiter_name }}</option>
+                                            {{ $recruiter->recruiter_name }}</option>
                                         @endforeach
                                     </select>
-                                </div>
-                            @endunless
+                                @endif
+                            </div>
                             @if ($showClientFilter)
                                 <div class="col-md-6 col-xl-2">
                                     <label for="dashboard_client_id" class="form-label fw-semibold">Client</label>
