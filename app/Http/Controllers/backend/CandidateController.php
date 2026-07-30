@@ -371,8 +371,15 @@ class CandidateController extends Controller
 
     private function formData(): array
     {
+        $isRecruiter = (int) auth()->user()->role_id === 3;
+        $linkedRecruiter = $isRecruiter
+            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower(auth()->user()->email)])->first()
+            : null;
+
         return [
             'recruiters' => Recruiter::where('status', true)->orderBy('recruiter_name')->get(),
+            'isRecruiterCandidateList' => $isRecruiter,
+            'linkedRecruiter' => $linkedRecruiter,
             'clients' => Client::where('status', true)->orderBy('client')->get(),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
             'clientJobRoleMap' => ClientJobRole::where('status', true)
@@ -385,10 +392,17 @@ class CandidateController extends Controller
 
     private function candidateQuery(Request $request)
     {
+        $user = auth()->user();
+        $isRecruiter = (int) $user->role_id === 3;
+        $linkedRecruiterId = $isRecruiter
+            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id')
+            : null;
+
         return Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])
+            ->when($isRecruiter, fn ($query) => $query->where('recruiter_id', $linkedRecruiterId ?? 0))
             ->when($request->filled('from_date'), fn ($query) => $query->whereDate('created_at', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn ($query) => $query->whereDate('created_at', '<=', $request->to_date))
-            ->when($request->filled('recruiter_id'), fn ($query) => $query->where('recruiter_id', $request->recruiter_id))
+            ->when(! $isRecruiter && $request->filled('recruiter_id'), fn ($query) => $query->where('recruiter_id', $request->recruiter_id))
             ->when($request->filled('job_role_id'), fn ($query) => $query->where('job_role_id', $request->job_role_id))
             ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
             ->when($request->filled('level_of_interview_id'), function ($query) use ($request) {
