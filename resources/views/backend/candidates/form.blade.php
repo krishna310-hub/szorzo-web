@@ -19,7 +19,7 @@
             <option value="">Select Recruiter</option>
             @foreach ($recruiters as $recruiter)
                 <option value="{{ $recruiter->id }}"
-                    {{ (string) $selectedRecruiterId === (string) $recruiter->id ? 'selected' : '' }}>
+                    {{ (string) $selectedRecruiterId == (string) $recruiter->id ? 'selected' : '' }}>
                     {{ $recruiter->recruiter_name }}</option>
             @endforeach
         </select>
