@@ -196,6 +196,7 @@ class CandidateController extends Controller
     {
         $closureLevels = [
             InterviewLevel::CANDIDATE_NOT_INTERESTED_ID => 'Candidate Not Interested',
+            InterviewLevel::CANDIDATE_NOT_POSITION_ID => 'Position Hold',
             InterviewLevel::CANDIDATE_NOT_RESPONDING_ID => 'Candidate Not Responding',
         ];
 
