@@ -7,20 +7,16 @@
     </div> --}}
     <div class="col-md-4">
         <label for="client_id" class="form-label">Recruiter <span class="text-danger">*</span></label>
-        <select class="form-select" id="recruiter_id" name="recruiter_id"
-            {{ ($isRecruiterCandidateList ?? false) ? 'disabled' : '' }}>
+        <select class="form-select" id="recruiter_id" name="recruiter_id" {{ ($isRecruiterCandidateList ?? false) ? 'disabled' : '' }}>
             <option value="">Select Recruiter</option>
-
             @foreach ($recruiters as $recruiter)
                 <option value="{{ $recruiter->id }}"
-                    {{ old('recruiter_id', $recruiter->id ?? auth()->user()->id) == $recruiter->id ? 'selected' : '' }}>
-                    {{ $recruiter->recruiter_name }}
-                </option>
+                    {{ old('recruiter_id', $candidate->recruiter_id ?? '') == $recruiter->id ? 'selected' : '' }}>
+                    {{ $recruiter->recruiter_name }}</option>
             @endforeach
         </select>
-
         @if($isRecruiterCandidateList ?? false)
-            <input type="hidden" name="recruiter_id" value="{{ auth()->user()->recruiter_id }}">
+            <input type="hidden" name="recruiter_id" value="{{ $linkedRecruiter?->id }}">
             <small class="text-muted">Recruiter is fixed from your login.</small>
         @endif
         @error('recruiter_id')
