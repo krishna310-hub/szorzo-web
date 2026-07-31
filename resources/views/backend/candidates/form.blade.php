@@ -13,7 +13,7 @@
 
             @foreach ($recruiters as $recruiter)
                 <option value="{{ $recruiter->id }}"
-                    {{ old('recruiter_id', $candidate->recruiter_id ?? auth()->user()->id) == $recruiter->id ? 'selected' : '' }}>
+                    {{ old('recruiter_id', $recruiter->id ?? auth()->user()->id) == $recruiter->id ? 'selected' : '' }}>
                     {{ $recruiter->recruiter_name }}
                 </option>
             @endforeach
