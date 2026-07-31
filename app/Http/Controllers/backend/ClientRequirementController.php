@@ -37,6 +37,36 @@ class ClientRequirementController extends Controller
                 ->latest();
 
             return DataTables::of($query)
+                ->filter(function ($query) use ($request) {
+                    $search = trim((string) $request->input('search.value'));
+
+                    if ($search !== '') {
+                        $query->where(function ($q) use ($search) {
+
+                            // Job Role
+                            $q->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
+                                $jobRoleQuery->where('job_role', 'like', "%{$search}%");
+                            });
+
+                            // Client
+                            $q->orWhereHas('client', function ($clientQuery) use ($search) {
+                                $clientQuery->where('client', 'like', "%{$search}%");
+                            });
+
+                            // Billing
+                            $q->orWhereHas('billing', function ($billingQuery) use ($search) {
+                                $billingQuery->where('value', 'like', "%{$search}%");
+                            });
+
+                            // Priority
+                            if (strtolower($search) === 'priority' || $search == '1') {
+                                $q->orWhere('is_priority', 1);
+                            } elseif (strtolower($search) === 'non priority' || $search == '0') {
+                                $q->orWhere('is_priority', 0);
+                            }
+                        });
+                    }
+                })
                 ->addIndexColumn()
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_description_name', fn ($row) => $row->jobDescription->job_description ?? '-')

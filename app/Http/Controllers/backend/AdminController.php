@@ -252,7 +252,7 @@ class AdminController extends Controller
         return view('backend.index', [
             'scopeLabel' => $isRecruiter
                 ? 'My recruitment pipeline'
-                : ($isDeliveryLead ? 'My delivery lead recruitment pipeline' : 'Management recruitment overview'),
+                : ($isDeliveryLead ? 'My delivery lead recruitment pipeline' : 'Talent Aquisition overview'),
             'isRecruiterDashboard' => $isPersonalDashboard,
             'showClientFilter' => true,
             'recruiterLinked' => !$isRecruiter || (bool) $linkedRecruiterId,

@@ -35,6 +35,36 @@ class CandidateController extends Controller
                 ->filterColumn('candidate_name', function ($query, $keyword) {
                     $query->where('candidate_name', 'LIKE', "%{$keyword}%");
                 })
+
+                ->filter(function ($query) use ($request) {
+                    $search = trim((string) $request->input('search.value'));
+
+                    if ($search !== '') {
+                        $query->where(function ($q) use ($search) {
+
+                            // Job Role
+                            $q->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
+                                $jobRoleQuery->where('job_role', 'like', "%{$search}%");
+                            });
+
+                            // Client
+                            $q->orWhereHas('client', function ($clientQuery) use ($search) {
+                                $clientQuery->where('client', 'like', "%{$search}%");
+                            });
+
+                            // Recruiter
+                            $q->orWhereHas('recruiter', function ($recruiterQuery) use ($search) {
+                                $recruiterQuery->where('recruiter_name', 'like', "%{$search}%");
+                            });
+
+                            // Interview Level
+                            $q->orWhereHas('interviewLevel', function ($levelQuery) use ($search) {
+                                $levelQuery->where('level', 'like', "%{$search}%");
+                            });
+                        });
+                    }
+                })
+
                 ->addIndexColumn()
                 ->addColumn('recruiter_name', fn ($row) => $row->recruiter->recruiter_name ?? '-')
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')

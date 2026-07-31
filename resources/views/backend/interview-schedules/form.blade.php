@@ -62,7 +62,7 @@
     </div>
 
     @php
-        $sourcingLevels = [
+        $interviewLevelsList = [
             'L1 Scheduled',
             'L1 Select',
             'L1 Reject',
@@ -79,6 +79,8 @@
             'L4 Select',
             'L4 Reject',
             'L4 Re-Schedule',
+        ];
+        $onboardingLevels = [
             'HR Discussion',
             'HR Select',
             'HR Reject',
@@ -87,23 +89,35 @@
             'Offer Declined',
             'Onboarded with Client',
             'Joiner Declined',
-            'Position Hold',
-            'Candidate Not Interested',
-            'Candidate Not Responding',
         ];
     @endphp
     <div class="col-md-4">
         <label for="level_of_interview_id" class="form-label">Level Of Interview <span class="text-danger">*</span></label>
         <select class="form-select" id="level_of_interview_id" name="level_of_interview_id">
             <option value="">Select level</option>
-            @foreach ($interviewLevels as $level)
-                @if(in_array($level->level, $sourcingLevels))
-                    <option value="{{ $level->id }}" data-level="{{ $level->level }}"
-                        {{ (string) old('level_of_interview_id', $selectedLevelId) === (string) $level->id ? 'selected' : '' }}>
-                        {{ $level->level }}
-                    </option>
-                @endif
-            @endforeach
+            <optgroup label="Interview Stage">
+                @foreach ($interviewLevels as $level)
+                    @if(in_array($level->level, $interviewLevelsList))
+                        <option value="{{ $level->id }}"
+                            data-level="{{ $level->level }}"
+                            {{ (string) old('level_of_interview_id', $selectedLevelId ?? '') === (string) $level->id ? 'selected' : '' }}>
+                            {{ $level->level }}
+                        </option>
+                    @endif
+                @endforeach
+            </optgroup>
+
+            <optgroup label="Onboarding Stage">
+                @foreach ($interviewLevels as $level)
+                    @if(in_array($level->level, $onboardingLevels))
+                        <option value="{{ $level->id }}"
+                            data-level="{{ $level->level }}"
+                            {{ (string) old('level_of_interview_id', $selectedLevelId ?? '') === (string) $level->id ? 'selected' : '' }}>
+                            {{ $level->level }}
+                        </option>
+                    @endif
+                @endforeach
+            </optgroup>
         </select>
         @error('level_of_interview_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>

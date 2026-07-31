@@ -28,6 +28,25 @@ class ClientJobRoleController extends Controller
             $clientJobRoles = ClientJobRole::with(['client', 'jobRole'])->latest();
 
             return DataTables::of($clientJobRoles)
+                ->filter(function ($clientJobRoles) use ($request) {
+                    $search = trim((string) $request->input('search.value'));
+
+                    if ($search !== '') {
+                        $clientJobRoles->where(function ($q) use ($search) {
+
+                            // Job Role
+                            $q->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
+                                $jobRoleQuery->where('job_role', 'like', "%{$search}%");
+                            });
+
+                            // Client
+                            $q->orWhereHas('client', function ($clientQuery) use ($search) {
+                                $clientQuery->where('client', 'like', "%{$search}%");
+                            });
+                        });
+                    }
+                })
+
                 ->addIndexColumn()
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')

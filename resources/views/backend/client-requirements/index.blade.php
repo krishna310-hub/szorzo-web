@@ -82,16 +82,12 @@
                 }, {
                     data: 'client_name',
                     name: 'client_name',
-                    orderable: false,
-                    searchable: false
                 }, {
                     data: 'billing_value',
                     name: 'billing_value'
                 }, {
                     data: 'job_role_name',
                     name: 'job_role_name',
-                    orderable: false,
-                    searchable: false
                 }, {
                     data: 'psoition_level',
                     name: 'psoition_level',
@@ -125,8 +121,6 @@
                 }, {
                     data: 'priority',
                     name: 'priority',
-                    orderable: false,
-                    searchable: false
                 }, {
                     data: 'ctc',
                     name: 'ctc'
