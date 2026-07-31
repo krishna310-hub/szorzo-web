@@ -32,33 +32,32 @@ class CandidateController extends Controller
             $query = $this->candidateQuery($request)->latest();
 
             return DataTables::of($query)
-                ->filterColumn('candidate_name', function ($query, $keyword) {
-                    $query->where('candidate_name', 'LIKE', "%{$keyword}%");
-                })
-
                 ->filter(function ($query) use ($request) {
                     $search = trim((string) $request->input('search.value'));
 
                     if ($search !== '') {
                         $query->where(function ($q) use ($search) {
 
+                            // Candidate name
+                            $q->where('candidate_name', 'like', "%{$search}%")
+
                             // Job Role
-                            $q->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
+                            ->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
                                 $jobRoleQuery->where('job_role', 'like', "%{$search}%");
-                            });
+                            })
 
                             // Client
-                            $q->orWhereHas('client', function ($clientQuery) use ($search) {
+                            ->orWhereHas('client', function ($clientQuery) use ($search) {
                                 $clientQuery->where('client', 'like', "%{$search}%");
-                            });
+                            })
 
                             // Recruiter
-                            $q->orWhereHas('recruiter', function ($recruiterQuery) use ($search) {
+                            ->orWhereHas('recruiter', function ($recruiterQuery) use ($search) {
                                 $recruiterQuery->where('recruiter_name', 'like', "%{$search}%");
-                            });
+                            })
 
                             // Interview Level
-                            $q->orWhereHas('interviewLevel', function ($levelQuery) use ($search) {
+                            ->orWhereHas('interviewLevel', function ($levelQuery) use ($search) {
                                 $levelQuery->where('level', 'like', "%{$search}%");
                             });
                         });
