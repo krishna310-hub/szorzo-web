@@ -208,9 +208,10 @@ class CandidateController extends Controller
         InterviewSchedule::where('candidate_id', $candidate->id)
             ->where('status', 'scheduled')
             ->get()
-            ->each(function (InterviewSchedule $schedule) use ($levelName) {
+            ->each(function (InterviewSchedule $schedule) use ($levelId, $levelName) {
                 $closureNote = 'Automatically cancelled: '.$levelName.'.';
                 $schedule->update([
+                    'level_of_interview_id' => $levelId,
                     'status' => 'cancelled',
                     'notes' => trim(implode("\n", array_filter([
                         $schedule->notes,
