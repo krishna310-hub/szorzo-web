@@ -6,17 +6,25 @@
         </select>@error('recruiter_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div> --}}
     <div class="col-md-4">
-        <label for="client_id" class="form-label">Recruiter <span class="text-danger">*</span></label>
+        @php
+            $selectedRecruiterId = old(
+                'recruiter_id',
+                ($isRecruiterCandidateList ?? false)
+                    ? $linkedRecruiter?->id
+                    : ($candidate->recruiter_id ?? '')
+            );
+        @endphp
+        <label for="recruiter_id" class="form-label">Recruiter <span class="text-danger">*</span></label>
         <select class="form-select" id="recruiter_id" name="recruiter_id" {{ ($isRecruiterCandidateList ?? false) ? 'disabled' : '' }}>
             <option value="">Select Recruiter</option>
             @foreach ($recruiters as $recruiter)
                 <option value="{{ $recruiter->id }}"
-                    {{ old('recruiter_id', $candidate->recruiter_id ?? '') == $recruiter->id ? 'selected' : '' }}>
+                    {{ (string) $selectedRecruiterId === (string) $recruiter->id ? 'selected' : '' }}>
                     {{ $recruiter->recruiter_name }}</option>
             @endforeach
         </select>
         @if($isRecruiterCandidateList ?? false)
-            <input type="hidden" name="recruiter_id" value="{{ $linkedRecruiter?->id }}">
+            <input type="hidden" name="recruiter_id" value="{{ $selectedRecruiterId }}">
             <small class="text-muted">Recruiter is fixed from your login.</small>
         @endif
         @error('recruiter_id')
