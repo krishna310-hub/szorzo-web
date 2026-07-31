@@ -8,6 +8,7 @@ use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\ClientJobRole;
 use App\Models\InterviewLevel;
+use App\Models\InterviewSchedule;
 use App\Models\JobRole;
 use App\Models\Recruiter;
 use App\Support\MasterDataSpreadsheet;
@@ -174,11 +175,43 @@ class CandidateController extends Controller
             $data['upload_cv'] = 'uploads/candidates/' . $filename;
         }
 
-        $candidate->update($data);
+        DB::transaction(function () use ($candidate, $data) {
+            $candidate->update($data);
+            $this->closeOpenSchedulesForCandidateOutcome(
+                $candidate,
+                (int) $data['level_of_interview_id']
+            );
+        });
 
         return redirect()
             ->route('admin.candidates.index')
             ->with('success', 'Candidate updated successfully.');
+    }
+
+    /**
+     * Candidate Not Interested/Responding are candidate-level closure outcomes.
+     * Cancel pending schedules without rewriting completed interview history.
+     */
+    private function closeOpenSchedulesForCandidateOutcome(Candidate $candidate, int $levelId): void
+    {
+        $levelName = InterviewLevel::whereKey($levelId)->value('level');
+        if (! in_array($levelName, ['Candidate Not Interested', 'Candidate Not Responding'], true)) {
+            return;
+        }
+
+        InterviewSchedule::where('candidate_id', $candidate->id)
+            ->where('status', 'scheduled')
+            ->get()
+            ->each(function (InterviewSchedule $schedule) use ($levelName) {
+                $closureNote = 'Automatically cancelled: '.$levelName.'.';
+                $schedule->update([
+                    'status' => 'cancelled',
+                    'notes' => trim(implode("\n", array_filter([
+                        $schedule->notes,
+                        $closureNote,
+                    ]))),
+                ]);
+            });
     }
 
     public function destroy($id)

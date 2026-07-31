@@ -248,10 +248,17 @@ class InterviewScheduleController extends Controller
 
         DB::transaction(function () use ($data) {
             InterviewSchedule::create($data);
-            Candidate::whereKey($data['candidate_id'])->update([
+            $candidateData = [
                 'level_of_interview_id' => $data['level_of_interview_id'],
                 'onboarding_date'       => $data['onboarding_date'],
-            ]);
+            ];
+            if (! empty($data['client_id'])) {
+                $candidateData['client_id'] = $data['client_id'];
+            }
+            if (! empty($data['job_role_id'])) {
+                $candidateData['job_role_id'] = $data['job_role_id'];
+            }
+            Candidate::whereKey($data['candidate_id'])->update($candidateData);
         });
 
         return redirect()->route('admin.interview-schedules.index')->with('success', 'Interview schedule created successfully.');
@@ -287,18 +294,21 @@ class InterviewScheduleController extends Controller
                 ->withInput();
         }
         $schedule = InterviewSchedule::findOrFail($id);
-        $schedule->update($this->validatedData($request));
-        $candidate = Candidate::findOrFail($schedule->candidate_id);
-        $candidateData = [];
-        if ($candidate->level_of_interview_id != $request->level_of_interview_id) {
-            $candidate->update(['level_of_interview_id' => $request->level_of_interview_id]);
-        }
-        if ($request->onboarding_date) {
-            $candidateData['onboarding_date'] = $request->onboarding_date;
-        }
-        if (!empty($candidateData)) {
-            $candidate->update($candidateData);
-        }
+        $data = $this->validatedData($request);
+        DB::transaction(function () use ($schedule, $data) {
+            $schedule->update($data);
+            $candidateData = ['level_of_interview_id' => $data['level_of_interview_id']];
+            if (! empty($data['client_id'])) {
+                $candidateData['client_id'] = $data['client_id'];
+            }
+            if (! empty($data['job_role_id'])) {
+                $candidateData['job_role_id'] = $data['job_role_id'];
+            }
+            if (! empty($data['onboarding_date'])) {
+                $candidateData['onboarding_date'] = $data['onboarding_date'];
+            }
+            Candidate::whereKey($schedule->candidate_id)->update($candidateData);
+        });
 
         return redirect()->route('admin.interview-schedules.index')->with('success', 'Interview schedule updated successfully.');
     }
