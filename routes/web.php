@@ -23,6 +23,7 @@ use App\Http\Controllers\backend\PageController;
 use App\Http\Controllers\backend\RecruiterController;
 use App\Http\Controllers\backend\RevenueController;
 use App\Http\Controllers\backend\SitemapRobotsController;
+use App\Http\Controllers\backend\TargetController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -223,6 +224,8 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::put('/{id}/update', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('delete');
         });
+
+        Route::resource('targets', TargetController::class)->except('show');
     });
 
     Route::prefix('client-requirements')->name('client-requirements.')->controller(ClientRequirementController::class)->group(function () {

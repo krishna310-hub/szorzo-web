@@ -15,6 +15,7 @@ class InterviewModeController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('read', InterviewMode::class);
 
         if ($request->ajax()) {
             return DataTables::of(InterviewMode::latest())
@@ -25,8 +26,8 @@ class InterviewModeController extends Controller
                 ->editColumn('created_at', fn ($row) => $row->created_at ? $row->created_at->format('d-m-Y H:i:s') : '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
-                        $buttons .= '<a href="' . route('admin.interview-modes.edit', $row->id) . '" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
-                        $buttons .= '<button type="button" data-route="' . route('admin.interview-modes.delete', $row->id) . '" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
+                    if (auth()->user()->can('edit', InterviewMode::class)) $buttons .= '<a href="' . route('admin.interview-modes.edit', $row->id) . '" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
+                    if (auth()->user()->can('delete', InterviewMode::class)) $buttons .= '<button type="button" data-route="' . route('admin.interview-modes.delete', $row->id) . '" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
                     return $buttons ?: '-';
                 })
                 ->rawColumns(['status', 'action'])
@@ -38,11 +39,13 @@ class InterviewModeController extends Controller
 
     public function create()
     {
+        $this->authorize('create', InterviewMode::class);
         return view('backend.interview-modes.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', InterviewMode::class);
         InterviewMode::create($this->validatedData($request));
 
         return redirect()->route('admin.interview-modes.index')->with('success', 'Interview Mode created successfully.');
@@ -50,6 +53,7 @@ class InterviewModeController extends Controller
 
     public function edit($id)
     {
+        $this->authorize('edit', InterviewMode::class);
         $interview_mode = InterviewMode::findOrFail($id);
 
         return view('backend.interview-modes.edit', compact('interview_mode'));
@@ -57,6 +61,7 @@ class InterviewModeController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->authorize('edit', InterviewMode::class);
         $interview_mode = InterviewMode::findOrFail($id);
         $interview_mode->update($this->validatedData($request, $interview_mode->id));
 
@@ -65,6 +70,7 @@ class InterviewModeController extends Controller
 
     public function destroy($id)
     {
+        $this->authorize('delete', InterviewMode::class);
         InterviewMode::findOrFail($id)->delete();
 
         return response()->json(['status' => true, 'message' => 'Interview Mode deleted successfully.']);

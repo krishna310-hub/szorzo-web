@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\DB;
 
 class RevenueController extends Controller
 {
@@ -44,7 +45,8 @@ class RevenueController extends Controller
             ->orderBy('candidate_name')
             ->get();
 
-        return view('backend.revenues.create', compact('candidates'));
+        $invoiceNumber = $this->nextInvoiceNumber();
+        return view('backend.revenues.create', compact('candidates', 'invoiceNumber'));
     }
 
     public function store(Request $request)
@@ -53,7 +55,10 @@ class RevenueController extends Controller
         $data = $this->validated($request);
         $candidate = $this->eligibleCandidate((int) $data['candidate_id']);
         $data = $this->calculatedData($data, $candidate);
-        Revenue::create($data);
+        DB::transaction(function () use ($data) {
+            $data['invoice_number'] = $this->nextInvoiceNumber();
+            Revenue::create($data);
+        });
 
         return redirect()->route('admin.revenues.index')->with('success', 'Revenue invoice created successfully.');
     }
@@ -99,7 +104,7 @@ class RevenueController extends Controller
         return $request->validate([
             'candidate_id' => [$revenue ? 'nullable' : 'required', 'integer', 'exists:candidates,id',
                 Rule::unique('revenues', 'candidate_id')->ignore($revenue?->id)],
-            'invoice_number' => ['required', 'string', 'max:100',
+            'invoice_number' => [$revenue ? 'required' : 'nullable', 'string', 'max:100',
                 Rule::unique('revenues', 'invoice_number')->ignore($revenue?->id)],
             'invoice_date' => 'required|date',
             'universe_number' => 'nullable|string|max:100',
@@ -108,6 +113,7 @@ class RevenueController extends Controller
             'client_gst_number' => 'nullable|string|max:30',
             'offered_ctc' => 'required|numeric|min:0',
             'billing_percentage' => 'required|numeric|min:0|max:100',
+            'service_amount' => 'required|numeric|min:0',
             'gst_percentage' => 'required|numeric|min:0|max:100',
             'notes' => 'nullable|string|max:2000',
         ]);
@@ -123,7 +129,8 @@ class RevenueController extends Controller
 
     private function calculatedData(array $data, Candidate $candidate): array
     {
-        $service = round((float) $data['offered_ctc'] * (float) $data['billing_percentage'] / 100, 2);
+        $data['invoice_number'] ??= $this->nextInvoiceNumber();
+        $service = round((float) $data['service_amount'], 2);
         $gst = round($service * (float) $data['gst_percentage'] / 100, 2);
         $data['candidate_id'] = $candidate->id;
         $data['client_id'] = $candidate->client_id;
@@ -131,6 +138,19 @@ class RevenueController extends Controller
         $data['gst_amount'] = $gst;
         $data['total_amount'] = round($service + $gst, 2);
         return $data;
+    }
+
+    private function nextInvoiceNumber(): string
+    {
+        $date = now();
+        $startYear = $date->month >= 4 ? $date->year : $date->year - 1;
+        $yearLabel = $startYear.'-'.($startYear + 1);
+        $latest = Revenue::where('invoice_number', 'like', 'SZ % '.$yearLabel)
+            ->lockForUpdate()->get(['invoice_number'])->map(function ($revenue) {
+                return preg_match('/^SZ\s+(\d+)/i', $revenue->invoice_number, $matches) ? (int) $matches[1] : 0;
+            })->max() ?? 0;
+
+        return 'SZ '.($latest + 1).' '.$yearLabel;
     }
 
     private function adminOnly(): void
