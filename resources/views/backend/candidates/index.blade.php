@@ -232,13 +232,9 @@
                     }, {
                         data: 'client_name',
                         name: 'client_name',
-                        orderable: false,
-                        searchable: false
                     }, {
                         data: 'job_role_name',
                         name: 'job_role_name',
-                        orderable: false,
-                        searchable: false
                     }, {
                         data: 'interview_level',
                         name: 'interview_level',
