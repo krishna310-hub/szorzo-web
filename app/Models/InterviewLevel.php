@@ -10,6 +10,9 @@ class InterviewLevel extends Model
 {
     use SoftDeletes;
 
+    public const CANDIDATE_NOT_INTERESTED_ID = 5;
+    public const CANDIDATE_NOT_RESPONDING_ID = 36;
+
     protected $table = 'level_of_interviews';
 
     protected $fillable = [

@@ -194,10 +194,16 @@ class CandidateController extends Controller
      */
     private function closeOpenSchedulesForCandidateOutcome(Candidate $candidate, int $levelId): void
     {
-        $levelName = InterviewLevel::whereKey($levelId)->value('level');
-        if (! in_array($levelName, ['Candidate Not Interested', 'Candidate Not Responding'], true)) {
+        $closureLevels = [
+            InterviewLevel::CANDIDATE_NOT_INTERESTED_ID => 'Candidate Not Interested',
+            InterviewLevel::CANDIDATE_NOT_RESPONDING_ID => 'Candidate Not Responding',
+        ];
+
+        if (! isset($closureLevels[$levelId])) {
             return;
         }
+
+        $levelName = $closureLevels[$levelId];
 
         InterviewSchedule::where('candidate_id', $candidate->id)
             ->where('status', 'scheduled')
