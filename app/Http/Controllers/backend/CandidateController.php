@@ -41,7 +41,8 @@ class CandidateController extends Controller
 
                     if ($search !== '') {
                         $query->where(function ($q) use ($search) {
-
+                            //name
+                            $q->where('candidate_name', 'like', "%{$search}%");
                             // Job Role
                             $q->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
                                 $jobRoleQuery->where('job_role', 'like', "%{$search}%");
