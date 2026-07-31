@@ -647,25 +647,25 @@
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L1</span>
                                             <div class="interview-stat-value">
-                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [7, 8])->count()) }}
+                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [7, 8, 31])->count()) }}
                                             </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L2</span>
                                             <div class="interview-stat-value">
-                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [11, 12])->count()) }}
+                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [11, 12, 32])->count()) }}
                                             </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L3</span>
                                             <div class="interview-stat-value">
-                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [23, 25])->count()) }}
+                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [23, 25, 33])->count()) }}
                                             </div>
                                         </div>
                                         <div class="interview-stat">
                                             <span class="interview-stat-label">L4</span>
                                             <div class="interview-stat-value">
-                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [27, 28])->count()) }}
+                                                {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [27, 28, 34])->count()) }}
                                             </div>
                                         </div>
                                     </div>

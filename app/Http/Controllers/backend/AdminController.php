@@ -274,7 +274,7 @@ class AdminController extends Controller
 
             'myApplicants' => (clone $candidates)->count(),
             'candidateInterviewStages' => (clone $candidates)
-                ->whereIn('level_of_interview_id', [7, 8, 11, 12, 23, 25, 27, 28])
+                ->whereIn('level_of_interview_id', [7, 8, 31, 11, 12, 32, 23, 25, 33, 27, 28, 34])
                 ->get(['id', 'level_of_interview_id']),
             'yetToOffer' => (clone $candidates)->where('level_of_interview_id', 15)->count(),
             'offered' => (clone $candidates)->whereIn('level_of_interview_id', [30, 35])->count(),
