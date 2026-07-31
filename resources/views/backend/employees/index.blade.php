@@ -9,10 +9,12 @@
                         <div class="card">
                             <div class="card-header d-flex align-items-center">
                                 <h5 class="card-title mb-0 flex-grow-1">Employees</h5>
+                                @can('create', \App\Models\Employee::class)
                                 <div class="d-flex flex-wrap gap-2">
                                     <a href="{{ route('admin.employees.create') }}" class="btn btn-sm btn-primary">Add New
                                         Employee</a>
                                 </div>
+                                @endcan
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">

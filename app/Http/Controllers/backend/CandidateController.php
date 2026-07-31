@@ -443,6 +443,18 @@ class CandidateController extends Controller
 
     private function validatedData(Request $request, ?Candidate $candidate = null): array
     {
+        $user = auth()->user();
+        $isRecruiter = (int) $user->role_id === 3;
+        if ($isRecruiter) {
+            $linkedRecruiterId = Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id');
+            if (! $linkedRecruiterId) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'recruiter_id' => 'Your login is not linked to an active recruiter record. Please contact the administrator.',
+                ]);
+            }
+            $request->merge(['recruiter_id' => $linkedRecruiterId]);
+        }
+
         $request->merge([
             'mobile_no' => $request->filled('mobile_no') ? trim((string) $request->mobile_no) : null,
             'email' => $request->filled('email') ? strtolower(trim((string) $request->email)) : null,

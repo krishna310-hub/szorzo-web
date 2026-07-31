@@ -286,6 +286,9 @@
                         auth()->user()->can('read', \App\Models\Recruiter::class) ||
                         auth()->user()->can('read', \App\Models\JobRole::class) ||
                         auth()->user()->can('read', \App\Models\Mode::class) ||
+                        auth()->user()->can('read', \App\Models\Employee::class) ||
+                        auth()->user()->can('read', \App\Models\InterviewMode::class) ||
+                        auth()->user()->can('read', \App\Models\Target::class) ||
                         ((int) auth()->id() === 1 && auth()->user()->can('read', \App\Models\Billing::class)) ||
                         auth()->user()->can('read', \App\Models\InterviewLevel::class) ||
                         auth()->user()->can('read', \App\Models\Location::class) ||
@@ -314,11 +317,13 @@
                                             Client Job Roles </a>
                                     </li>
                                 @endcan
+                                @can('read', \App\Models\Employee::class)
                                 <li class="nav-item">
                                     <a href="{{ route('admin.employees.index') }}"
                                         class="nav-link {{ request()->is('admin/masters/employees*') ? 'active' : '' }}">
                                         Employees </a>
                                 </li>
+                                @endcan
                                 @can('read', \App\Models\Recruiter::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.recruiters.index') }}"
@@ -354,11 +359,20 @@
                                             Level of Interview </a>
                                     </li>
                                 @endcan
+                                @can('read', \App\Models\InterviewMode::class)
                                 <li class="nav-item">
                                     <a href="{{ route('admin.interview-modes.index') }}"
                                         class="nav-link {{ request()->is('admin/masters/interview-modes*') ? 'active' : '' }}">
                                         Interview Mode </a>
                                 </li>
+                                @endcan
+                                @can('read', \App\Models\Target::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.targets.index') }}"
+                                            class="nav-link {{ request()->is('admin/masters/targets*') ? 'active' : '' }}">
+                                            Targets </a>
+                                    </li>
+                                @endcan
                                 @can('read', \App\Models\Location::class)
                                     <li class="nav-item">
                                         <a href="{{ route('admin.locations.index') }}"

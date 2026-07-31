@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class EmployeeController extends Controller
 {
+    use AuthorizesRequests;
     public function index(Request $request)
     {
+        $this->authorize('read', Employee::class);
         if ($request->ajax()) {
             return DataTables::of(Employee::latest())
                 ->addIndexColumn()
@@ -20,8 +23,8 @@ class EmployeeController extends Controller
                 ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
-                        $buttons .= '<a href="'.route('admin.employees.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
-                        $buttons .= '<button type="button" data-route="'.route('admin.employees.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
+                    if (auth()->user()->can('edit', Employee::class)) $buttons .= '<a href="'.route('admin.employees.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
+                    if (auth()->user()->can('delete', Employee::class)) $buttons .= '<button type="button" data-route="'.route('admin.employees.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
 
                     return $buttons ?: '-';
                 })
@@ -34,11 +37,13 @@ class EmployeeController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Employee::class);
         return view('backend.employees.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Employee::class);
          $data = $this->validatedData($request);
 
         if ($request->hasFile('employee_image')) {
@@ -58,6 +63,7 @@ class EmployeeController extends Controller
 
     public function edit($id)
     {
+        $this->authorize('edit', Employee::class);
         $employee = Employee::findOrFail($id);
 
         return view('backend.employees.edit', compact('employee'));
@@ -65,6 +71,7 @@ class EmployeeController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->authorize('edit', Employee::class);
         $employee = Employee::findOrFail($id);
         $data = $this->validatedData($request, $employee->id);
 
@@ -89,6 +96,7 @@ class EmployeeController extends Controller
 
     public function destroy($id)
     {
+        $this->authorize('delete', Employee::class);
         Employee::findOrFail($id)->delete();
 
         return response()->json(['status' => true, 'message' => 'Employee deleted successfully.']);

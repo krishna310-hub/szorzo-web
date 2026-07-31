@@ -11,6 +11,7 @@ use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
 use App\Models\Recruiter;
 use App\Models\User;
+use App\Models\Target;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -374,8 +375,9 @@ class AdminController extends Controller
             ],
         ];
 
-        $kpis = collect($definitions)->map(function (array $kpi) use ($targetMultiplier) {
-            $kpi['target'] *= $targetMultiplier;
+        $configuredTargets = Target::where('status', true)->pluck('monthly_target', 'target_name');
+        $kpis = collect($definitions)->map(function (array $kpi) use ($targetMultiplier, $configuredTargets) {
+            $kpi['target'] = (int) ($configuredTargets->get($kpi['label'], $kpi['target'])) * $targetMultiplier;
             $kpi['percentage'] = min(100, (int) round(($kpi['completed'] / max(1, $kpi['target'])) * 100));
             return $kpi;
         });

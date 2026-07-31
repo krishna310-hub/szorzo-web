@@ -99,6 +99,21 @@ class PermissionsSeeder extends Seeder
             ['name'=>'Create',    'page'=>'billing'],
             ['name'=>'Edit',      'page'=>'billing'],
             ['name'=>'Delete',    'page'=>'billing'],
+
+            ['name'=>'Read',      'page'=>'employee'],
+            ['name'=>'Create',    'page'=>'employee'],
+            ['name'=>'Edit',      'page'=>'employee'],
+            ['name'=>'Delete',    'page'=>'employee'],
+
+            ['name'=>'Read',      'page'=>'interview_mode'],
+            ['name'=>'Create',    'page'=>'interview_mode'],
+            ['name'=>'Edit',      'page'=>'interview_mode'],
+            ['name'=>'Delete',    'page'=>'interview_mode'],
+
+            ['name'=>'Read',      'page'=>'target'],
+            ['name'=>'Create',    'page'=>'target'],
+            ['name'=>'Edit',      'page'=>'target'],
+            ['name'=>'Delete',    'page'=>'target'],
         ];
 
         foreach ($permissions as $permission) {
