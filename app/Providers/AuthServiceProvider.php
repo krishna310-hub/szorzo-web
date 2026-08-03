@@ -17,6 +17,7 @@ use App\Models\InterviewMode;
 use App\Models\Target;
 use App\Models\Pages;
 use App\Models\Recruiter;
+use App\Models\Report;
 use App\Policies\CandidatePolicy;
 use App\Policies\BillingPolicy;
 use App\Policies\ClientJobRolePolicy;
@@ -33,6 +34,7 @@ use App\Policies\EmployeePolicy;
 use App\Policies\InterviewModePolicy;
 use App\Policies\TargetPolicy;
 use App\Policies\RecruiterPolicy;
+use App\Policies\ReportPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use App\Policies\PagesPolicy;
@@ -66,6 +68,7 @@ class AuthServiceProvider extends ServiceProvider
         Employee::class => EmployeePolicy::class,
         InterviewMode::class => InterviewModePolicy::class,
         Target::class => TargetPolicy::class,
+        Report::class => ReportPolicy::class,
     ];
 
     /**

@@ -263,6 +263,16 @@
                     </li>
                 @endcan
 
+                @can('read', \App\Models\Report::class)
+                    <li class="nav-item">
+                        <a href="{{ route('admin.reports.index') }}"
+                            class="nav-link menu-link {{ request()->is('admin/reports*') ? 'active' : '' }}">
+                            <i class="ri-bar-chart-box-line"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                @endcan
+
                 @if ((int) auth()->id() === 1)
                     <li class="nav-item">
                         <a href="{{ route('admin.revenues.index') }}"

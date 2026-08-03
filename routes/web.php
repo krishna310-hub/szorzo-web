@@ -21,6 +21,7 @@ use App\Http\Controllers\backend\JobRoleController;
 use App\Http\Controllers\backend\ModeController;
 use App\Http\Controllers\backend\PageController;
 use App\Http\Controllers\backend\RecruiterController;
+use App\Http\Controllers\backend\ReportController;
 use App\Http\Controllers\backend\RevenueController;
 use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\backend\TargetController;
@@ -250,6 +251,11 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/{id}/edit', 'edit')->name('edit');
         Route::put('/{id}/update', 'update')->name('update');
         Route::delete('/{id}', 'destroy')->name('delete');
+    });
+
+    Route::prefix('reports')->name('reports.')->controller(ReportController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/export', 'export')->name('export');
     });
 
     Route::middleware('revenue.admin')->prefix('revenues')->name('revenues.')->controller(RevenueController::class)->group(function () {

@@ -207,7 +207,7 @@ class CandidateController extends Controller
         $levelName = $closureLevels[$levelId];
 
         InterviewSchedule::where('candidate_id', $candidate->id)
-            ->where('status', 'scheduled')
+            // ->where('status', 'scheduled')
             ->get()
             ->each(function (InterviewSchedule $schedule) use ($levelId, $levelName) {
                 $closureNote = 'Automatically cancelled: '.$levelName.'.';
