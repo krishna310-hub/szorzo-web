@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Recruiter;
 use App\Models\Report;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -19,18 +20,7 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $this->authorize('read', Report::class);
-        [$query, $filters, $recruiters, $scopeLabel] = $this->reportQuery($request);
-        $total = (clone $query)->count();
-
-        return view('backend.reports.index', [
-            'filters' => $filters,
-            'recruiters' => $recruiters,
-            'scopeLabel' => $scopeLabel,
-            'total' => $total,
-            'recruiterReport' => $this->breakdown($query, 'recruiters', 'recruiter_id', 'recruiter_name', $total, 'Unassigned recruiter'),
-            'clientReport' => $this->breakdown($query, 'clients', 'client_id', 'client', $total, 'Unassigned client'),
-            'levelReport' => $this->breakdown($query, 'level_of_interviews', 'level_of_interview_id', 'level', $total, 'No interview level', 'sort_order'),
-        ]);
+        return view('backend.reports.index', $this->reportData($request));
     }
 
     public function export(Request $request): StreamedResponse
@@ -56,6 +46,34 @@ class ReportController extends Controller
             });
             fclose($output);
         }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function pdf(Request $request)
+    {
+        $this->authorize('export', Report::class);
+        $data = $this->reportData($request);
+        $safeScope = preg_replace('/[^A-Za-z0-9_-]+/', '-', $data['scopeLabel']);
+        $fileName = 'recruitment-report-'.trim($safeScope, '-').'-'.now()->format('Y-m-d-His').'.pdf';
+
+        return Pdf::loadView('backend.reports.pdf', $data)
+            ->setPaper('a4', 'landscape')
+            ->download($fileName);
+    }
+
+    private function reportData(Request $request): array
+    {
+        [$query, $filters, $recruiters, $scopeLabel] = $this->reportQuery($request);
+        $total = (clone $query)->count();
+
+        return [
+            'filters' => $filters,
+            'recruiters' => $recruiters,
+            'scopeLabel' => $scopeLabel,
+            'total' => $total,
+            'recruiterReport' => $this->breakdown($query, 'recruiters', 'recruiter_id', 'recruiter_name', $total, 'Unassigned recruiter'),
+            'clientReport' => $this->breakdown($query, 'clients', 'client_id', 'client', $total, 'Unassigned client'),
+            'levelReport' => $this->breakdown($query, 'level_of_interviews', 'level_of_interview_id', 'level', $total, 'No interview level', 'sort_order'),
+        ];
     }
 
     private function reportQuery(Request $request): array

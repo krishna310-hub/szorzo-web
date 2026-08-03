@@ -256,6 +256,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::prefix('reports')->name('reports.')->controller(ReportController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/export', 'export')->name('export');
+        Route::get('/pdf', 'pdf')->name('pdf');
     });
 
     Route::middleware('revenue.admin')->prefix('revenues')->name('revenues.')->controller(RevenueController::class)->group(function () {
