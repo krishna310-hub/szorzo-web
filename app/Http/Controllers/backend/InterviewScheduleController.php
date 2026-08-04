@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\backend;
 
+use App\Exports\MasterDataExport;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Client;
@@ -15,6 +16,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class InterviewScheduleController extends Controller
@@ -231,6 +233,34 @@ class InterviewScheduleController extends Controller
         ]));
     }
 
+    public function export(Request $request)
+    {
+        $this->authorize('read', Candidate::class);
+
+        $rows = $this->scheduleQuery($request)
+            ->oldest('schedule_date')
+            ->get()
+            ->map(fn (InterviewSchedule $schedule, int $index) => [
+                $index + 1,
+                $schedule->candidate?->candidate_name,
+                $schedule->candidate?->mobile_no,
+                $schedule->candidate?->recruiter?->recruiter_name,
+                $schedule->client?->client ?? $schedule->candidate?->client?->client,
+                $schedule->jobRole?->job_role ?? $schedule->candidate?->jobRole?->job_role,
+                $schedule->interviewLevel?->level,
+                $schedule->interviewMode?->interview_mode,
+                $schedule->schedule_date?->format('d-m-Y H:i'),
+                InterviewSchedule::STATUSES[$schedule->status] ?? ucfirst($schedule->status),
+                $schedule->notes,
+                $schedule->created_at?->format('d-m-Y H:i:s'),
+            ])->all();
+
+        return Excel::download(new MasterDataExport([
+            'S.No', 'Candidate', 'Mobile No', 'Recruiter', 'Client', 'Job Role',
+            'Level', 'Interview Mode', 'Schedule Date', 'Status', 'Notes', 'Created At',
+        ], $rows), 'interview-schedules-'.now()->format('Y-m-d').'.xlsx');
+    }
+
     public function store(Request $request)
     {
         $this->authorize('create', Candidate::class);
@@ -343,7 +373,7 @@ class InterviewScheduleController extends Controller
             ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id')
             : null;
 
-        return InterviewSchedule::with(['candidate.recruiter', 'candidate.client', 'candidate.jobRole', 'client', 'jobRole', 'interviewLevel'])
+        return InterviewSchedule::with(['candidate.recruiter', 'candidate.client', 'candidate.jobRole', 'client', 'jobRole', 'interviewLevel', 'interviewMode'])
             ->when($isRecruiter, fn ($query) => $query->whereHas(
                 'candidate',
                 fn ($candidateQuery) => $candidateQuery->where('recruiter_id', $linkedRecruiterId ?? 0)

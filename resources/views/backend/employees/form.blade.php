@@ -121,6 +121,14 @@
         @enderror
     </div>
     <div class="col-md-4">
+        <label for="date_of_joining" class="form-label">Date of Joining (DOJ)</label>
+        <input type="date" class="form-control" id="date_of_joining" name="date_of_joining"
+            value="{{ old('date_of_joining', isset($employee) && $employee->date_of_joining ? $employee->date_of_joining->format('Y-m-d') : '') }}">
+        @error('date_of_joining')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-4">
         <label for="employee_uan_pf_number" class="form-label">UAN / PF Number</label>
         <input type="text" class="form-control" id="employee_uan_pf_number" name="employee_uan_pf_number" placeholder="Enter UAN/PF number"
             value="{{ old('employee_uan_pf_number', $employee->employee_uan_pf_number ?? '') }}">

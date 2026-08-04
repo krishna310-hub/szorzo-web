@@ -257,6 +257,7 @@ class CandidateController extends Controller
                 $candidate->preferred_location,
                 $candidate->reason_for_change,
                 $candidate->interviewLevel?->level,
+                $candidate->onboarding_date?->format('d-m-Y'),
                 $candidate->status ? 'Active' : 'Inactive',
             ])->all();
 
@@ -279,7 +280,7 @@ class CandidateController extends Controller
             $dropdowns['Client'][0] ?? null, $dropdowns['Job Role'][0] ?? null, 'Example Candidate',
             '9876543210', 'candidate@example.com', 'B.Tech', 5, 3, 60000, 5000, 900000,
             1100000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
-            $dropdowns['Level Of Interview'][0] ?? null, 'Active',
+            $dropdowns['Level Of Interview'][0] ?? null, now()->format('Y-m-d'), 'Active',
         ]], $dropdowns), 'candidates-import-template.xlsx');
     }
 
@@ -340,6 +341,7 @@ class CandidateController extends Controller
                 'preferred_location' => MasterDataSpreadsheet::text($row['preferred_location'] ?? null),
                 'reason_for_change' => MasterDataSpreadsheet::text($row['reason_for_change'] ?? null),
                 'level_of_interview_id' => MasterDataSpreadsheet::lookup(InterviewLevel::class, 'level', $interviewLevel),
+                'onboarding_date' => MasterDataSpreadsheet::date($row['onboarding_date'] ?? null),
                 'status' => MasterDataSpreadsheet::status($row['status'] ?? null),
             ];
 
@@ -375,6 +377,7 @@ class CandidateController extends Controller
                 'preferred_location' => 'nullable|string|max:255',
                 'reason_for_change' => 'nullable|string',
                 'level_of_interview_id' => 'nullable|exists:level_of_interviews,id',
+                'onboarding_date' => 'nullable|date',
                 'status' => 'required|in:0,1',
             ]);
 
@@ -555,6 +558,6 @@ class CandidateController extends Controller
 
     private function importHeadings(): array
     {
-        return ['Record ID','Created Date', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Status',];
+        return ['Record ID','Created Date', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
     }
 }

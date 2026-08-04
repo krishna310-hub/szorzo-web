@@ -19,6 +19,18 @@
         <input type="text" class="form-control" id="mobile_number" name="mobile_number" value="{{ old('mobile_number', $recruiter->mobile_number ?? '') }}" placeholder="Enter mobile number">
         @error('mobile_number')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+    <div class="col-md-4">
+        <label for="delivery_lead_user_id" class="form-label">Recruiter DL</label>
+        <select class="form-select" id="delivery_lead_user_id" name="delivery_lead_user_id">
+            <option value="">Select Recruiter DL</option>
+            @foreach ($deliveryLeads as $deliveryLead)
+                <option value="{{ $deliveryLead->id }}" {{ (string) old('delivery_lead_user_id', $recruiter->delivery_lead_user_id ?? '') === (string) $deliveryLead->id ? 'selected' : '' }}>
+                    {{ $deliveryLead->name }} ({{ $deliveryLead->email }})
+                </option>
+            @endforeach
+        </select>
+        @error('delivery_lead_user_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
     {{-- <div class="col-md-4">
         <label for="performance_rating" class="form-label">Performance Rating</label>
         <input type="number" step="0.01" min="0" max="10" class="form-control" id="performance_rating" name="performance_rating" value="{{ old('performance_rating', $recruiter->performance_rating ?? '') }}" placeholder="Enter performance rating">

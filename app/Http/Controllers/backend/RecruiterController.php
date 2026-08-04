@@ -4,8 +4,10 @@ namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Recruiter;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 
 class RecruiterController extends Controller
@@ -17,10 +19,11 @@ class RecruiterController extends Controller
         $this->authorize('read', Recruiter::class);
 
         if ($request->ajax()) {
-            $recruiters = Recruiter::latest();
+            $recruiters = Recruiter::with('deliveryLead')->latest();
 
             return DataTables::of($recruiters)
                 ->addIndexColumn()
+                ->addColumn('delivery_lead', fn ($row) => $row->deliveryLead?->name ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -45,7 +48,7 @@ class RecruiterController extends Controller
     public function create()
     {
         $this->authorize('create', Recruiter::class);
-        return view('backend.recruiters.create');
+        return view('backend.recruiters.create', ['deliveryLeads' => $this->deliveryLeads()]);
     }
 
     public function store(Request $request)
@@ -60,7 +63,7 @@ class RecruiterController extends Controller
     {
         $this->authorize('edit', Recruiter::class);
         $recruiter = Recruiter::findOrFail($id);
-        return view('backend.recruiters.edit', compact('recruiter'));
+        return view('backend.recruiters.edit', ['recruiter' => $recruiter, 'deliveryLeads' => $this->deliveryLeads()]);
     }
 
     public function update(Request $request, $id)
@@ -88,7 +91,15 @@ class RecruiterController extends Controller
             'email' => 'nullable|email|max:255',
             'mobile_number' => 'nullable|string|max:30',
             'performance_rating' => 'nullable|numeric|min:0|max:10',
+            'delivery_lead_user_id' => ['nullable', Rule::in($this->deliveryLeads()->pluck('id')->all())],
             'status' => 'required|in:0,1',
         ]);
+    }
+
+    private function deliveryLeads()
+    {
+        return User::whereHas('role', function ($query) {
+            $query->whereIn('access_level', ['delivery-lead', 'delivery_lead', 'recruiter-dl', 'recruiter_dl']);
+        })->where('is_active', 1)->orderBy('name')->get();
     }
 }

@@ -10,6 +10,9 @@
                             <div class="card-header d-flex align-items-center">
                                 <h5 class="card-title mb-0 flex-grow-1">Interview Scheduled List</h5>
                                 <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('admin.interview-schedules.export') }}" id="interview-schedule-export" class="btn btn-sm btn-success">
+                                        <i class="ri-file-excel-2-line me-1"></i> Export
+                                    </a>
                                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#interviewScheduleFilterOffcanvas" aria-controls="interviewScheduleFilterOffcanvas">
                                         <i class="ri-filter-3-line me-1"></i> Filter
                                     </button>
@@ -135,6 +138,7 @@
     <script>
         $(document).ready(function() {
             var currentFilters = {};
+            var exportBaseUrl = @json(route('admin.interview-schedules.export'));
             var interviewLevelFilter = new Choices('#filter_level_of_interview_id', {
                 removeItemButton: true,
                 shouldSort: false,
@@ -156,6 +160,18 @@
                     }
                 });
                 return filters;
+            }
+
+            function updateExportUrl() {
+                var url = new URL(exportBaseUrl, window.location.origin);
+                Object.entries(currentFilters).forEach(function(entry) {
+                    var key = entry[0];
+                    var value = entry[1];
+                    (Array.isArray(value) ? value : [value]).forEach(function(item) {
+                        url.searchParams.append(Array.isArray(value) ? key + '[]' : key, item);
+                    });
+                });
+                $('#interview-schedule-export').attr('href', url.toString());
             }
 
             var table = $('#interview-schedules-table').DataTable({
@@ -229,6 +245,7 @@
             $('#interview-schedule-filter-form').on('submit', function(e) {
                 e.preventDefault();
                 currentFilters = collectFilters();
+                updateExportUrl();
                 table.ajax.reload();
 
                 var offcanvasEl = document.getElementById('interviewScheduleFilterOffcanvas');
@@ -242,6 +259,7 @@
                 $('#interview-schedule-filter-form')[0].reset();
                 interviewLevelFilter.removeActiveItems();
                 currentFilters = {};
+                updateExportUrl();
                 table.ajax.reload();
             });
 

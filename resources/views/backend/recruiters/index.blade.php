@@ -25,6 +25,7 @@
                                             <th>Location</th>
                                             <th>Email</th>
                                             <th>Mobile Number</th>
+                                            <th>Recruiter DL</th>
                                             {{-- <th>Performance Rating</th> --}}
                                             <th>Status</th>
                                             <th>Created At</th>
@@ -56,6 +57,7 @@
                 { data: 'location', name: 'location' },
                 { data: 'email', name: 'email' },
                 { data: 'mobile_number', name: 'mobile_number' },
+                { data: 'delivery_lead', name: 'delivery_lead', orderable: false, searchable: false },
                 // { data: 'performance_rating', name: 'performance_rating' },
                 { data: 'status', name: 'status', orderable: false, searchable: false },
                 { data: 'created_at', name: 'created_at' },

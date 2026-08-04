@@ -19,6 +19,7 @@ class Employee extends Model
         'blood_group',
         'employee_no',
         'designation',
+        'date_of_joining',
         'employee_uan_pf_number',
         'employee_esi_number',
         'mobile_number',
@@ -59,5 +60,6 @@ class Employee extends Model
 
     protected $casts = [
         'status' => 'boolean',
+        'date_of_joining' => 'date',
     ];
 }

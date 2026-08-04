@@ -17,6 +17,7 @@ class EmployeeController extends Controller
         if ($request->ajax()) {
             return DataTables::of(Employee::latest())
                 ->addIndexColumn()
+                ->editColumn('date_of_joining', fn ($row) => $row->date_of_joining?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -117,6 +118,7 @@ class EmployeeController extends Controller
             // Employee Details
             'employee_no' => 'nullable|string|max:255',
             'designation' => 'nullable|string|max:255',
+            'date_of_joining' => 'nullable|date',
             'employee_uan_pf_number' => 'nullable|string|max:50',
             'employee_esi_number' => 'nullable|string|max:50',
 

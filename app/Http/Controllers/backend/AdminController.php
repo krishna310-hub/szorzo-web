@@ -18,6 +18,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\File;
 
 class AdminController extends Controller
 {
@@ -63,9 +64,14 @@ class AdminController extends Controller
             ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->first()
             : null;
         $linkedRecruiterId = $linkedRecruiter?->id;
+        $deliveryLeadRecruiterIds = $isDeliveryLead
+            ? Recruiter::where('delivery_lead_user_id', $user->id)->pluck('id')
+            : collect();
 
         $availableRecruiters = ($isSuperAdmin || $isDeliveryLead)
-            ? Recruiter::where('status', true)->orderBy('recruiter_name')->get()
+            ? Recruiter::where('status', true)
+                ->when($isDeliveryLead, fn ($query) => $query->whereIn('id', $deliveryLeadRecruiterIds))
+                ->orderBy('recruiter_name')->get()
             : collect();
         $availableClients = Client::where('status', true)->orderBy('client')->get();
         $requestedRecruiterId = $request->filled('recruiter_id') ? (int) $request->recruiter_id : null;
@@ -78,6 +84,19 @@ class AdminController extends Controller
             : null;
 
         $requirements = ClientRequirement::visibleTo($user)
+            ->when($isDeliveryLead, function ($query) use ($deliveryLeadRecruiterIds) {
+                if ($deliveryLeadRecruiterIds->isEmpty()) {
+                    return $query->whereRaw('1 = 0');
+                }
+                $query->where(function ($teamQuery) use ($deliveryLeadRecruiterIds) {
+                    foreach ($deliveryLeadRecruiterIds as $recruiterId) {
+                        $teamQuery->orWhereJsonContains('project_owner_ids', $recruiterId)
+                            ->orWhere(function ($legacyQuery) use ($recruiterId) {
+                                $legacyQuery->whereNull('project_owner_ids')->where('project_owner', $recruiterId);
+                            });
+                    }
+                });
+            })
             ->when($selectedRecruiterId !== null, fn($query) => $query->where(function ($ownerQuery) use ($selectedRecruiterId) {
                 $ownerQuery->whereJsonContains('project_owner_ids', $selectedRecruiterId)
                     ->orWhere(function ($legacyQuery) use ($selectedRecruiterId) {
@@ -89,11 +108,15 @@ class AdminController extends Controller
             ->when($dateFrom, fn($query) => $query->where('client_requirements.created_at', '>=', $dateFrom))
             ->when($dateTo, fn($query) => $query->where('client_requirements.created_at', '<=', $dateTo));
         $candidates = Candidate::query()
+            ->when($isDeliveryLead, fn ($query) => $query->whereIn('recruiter_id', $deliveryLeadRecruiterIds))
             ->when($selectedRecruiterId !== null, fn($query) => $query->where('recruiter_id', $selectedRecruiterId))
             ->when($selectedClientId, fn($query) => $query->where('client_id', $selectedClientId))
             ->when($dateFrom, fn($query) => $query->where('candidates.created_at', '>=', $dateFrom))
             ->when($dateTo, fn($query) => $query->where('candidates.created_at', '<=', $dateTo));
         $interviews = InterviewSchedule::query()
+            ->when($isDeliveryLead, fn ($query) => $query->whereHas(
+                'candidate', fn ($candidate) => $candidate->whereIn('recruiter_id', $deliveryLeadRecruiterIds)
+            ))
             ->when($selectedRecruiterId !== null, fn($query) => $query->whereHas(
                 'candidate',
                 fn($candidate) => $candidate->where('recruiter_id', $selectedRecruiterId)
@@ -105,8 +128,9 @@ class AdminController extends Controller
             ->when($dateFrom, fn($query) => $query->where('interview_schedules.schedule_date', '>=', $dateFrom))
             ->when($dateTo, fn($query) => $query->where('interview_schedules.schedule_date', '<=', $dateTo));
 
-        $candidateLevelScope = function ($query) use ($selectedRecruiterId, $selectedClientId, $dateFrom, $dateTo) {
+        $candidateLevelScope = function ($query) use ($isDeliveryLead, $deliveryLeadRecruiterIds, $selectedRecruiterId, $selectedClientId, $dateFrom, $dateTo) {
             $query
+                ->when($isDeliveryLead, fn($candidate) => $candidate->whereIn('recruiter_id', $deliveryLeadRecruiterIds))
                 ->when($selectedRecruiterId !== null, fn($candidate) => $candidate->where('recruiter_id', $selectedRecruiterId))
                 ->when($selectedClientId, fn($candidate) => $candidate->where('client_id', $selectedClientId))
                 ->when($dateFrom, fn($candidate) => $candidate->where('candidates.created_at', '>=', $dateFrom))
@@ -233,7 +257,10 @@ class AdminController extends Controller
             : max(1, $availableRecruiters->count());
         $monthlyKpis = $this->monthlyTargetAnalytics($candidates, $targetMultiplier, $dateFrom, $dateTo);
         $deliveryLeadAnalytics = $this->monthlyTargetAnalytics(
-            Candidate::query(),
+            Candidate::query()->when(
+                $isDeliveryLead,
+                fn ($query) => $query->whereIn('recruiter_id', $deliveryLeadRecruiterIds)
+            ),
             max(1, $availableRecruiters->count()),
             $dateFrom,
             $dateTo
@@ -395,7 +422,15 @@ class AdminController extends Controller
     public function profile()
     {
         $this->authorize('profileRead', General::class);
-        return view('backend.common.profile');
+        $user = Auth::user();
+        $employee = \App\Models\Employee::query()
+            ->where(function ($query) use ($user) {
+                $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($user->email)])
+                    ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($user->email)]);
+            })
+            ->first();
+
+        return view('backend.common.profile', compact('employee'));
     }
 
     public function settingStore(Request $request) {}
@@ -403,42 +438,32 @@ class AdminController extends Controller
     public function uploadProfile(Request $request)
     {
         $this->authorize('profileEdit', General::class);
-        if ($request->hasFile('profile_image')) {
-            $file = $request->file('profile_image');
+        $data = $request->validate([
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120|required_without:cover_image',
+            'cover_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120|required_without:profile_image',
+        ]);
+        $user = User::findOrFail(Auth::id());
 
-            $user = User::where('id', Auth::user()->id)->first();
-            if ($user) {
-                if ($user->profile_picture) {
-                    $oldImagePath = public_path($user->profile_picture);
-                    if (file_exists($oldImagePath)) {
-                        unlink($oldImagePath);
-                    }
-                }
-
-                $uploadPath = public_path('uploads/profile_images');
-                if (!file_exists($uploadPath)) {
-                    mkdir($uploadPath, 0755, true);
-                }
-
-                $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-                $filePath = 'uploads/profile_images/' . $fileName;
-
-                $file->move($uploadPath, $fileName);
-
-                $user->profile_picture = $filePath;
-                $user->save();
-
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Profile uploaded successfully',
-                ]);
+        foreach (['profile_image' => 'profile_picture', 'cover_image' => 'cover_picture'] as $input => $column) {
+            if (! $request->hasFile($input)) {
+                continue;
             }
+
+            $file = $request->file($input);
+            $directory = $input === 'profile_image' ? 'uploads/profile_images' : 'uploads/cover_images';
+            $fileName = uniqid($input.'_', true).'.'.$file->getClientOriginalExtension();
+            File::ensureDirectoryExists(public_path($directory));
+            $file->move(public_path($directory), $fileName);
+
+            if ($user->{$column} && file_exists(public_path($user->{$column}))) {
+                unlink(public_path($user->{$column}));
+            }
+            $user->{$column} = $directory.'/'.$fileName;
         }
 
-        return response()->json([
-            'status' => false,
-            'message' => 'No image was uploaded',
-        ]);
+        $user->save();
+
+        return back()->with('success', 'Profile images updated successfully.');
     }
 
     public function lock()

@@ -25,6 +25,7 @@
                                                 <th>Employee ID</th>
                                                 <th>Employee</th>
                                                 <th>Designation</th>
+                                                <th>Date of Joining</th>
                                                 <th>Status</th>
                                                 <th>Created At</th>
                                                 <th>Action</th>
@@ -69,6 +70,10 @@
                     {
                         data: 'designation',
                         name: 'designation'
+                    },
+                    {
+                        data: 'date_of_joining',
+                        name: 'date_of_joining'
                     },
                     {
                         data: 'status',
