@@ -194,53 +194,159 @@
             color: #172033;
         }
 
-        .pipeline-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 14px;
+        .pipeline-board {
+            padding: 22px;
+            border: 1px solid #e8edf5;
+            border-radius: 22px;
+            background: #f8fafc;
+        }
+
+        .pipeline-overview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+            padding: 18px 20px;
+            border-radius: 18px;
+            color: #fff;
+            background: linear-gradient(115deg, #172033, #32203b 58%, #8d1f2d);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pipeline-overview:after {
+            content: '';
+            width: 160px;
+            height: 160px;
+            border: 28px solid rgba(255, 255, 255, .06);
+            border-radius: 50%;
+            position: absolute;
+            top: -70px;
+            right: -38px;
+        }
+
+        .pipeline-overview-label {
+            color: rgba(255, 255, 255, .65);
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .pipeline-overview-value {
+            font-size: 1.55rem;
+            font-weight: 800;
+            line-height: 1.15;
+        }
+
+        .pipeline-flow {
+            position: relative;
+        }
+
+        .pipeline-flow:before {
+            content: '';
+            position: absolute;
+            top: 28px;
+            bottom: 28px;
+            left: 23px;
+            width: 2px;
+            background: #dce3ed;
         }
 
         .pipeline-stage {
-            border: 1px solid #e5e7eb;
+            --stage-color: #475569;
+            --stage-soft: #f1f5f9;
+            display: grid;
+            grid-template-columns: 48px minmax(0, 1fr);
+            gap: 16px;
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .pipeline-stage:last-child {
+            margin-bottom: 0;
+        }
+
+        .pipeline-stage-marker {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #f8fafc;
+            border-radius: 15px;
+            color: #fff;
+            background: var(--stage-color);
+            box-shadow: 0 5px 16px rgba(15, 23, 42, .14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pipeline-stage-card {
+            min-width: 0;
+            border: 1px solid #e3e8f0;
             border-radius: 18px;
             background: #fff;
-            padding: 18px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+            box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+            overflow: hidden;
         }
 
         .pipeline-stage-title {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #eef2f7;
+            gap: 16px;
+            padding: 17px 20px;
+            border-left: 4px solid var(--stage-color);
+            background: linear-gradient(90deg, var(--stage-soft), #fff 38%);
         }
 
         .pipeline-stage-title h6 {
-            margin: 0;
+            margin: 0 0 3px;
             color: #172033;
+            font-size: .95rem;
             font-weight: 800;
         }
 
+        .pipeline-stage-meta {
+            color: #8792a5;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
         .pipeline-stage-count {
-            min-width: 34px;
-            border-radius: 999px;
-            padding: 5px 10px;
-            background: #eef2ff;
-            color: #4338ca;
-            font-size: .75rem;
-            font-weight: 800;
-            text-align: center;
+            flex: 0 0 auto;
+            min-width: 68px;
+            text-align: right;
+        }
+
+        .pipeline-stage-count strong {
+            display: block;
+            color: var(--stage-color);
+            font-size: 1.35rem;
+            line-height: 1;
+        }
+
+        .pipeline-stage-count span {
+            color: #94a3b8;
+            font-size: .66rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 28px;
+            padding: 8px 20px 14px;
         }
 
         .pipeline-item {
             min-width: 0;
-            padding: 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
+            padding: 12px 0;
+            border-bottom: 1px solid #eef2f6;
         }
 
         .pipeline-item-header {
@@ -248,54 +354,52 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .pipeline-item-label {
             min-width: 0;
-            overflow: hidden;
-            color: #334155;
-            font-size: .82rem;
+            color: #475569;
+            font-size: .8rem;
             font-weight: 700;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
         .pipeline-item-value {
             flex: 0 0 auto;
-            color: #111827;
-            font-size: 1.2rem;
+            min-width: 34px;
+            color: #172033;
+            font-size: .88rem;
             font-weight: 800;
-            line-height: 1;
+            text-align: right;
         }
 
         .pipeline-track {
-            height: 9px;
+            height: 5px;
             border-radius: 20px;
-            background: #f1f5f9;
+            background: #edf1f5;
             overflow: hidden;
         }
 
         .pipeline-fill {
             height: 100%;
+            min-width: 2px;
             border-radius: 20px;
-            background: linear-gradient(90deg, #ef4444, #7f1d1d);
+            background: var(--stage-color);
         }
 
-        .pipeline-empty {
-            grid-column: 1 / -1;
+        .pipeline-chart-body {
+            padding: 6px 18px 12px;
         }
 
-        @media (max-width: 991.98px) {
-            .pipeline-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 575.98px) {
-            .pipeline-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 767.98px) {
+            .pipeline-board { padding: 14px; }
+            .pipeline-overview { align-items: flex-start; flex-direction: column; }
+            .pipeline-grid { grid-template-columns: 1fr; }
+            .pipeline-stage { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; }
+            .pipeline-flow:before { left: 18px; }
+            .pipeline-stage-marker { width: 38px; height: 38px; border-radius: 12px; }
+            .pipeline-stage-title { padding: 14px; }
+            .pipeline-grid { padding-right: 14px; padding-left: 14px; }
         }
 
         .interview-item {
@@ -998,42 +1102,70 @@
                     @can('read', \App\Models\Candidate::class)
                         <div class="col-12">
                             <div class="card panel-card target-panel">
-                                <div class="card-body p-4">
-                                    <h5 class="section-title mb-1">Interview Pipeline</h5>
-                                    <p class="text-muted small mb-4">Level-wise interview activity</p>
+                                <div class="card-body p-3 p-lg-4">
                                     @php
-                                        $maxLevel = max(1, (int) $candidateLevels->max('candidates_count'));
+                                        $pipelineTotal = $groupedLevels->sum(fn ($group) => $group['levels']->sum('candidates_count'));
+                                        $pipelineStatusCount = $groupedLevels->sum(fn ($group) => $group['levels']->count());
+                                        $stageDesign = [
+                                            'Sourcing Stage' => ['icon' => 'ri-user-search-line', 'color' => '#2563eb', 'soft' => '#eff6ff', 'caption' => 'Candidate discovery and screening'],
+                                            'Interview Stage' => ['icon' => 'ri-discuss-line', 'color' => '#7c3aed', 'soft' => '#f5f3ff', 'caption' => 'Interview rounds and decisions'],
+                                            'Offer Stage' => ['icon' => 'ri-file-paper-2-line', 'color' => '#ea580c', 'soft' => '#fff7ed', 'caption' => 'HR review and offer outcomes'],
+                                            'Monthly Joining Details' => ['icon' => 'ri-bar-chart-grouped-line', 'color' => '#d97706', 'soft' => '#fffbeb', 'caption' => 'Monthly offer acceptance trend'],
+                                            'Onboarding Stage' => ['icon' => 'ri-user-follow-line', 'color' => '#059669', 'soft' => '#ecfdf5', 'caption' => 'Final joining status'],
+                                            'Monthly Onboarding Details' => ['icon' => 'ri-line-chart-line', 'color' => '#0f766e', 'soft' => '#f0fdfa', 'caption' => 'Monthly onboarding trend'],
+                                        ];
                                     @endphp
-                                    <div class="pipeline-groups">
+                                    <div class="pipeline-board">
+                                        <div class="pipeline-overview">
+                                            <div class="position-relative" style="z-index: 1">
+                                                <div class="pipeline-overview-label mb-1">Recruitment journey</div>
+                                                <div class="pipeline-overview-value">Interview Pipeline</div>
+                                                <div class="small mt-1" style="color: rgba(255,255,255,.68)">A stage-by-stage view of candidate movement</div>
+                                            </div>
+                                            <div class="d-flex gap-4 position-relative" style="z-index: 1">
+                                                <div>
+                                                    <div class="pipeline-overview-label">Activity</div>
+                                                    <div class="pipeline-overview-value">{{ number_format($pipelineTotal) }}</div>
+                                                </div>
+                                                <div>
+                                                    <div class="pipeline-overview-label">Statuses</div>
+                                                    <div class="pipeline-overview-value">{{ number_format($pipelineStatusCount) }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="pipeline-flow">
 
                                         @foreach ($groupedLevels as $group)
-                                            <div class="pipeline-stage mb-4">
+                                            @php
+                                                $design = $stageDesign[$group['title']];
+                                                $stageTotal = (int) $group['levels']->sum('candidates_count');
+                                                $stageMax = max(1, (int) $group['levels']->max('candidates_count'));
+                                            @endphp
+                                            <div class="pipeline-stage" style="--stage-color: {{ $design['color'] }}; --stage-soft: {{ $design['soft'] }};">
+                                                <div class="pipeline-stage-marker">
+                                                    <i class="{{ $design['icon'] }}"></i>
+                                                </div>
+                                                <div class="pipeline-stage-card">
 
-                                                @unless (in_array($group['title'], ['Monthly Joining Details', 'Monthly Onboarding Details'], true))
                                                     <div class="pipeline-stage-title">
-                                                        <h6><i class="ri-flow-chart me-2 text-primary"></i>{{ $group['title'] }}</h6>
-                                                        <span class="pipeline-stage-count">{{ number_format($group['levels']->sum('candidates_count')) }}</span>
+                                                        <div>
+                                                            <h6>{{ $group['title'] }}</h6>
+                                                            <div class="pipeline-stage-meta">{{ $design['caption'] }}</div>
+                                                        </div>
+                                                        @unless (in_array($group['title'], ['Monthly Joining Details', 'Monthly Onboarding Details'], true))
+                                                            <div class="pipeline-stage-count">
+                                                                <strong>{{ number_format($stageTotal) }}</strong>
+                                                                <span>Candidates</span>
+                                                            </div>
+                                                        @endunless
                                                     </div>
-                                                @endunless
 
                                                 @if ($group['title'] === 'Monthly Joining Details')
-                                                    <div class="border rounded-4 bg-light p-3 p-lg-4">
-                                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                                                            <div>
-                                                                <div class="fw-semibold text-dark">Monthly Joining Details</div>
-                                                                <small class="text-muted">Offer Accepted (green) and Offer Declined (red) by onboarding month</small>
-                                                            </div>
-                                                        </div>
+                                                    <div class="pipeline-chart-body">
                                                         <div id="pipelineMonthlyJoiningBarChart" style="min-height: 250px;"></div>
                                                     </div>
                                                 @elseif($group['title'] === 'Monthly Onboarding Details')
-                                                    <div class="border rounded-4 bg-light p-3 p-lg-4">
-                                                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                                                            <div>
-                                                                <div class="fw-semibold text-dark">Monthly Onboarding Details</div>
-                                                                <small class="text-muted">Onboarded with Client (green) and Joiner Declined (red) by onboarding month</small>
-                                                            </div>
-                                                        </div>
+                                                    <div class="pipeline-chart-body">
                                                         <div id="pipelineMonthlyOnboardingBarChart" style="min-height: 250px;"></div>
                                                     </div>
                                                 @else
@@ -1042,7 +1174,7 @@
                                                         @foreach ($group['levels'] as $level)
                                                             @php
                                                                 $count = (int) $level->candidates_count;
-                                                                $percentage = round(($count / $maxLevel) * 100);
+                                                                $percentage = round(($count / $stageMax) * 100);
                                                             @endphp
 
                                                             <div class="pipeline-item">
@@ -1066,10 +1198,10 @@
 
                                                     </div>
                                                 @endif
-
+                                                </div>
                                             </div>
                                         @endforeach
-
+                                        </div>
                                     </div>
                                     {{-- <div class="row g-2 mt-3 pt-3 border-top text-center">
                                         <div class="col-6">
