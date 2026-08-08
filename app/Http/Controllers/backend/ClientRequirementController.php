@@ -36,7 +36,7 @@ class ClientRequirementController extends Controller
                 ->with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner', 'billing'])
                 ->latest();
 
-            return DataTables::of($query)
+            $dataTable = DataTables::of($query)
                 ->filter(function ($query) use ($request) {
                     $search = trim((string) $request->input('search.value'));
 
@@ -78,12 +78,15 @@ class ClientRequirementController extends Controller
                     ->map(fn ($id) => $locationNames->get((int) $id))->filter()->join(', ') ?: '-')
                 ->addColumn('project_owner_name', fn ($row) => collect($row->project_owner_ids ?: array_filter([$row->project_owner]))
                     ->map(fn ($id) => $recruiterNames->get((int) $id))->filter()->join(', ') ?: '-')
-                ->addColumn('billing_value', fn ($row) => $row->billing ? $row->billing->value.'%' : '-')
-                ->when($request->user()->isSuperAdmin(), fn ($dataTable) => $dataTable
-                    ->editColumn('revenue_amount', fn ($row) => $row->revenue_amount !== null
-                        ? '₹'.number_format((float) $row->revenue_amount, 2)
-                        : '-'))
-                ->editColumn('requirement_open_date', fn ($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
+                ->addColumn('billing_value', fn ($row) => $row->billing ? $row->billing->value.'%' : '-');
+
+            if ($request->user()->isSuperAdmin()) {
+                $dataTable->editColumn('revenue_amount', fn ($row) => $row->revenue_amount !== null
+                    ? '₹'.number_format((float) $row->revenue_amount, 2)
+                    : '-');
+            }
+
+            return $dataTable->editColumn('requirement_open_date', fn ($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
                 ->editColumn('closure_target_date', fn ($row) => $row->closure_target_date?->format('d-m-Y') ?? '-')
                 ->editColumn('ctc', fn ($row) => $row->ctc !== null ? number_format((float) $row->ctc, 2) : '-')
                 ->editColumn('status', fn ($row) => $row->status
