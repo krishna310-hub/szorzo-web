@@ -19154,7 +19154,7 @@ span.flatpickr-weekday {
     top: 0;
     bottom: 0;
     opacity: 0.9;
-    background: var(--vz-primary);
+    /* background: var(--vz-primary);
     background: -webkit-gradient(
         linear,
         left bottom,
@@ -19166,7 +19166,7 @@ span.flatpickr-weekday {
         to top,
         var(--vz-primary-text-emphasis),
         var(--vz-primary)
-    );
+    ); */
 }
 
 .profile-wid-bg .profile-wid-img {
