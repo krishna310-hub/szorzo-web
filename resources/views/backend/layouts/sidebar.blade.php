@@ -273,7 +273,7 @@
                     </li>
                 @endcan
 
-                @if ((int) auth()->id() === 1)
+                @can('read', \App\Models\Revenue::class)
                     <li class="nav-item">
                         <a href="{{ route('admin.revenues.index') }}"
                             class="nav-link menu-link {{ request()->is('admin/revenues*') ? 'active' : '' }}">
@@ -281,7 +281,7 @@
                             <span>Revenue</span>
                         </a>
                     </li>
-                @endif
+                @endcan
 
                 <li class="nav-item">
                     <a href="{{ route('admin.interview-schedules.index') }}"

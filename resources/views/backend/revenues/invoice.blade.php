@@ -1,11 +1,11 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><title>{{ $revenue->invoice_number }}</title>
 <style>
-@page{margin:20px 30px}*{box-sizing:border-box}body{font-family:DejaVu Sans,Arial,sans-serif;color:#000;font-size:11px;margin:0}
-.sheet{width:100%;max-width:760px;margin:auto;background:#fff}.header{text-align:center;border-bottom:1px solid #777;padding-bottom:7px}
-.brand{font-size:21px;font-weight:bold;letter-spacing:.2px}.brand img{height:34px;vertical-align:middle;margin-right:7px}.brand span{color:#ed1c2b;letter-spacing:5px}.tag{font-size:10px;color:#c51f26;font-weight:bold;margin:1px}
+@page{size:A4 portrait;margin:18px 26px}*{box-sizing:border-box}body{font-family:DejaVu Sans,Arial,sans-serif;color:#000;font-size:10.5px;margin:0}
+.sheet{width:100%;margin:auto;background:#fff}.header{text-align:center;border-bottom:1px solid #555;padding-bottom:8px}
+.brand{font-size:20px;font-weight:bold;letter-spacing:.2px;white-space:nowrap}.brand img{width:72px;vertical-align:middle;margin-right:8px}.brand span{color:#ed1c2b;letter-spacing:5px}.tag{font-size:10px;color:#c51f26;font-weight:bold;margin:2px 0}
 .address{line-height:1.35}.title{text-align:center;font-size:17px;font-weight:bold;text-decoration:underline;margin:10px 0}
-table{width:100%;border-collapse:collapse}td,th{border:1px solid #777;padding:6px;vertical-align:top}.party td{width:50%;line-height:1.5}
+table{width:100%;border-collapse:collapse}td,th{border:1px solid #555;padding:6px;vertical-align:top}.party td{width:50%;line-height:1.55}
 .details td:first-child{width:70%}.details td:last-child{width:30%;text-align:right}.details th{background:#eee;text-align:left}
 .amount{text-align:right!important}.words td:first-child{width:20%;font-weight:bold}.bank td:first-child{width:38%;font-weight:bold}
 .notice{text-align:center;font-weight:bold;margin:10px 0}.signature{text-align:right;line-height:1.7;margin-top:15px}
@@ -29,8 +29,7 @@ table{width:100%;border-collapse:collapse}td,th{border:1px solid #777;padding:6p
         <tr><td><strong>Recruitment Service Charges</strong><div class="candidate-lines">
             Candidate Name : {{ $revenue->candidate->candidate_name }}<br>
             Offered CTC : Rs {{ number_format((float)$revenue->offered_ctc, 2) }}/-<br>
-            Date of Joining : {{ $revenue->candidate->onboarding_date?->format('d-m-Y') ?? '-' }}<br>
-            Billing Percentage : {{ rtrim(rtrim(number_format((float)$revenue->billing_percentage, 2), '0'), '.') }}%
+            Date of Joining : {{ $revenue->candidate->onboarding_date?->format('d-m-Y') ?? '-' }}
         </div></td><td class="amount">{{ number_format((float)$revenue->service_amount, 2, '.', '') }}</td></tr>
         <tr><td><strong>GST @ {{ rtrim(rtrim(number_format((float)$revenue->gst_percentage, 2), '0'), '.') }}%</strong></td><td class="amount">{{ number_format((float)$revenue->gst_amount, 2, '.', '') }}</td></tr>
         <tr><td><strong>Total Billing Amount</strong></td><td class="amount"><strong>{{ number_format((float)$revenue->total_amount, 2, '.', '') }}</strong></td></tr>

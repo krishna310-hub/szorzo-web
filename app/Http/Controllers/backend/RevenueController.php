@@ -5,6 +5,7 @@ namespace App\Http\Controllers\backend;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Revenue;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,9 +14,11 @@ use Illuminate\Support\Facades\DB;
 
 class RevenueController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index(Request $request)
     {
-        $this->adminOnly();
+        $this->authorize('read', Revenue::class);
 
         if ($request->ajax()) {
             return DataTables::of(Revenue::with(['candidate', 'client'])->latest())
@@ -24,11 +27,17 @@ class RevenueController extends Controller
                 ->editColumn('service_amount', fn ($row) => '₹'.number_format((float) $row->service_amount, 2))
                 ->editColumn('total_amount', fn ($row) => '₹'.number_format((float) $row->total_amount, 2))
                 ->addColumn('candidate_name', fn ($row) => e($row->candidate?->candidate_name ?? '-'))
-                ->addColumn('action', fn ($row) =>
-                    '<a href="'.route('admin.revenues.show', $row).'" class="text-primary fs-4 me-2" title="View"><i class="ri-eye-line"></i></a>'.
-                    '<a href="'.route('admin.revenues.edit', $row).'" class="text-info fs-4 me-2" title="Edit"><i class="bx bxs-edit"></i></a>'.
-                    '<a href="'.route('admin.revenues.download', $row).'" class="text-success fs-4" title="Download PDF"><i class="ri-download-2-line"></i></a>'
-                )
+                ->addColumn('action', function ($row) {
+                    $actions = '<a href="'.route('admin.revenues.show', $row).'" class="text-primary fs-4 me-2" title="View"><i class="ri-eye-line"></i></a>';
+                    if (auth()->user()->can('edit', Revenue::class)) {
+                        $actions .= '<a href="'.route('admin.revenues.edit', $row).'" class="text-info fs-4 me-2" title="Edit"><i class="bx bxs-edit"></i></a>';
+                    }
+                    if (auth()->user()->can('download', Revenue::class)) {
+                        $actions .= '<a href="'.route('admin.revenues.download', $row).'" class="text-success fs-4" title="Download PDF"><i class="ri-download-2-line"></i></a>';
+                    }
+
+                    return $actions;
+                })
                 ->rawColumns(['action'])
                 ->make(true);
         }
@@ -38,9 +47,9 @@ class RevenueController extends Controller
 
     public function create()
     {
-        $this->adminOnly();
+        $this->authorize('create', Revenue::class);
         $candidates = Candidate::with(['client.billing'])
-            ->where('level_of_interview_id', 30)
+            ->where('level_of_interview_id', 20)
             ->whereDoesntHave('revenue')
             ->orderBy('candidate_name')
             ->get();
@@ -51,7 +60,7 @@ class RevenueController extends Controller
 
     public function store(Request $request)
     {
-        $this->adminOnly();
+        $this->authorize('create', Revenue::class);
         $data = $this->validated($request);
         $candidate = $this->eligibleCandidate((int) $data['candidate_id']);
         $data = $this->calculatedData($data, $candidate);
@@ -65,7 +74,7 @@ class RevenueController extends Controller
 
     public function show(Revenue $revenue)
     {
-        $this->adminOnly();
+        $this->authorize('read', Revenue::class);
         $revenue->load(['candidate.jobRole', 'client']);
         $amountInWords = $this->amountInWords((float) $revenue->total_amount);
         return view('backend.revenues.show', compact('revenue', 'amountInWords'));
@@ -73,14 +82,14 @@ class RevenueController extends Controller
 
     public function edit(Revenue $revenue)
     {
-        $this->adminOnly();
+        $this->authorize('edit', Revenue::class);
         $revenue->load(['candidate.client.billing']);
         return view('backend.revenues.edit', compact('revenue'));
     }
 
     public function update(Request $request, Revenue $revenue)
     {
-        $this->adminOnly();
+        $this->authorize('edit', Revenue::class);
         $data = $this->validated($request, $revenue);
         $candidate = $this->eligibleCandidate((int) $revenue->candidate_id);
         unset($data['candidate_id']);
@@ -91,7 +100,7 @@ class RevenueController extends Controller
 
     public function download(Revenue $revenue)
     {
-        $this->adminOnly();
+        $this->authorize('download', Revenue::class);
         $revenue->load(['candidate.jobRole', 'client']);
         $amountInWords = $this->amountInWords((float) $revenue->total_amount);
         $pdf = Pdf::loadView('backend.revenues.invoice', compact('revenue', 'amountInWords'))->setPaper('a4');
@@ -123,7 +132,7 @@ class RevenueController extends Controller
     {
         return Candidate::with(['client.billing'])
             ->whereKey($id)
-            ->where('level_of_interview_id', 30)
+            ->where('level_of_interview_id', 20)
             ->firstOrFail();
     }
 
@@ -151,11 +160,6 @@ class RevenueController extends Controller
             })->max() ?? 0;
 
         return 'SZ '.($latest + 1).' '.$yearLabel;
-    }
-
-    private function adminOnly(): void
-    {
-        abort_unless((int) auth()->id() === 1, 403, 'Revenue is available only to the administrator.');
     }
 
     private function amountInWords(float $amount): string

@@ -10,6 +10,7 @@ use App\Models\General;
 use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
 use App\Models\Recruiter;
+use App\Models\Revenue;
 use App\Models\User;
 use App\Models\Target;
 use Carbon\CarbonImmutable;
@@ -242,15 +243,36 @@ class AdminController extends Controller
         ]);
 
         $revenueMonths = collect(range(6, 0))->map(fn ($offset) => now()->subMonthsNoOverflow($offset));
-        $monthlyRevenue = (clone $requirements)
+
+        // Revenue is earned only when a candidate is onboarded. A joiner decline
+        // records the same requirement value as lost/declined revenue.
+        $requirementRevenue = (clone $requirements)
             ->whereNotNull('revenue_amount')
-            ->whereRaw(
-                'COALESCE(requirement_open_date, client_requirements.created_at) >= ?',
-                [now()->subMonthsNoOverflow(6)->startOfMonth()]
-            )
-            ->selectRaw("DATE_FORMAT(COALESCE(requirement_open_date, client_requirements.created_at), '%Y-%m') as month_key, SUM(revenue_amount) as total")
-            ->groupBy('month_key')
-            ->pluck('total', 'month_key');
+            ->orderByDesc('requirement_open_date')
+            ->orderByDesc('id')
+            ->get(['client_id', 'job_role_id', 'revenue_amount'])
+            ->unique(fn ($requirement) => $requirement->client_id.'|'.$requirement->job_role_id)
+            ->mapWithKeys(fn ($requirement) => [
+                $requirement->client_id.'|'.$requirement->job_role_id => (float) $requirement->revenue_amount,
+            ]);
+        $revenueOutcomes = (clone $candidates)
+            ->whereIn('level_of_interview_id', [20, 21])
+            ->whereRaw('COALESCE(onboarding_date, candidates.updated_at) >= ?', [
+                now()->subMonthsNoOverflow(6)->startOfMonth(),
+            ])
+            ->get(['client_id', 'job_role_id', 'level_of_interview_id', 'onboarding_date', 'updated_at']);
+        $monthlyOutcomeRevenue = $revenueOutcomes
+            ->groupBy(fn ($candidate) => ($candidate->onboarding_date ?? $candidate->updated_at)->format('Y-m'));
+        $monthlyOnboardedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
+            ->where('level_of_interview_id', 20)
+            ->sum(fn ($candidate) => $requirementRevenue->get($candidate->client_id.'|'.$candidate->job_role_id, 0)));
+        $monthlyDeclinedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
+            ->where('level_of_interview_id', 21)
+            ->sum(fn ($candidate) => $requirementRevenue->get($candidate->client_id.'|'.$candidate->job_role_id, 0)));
+        $onboardedRevenue = $revenueOutcomes->where('level_of_interview_id', 20)
+            ->sum(fn ($candidate) => $requirementRevenue->get($candidate->client_id.'|'.$candidate->job_role_id, 0));
+        $declinedRevenue = $revenueOutcomes->where('level_of_interview_id', 21)
+            ->sum(fn ($candidate) => $requirementRevenue->get($candidate->client_id.'|'.$candidate->job_role_id, 0));
 
         $targetMultiplier = $selectedRecruiterId
             ? 1
@@ -315,8 +337,14 @@ class AdminController extends Controller
             'joinerDeclinedChartTotals' => $monthlyJoiningDetails->pluck('joiner_declined')->values(),
             'revenueChartMonths' => $revenueMonths->map->format('M Y')->values(),
             'revenueChartTotals' => $revenueMonths
-                ->map(fn ($month) => round((float) ($monthlyRevenue[$month->format('Y-m')] ?? 0), 2))
+                ->map(fn ($month) => round((float) ($monthlyOnboardedRevenue[$month->format('Y-m')] ?? 0), 2))
                 ->values(),
+            'declinedRevenueChartTotals' => $revenueMonths
+                ->map(fn ($month) => round((float) ($monthlyDeclinedRevenue[$month->format('Y-m')] ?? 0), 2))
+                ->values(),
+            'onboardedRevenue' => round((float) $onboardedRevenue, 2),
+            'declinedRevenue' => round((float) $declinedRevenue, 2),
+            'showRevenueDashboard' => $user->can('read', Revenue::class),
 
             'revenue' => (clone $requirements)->sum('revenue_amount'),
             'candidateLevels' => $candidateLevels,

@@ -30,6 +30,9 @@
                                                 <th>S.No</th>
                                                 <th>Client</th>
                                                 <th>Billing</th>
+                                                @if (auth()->user()->isSuperAdmin())
+                                                    <th>Revenue</th>
+                                                @endif
                                                 <th>Job Role</th>
                                                 <th>Position Level</th>
                                                 <th>Mode</th>
@@ -85,7 +88,14 @@
                 }, {
                     data: 'billing_value',
                     name: 'billing_value'
-                }, {
+                }
+                @if (auth()->user()->isSuperAdmin())
+                , {
+                    data: 'revenue_amount',
+                    name: 'revenue_amount'
+                }
+                @endif
+                , {
                     data: 'job_role_name',
                     name: 'job_role_name',
                 }, {

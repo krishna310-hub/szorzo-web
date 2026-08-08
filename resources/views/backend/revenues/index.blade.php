@@ -5,7 +5,9 @@
     <div class="card">
         <div class="card-header d-flex align-items-center">
             <h5 class="card-title mb-0 flex-grow-1">Revenue Invoices</h5>
-            <a href="{{ route('admin.revenues.create') }}" class="btn btn-sm btn-primary">Generate Invoice</a>
+            @can('create', \App\Models\Revenue::class)
+                <a href="{{ route('admin.revenues.create') }}" class="btn btn-sm btn-primary">Generate Invoice</a>
+            @endcan
         </div>
         <div class="card-body">
             <div class="table-responsive">

@@ -200,6 +200,41 @@
             gap: 14px;
         }
 
+        .pipeline-stage {
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            background: #fff;
+            padding: 18px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+        }
+
+        .pipeline-stage-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .pipeline-stage-title h6 {
+            margin: 0;
+            color: #172033;
+            font-weight: 800;
+        }
+
+        .pipeline-stage-count {
+            min-width: 34px;
+            border-radius: 999px;
+            padding: 5px 10px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: .75rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
         .pipeline-item {
             min-width: 0;
             padding: 16px;
@@ -972,11 +1007,14 @@
                                     <div class="pipeline-groups">
 
                                         @foreach ($groupedLevels as $group)
-                                            <div class="mb-4">
+                                            <div class="pipeline-stage mb-4">
 
-                                                <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">
-                                                    {{ $group['title'] }}
-                                                </h5>
+                                                @unless (in_array($group['title'], ['Monthly Joining Details', 'Monthly Onboarding Details'], true))
+                                                    <div class="pipeline-stage-title">
+                                                        <h6><i class="ri-flow-chart me-2 text-primary"></i>{{ $group['title'] }}</h6>
+                                                        <span class="pipeline-stage-count">{{ number_format($group['levels']->sum('candidates_count')) }}</span>
+                                                    </div>
+                                                @endunless
 
                                                 @if ($group['title'] === 'Monthly Joining Details')
                                                     <div class="border rounded-4 bg-light p-3 p-lg-4">
@@ -1084,21 +1122,22 @@
                         </div>
                     @endcan --}}
                 </div>
-                @if ($isSuperAdminDashboard)
-                    @can('read', \App\Models\ClientRequirement::class)
+                @if ($showRevenueDashboard)
                         <div class="card panel-card target-panel mb-4">
                             <div class="card-body p-4">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                     <div>
-                                        <h5 class="section-title mb-1">Monthly Revenue</h5>
-                                        <p class="text-muted small mb-0">Client Requirement Revenue Amount totals for the last seven months</p>
+                                        <h5 class="section-title mb-1">Revenue Outcomes</h5>
+                                        <p class="text-muted small mb-0">Onboarded and joiner-declined revenue for the last seven months</p>
                                     </div>
-                                    <span class="badge bg-success-subtle text-success">Admin only</span>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="badge bg-success-subtle text-success">Onboarded: &#8377;{{ number_format($onboardedRevenue, 2) }}</span>
+                                        <span class="badge bg-danger-subtle text-danger">Declined: &#8377;{{ number_format($declinedRevenue, 2) }}</span>
+                                    </div>
                                 </div>
                                 <div id="monthlyRevenueBarChart" style="min-height: 300px;"></div>
                             </div>
                         </div>
-                    @endcan
                 @endif
                 <div class="row g-4">
                     @can('read', \App\Models\Candidate::class)
@@ -1308,10 +1347,10 @@
                     height: 300,
                     toolbar: { show: false }
                 },
-                series: [{
-                    name: 'Revenue Amount',
-                    data: @json($revenueChartTotals)
-                }],
+                series: [
+                    { name: 'Onboarded Revenue', data: @json($revenueChartTotals) },
+                    { name: 'Declined Revenue', data: @json($declinedRevenueChartTotals) }
+                ],
                 xaxis: {
                     categories: @json($revenueChartMonths),
                     axisBorder: { show: false },
@@ -1325,7 +1364,7 @@
                         }
                     }
                 },
-                colors: ['#2563eb'],
+                colors: ['#22c55e', '#ef4444'],
                 plotOptions: {
                     bar: {
                         borderRadius: 5,
