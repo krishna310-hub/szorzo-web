@@ -19,7 +19,9 @@ class RecruiterController extends Controller
         $this->authorize('read', Recruiter::class);
 
         if ($request->ajax()) {
-            $recruiters = Recruiter::with('deliveryLead')->latest();
+            $recruiters = Recruiter::with('deliveryLead')
+                ->visibleTo($request->user()->loadMissing('role'))
+                ->latest();
 
             return DataTables::of($recruiters)
                 ->addIndexColumn()
@@ -31,11 +33,12 @@ class RecruiterController extends Controller
                 ->addColumn('action', function ($row) {
                     $buttons = '';
                     if (auth()->user()->can('edit', Recruiter::class)) {
-                        $buttons .= '<a href="' . route('admin.recruiters.edit', $row->id) . '" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
+                        $buttons .= '<a href="'.route('admin.recruiters.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }
                     if (auth()->user()->can('delete', Recruiter::class)) {
-                        $buttons .= '<button type="button" data-route="' . route('admin.recruiters.delete', $row->id) . '" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
+                        $buttons .= '<button type="button" data-route="'.route('admin.recruiters.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
                     }
+
                     return $buttons ?: '-';
                 })
                 ->rawColumns(['status', 'action'])
@@ -48,6 +51,7 @@ class RecruiterController extends Controller
     public function create()
     {
         $this->authorize('create', Recruiter::class);
+
         return view('backend.recruiters.create', ['deliveryLeads' => $this->deliveryLeads()]);
     }
 
@@ -62,14 +66,15 @@ class RecruiterController extends Controller
     public function edit($id)
     {
         $this->authorize('edit', Recruiter::class);
-        $recruiter = Recruiter::findOrFail($id);
+        $recruiter = $this->visibleRecruiters()->findOrFail($id);
+
         return view('backend.recruiters.edit', ['recruiter' => $recruiter, 'deliveryLeads' => $this->deliveryLeads()]);
     }
 
     public function update(Request $request, $id)
     {
         $this->authorize('edit', Recruiter::class);
-        $recruiter = Recruiter::findOrFail($id);
+        $recruiter = $this->visibleRecruiters()->findOrFail($id);
         $recruiter->update($this->validatedData($request));
 
         return redirect()->route('admin.recruiters.index')->with('success', 'Recruiter updated successfully.');
@@ -78,7 +83,7 @@ class RecruiterController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', Recruiter::class);
-        Recruiter::findOrFail($id)->delete();
+        $this->visibleRecruiters()->findOrFail($id)->delete();
 
         return response()->json(['status' => true, 'message' => 'Recruiter deleted successfully.']);
     }
@@ -101,5 +106,10 @@ class RecruiterController extends Controller
         return User::whereHas('role', function ($query) {
             $query->whereIn('access_level', ['delivery-lead', 'delivery_lead', 'recruiter-dl', 'recruiter_dl']);
         })->where('is_active', 1)->orderBy('name')->get();
+    }
+
+    private function visibleRecruiters()
+    {
+        return Recruiter::visibleTo(auth()->user()->loadMissing('role'));
     }
 }
