@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -68,5 +69,24 @@ class Candidate extends Model
     public function revenue()
     {
         return $this->hasOne(Revenue::class);
+    }
+
+    /** Limit candidates to the recruiter team available to the user. */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        $accessLevel = str_replace('_', '-', strtolower((string) $user->role?->access_level));
+
+        if ($accessLevel === 'super-admin') {
+            return $query;
+        }
+
+        if (! in_array($accessLevel, ['delivery-lead', 'recruiter-dl', 'recruiter'], true)) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn(
+            'recruiter_id',
+            Recruiter::query()->visibleTo($user)->select('id')
+        );
     }
 }

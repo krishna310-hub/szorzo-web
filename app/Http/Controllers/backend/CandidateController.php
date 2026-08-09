@@ -16,10 +16,11 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Support\Str;
 
 class CandidateController extends Controller
 {
@@ -43,24 +44,24 @@ class CandidateController extends Controller
                             $q->where('candidate_name', 'like', "%{$search}%")
 
                             // Job Role
-                            ->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
-                                $jobRoleQuery->where('job_role', 'like', "%{$search}%");
-                            })
+                                ->orWhereHas('jobRole', function ($jobRoleQuery) use ($search) {
+                                    $jobRoleQuery->where('job_role', 'like', "%{$search}%");
+                                })
 
                             // Client
-                            ->orWhereHas('client', function ($clientQuery) use ($search) {
-                                $clientQuery->where('client', 'like', "%{$search}%");
-                            })
+                                ->orWhereHas('client', function ($clientQuery) use ($search) {
+                                    $clientQuery->where('client', 'like', "%{$search}%");
+                                })
 
                             // Recruiter
-                            ->orWhereHas('recruiter', function ($recruiterQuery) use ($search) {
-                                $recruiterQuery->where('recruiter_name', 'like', "%{$search}%");
-                            })
+                                ->orWhereHas('recruiter', function ($recruiterQuery) use ($search) {
+                                    $recruiterQuery->where('recruiter_name', 'like', "%{$search}%");
+                                })
 
                             // Interview Level
-                            ->orWhereHas('interviewLevel', function ($levelQuery) use ($search) {
-                                $levelQuery->where('level', 'like', "%{$search}%");
-                            });
+                                ->orWhereHas('interviewLevel', function ($levelQuery) use ($search) {
+                                    $levelQuery->where('level', 'like', "%{$search}%");
+                                });
                         });
                     }
                 })
@@ -70,7 +71,7 @@ class CandidateController extends Controller
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
                 ->addColumn('interview_level', fn ($row) => $row->interviewLevel->level ?? '-')
-                ->editColumn('onboarding_date', fn($row) => $row->onboarding_date?->format('d-m-Y') ?? '-')
+                ->editColumn('onboarding_date', fn ($row) => $row->onboarding_date?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -84,6 +85,7 @@ class CandidateController extends Controller
                     if ($row->upload_cv) {
                         return '<a href="'.asset($row->upload_cv).'" target="_blank" class="btn btn-sm btn-outline-primary">View CV</a>';
                     }
+
                     return '-';
                 })
                 ->addColumn('action', function ($row) {
@@ -128,11 +130,11 @@ class CandidateController extends Controller
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
 
-            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
+            $filename = time().'_'.Str::slug($originalName).'.'.$extension;
 
             $file->move(public_path('uploads/candidates'), $filename);
 
-            $data['upload_cv'] = 'uploads/candidates/' . $filename;
+            $data['upload_cv'] = 'uploads/candidates/'.$filename;
         }
 
         Candidate::create($data);
@@ -147,7 +149,7 @@ class CandidateController extends Controller
         $this->authorize('edit', Candidate::class);
 
         return view('backend.candidates.edit', array_merge(
-            ['candidate' => Candidate::findOrFail($id)],
+            ['candidate' => $this->visibleCandidates()->findOrFail($id)],
             $this->formData()
         ));
     }
@@ -156,7 +158,7 @@ class CandidateController extends Controller
     {
         $this->authorize('edit', Candidate::class);
 
-        $candidate = Candidate::findOrFail($id);
+        $candidate = $this->visibleCandidates()->findOrFail($id);
 
         $data = $this->validatedData($request, $candidate);
 
@@ -169,10 +171,10 @@ class CandidateController extends Controller
             $file = $request->file('upload_cv');
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
-            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
+            $filename = time().'_'.Str::slug($originalName).'.'.$extension;
             $file->move(public_path('uploads/candidates'), $filename);
 
-            $data['upload_cv'] = 'uploads/candidates/' . $filename;
+            $data['upload_cv'] = 'uploads/candidates/'.$filename;
         }
 
         DB::transaction(function () use ($candidate, $data) {
@@ -225,7 +227,7 @@ class CandidateController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', Candidate::class);
-        Candidate::findOrFail($id)->delete();
+        $this->visibleCandidates()->findOrFail($id)->delete();
 
         return response()->json(['status' => true, 'message' => 'Candidate deleted successfully.']);
     }
@@ -235,7 +237,7 @@ class CandidateController extends Controller
         $this->authorize('read', Candidate::class);
 
         $rows = $this->candidateQuery($request)
-            ->orderBy('id', 'asc')->get()->map(fn ($candidate,$index) => [
+            ->orderBy('id', 'asc')->get()->map(fn ($candidate, $index) => [
                 $index + 1,
                 $candidate->created_at ? date('d-m-Y', strtotime($candidate->created_at)) : '',
                 $candidate->recruiter?->recruiter_name,
@@ -269,7 +271,7 @@ class CandidateController extends Controller
         $this->authorize('create', Candidate::class);
 
         $dropdowns = [
-            'Recruiter' => Recruiter::where('status', true)->orderBy('recruiter_name')->pluck('recruiter_name')->all(),
+            'Recruiter' => $this->visibleRecruiters()->where('status', true)->orderBy('recruiter_name')->pluck('recruiter_name')->all(),
             'Client' => Client::where('status', true)->orderBy('client')->pluck('client')->all(),
             'Job Role' => JobRole::where('status', true)->orderBy('job_role')->pluck('job_role')->all(),
             'Level Of Interview' => InterviewLevel::where('status', true)->orderBy('sort_order')->pluck('level')->all(),
@@ -410,6 +412,16 @@ class CandidateController extends Controller
                 if ($data['email'] && isset($seenEmails[$data['email']])) {
                     $validator->errors()->add('email', 'The email address is duplicated in the import file.');
                 }
+
+                if ($this->accessLevel() !== 'super-admin') {
+                    if (! $data['recruiter_id'] || ! $this->visibleRecruiters()->whereKey($data['recruiter_id'])->exists()) {
+                        $validator->errors()->add('recruiter_id', 'The recruiter is not available to your login.');
+                    }
+
+                    if ($data['id'] && ! $this->visibleCandidates()->whereKey($data['id'])->exists()) {
+                        $validator->errors()->add('id', 'The candidate record is not available to your login.');
+                    }
+                }
             });
 
             if ($validator->fails()) {
@@ -435,7 +447,7 @@ class CandidateController extends Controller
             foreach ($validRows as $data) {
                 $id = $data['id'];
                 unset($data['id']);
-                $id ? Candidate::findOrFail($id)->update($data) : Candidate::create($data);
+                $id ? $this->visibleCandidates()->findOrFail($id)->update($data) : Candidate::create($data);
             }
         });
 
@@ -444,13 +456,13 @@ class CandidateController extends Controller
 
     private function formData(): array
     {
-        $isRecruiter = (int) auth()->user()->role_id === 3;
+        $isRecruiter = $this->accessLevel() === 'recruiter';
         $linkedRecruiter = $isRecruiter
-            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower(auth()->user()->email)])->first()
+            ? $this->visibleRecruiters()->first()
             : null;
 
         return [
-            'recruiters' => Recruiter::where('status', true)->orderBy('recruiter_name')->get(),
+            'recruiters' => $this->visibleRecruiters()->where('status', true)->orderBy('recruiter_name')->get(),
             'isRecruiterCandidateList' => $isRecruiter,
             'linkedRecruiter' => $linkedRecruiter,
             'clients' => Client::where('status', true)->orderBy('client')->get(),
@@ -465,14 +477,10 @@ class CandidateController extends Controller
 
     private function candidateQuery(Request $request)
     {
-        $user = auth()->user();
-        $isRecruiter = (int) $user->role_id === 3;
-        $linkedRecruiterId = $isRecruiter
-            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id')
-            : null;
+        $isRecruiter = $this->accessLevel() === 'recruiter';
 
         return Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])
-            ->when($isRecruiter, fn ($query) => $query->where('recruiter_id', $linkedRecruiterId ?? 0))
+            ->visibleTo(auth()->user()->loadMissing('role'))
             ->when($request->filled('from_date'), fn ($query) => $query->whereDate('created_at', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn ($query) => $query->whereDate('created_at', '<=', $request->to_date))
             ->when(! $isRecruiter && $request->filled('recruiter_id'), fn ($query) => $query->where('recruiter_id', $request->recruiter_id))
@@ -488,11 +496,11 @@ class CandidateController extends Controller
     private function validatedData(Request $request, ?Candidate $candidate = null): array
     {
         $user = auth()->user();
-        $isRecruiter = (int) $user->role_id === 3;
+        $isRecruiter = $this->accessLevel() === 'recruiter';
         if ($isRecruiter) {
-            $linkedRecruiterId = Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id');
+            $linkedRecruiterId = $this->visibleRecruiters()->value('id');
             if (! $linkedRecruiterId) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'recruiter_id' => 'Your login is not linked to an active recruiter record. Please contact the administrator.',
                 ]);
             }
@@ -543,12 +551,18 @@ class CandidateController extends Controller
             'expected_ctc.integer' => 'Expected CTC must be entered as a whole amount (e.g. 800000).',
         ]);
 
+        if (! $this->visibleRecruiters()->whereKey($data['recruiter_id'])->exists()) {
+            throw ValidationException::withMessages([
+                'recruiter_id' => 'You can only assign candidates to a recruiter available to your login.',
+            ]);
+        }
+
         $isAssigned = ClientJobRole::where('client_id', $data['client_id'])
             ->where('job_role_id', $data['job_role_id'])
             ->where('status', true)
             ->exists();
         if (! $isAssigned) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'job_role_id' => 'The selected job role is not assigned to this client.',
             ]);
         }
@@ -556,8 +570,33 @@ class CandidateController extends Controller
         return $data;
     }
 
+    private function accessLevel(): string
+    {
+        return str_replace('_', '-', strtolower((string) auth()->user()->loadMissing('role')->role?->access_level));
+    }
+
+    private function visibleRecruiters()
+    {
+        $user = auth()->user()->loadMissing('role');
+
+        if ($this->accessLevel() === 'super-admin') {
+            return Recruiter::query();
+        }
+
+        if (! in_array($this->accessLevel(), ['delivery-lead', 'recruiter-dl', 'recruiter'], true)) {
+            return Recruiter::query()->whereRaw('1 = 0');
+        }
+
+        return Recruiter::visibleTo($user);
+    }
+
+    private function visibleCandidates()
+    {
+        return Candidate::visibleTo(auth()->user()->loadMissing('role'));
+    }
+
     private function importHeadings(): array
     {
-        return ['Record ID','Created Date', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
+        return ['Record ID', 'Created Date', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
     }
 }
