@@ -85,7 +85,7 @@ class Candidate extends Model
         }
 
         return $query->whereIn(
-            'recruiter_id',
+            'candidates.recruiter_id',
             Recruiter::query()->visibleTo($user)->select('id')
         );
     }

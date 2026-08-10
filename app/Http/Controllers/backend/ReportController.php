@@ -9,8 +9,8 @@ use App\Models\Report;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
@@ -20,6 +20,7 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $this->authorize('read', Report::class);
+
         return view('backend.reports.index', $this->reportData($request));
     }
 
@@ -79,11 +80,9 @@ class ReportController extends Controller
     private function reportQuery(Request $request): array
     {
         $user = $request->user()->loadMissing('role');
-        $role = $user->role?->access_level;
-        $isRecruiter = (int) $user->role_id === 3 || $role === 'recruiter';
-        // Any non-recruiter role granted the report permission receives the
-        // organization view; recruiter accounts remain restricted to themselves.
-        $canViewAll = ! $isRecruiter;
+        $accessLevel = str_replace('_', '-', strtolower((string) $user->role?->access_level));
+        $isAdmin = $accessLevel === 'super-admin';
+        $isRecruiter = $accessLevel === 'recruiter';
 
         $validated = $request->validate([
             'from_date' => ['nullable', 'date_format:Y-m-d'],
@@ -91,17 +90,22 @@ class ReportController extends Controller
             'recruiter_id' => ['nullable', 'integer', 'exists:recruiters,id'],
         ]);
 
-        $recruiters = $canViewAll
+        $recruiters = $isAdmin
             ? Recruiter::orderBy('recruiter_name')->get(['id', 'recruiter_name'])
-            : collect();
+            : (in_array($accessLevel, ['delivery-lead', 'recruiter-dl'], true)
+                ? Recruiter::visibleTo($user)->orderBy('recruiter_name')->get(['id', 'recruiter_name'])
+                : collect());
         $linkedRecruiter = $isRecruiter
-            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->first()
+            ? Recruiter::visibleTo($user)->first()
             : null;
 
         $selectedRecruiterId = $isRecruiter
             ? ($linkedRecruiter?->id ?? 0)
-            : (isset($validated['recruiter_id']) ? (int) $validated['recruiter_id'] : null);
+            : (isset($validated['recruiter_id']) && $recruiters->contains('id', (int) $validated['recruiter_id'])
+                ? (int) $validated['recruiter_id']
+                : null);
         $query = Candidate::query()
+            ->visibleTo($user)
             ->when($selectedRecruiterId !== null, fn (Builder $q) => $q->where('recruiter_id', $selectedRecruiterId))
             ->when(isset($validated['from_date']), fn (Builder $q) => $q->where('candidates.created_at', '>=', CarbonImmutable::parse($validated['from_date'])->startOfDay()))
             ->when(isset($validated['to_date']), fn (Builder $q) => $q->where('candidates.created_at', '<=', CarbonImmutable::parse($validated['to_date'])->endOfDay()));
@@ -112,7 +116,11 @@ class ReportController extends Controller
             'recruiter_id' => $selectedRecruiterId,
             'is_recruiter' => $isRecruiter,
             'linked' => ! $isRecruiter || (bool) $linkedRecruiter,
-        ], $recruiters, $isRecruiter ? ($linkedRecruiter?->recruiter_name ?? 'Unlinked recruiter account') : ($selectedRecruiterId ? ($recruiters->firstWhere('id', $selectedRecruiterId)?->recruiter_name ?? 'Recruiter') : 'All recruiters')];
+        ], $recruiters, $isRecruiter
+            ? ($linkedRecruiter?->recruiter_name ?? 'Unlinked recruiter account')
+            : ($selectedRecruiterId
+                ? ($recruiters->firstWhere('id', $selectedRecruiterId)?->recruiter_name ?? 'Recruiter')
+                : ($isAdmin ? 'All recruiters' : 'My recruiter team'))];
     }
 
     private function breakdown(Builder $base, string $table, string $foreignKey, string $labelColumn, int $total, string $emptyLabel, ?string $orderColumn = null)
@@ -125,6 +133,7 @@ class ReportController extends Controller
             ->get()
             ->map(function ($row) use ($total) {
                 $row->percentage = $total > 0 ? round(((int) $row->total / $total) * 100, 2) : 0.0;
+
                 return $row;
             });
     }

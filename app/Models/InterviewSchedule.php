@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -55,5 +56,14 @@ class InterviewSchedule extends Model
     public function interviewMode()
     {
         return $this->belongsTo(InterviewMode::class, 'interview_mode_id');
+    }
+
+    /** Limit schedules to candidates visible to the logged-in user. */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'candidate',
+            fn (Builder $candidateQuery) => $candidateQuery->visibleTo($user)
+        );
     }
 }

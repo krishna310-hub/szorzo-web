@@ -16,6 +16,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -116,51 +117,51 @@ class InterviewScheduleController extends Controller
 
                 ->addColumn(
                     'candidate_name',
-                    fn($row) => $row->candidate?->candidate_name ?? '-'
+                    fn ($row) => $row->candidate?->candidate_name ?? '-'
                 )
 
                 ->addColumn(
                     'candidate_mobile',
-                    fn($row) => $row->candidate?->mobile_no ?? '-'
+                    fn ($row) => $row->candidate?->mobile_no ?? '-'
                 )
 
                 ->addColumn(
                     'recruiter_name',
-                    fn($row) => $row->candidate?->recruiter?->recruiter_name ?? '-'
+                    fn ($row) => $row->candidate?->recruiter?->recruiter_name ?? '-'
                 )
 
                 ->addColumn(
                     'client_name',
-                    fn($row) => $row->client?->client
+                    fn ($row) => $row->client?->client
                         ?? $row->candidate?->client?->client
                         ?? '-'
                 )
 
                 ->addColumn(
                     'job_role_name',
-                    fn($row) => $row->jobRole?->job_role
+                    fn ($row) => $row->jobRole?->job_role
                         ?? $row->candidate?->jobRole?->job_role
                         ?? '-'
                 )
 
                 ->addColumn(
                     'interview_level',
-                    fn($row) => $row->interviewLevel?->level ?? '-'
+                    fn ($row) => $row->interviewLevel?->level ?? '-'
                 )
 
                 ->editColumn(
                     'schedule_date',
-                    fn($row) => $row->schedule_date?->format('d-m-Y H:i') ?? '-'
+                    fn ($row) => $row->schedule_date?->format('d-m-Y H:i') ?? '-'
                 )
 
                 ->editColumn(
                     'status',
-                    fn($row) => $this->statusBadge($row->status)
+                    fn ($row) => $this->statusBadge($row->status)
                 )
 
                 ->editColumn(
                     'notes',
-                    fn($row) => $row->notes ?: '-'
+                    fn ($row) => $row->notes ?: '-'
                 )
 
                 ->editColumn(
@@ -169,21 +170,21 @@ class InterviewScheduleController extends Controller
                 )
 
                 ->addColumn('action', function ($row) {
-                    $buttons = '<a href="' .
+                    $buttons = '<a href="'.
                         route(
                             'admin.interview-schedules.show',
                             $row->candidate_id
-                        ) .
+                        ).
                         '" class="text-primary fs-4 me-1" title="History">
                             <i class="ri-history-line"></i>
                         </a>';
 
                     if (auth()->user()->can('edit', Candidate::class)) {
-                        $buttons .= '<a href="' .
+                        $buttons .= '<a href="'.
                             route(
                                 'admin.interview-schedules.edit',
                                 $row->id
-                            ) .
+                            ).
                             '" class="text-info fs-4 me-1" title="Edit">
                                 <i class="bx bxs-edit"></i>
                             </a>';
@@ -192,11 +193,11 @@ class InterviewScheduleController extends Controller
                     if (auth()->user()->can('delete', Candidate::class)) {
                         $buttons .= '<button
                             type="button"
-                            data-route="' .
+                            data-route="'.
                             route(
                                 'admin.interview-schedules.delete',
                                 $row->id
-                            ) .
+                            ).
                             '"
                             class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record"
                             title="Delete">
@@ -223,7 +224,7 @@ class InterviewScheduleController extends Controller
 
         $data = $this->formData();
         $candidate = $request->filled('candidate_id')
-            ? Candidate::with(['client', 'jobRole', 'interviewLevel'])->find($request->candidate_id)
+            ? $this->visibleCandidates()->with(['client', 'jobRole', 'interviewLevel'])->find($request->candidate_id)
             : null;
         $interviewMode = InterviewMode::all();
 
@@ -268,10 +269,10 @@ class InterviewScheduleController extends Controller
         $data = $this->validatedData($request);
 
         $level = InterviewLevel::find($request->level_of_interview_id);
-        if ($level && $level->level === 'Offer Released' && !$request->filled('onboarding_date')) {
+        if ($level && $level->level === 'Offer Released' && ! $request->filled('onboarding_date')) {
             return back()
                 ->withErrors([
-                    'onboarding_date' => 'Onboarding Date is mandatory when the interview level is Offer Released.'
+                    'onboarding_date' => 'Onboarding Date is mandatory when the interview level is Offer Released.',
                 ])
                 ->withInput();
         }
@@ -280,7 +281,7 @@ class InterviewScheduleController extends Controller
             InterviewSchedule::create($data);
             $candidateData = [
                 'level_of_interview_id' => $data['level_of_interview_id'],
-                'onboarding_date'       => $data['onboarding_date'],
+                'onboarding_date' => $data['onboarding_date'],
             ];
             if (! empty($data['client_id'])) {
                 $candidateData['client_id'] = $data['client_id'];
@@ -298,8 +299,8 @@ class InterviewScheduleController extends Controller
     {
         $this->authorize('edit', Candidate::class);
 
-        $interviewSchedule = InterviewSchedule::with('interviewMode')->findOrFail($id);
-        $onboarding_candidate = Candidate::findOrFail($interviewSchedule->candidate_id);
+        $interviewSchedule = $this->visibleSchedules()->with('interviewMode')->findOrFail($id);
+        $onboarding_candidate = $this->visibleCandidates()->findOrFail($interviewSchedule->candidate_id);
 
         return view('backend.interview-schedules.edit', array_merge(
             [
@@ -316,14 +317,14 @@ class InterviewScheduleController extends Controller
         $this->authorize('edit', Candidate::class);
 
         $level = InterviewLevel::find($request->level_of_interview_id);
-        if ($level && $level->level === 'Offer Released' && !$request->filled('onboarding_date')) {
+        if ($level && $level->level === 'Offer Released' && ! $request->filled('onboarding_date')) {
             return back()
                 ->withErrors([
-                    'onboarding_date' => 'Onboarding Date is mandatory when the interview level is Offer Released.'
+                    'onboarding_date' => 'Onboarding Date is mandatory when the interview level is Offer Released.',
                 ])
                 ->withInput();
         }
-        $schedule = InterviewSchedule::findOrFail($id);
+        $schedule = $this->visibleSchedules()->findOrFail($id);
         $data = $this->validatedData($request);
         DB::transaction(function () use ($schedule, $data) {
             $schedule->update($data);
@@ -347,7 +348,7 @@ class InterviewScheduleController extends Controller
     {
         $this->authorize('read', Candidate::class);
 
-        $candidate = Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])->findOrFail($candidateId);
+        $candidate = $this->visibleCandidates()->with(['recruiter', 'client', 'jobRole', 'interviewLevel'])->findOrFail($candidateId);
         $schedules = InterviewSchedule::with(['client', 'jobRole', 'interviewLevel'])
             ->where('candidate_id', $candidate->id)
             ->latest('schedule_date')
@@ -360,48 +361,40 @@ class InterviewScheduleController extends Controller
     {
         $this->authorize('delete', Candidate::class);
 
-        InterviewSchedule::findOrFail($id)->delete();
+        $this->visibleSchedules()->findOrFail($id)->delete();
 
         return response()->json(['status' => true, 'message' => 'Interview schedule deleted successfully.']);
     }
 
     private function scheduleQuery(Request $request)
     {
-        $user = auth()->user();
-        $isRecruiter = (int) $user->role_id === 3;
-        $linkedRecruiterId = $isRecruiter
-            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id')
-            : null;
+        $isRecruiter = $this->accessLevel() === 'recruiter';
 
         return InterviewSchedule::with(['candidate.recruiter', 'candidate.client', 'candidate.jobRole', 'client', 'jobRole', 'interviewLevel', 'interviewMode'])
-            ->when($isRecruiter, fn ($query) => $query->whereHas(
-                'candidate',
-                fn ($candidateQuery) => $candidateQuery->where('recruiter_id', $linkedRecruiterId ?? 0)
-            ))
-            ->when($request->filled('from_date'), fn($query) => $query->whereDate('schedule_date', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn($query) => $query->whereDate('schedule_date', '<=', $request->to_date))
-            ->when($request->filled('candidate_id'), fn($query) => $query->where('candidate_id', $request->candidate_id))
-            ->when($request->filled('client_id'), fn($query) => $query->where('client_id', $request->client_id))
-            ->when($request->filled('job_role_id'), fn($query) => $query->where('job_role_id', $request->job_role_id))
+            ->visibleTo(auth()->user()->loadMissing('role'))
+            ->when($request->filled('from_date'), fn ($query) => $query->whereDate('schedule_date', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn ($query) => $query->whereDate('schedule_date', '<=', $request->to_date))
+            ->when($request->filled('candidate_id'), fn ($query) => $query->where('candidate_id', $request->candidate_id))
+            ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
+            ->when($request->filled('job_role_id'), fn ($query) => $query->where('job_role_id', $request->job_role_id))
             ->when($request->filled('level_of_interview_id'), function ($query) use ($request) {
                 $levelIds = array_filter((array) $request->input('level_of_interview_id'));
 
                 return $query->whereIn('level_of_interview_id', $levelIds);
             })
-            ->when($request->filled('status'), fn($query) => $query->where('status', $request->status))
-            ->when(! $isRecruiter && $request->filled('recruiter_id'), fn($query) => $query->whereHas('candidate', fn($candidateQuery) => $candidateQuery->where('recruiter_id', $request->recruiter_id)));
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->status))
+            ->when(! $isRecruiter && $request->filled('recruiter_id'), fn ($query) => $query->whereHas('candidate', fn ($candidateQuery) => $candidateQuery->where('recruiter_id', $request->recruiter_id)));
     }
 
     private function formData(): array
     {
-        $isRecruiter = (int) auth()->user()->role_id === 3;
+        $isRecruiter = $this->accessLevel() === 'recruiter';
         $linkedRecruiter = $isRecruiter
-            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower(auth()->user()->email)])->first()
+            ? $this->visibleRecruiters()->first()
             : null;
 
         return [
-            'candidates' => Candidate::query()
-                ->when($isRecruiter, fn ($query) => $query->where('recruiter_id', $linkedRecruiter?->id ?? 0))
+            'candidates' => $this->visibleCandidates()
                 ->orderBy('candidate_name')
                 ->get(),
             'isRecruiterScheduleList' => $isRecruiter,
@@ -414,7 +407,7 @@ class InterviewScheduleController extends Controller
                 ->map(fn ($rows) => $rows->pluck('job_role_id')->unique()->values()),
             'interviewMode' => InterviewMode::orderBy('interview_mode')->get(),
             'interviewLevels' => InterviewLevel::orderBy('sort_order')->get(),
-            'recruiters' => Recruiter::orderBy('recruiter_name')->get(),
+            'recruiters' => $this->visibleRecruiters()->orderBy('recruiter_name')->get(),
             'statuses' => InterviewSchedule::STATUSES,
         ];
     }
@@ -433,14 +426,50 @@ class InterviewScheduleController extends Controller
             'onboarding_date' => 'nullable|date',
         ]);
 
+        if (! $this->visibleCandidates()->whereKey($data['candidate_id'])->exists()) {
+            throw ValidationException::withMessages([
+                'candidate_id' => 'The selected candidate is not available to your login.',
+            ]);
+        }
+
         if ($data['client_id'] && $data['job_role_id'] && ! ClientJobRole::where('client_id', $data['client_id'])
             ->where('job_role_id', $data['job_role_id'])->where('status', true)->exists()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'job_role_id' => 'The selected job role is not assigned to this client.',
             ]);
         }
 
         return $data;
+    }
+
+    private function accessLevel(): string
+    {
+        return str_replace('_', '-', strtolower((string) auth()->user()->loadMissing('role')->role?->access_level));
+    }
+
+    private function visibleRecruiters()
+    {
+        $user = auth()->user()->loadMissing('role');
+
+        if ($this->accessLevel() === 'super-admin') {
+            return Recruiter::query();
+        }
+
+        if (! in_array($this->accessLevel(), ['delivery-lead', 'recruiter-dl', 'recruiter'], true)) {
+            return Recruiter::query()->whereRaw('1 = 0');
+        }
+
+        return Recruiter::visibleTo($user);
+    }
+
+    private function visibleCandidates()
+    {
+        return Candidate::visibleTo(auth()->user()->loadMissing('role'));
+    }
+
+    private function visibleSchedules()
+    {
+        return InterviewSchedule::visibleTo(auth()->user()->loadMissing('role'));
     }
 
     private function statusBadge(string $status): string
@@ -456,6 +485,6 @@ class InterviewScheduleController extends Controller
         $label = InterviewSchedule::STATUSES[$status] ?? ucfirst($status);
         $class = $classes[$status] ?? 'bg-secondary-subtle text-secondary';
 
-        return '<span class="badge ' . $class . '">' . $label . '</span>';
+        return '<span class="badge '.$class.'">'.$label.'</span>';
     }
 }
