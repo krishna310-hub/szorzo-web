@@ -842,9 +842,6 @@
                 </div>
 
                 @php
-                    $dashboardRoleId = (int) auth()->user()->role_id;
-                    $isSuperAdminDashboard = $dashboardRoleId === 1;
-                    $isDeliveryLeadDashboard = $dashboardRoleId === 2;
                     $selectedDashboardRecruiter = $selectedRecruiterId
                         ? $recruiters->firstWhere('id', (int) $selectedRecruiterId)
                         : null;

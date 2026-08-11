@@ -56,22 +56,22 @@ class AdminController extends Controller
             : null;
 
         $user = Auth::user()->loadMissing('role.permissions');
-        $roleId = (int) $user->role_id;
-        $isSuperAdmin = $roleId === 1;
-        $isDeliveryLead = $roleId === 2;
-        $isRecruiter = $roleId === 3;
+        $accessLevel = str_replace('_', '-', strtolower((string) $user->role?->access_level));
+        $isSuperAdmin = $accessLevel === 'super-admin';
+        $isDeliveryLead = in_array($accessLevel, ['delivery-lead', 'recruiter-dl'], true);
+        $isRecruiter = $accessLevel === 'recruiter';
         $isPersonalDashboard = $isRecruiter;
         $linkedRecruiter = $isRecruiter
             ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->first()
             : null;
         $linkedRecruiterId = $linkedRecruiter?->id;
         $deliveryLeadRecruiterIds = $isDeliveryLead
-            ? Recruiter::where('delivery_lead_user_id', $user->id)->pluck('id')
+            ? Recruiter::visibleTo($user)->pluck('id')
             : collect();
 
         $availableRecruiters = ($isSuperAdmin || $isDeliveryLead)
             ? Recruiter::where('status', true)
-                ->when($isDeliveryLead, fn ($query) => $query->whereIn('id', $deliveryLeadRecruiterIds))
+                ->when($isDeliveryLead, fn ($query) => $query->visibleTo($user))
                 ->orderBy('recruiter_name')->get()
             : collect();
         $availableClients = Client::where('status', true)->orderBy('client')->get();
@@ -108,8 +108,7 @@ class AdminController extends Controller
             ->when($selectedClientId, fn($query) => $query->where('client_id', $selectedClientId))
             ->when($dateFrom, fn($query) => $query->where('client_requirements.created_at', '>=', $dateFrom))
             ->when($dateTo, fn($query) => $query->where('client_requirements.created_at', '<=', $dateTo));
-        $candidates = Candidate::query()
-            ->when($isDeliveryLead, fn ($query) => $query->whereIn('recruiter_id', $deliveryLeadRecruiterIds))
+        $candidates = Candidate::visibleTo($user)
             ->when($selectedRecruiterId !== null, fn($query) => $query->where('recruiter_id', $selectedRecruiterId))
             ->when($selectedClientId, fn($query) => $query->where('client_id', $selectedClientId))
             ->when($dateFrom, fn($query) => $query->where('candidates.created_at', '>=', $dateFrom))
@@ -279,10 +278,7 @@ class AdminController extends Controller
             : max(1, $availableRecruiters->count());
         $monthlyKpis = $this->monthlyTargetAnalytics($candidates, $targetMultiplier, $dateFrom, $dateTo);
         $deliveryLeadAnalytics = $this->monthlyTargetAnalytics(
-            Candidate::query()->when(
-                $isDeliveryLead,
-                fn ($query) => $query->whereIn('recruiter_id', $deliveryLeadRecruiterIds)
-            ),
+            Candidate::visibleTo($user),
             max(1, $availableRecruiters->count()),
             $dateFrom,
             $dateTo
@@ -302,6 +298,8 @@ class AdminController extends Controller
             'scopeLabel' => $isRecruiter
                 ? 'My recruitment pipeline'
                 : ($isDeliveryLead ? 'My delivery lead recruitment pipeline' : 'Talent Aquisition overview'),
+            'isSuperAdminDashboard' => $isSuperAdmin,
+            'isDeliveryLeadDashboard' => $isDeliveryLead,
             'isRecruiterDashboard' => $isPersonalDashboard,
             'showClientFilter' => true,
             'recruiterLinked' => !$isRecruiter || (bool) $linkedRecruiterId,
