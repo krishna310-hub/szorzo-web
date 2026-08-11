@@ -157,7 +157,7 @@
     </div>
     <div class="col-md-4">
         <label for="upload_cv" class="form-label">
-            Upload CV
+            Upload CV <span class="text-danger">*</span>
 
             @if(isset($candidate) && $candidate->upload_cv)
                 <a href="{{ asset($candidate->upload_cv) }}" target="_blank" class="btn btn-sm btn-outline-primary">
