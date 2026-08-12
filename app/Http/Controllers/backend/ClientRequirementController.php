@@ -53,6 +53,11 @@ class ClientRequirementController extends Controller
                                 $clientQuery->where('client', 'like', "%{$search}%");
                             });
 
+                            // Job Description
+                            $q->orWhereHas('jobDescription', function ($jobDescriptionQuery) use ($search) {
+                                $jobDescriptionQuery->where('job_description', 'like', "%{$search}%");
+                            });
+
                             // Billing
                             $q->orWhereHas('billing', function ($billingQuery) use ($search) {
                                 $billingQuery->where('value', 'like', "%{$search}%");
@@ -69,7 +74,10 @@ class ClientRequirementController extends Controller
                 })
                 ->addIndexColumn()
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
-                ->addColumn('job_description_name', fn ($row) => $row->jobDescription->job_description ?? '-')
+                ->addColumn('job_description_content', fn ($row) => $row->jobDescription?->job_description)
+                ->addColumn('job_description_action', fn ($row) => filled($row->jobDescription?->job_description)
+                    ? '<button type="button" class="btn btn-link text-primary fs-4 p-0 view-job-description" title="View Job Description" aria-label="View Job Description"><i class="ri-eye-line"></i></button>'
+                    : '-')
                 ->addColumn('psoition_level', fn ($row) => $row->position_level ?? '-')
                 ->addColumn('mode_name', fn ($row) => collect($row->mode_ids ?: array_filter([$row->mode_id]))
                     ->map(fn ($id) => $modeNames->get((int) $id))->filter()->join(', ') ?: '-')
@@ -107,7 +115,7 @@ class ClientRequirementController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['status', 'priority', 'action'])
+                ->rawColumns(['job_description_content', 'job_description_action', 'status', 'priority', 'action'])
                 ->make(true);
         }
 

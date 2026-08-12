@@ -34,6 +34,7 @@
                                                     <th>Revenue</th>
                                                 @endif
                                                 <th>Job Role</th>
+                                                <th>JD</th>
                                                 <th>Position Level</th>
                                                 <th>Mode</th>
                                                 <th>Requirement Open Date</th>
@@ -56,6 +57,21 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="job-description-modal" tabindex="-1" aria-labelledby="job-description-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="job-description-modal-title">Job Description</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="job-description-modal-content"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -98,6 +114,11 @@
                 , {
                     data: 'job_role_name',
                     name: 'job_role_name',
+                }, {
+                    data: 'job_description_action',
+                    name: 'job_description_action',
+                    orderable: false,
+                    searchable: false
                 }, {
                     data: 'psoition_level',
                     name: 'psoition_level',
@@ -154,6 +175,35 @@
                     searchable: false
                 }]
             });
+
+            function sanitizeJobDescription(html) {
+                const parsed = new DOMParser().parseFromString(html || '', 'text/html');
+                parsed.querySelectorAll('script, iframe, object, embed').forEach(function(element) {
+                    element.remove();
+                });
+                parsed.body.querySelectorAll('*').forEach(function(element) {
+                    Array.from(element.attributes).forEach(function(attribute) {
+                        const name = attribute.name.toLowerCase();
+                        if (name.startsWith('on') ||
+                            (['href', 'src'].includes(name) && /^\s*javascript:/i.test(attribute.value))) {
+                            element.removeAttribute(attribute.name);
+                        }
+                    });
+                });
+
+                return parsed.body.innerHTML;
+            }
+
+            $(document).on('click', '.view-job-description', function() {
+                const rowData = table.row($(this).closest('tr')).data();
+                const content = rowData && rowData.job_description_content
+                    ? sanitizeJobDescription(rowData.job_description_content)
+                    : '<p class="text-muted mb-0">No job description is available.</p>';
+
+                $('#job-description-modal-content').html(content);
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('job-description-modal')).show();
+            });
+
             $(document).on('click', '.delete-record', function() {
                 if (!confirm('Are you sure you want to delete this client requirement?')) return;
                 $.ajax({

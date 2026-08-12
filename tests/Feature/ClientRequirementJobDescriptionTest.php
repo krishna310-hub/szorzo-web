@@ -45,5 +45,15 @@ class ClientRequirementJobDescriptionTest extends TestCase
             $clientJobRole->id,
             ClientRequirement::firstOrFail()->job_description_id
         );
+
+        $indexResponse = $this->actingAs($user)->getJson(route('admin.client-requirements.index', [
+            'draw' => 1,
+            'start' => 0,
+            'length' => 10,
+        ]), ['X-Requested-With' => 'XMLHttpRequest']);
+
+        $indexResponse->assertOk();
+        $indexResponse->assertJsonPath('data.0.job_description_content', '<p>Build and maintain applications.</p>');
+        $this->assertStringContainsString('view-job-description', $indexResponse->json('data.0.job_description_action'));
     }
 }
