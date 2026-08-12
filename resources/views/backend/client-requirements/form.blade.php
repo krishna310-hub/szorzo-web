@@ -84,19 +84,17 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
-    {{-- <div class="col-md-4"><label for="job_description_id" class="form-label">Job Description</label><select
-            class="form-select" id="job_description_id" name="job_description_id">
-            <option value="">Select job description</option>
-            @foreach ($jobDescriptions as $jobDescription)
-                <option value="{{ $jobDescription->id }}"
-                    {{ old('job_description_id', $clientRequirement->job_description_id ?? '') == $jobDescription->id ? 'selected' : '' }}>
-                    {{ $jobDescription->job_description ?: 'Job Description #' . $jobDescription->id }}</option>
-            @endforeach
-        </select>
+    <div class="col-12">
+        <label class="form-label">Job Description</label>
+        <input type="hidden" id="job_description_id"
+            value="{{ old('job_description_id', $clientRequirement->job_description_id ?? '') }}">
+        <div id="job_description_preview" class="form-control bg-light" style="min-height: 140px; overflow-y: auto;" aria-live="polite">
+            <span class="text-muted">Select a client and job role to load the job description.</span>
+        </div>
         @error('job_description_id')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
-    </div> --}}
+    </div>
     <div class="col-md-4"><label for="requirement_open_date" class="form-label">Requirement Open Date</label><input
             type="date" class="form-control" id="requirement_open_date" name="requirement_open_date"
             value="{{ old('requirement_open_date', isset($clientRequirement) && $clientRequirement->requirement_open_date ? $clientRequirement->requirement_open_date->format('Y-m-d') : '') }}">
@@ -194,7 +192,10 @@
 document.addEventListener('DOMContentLoaded', function () {
     const client = document.getElementById('client_id');
     const jobRole = document.getElementById('job_role_id');
+    const jobDescriptionId = document.getElementById('job_description_id');
+    const jobDescriptionPreview = document.getElementById('job_description_preview');
     const clientJobRoleMap = @json($clientJobRoleMap);
+    const jobDescriptionMap = @json($jobDescriptionMap);
     const jobRoleOptions = Array.from(jobRole.options).map(function (option) {
         return {
             value: option.value,
@@ -223,9 +224,38 @@ document.addEventListener('DOMContentLoaded', function () {
             jobRole.value = '';
         }
         jobRole.disabled = !client.value;
+        populateJobDescription();
+    }
+
+    function sanitizedDescription(html) {
+        const documentFragment = new DOMParser().parseFromString(html || '', 'text/html');
+        documentFragment.querySelectorAll('script, iframe, object, embed').forEach(element => element.remove());
+        documentFragment.body.querySelectorAll('*').forEach(function (element) {
+            Array.from(element.attributes).forEach(function (attribute) {
+                if (attribute.name.toLowerCase().startsWith('on') ||
+                    (['href', 'src'].includes(attribute.name.toLowerCase()) && /^\s*javascript:/i.test(attribute.value))) {
+                    element.removeAttribute(attribute.name);
+                }
+            });
+        });
+
+        return documentFragment.body.innerHTML;
+    }
+
+    function populateJobDescription() {
+        const assignment = jobDescriptionMap[client.value + ':' + jobRole.value];
+        jobDescriptionId.value = assignment ? assignment.id : '';
+
+        if (!assignment || !assignment.description) {
+            jobDescriptionPreview.innerHTML = '<span class="text-muted">No job description is available for the selected client and job role.</span>';
+            return;
+        }
+
+        jobDescriptionPreview.innerHTML = sanitizedDescription(assignment.description);
     }
 
     client.addEventListener('change', filterJobRoles);
+    jobRole.addEventListener('change', populateJobDescription);
     filterJobRoles();
 
     if (typeof Choices === 'undefined') {

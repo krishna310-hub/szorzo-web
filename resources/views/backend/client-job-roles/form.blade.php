@@ -53,3 +53,34 @@
     <button type="reset" class="btn btn-danger">Clear</button>
     <button type="submit" class="btn btn-success">Submit</button>
 </div>
+
+@push('script')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const description = document.getElementById('job_description');
+
+    if (!description || typeof CKEDITOR === 'undefined') {
+        return;
+    }
+
+    CKEDITOR.ClassicEditor.create(description, {
+        toolbar: {
+            items: [
+                'heading', '|', 'bold', 'italic', 'underline', 'link', '|',
+                'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|',
+                'blockQuote', 'insertTable', '|', 'undo', 'redo'
+            ],
+            shouldNotGroupWhenFull: true
+        },
+        removePlugins: [
+            'CKBox', 'CKFinder', 'EasyImage', 'RealTimeCollaborativeComments',
+            'RealTimeCollaborativeTrackChanges', 'RealTimeCollaborativeRevisionHistory',
+            'PresenceList', 'Comments', 'TrackChanges', 'TrackChangesData',
+            'RevisionHistory', 'Pagination', 'WProofreader', 'MathType'
+        ]
+    }).catch(function (error) {
+        console.error('Unable to initialize the job description editor.', error);
+    });
+});
+</script>
+@endpush

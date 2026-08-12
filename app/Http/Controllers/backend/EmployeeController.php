@@ -3,14 +3,30 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\Employee;
-use Illuminate\Http\Request;
-use Yajra\DataTables\Facades\DataTables;
+use App\Models\Mode;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Yajra\DataTables\Facades\DataTables;
 
 class EmployeeController extends Controller
 {
     use AuthorizesRequests;
+
+    private const DOCUMENT_FIELDS = [
+        'offer_letter',
+        'intent_letter',
+        'pan_card_file',
+        'aadhaar_file',
+        'twelfth_marksheet',
+        'tenth_marksheet',
+        'degree_certificate',
+    ];
+
     public function index(Request $request)
     {
         $this->authorize('read', Employee::class);
@@ -24,8 +40,12 @@ class EmployeeController extends Controller
                 ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
-                    if (auth()->user()->can('edit', Employee::class)) $buttons .= '<a href="'.route('admin.employees.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
-                    if (auth()->user()->can('delete', Employee::class)) $buttons .= '<button type="button" data-route="'.route('admin.employees.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
+                    if (auth()->user()->can('edit', Employee::class)) {
+                        $buttons .= '<a href="'.route('admin.employees.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
+                    }
+                    if (auth()->user()->can('delete', Employee::class)) {
+                        $buttons .= '<button type="button" data-route="'.route('admin.employees.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
+                    }
 
                     return $buttons ?: '-';
                 })
@@ -39,23 +59,27 @@ class EmployeeController extends Controller
     public function create()
     {
         $this->authorize('create', Employee::class);
-        return view('backend.employees.create');
+
+        return view('backend.employees.create', $this->formOptions());
     }
 
     public function store(Request $request)
     {
         $this->authorize('create', Employee::class);
-         $data = $this->validatedData($request);
+        $data = $this->validatedData($request);
 
         if ($request->hasFile('employee_image')) {
 
             $image = $request->file('employee_image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $imageName = Str::uuid().'.'.$image->getClientOriginalExtension();
 
+            File::ensureDirectoryExists(public_path('uploads/employees'));
             $image->move(public_path('uploads/employees'), $imageName);
 
             $data['employee_image'] = $imageName;
         }
+
+        $this->storeDocuments($request, $data);
 
         Employee::create($data);
 
@@ -67,7 +91,7 @@ class EmployeeController extends Controller
         $this->authorize('edit', Employee::class);
         $employee = Employee::findOrFail($id);
 
-        return view('backend.employees.edit', compact('employee'));
+        return view('backend.employees.edit', array_merge(compact('employee'), $this->formOptions()));
     }
 
     public function update(Request $request, $id)
@@ -78,17 +102,20 @@ class EmployeeController extends Controller
 
         if ($request->hasFile('employee_image')) {
 
-        if ($employee->employee_image && file_exists(public_path('uploads/employees/' . $employee->employee_image))) {
-                unlink(public_path('uploads/employees/' . $employee->employee_image));
+            if ($employee->employee_image && file_exists(public_path('uploads/employees/'.$employee->employee_image))) {
+                unlink(public_path('uploads/employees/'.$employee->employee_image));
             }
 
             $image = $request->file('employee_image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $imageName = Str::uuid().'.'.$image->getClientOriginalExtension();
 
+            File::ensureDirectoryExists(public_path('uploads/employees'));
             $image->move(public_path('uploads/employees'), $imageName);
 
             $data['employee_image'] = $imageName;
         }
+
+        $this->storeDocuments($request, $data, $employee);
 
         $employee->update($data);
 
@@ -98,14 +125,19 @@ class EmployeeController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete', Employee::class);
-        Employee::findOrFail($id)->delete();
+        $employee = Employee::findOrFail($id);
+        $this->deleteEmployeeFiles($employee);
+        $employee->delete();
 
         return response()->json(['status' => true, 'message' => 'Employee deleted successfully.']);
     }
 
     private function validatedData(Request $request): array
     {
-        return $request->validate([
+        $selectedMode = $request->filled('mode_id') ? Mode::find($request->integer('mode_id')) : null;
+        $requiresContractDates = in_array(strtolower(trim($selectedMode?->mode ?? '')), ['contract', 'c2h'], true);
+
+        $data = $request->validate([
             // Personal Information
             'employee_name' => 'required|string|max:255',
             'employee_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
@@ -119,6 +151,12 @@ class EmployeeController extends Controller
             'employee_no' => 'nullable|string|max:255',
             'designation' => 'nullable|string|max:255',
             'date_of_joining' => 'nullable|date',
+            'client_id' => 'nullable|integer|exists:clients,id',
+            'mode_id' => 'nullable|integer|exists:modes,id',
+            'contract_from_date' => [Rule::requiredIf($requiresContractDates), 'nullable', 'date'],
+            'contract_to_date' => [Rule::requiredIf($requiresContractDates), 'nullable', 'date', 'after_or_equal:contract_from_date'],
+            'offer_letter' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'intent_letter' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'employee_uan_pf_number' => 'nullable|string|max:50',
             'employee_esi_number' => 'nullable|string|max:50',
 
@@ -144,6 +182,11 @@ class EmployeeController extends Controller
             'aadhaar_card_number' => 'nullable|digits:12',
             'passport_number' => 'nullable|string|max:20',
             'passport_validity_date' => 'nullable|date',
+            'pan_card_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'aadhaar_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'twelfth_marksheet' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'tenth_marksheet' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'degree_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
 
             // Family Information
             'fathers_name' => 'nullable|string|max:255',
@@ -170,6 +213,57 @@ class EmployeeController extends Controller
             // Additional Information
             'passion' => 'nullable|string|max:1000',
             'awards_appreciation' => 'nullable|string|max:1000',
+            'status' => 'required|boolean',
         ]);
+
+        if (! $requiresContractDates) {
+            $data['contract_from_date'] = null;
+            $data['contract_to_date'] = null;
+        }
+
+        return $data;
+    }
+
+    private function formOptions(): array
+    {
+        return [
+            'clients' => Client::orderByDesc('status')->orderBy('client')->get(['id', 'client', 'status']),
+            'modes' => Mode::orderByDesc('status')->orderBy('mode')->get(['id', 'mode', 'status']),
+        ];
+    }
+
+    private function storeDocuments(Request $request, array &$data, ?Employee $employee = null): void
+    {
+        File::ensureDirectoryExists(public_path('uploads/employees/documents'));
+
+        foreach (self::DOCUMENT_FIELDS as $field) {
+            if (! $request->hasFile($field)) {
+                unset($data[$field]);
+
+                continue;
+            }
+
+            if ($employee?->{$field}) {
+                File::delete(public_path('uploads/employees/documents/'.$employee->{$field}));
+            }
+
+            $file = $request->file($field);
+            $fileName = Str::uuid().'.'.$file->getClientOriginalExtension();
+            $file->move(public_path('uploads/employees/documents'), $fileName);
+            $data[$field] = $fileName;
+        }
+    }
+
+    private function deleteEmployeeFiles(Employee $employee): void
+    {
+        if ($employee->employee_image) {
+            File::delete(public_path('uploads/employees/'.$employee->employee_image));
+        }
+
+        foreach (self::DOCUMENT_FIELDS as $field) {
+            if ($employee->{$field}) {
+                File::delete(public_path('uploads/employees/documents/'.$employee->{$field}));
+            }
+        }
     }
 }

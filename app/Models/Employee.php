@@ -20,6 +20,17 @@ class Employee extends Model
         'employee_no',
         'designation',
         'date_of_joining',
+        'client_id',
+        'mode_id',
+        'contract_from_date',
+        'contract_to_date',
+        'offer_letter',
+        'intent_letter',
+        'pan_card_file',
+        'aadhaar_file',
+        'twelfth_marksheet',
+        'tenth_marksheet',
+        'degree_certificate',
         'employee_uan_pf_number',
         'employee_esi_number',
         'mobile_number',
@@ -55,11 +66,23 @@ class Employee extends Model
         'any_health_issue',
         'passion',
         'awards_appreciation',
-        'status'
+        'status',
     ];
 
     protected $casts = [
         'status' => 'boolean',
         'date_of_joining' => 'date',
+        'contract_from_date' => 'date',
+        'contract_to_date' => 'date',
     ];
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function mode()
+    {
+        return $this->belongsTo(Mode::class);
+    }
 }

@@ -346,13 +346,20 @@ class ClientRequirementController extends Controller
         return [
             'clients' => Client::where('status', true)->orderBy('client')->get(),
             'billings' => Billing::where('status', true)->orderBy('value')->get(),
-            'jobDescriptions' => ClientJobRole::where('status', true)->orderBy('job_description')->get(),
             'modes' => Mode::where('status', true)->orderBy('mode')->get(),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
             'clientJobRoleMap' => ClientJobRole::where('status', true)
-                ->get(['client_id', 'job_role_id'])
+                ->get(['id', 'client_id', 'job_role_id', 'job_description'])
                 ->groupBy('client_id')
                 ->map(fn ($rows) => $rows->pluck('job_role_id')->unique()->values()),
+            'jobDescriptionMap' => ClientJobRole::where('status', true)
+                ->get(['id', 'client_id', 'job_role_id', 'job_description'])
+                ->mapWithKeys(fn ($item) => [
+                    $item->client_id.':'.$item->job_role_id => [
+                        'id' => $item->id,
+                        'description' => $item->job_description,
+                    ],
+                ]),
             'recruiters' => Recruiter::where('status', true)->orderBy('recruiter_name')->get(),
             'locations' => Location::where('status', true)->orderBy('location')->get(),
         ];
@@ -387,14 +394,22 @@ class ClientRequirementController extends Controller
         $data['location_ids'] = array_values(array_unique(array_map('intval', $data['location_ids'] ?? [])));
         $data['project_owner_ids'] = array_values(array_unique(array_map('intval', $data['project_owner_ids'] ?? [])));
 
-        if ($data['job_role_id'] && ! ClientJobRole::where('client_id', $data['client_id'])
-            ->where('job_role_id', $data['job_role_id'])
-            ->where('status', true)
-            ->exists()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'job_role_id' => 'The selected job role is not assigned to this client.',
-            ]);
+        $clientJobRole = null;
+        if ($data['job_role_id'] ?? null) {
+            $clientJobRole = ClientJobRole::where('client_id', $data['client_id'])
+                ->where('job_role_id', $data['job_role_id'])
+                ->where('status', true)
+                ->first();
+
+            if (! $clientJobRole) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'job_role_id' => 'The selected job role is not assigned to this client.',
+                ]);
+            }
         }
+
+        // The JD always comes from the selected Client Job Role.
+        $data['job_description_id'] = $clientJobRole?->id;
 
         // Keep the original columns populated for backward compatibility with reports/imports.
         $data['mode_id'] = $data['mode_ids'][0] ?? null;

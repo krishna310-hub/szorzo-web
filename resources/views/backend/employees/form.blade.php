@@ -129,6 +129,55 @@
         @enderror
     </div>
     <div class="col-md-4 mt-3">
+        <label for="client_id" class="form-label">Client</label>
+        <select class="form-select" id="client_id" name="client_id">
+            <option value="">Select Client</option>
+            @foreach($clients as $client)
+                <option value="{{ $client->id }}" {{ (string) old('client_id', $employee->client_id ?? '') === (string) $client->id ? 'selected' : '' }}>
+                    {{ $client->client }}{{ $client->status ? '' : ' (Inactive)' }}
+                </option>
+            @endforeach
+        </select>
+        @error('client_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 mt-3">
+        <label for="mode_id" class="form-label">Mode</label>
+        <select class="form-select" id="mode_id" name="mode_id">
+            <option value="" data-requires-contract-dates="0">Select Mode</option>
+            @foreach($modes as $mode)
+                @php($requiresContractDates = in_array(strtolower(trim($mode->mode)), ['contract', 'c2h'], true))
+                <option value="{{ $mode->id }}" data-requires-contract-dates="{{ $requiresContractDates ? '1' : '0' }}"
+                    {{ (string) old('mode_id', $employee->mode_id ?? '') === (string) $mode->id ? 'selected' : '' }}>
+                    {{ $mode->mode }}{{ $mode->status ? '' : ' (Inactive)' }}
+                </option>
+            @endforeach
+        </select>
+        @error('mode_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 mt-3 contract-date-field">
+        <label for="contract_from_date" class="form-label">From Date <span class="text-danger">*</span></label>
+        <input type="date" class="form-control" id="contract_from_date" name="contract_from_date"
+            value="{{ old('contract_from_date', isset($employee) && $employee->contract_from_date ? $employee->contract_from_date->format('Y-m-d') : '') }}">
+        @error('contract_from_date')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 mt-3 contract-date-field">
+        <label for="contract_to_date" class="form-label">To Date <span class="text-danger">*</span></label>
+        <input type="date" class="form-control" id="contract_to_date" name="contract_to_date"
+            value="{{ old('contract_to_date', isset($employee) && $employee->contract_to_date ? $employee->contract_to_date->format('Y-m-d') : '') }}">
+        @error('contract_to_date')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    @foreach(['offer_letter' => 'Offer Letter', 'intent_letter' => 'Intent Letter'] as $field => $label)
+        <div class="col-md-4 mt-3">
+            <label for="{{ $field }}" class="form-label">{{ $label }}
+                @if(!empty($employee->{$field}))
+                    <a href="{{ asset('uploads/employees/documents/'.$employee->{$field}) }}" target="_blank" class="ms-2">View</a>
+                @endif
+            </label>
+            <input type="file" class="form-control" id="{{ $field }}" name="{{ $field }}" accept=".pdf,.jpg,.jpeg,.png">
+            @error($field)<span class="text-danger small">{{ $message }}</span>@enderror
+        </div>
+    @endforeach
+    <div class="col-md-4 mt-3">
         <label for="employee_uan_pf_number" class="form-label">UAN / PF Number</label>
         <input type="text" class="form-control" id="employee_uan_pf_number" name="employee_uan_pf_number" placeholder="Enter UAN/PF number"
             value="{{ old('employee_uan_pf_number', $employee->employee_uan_pf_number ?? '') }}">
@@ -273,6 +322,27 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    <div class="col-12 mt-5">
+        <h4 class="mt-4 mb-3 text-primary">Documents</h4>
+        <p class="text-muted mb-3">Accepted formats: PDF, JPG, JPEG, PNG (maximum 5 MB each).</p>
+    </div>
+    @foreach([
+        'pan_card_file' => 'PAN Card File',
+        'aadhaar_file' => 'Aadhaar File',
+        'twelfth_marksheet' => '12th Marksheet',
+        'tenth_marksheet' => '10th Marksheet',
+        'degree_certificate' => 'Degree Certificate',
+    ] as $field => $label)
+        <div class="col-md-4 {{ $loop->index >= 3 ? 'mt-3' : '' }}">
+            <label for="{{ $field }}" class="form-label">{{ $label }}
+                @if(!empty($employee->{$field}))
+                    <a href="{{ asset('uploads/employees/documents/'.$employee->{$field}) }}" target="_blank" class="ms-2">View</a>
+                @endif
+            </label>
+            <input type="file" class="form-control" id="{{ $field }}" name="{{ $field }}" accept=".pdf,.jpg,.jpeg,.png">
+            @error($field)<span class="text-danger small">{{ $message }}</span>@enderror
+        </div>
+    @endforeach
     <div class="col-12 mt-5">
         <h4 class="mt-4 mb-3 text-primary">Family Information</h4>
     </div>
@@ -440,6 +510,24 @@
         @error('status')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
 </div>
+@push('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mode = document.getElementById('mode_id');
+        const dateFields = document.querySelectorAll('.contract-date-field');
+        const dateInputs = [document.getElementById('contract_from_date'), document.getElementById('contract_to_date')];
+
+        function toggleContractDates() {
+            const requiresDates = mode.options[mode.selectedIndex]?.dataset.requiresContractDates === '1';
+            dateFields.forEach(field => field.classList.toggle('d-none', !requiresDates));
+            dateInputs.forEach(input => input.required = requiresDates);
+        }
+
+        mode.addEventListener('change', toggleContractDates);
+        toggleContractDates();
+    });
+</script>
+@endpush
 <div class="d-flex gap-3 mt-5 justify-content-center">
     <button type="reset" class="btn btn-danger">Clear</button>
     <button type="submit" class="btn btn-success">Submit</button>

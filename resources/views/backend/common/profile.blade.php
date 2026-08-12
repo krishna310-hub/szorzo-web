@@ -10,13 +10,11 @@
                 <div class="position-relative mx-n4 mt-n4">
                     <div class="profile-wid-bg profile-setting-img">
                         <img src="{{ Auth::user()->cover_picture ? asset(Auth::user()->cover_picture) : asset('admin/images/profile-bg.jpg') }}" class="profile-wid-img" alt="Cover image">
-                        @can('profileEdit', \App\Models\General::class)
-                            <div class="overlay-content"><div class="text-end p-3">
-                                <label class="btn btn-light mb-0"><i class="ri-image-edit-line me-1"></i> Cover Image
-                                    <input type="file" name="cover_image" class="d-none" accept="image/jpeg,image/png,image/webp">
-                                </label>
-                            </div></div>
-                        @endcan
+                        <div class="overlay-content"><div class="text-end p-3">
+                            <label class="btn btn-light mb-0"><i class="ri-image-edit-line me-1"></i> Banner Image
+                                <input type="file" name="cover_image" class="d-none" accept="image/jpeg,image/png,image/webp">
+                            </label>
+                        </div></div>
                     </div>
                 </div>
 
@@ -34,9 +32,7 @@
                             </div>
                             <h5 class="fs-16 mb-1">{{ $employee?->employee_name ?? Auth::user()->name }}</h5>
                             <p class="text-muted mb-3">{{ $employee?->designation ?? Auth::user()->role?->name }}</p>
-                            @can('profileEdit', \App\Models\General::class)
-                                <button type="submit" class="btn btn-success btn-sm">Update Images</button>
-                            @endcan
+                            <button type="submit" class="btn btn-success btn-sm">Update Images</button>
                             @error('profile_image')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
                             @error('cover_image')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
                         </div></div>

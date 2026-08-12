@@ -10,7 +10,9 @@
     <meta content="Themesbrand" name="author" /> --}}
     <!-- App favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('frontend/images/favicon.png') }}">
-    <link rel="stylesheet" href="{{ asset('frontend/css/remixicon.css') }}">
+    <link rel="preload" href="{{ asset('admin/fonts/remixiconca45.woff2') }}?t=1701175860820" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ asset('admin/fonts/boxicons.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ asset('admin/fonts/materialdesignicons-webfont9445.woff2') }}?v=7.2.96" as="font" type="font/woff2" crossorigin>
 
     @include('backend.layouts.css_master')
 

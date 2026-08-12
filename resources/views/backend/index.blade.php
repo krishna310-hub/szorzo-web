@@ -481,7 +481,7 @@
 
         .individual-target-summary-value.percentage-blue {
             color: #2563eb;
-        }
+        }   
 
         .individual-target-summary-value.percentage-red {
             color: #dc2626;
