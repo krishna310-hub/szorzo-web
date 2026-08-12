@@ -128,7 +128,7 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 mt-3">
         <label for="employee_uan_pf_number" class="form-label">UAN / PF Number</label>
         <input type="text" class="form-control" id="employee_uan_pf_number" name="employee_uan_pf_number" placeholder="Enter UAN/PF number"
             value="{{ old('employee_uan_pf_number', $employee->employee_uan_pf_number ?? '') }}">
