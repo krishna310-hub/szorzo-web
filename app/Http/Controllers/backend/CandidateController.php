@@ -75,7 +75,7 @@ class CandidateController extends Controller
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
-                ->editColumn('created_at', fn ($row) => $row->created_at?->format('Y-m-d H:i:s') ?? '-')
+                ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
 
                 ->editColumn('take_home', fn ($row) => $row->take_home !== null ? number_format((float) $row->take_home, 2) : '-')
                 ->editColumn('variable', fn ($row) => $row->variable !== null ? number_format((float) $row->variable, 2) : '-')

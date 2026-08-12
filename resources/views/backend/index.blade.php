@@ -608,6 +608,122 @@
                 grid-row: 3;
             }
         }
+
+        /* birthday reminder */
+        .birthday-reminder-card {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 22px;
+            background: linear-gradient(135deg, #fff7ed, #fff1f2);
+            border: 1px solid #fed7aa;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .birthday-icon {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #f97316;
+            border-radius: 12px;
+            font-size: 28px;
+            box-shadow: 0 3px 10px rgba(249, 115, 22, 0.15);
+        }
+
+        .birthday-content {
+            flex: 1;
+        }
+
+        .birthday-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #9a3412;
+        }
+
+        .birthday-emoji {
+            font-size: 18px;
+        }
+
+        .birthday-message {
+            margin-top: 4px;
+            color: #57534e;
+            font-size: 14px;
+        }
+
+        .birthday-message strong {
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        .birthday-decoration {
+            position: absolute;
+            right: 20px;
+            bottom: -8px;
+            font-size: 48px;
+            opacity: 0.15;
+            transform: rotate(-10deg);
+        }
+
+        /* birthday welcome */
+        .birthday-welcome {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 22px 26px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            overflow: hidden;
+        }
+
+        .birthday-welcome-icon {
+            width: 58px;
+            height: 58px;
+            min-width: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.18);
+            font-size: 30px;
+        }
+
+        .birthday-welcome-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .birthday-welcome-title {
+            font-size: 25px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .birthday-welcome-message {
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .birthday-confetti {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 65px;
+            opacity: 0.15;
+        }
     </style>
 
     <div class="main-content dashboard-shell">
@@ -617,8 +733,55 @@
                     <div class="position-relative" style="z-index:1">
                         <div class="scope-pill mb-3"><i class="ri-shield-user-line"></i>{{ $scopeLabel }}</div>
                         <h2 class="fw-bold text-white mb-2">Welcome back, {{ auth()->user()->name }}</h2>
-                        <p class="mb-0 text-white-50">A live view of requirements, applicants and interviews available to
-                            your role.</p>
+
+                        @if (auth()->user()->role_id == 1 && $birthdayEmployees->isNotEmpty())
+                            <div class="birthday-reminder-card mb-4">
+                                <div class="birthday-icon">
+                                    <i class="ri-cake-2-line"></i>
+                                </div>
+
+                                <div class="birthday-content">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="birthday-title">Birthday Reminder</span>
+                                        <span class="birthday-emoji">🎉</span>
+                                    </div>
+
+                                    @foreach ($birthdayEmployees as $birthdayEmployee)
+                                        <div class="birthday-message">
+                                            Today is
+                                            <strong>{{ $birthdayEmployee->employee_name }}</strong>'s birthday!
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <div class="birthday-decoration">🎂</div>
+                            </div>
+                        @endif
+
+                        @if ($birthdayEmployee && auth()->user()->role_id != 1)
+                            <div class="birthday-welcome">
+                                <div class="birthday-welcome-icon">
+                                    🎂
+                                </div>
+
+                                <div class="birthday-welcome-content">
+                                    <div class="birthday-welcome-title">
+                                        🎉 Happy Birthday!
+                                    </div>
+
+                                    <div class="birthday-welcome-message">
+                                        Wishing you a wonderful birthday filled with happiness, success,
+                                        and a fantastic year ahead! ✨
+                                    </div>
+                                </div>
+
+                                <div class="birthday-confetti">🎈</div>
+                            </div>
+                        @else
+                            <p class="mb-0 text-white-50">
+                                A live view of requirements, applicants and interviews available to your role.
+                            </p>
+                        @endif
                     </div>
                 </div>
 

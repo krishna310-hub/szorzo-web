@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\ClientRequirement;
+use App\Models\Employee;
 use App\Models\General;
 use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
@@ -20,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -27,6 +29,34 @@ class AdminController extends Controller
     public function index(Request $request)
     {
         $this->authorize('dashboard', General::class);
+
+        $today = Carbon::today();
+        $user = Auth::user();
+        $employee = \App\Models\Employee::query()
+            ->where(function ($query) use ($user) {
+                $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($user->email)])
+                    ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($user->email)]);
+            })->first();
+
+        $birthdayEmployee = null;
+        if ($employee && $employee->dob) {
+            $dob = Carbon::parse($employee->dob);
+            if (
+                $dob->month === $today->month &&
+                $dob->day === $today->day
+            ) {
+                $birthdayEmployee = $employee;
+            }
+        }
+
+        $birthdayEmployees = collect();
+        if ($user->role_id == 1) {
+            $birthdayEmployees = \App\Models\Employee::query()
+                ->whereNotNull('dob')
+                ->whereMonth('dob', $today->month)
+                ->whereDay('dob', $today->day)
+                ->get();
+        }
 
         $toDateRules = ['nullable', 'date_format:Y-m-d'];
         if ($request->filled('dashboard_from_date')) {
@@ -352,6 +382,9 @@ class AdminController extends Controller
                 ->where('schedule_date', '>=', now())->orderBy('schedule_date')->limit(6)->get(),
             'groupedLevels' => $groupedLevels,
             'maxLevel' => $maxLevel,
+            'birthdayEmployee' => $birthdayEmployee,
+            'employee' => $employee,
+            'birthdayEmployees' => $birthdayEmployees,
         ]);
     }
 

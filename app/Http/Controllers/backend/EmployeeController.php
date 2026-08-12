@@ -15,7 +15,7 @@ class EmployeeController extends Controller
     {
         $this->authorize('read', Employee::class);
         if ($request->ajax()) {
-            return DataTables::of(Employee::latest())
+            return DataTables::of(Employee::orderBy('employee_no', 'asc')->get())
                 ->addIndexColumn()
                 ->editColumn('date_of_joining', fn ($row) => $row->date_of_joining?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
