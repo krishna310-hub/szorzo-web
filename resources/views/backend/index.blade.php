@@ -481,7 +481,7 @@
 
         .individual-target-summary-value.percentage-blue {
             color: #2563eb;
-        }   
+        }
 
         .individual-target-summary-value.percentage-red {
             color: #dc2626;
@@ -1107,7 +1107,7 @@
                             @endforeach
                         </div>
 
-                        @if ($isSuperAdminDashboard || $isDeliveryLeadDashboard)
+                        {{-- @if ($isSuperAdminDashboard || $isDeliveryLeadDashboard)
                             <div class="mt-4 pt-4 border-top">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                     <div>
@@ -1166,7 +1166,7 @@
                                         preview</div>
                                 @endforelse
                             </div>
-                        @endif
+                        @endif --}}
                     </div>
                 </div>
 
