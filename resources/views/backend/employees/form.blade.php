@@ -145,7 +145,9 @@
         <select class="form-select" id="mode_id" name="mode_id">
             <option value="" data-requires-contract-dates="0">Select Mode</option>
             @foreach($modes as $mode)
-                @php($requiresContractDates = in_array(strtolower(trim($mode->mode)), ['contract', 'c2h'], true))
+                @php
+                    $requiresContractDates = in_array(strtolower(trim($mode->mode)), ['contract', 'c2h'], true);
+                @endphp
                 <option value="{{ $mode->id }}" data-requires-contract-dates="{{ $requiresContractDates ? '1' : '0' }}"
                     {{ (string) old('mode_id', $employee->mode_id ?? '') === (string) $mode->id ? 'selected' : '' }}>
                     {{ $mode->mode }}{{ $mode->status ? '' : ' (Inactive)' }}
