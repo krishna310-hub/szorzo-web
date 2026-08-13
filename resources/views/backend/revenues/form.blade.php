@@ -8,14 +8,14 @@
             @foreach($candidates as $candidate)
                 <option value="{{ $candidate->id }}"
                     data-client="{{ $candidate->client?->client }}"
-                    data-ctc="{{ $candidate->expected_ctc }}"
+                    data-ctc="{{ $candidate->onboarding_ctc }}"
                     data-billing="{{ $candidate->client?->billing?->value }}"
                     {{ old('candidate_id') == $candidate->id ? 'selected' : '' }}>
                     {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }}
                 </option>
             @endforeach
         </select>
-        <small class="text-muted">Only candidates at interview level ID 30 are listed.</small>
+        <small class="text-muted">Only onboarded candidates with an Onboarding CTC are listed.</small>
     </div>
     @else
         <input type="hidden" name="candidate_id" value="{{ $revenue->candidate_id }}">
@@ -27,7 +27,7 @@
     <div class="col-md-3 mb-3"><label class="form-label">SZ Universe Number</label><input name="universe_number" class="form-control" value="{{ old('universe_number', $revenue->universe_number ?? '786') }}"></div>
     <div class="col-md-8 mb-3"><label class="form-label">Client Address</label><textarea name="client_address" class="form-control" rows="3">{{ old('client_address', $revenue->client_address ?? '') }}</textarea></div>
     <div class="col-md-4 mb-3"><label class="form-label">Client GST Number</label><input name="client_gst_number" class="form-control" value="{{ old('client_gst_number', $revenue->client_gst_number ?? '') }}"></div>
-    <div class="col-md-4 mb-3"><label class="form-label">Offered CTC (₹) <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" name="offered_ctc" id="offered_ctc" class="form-control calc" required value="{{ old('offered_ctc', $revenue->offered_ctc ?? '') }}"></div>
+    <div class="col-md-4 mb-3"><label class="form-label">Onboarding CTC (₹)</label><input type="number" step="0.01" min="0" name="onboarding_ctc" id="onboarding_ctc" class="form-control" readonly value="{{ old('onboarding_ctc', $revenue->onboarding_ctc ?? '') }}"><small class="text-muted">Taken from the selected candidate.</small></div>
     <div class="col-md-4 mb-3"><label class="form-label">Billing Percentage <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" max="100" name="billing_percentage" id="billing_percentage" class="form-control calc" required value="{{ old('billing_percentage', $revenue->billing_percentage ?? '') }}"></div>
     <div class="col-md-4 mb-3"><label class="form-label">GST Percentage <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" max="100" name="gst_percentage" id="gst_percentage" class="form-control calc" required value="{{ old('gst_percentage', $revenue->gst_percentage ?? 18) }}"></div>
     <div class="col-md-4 mb-3"><label class="form-label">Invoice Amount (₹) <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" name="service_amount" id="service_amount" class="form-control" required value="{{ old('service_amount', $revenue->service_amount ?? '') }}"><small class="text-muted">Editable; initially calculated from CTC and billing %.</small></div>
@@ -40,7 +40,7 @@
 @push('script')
 <script>
 function calculateRevenue() {
-    const ctc = Number($('#offered_ctc').val() || 0), billing = Number($('#billing_percentage').val() || 0), gstRate = Number($('#gst_percentage').val() || 0);
+    const gstRate = Number($('#gst_percentage').val() || 0);
     const revenue = Number($('#service_amount').val() || 0), gst = revenue * gstRate / 100;
     $('#gst_preview').val('₹' + gst.toFixed(2));
     $('#total_preview').val('₹' + (revenue + gst).toFixed(2));
@@ -49,14 +49,14 @@ $(function () {
     $('#candidate_id').on('change', function () {
         const option = this.options[this.selectedIndex];
         $('#client_name').val(option.dataset.client || '');
-        $('#offered_ctc').val(option.dataset.ctc || '');
+        $('#onboarding_ctc').val(option.dataset.ctc || '');
         $('#billing_percentage').val(option.dataset.billing || '');
         $('#service_amount').val((Number(option.dataset.ctc || 0) * Number(option.dataset.billing || 0) / 100).toFixed(2));
         calculateRevenue();
     });
     $('.calc, #service_amount').on('input', function () {
-        if (this.id === 'offered_ctc' || this.id === 'billing_percentage') {
-            $('#service_amount').val((Number($('#offered_ctc').val() || 0) * Number($('#billing_percentage').val() || 0) / 100).toFixed(2));
+        if (this.id === 'billing_percentage') {
+            $('#service_amount').val((Number($('#onboarding_ctc').val() || 0) * Number($('#billing_percentage').val() || 0) / 100).toFixed(2));
         }
         calculateRevenue();
     });

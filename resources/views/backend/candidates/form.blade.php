@@ -127,6 +127,13 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    <div class="col-md-4"><label for="onboarding_ctc" class="form-label">Onboarding CTC <span class="text-danger">*</span></label><input type="number"
+            step="0.01" min="0" class="form-control" id="onboarding_ctc" name="onboarding_ctc"
+            value="{{ old('onboarding_ctc', isset($candidate) ? (int) $candidate->onboarding_ctc : '') }}">
+        @error('onboarding_ctc')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
     <div class="col-md-4"><label for="notice_period" class="form-label">Notice Period <span class="text-danger">*</span></label><input
             class="form-control" id="notice_period" name="notice_period"
             value="{{ old('notice_period', $candidate->notice_period ?? '') }}">

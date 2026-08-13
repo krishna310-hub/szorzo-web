@@ -294,6 +294,7 @@
                 @if (auth()->user()->can('read', \App\Models\Client::class) ||
                         auth()->user()->can('read', \App\Models\ClientJobRole::class) ||
                         auth()->user()->can('read', \App\Models\Recruiter::class) ||
+                        auth()->user()->can('read', \App\Models\ProfileSourced::class) ||
                         auth()->user()->can('read', \App\Models\JobRole::class) ||
                         auth()->user()->can('read', \App\Models\Mode::class) ||
                         auth()->user()->can('read', \App\Models\Employee::class) ||
@@ -339,6 +340,13 @@
                                         <a href="{{ route('admin.recruiters.index') }}"
                                             class="nav-link {{ request()->is('admin/masters/recruiters*') ? 'active' : '' }}">
                                             Recruiters </a>
+                                    </li>
+                                @endcan
+                                @can('read', \App\Models\ProfileSourced::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.profile-sourced.index') }}"
+                                            class="nav-link {{ request()->is('admin/masters/profile-sourced*') ? 'active' : '' }}">
+                                            Profile Sourced </a>
                                     </li>
                                 @endcan
                                 @can('read', \App\Models\JobRole::class)

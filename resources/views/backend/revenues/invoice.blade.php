@@ -1,10 +1,10 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><title>{{ $revenue->invoice_number }}</title>
 <style>
-@page{size:A4 portrait;margin:18px 26px}*{box-sizing:border-box}body{font-family:DejaVu Sans,Arial,sans-serif;color:#000;font-size:10.5px;margin:0}
-.sheet{width:100%;margin:auto;background:#fff}.header{text-align:center;border-bottom:1px solid #555;padding-bottom:8px}
-.brand{font-size:20px;font-weight:bold;letter-spacing:.2px;white-space:nowrap}.brand img{width:72px;vertical-align:middle;margin-right:8px}.brand span{color:#ed1c2b;letter-spacing:5px}.tag{font-size:10px;color:#c51f26;font-weight:bold;margin:2px 0}
-.address{line-height:1.35}.title{text-align:center;font-size:17px;font-weight:bold;text-decoration:underline;margin:10px 0}
+@page{size:A4 portrait;margin:16px 22px}*{box-sizing:border-box}body{font-family:DejaVu Sans,Arial,sans-serif;color:#000;font-size:10.5px;margin:0}
+.sheet{width:100%;margin:auto;background:#fff;border:4px double #111;padding:14px 14px 18px}.header{padding:0 6px 10px}
+.invoice-header{border:0}.invoice-header td{border:0;padding:0;vertical-align:middle}.company-heading{color:#ed1c24;font-size:14px;font-weight:bold;line-height:1.25}.tag{color:#ed1c24;font-size:12px;font-weight:bold;line-height:1.25}
+.address{font-size:10.5px;line-height:1.35;padding-bottom:12px;border-bottom:1px solid #222}.header-logo{text-align:center;width:35%;padding-left:18px!important}.rhino-logo{display:block;width:100px;height:auto;margin:0 auto 2px}.szorzo-logo{display:block;width:210px;height:auto;margin:0 auto}.title{text-align:center;font-size:25px;font-weight:bold;margin:5px 0 10px}
 table{width:100%;border-collapse:collapse}td,th{border:1px solid #555;padding:6px;vertical-align:top}.party td{width:50%;line-height:1.55}
 .details td:first-child{width:70%}.details td:last-child{width:30%;text-align:right}.details th{background:#eee;text-align:left}
 .amount{text-align:right!important}.words td:first-child{width:20%;font-weight:bold}.bank td:first-child{width:38%;font-weight:bold}
@@ -12,9 +12,17 @@ table{width:100%;border-collapse:collapse}td,th{border:1px solid #555;padding:6p
 .label{font-weight:bold}.candidate-lines{line-height:1.8;margin-top:5px}
 </style></head><body><div class="sheet">
     <div class="header">
-        <div class="brand"><img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('frontend/images/adminlogos.png'))) }}"><span>SZORZO</span> Technologies Private Limited</div>
-        <div class="tag">Let’s Build Together. Multiply Faster.</div>
-        <div class="address">No 81/1, 82/2, 1st Floor, Clayworks Shankara Campus,<br>Doddakallasandra, Kanakapura Road, Bangalore - 560062<br>Desk: +91 990 141 9393 | Email: business@szorzo.com<br>Social : www.szorzo.com</div>
+        <table class="invoice-header"><tr>
+            <td>
+                <div class="company-heading">SZORZO Technologies Private Limited</div>
+                <div class="tag">Let’s Build Together. Multiply Faster.</div>
+                <div class="address">No 81/1, 82/2, 1st Floor, Clayworks Shankara Campus,<br>Doddakallasandra, Kanakapura Road, Bangalore - 560062<br>Desk: +91 990 141 9393 | Email: <u>business@szorzo.com</u><br>Social : www.szorzo.com</div>
+            </td>
+            <td class="header-logo">
+                <img class="rhino-logo" src="data:image/webp;base64,{{ base64_encode(file_get_contents(public_path('frontend/images/rhino-logo.webp'))) }}" alt="Szorzo Rhino Logo">
+                <img class="szorzo-logo" src="data:image/webp;base64,{{ base64_encode(file_get_contents(public_path('frontend/images/logo-bg.webp'))) }}" alt="Szorzo Logo">
+            </td>
+        </tr></table>
     </div>
     <div class="title">TAX INVOICE</div>
     <table class="party"><tr>
@@ -28,7 +36,7 @@ table{width:100%;border-collapse:collapse}td,th{border:1px solid #555;padding:6p
     <table class="details"><thead><tr><th>DESCRIPTION</th><th>AMOUNT IN RUPEES</th></tr></thead><tbody>
         <tr><td><strong>Recruitment Service Charges</strong><div class="candidate-lines">
             Candidate Name : {{ $revenue->candidate->candidate_name }}<br>
-            Offered CTC : Rs {{ number_format((float)$revenue->offered_ctc, 2) }}/-<br>
+            Onboarding CTC : Rs {{ number_format((float)$revenue->onboarding_ctc, 2) }}/-<br>
             Date of Joining : {{ $revenue->candidate->onboarding_date?->format('d-m-Y') ?? '-' }}
         </div></td><td class="amount">{{ number_format((float)$revenue->service_amount, 2, '.', '') }}</td></tr>
         <tr><td><strong>GST @ {{ rtrim(rtrim(number_format((float)$revenue->gst_percentage, 2), '0'), '.') }}%</strong></td><td class="amount">{{ number_format((float)$revenue->gst_amount, 2, '.', '') }}</td></tr>

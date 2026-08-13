@@ -81,6 +81,7 @@ class CandidateController extends Controller
                 ->editColumn('variable', fn ($row) => $row->variable !== null ? number_format((float) $row->variable, 2) : '-')
                 ->editColumn('current_ctc', fn ($row) => $row->current_ctc !== null ? number_format((float) $row->current_ctc, 2) : '-')
                 ->editColumn('expected_ctc', fn ($row) => $row->expected_ctc !== null ? number_format((float) $row->expected_ctc, 2) : '-')
+                ->editColumn('onboarding_ctc', fn ($row) => $row->onboarding_ctc !== null ? number_format((float) $row->onboarding_ctc, 2) : '-')
                 ->addColumn('cv_preview', function ($row) {
                     if ($row->upload_cv) {
                         return '<a href="'.asset($row->upload_cv).'" target="_blank" class="btn btn-sm btn-outline-primary">View CV</a>';
@@ -253,6 +254,7 @@ class CandidateController extends Controller
                 $candidate->variable,
                 $candidate->current_ctc,
                 $candidate->expected_ctc,
+                $candidate->onboarding_ctc,
                 $candidate->notice_period,
                 $candidate->current_company,
                 $candidate->current_location,
@@ -281,7 +283,7 @@ class CandidateController extends Controller
             null, now()->format('Y-m-d'), $dropdowns['Recruiter'][0] ?? null,
             $dropdowns['Client'][0] ?? null, $dropdowns['Job Role'][0] ?? null, 'Example Candidate',
             '9876543210', 'candidate@example.com', 'B.Tech', 5, 3, 60000, 5000, 900000,
-            1100000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
+            1100000, 1050000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
             $dropdowns['Level Of Interview'][0] ?? null, now()->format('Y-m-d'), 'Active',
         ]], $dropdowns), 'candidates-import-template.xlsx');
     }
@@ -337,6 +339,7 @@ class CandidateController extends Controller
                 'variable' => $row['variable'] ?? null,
                 'current_ctc' => $row['current_ctc'] ?? null,
                 'expected_ctc' => $row['expected_ctc'] ?? null,
+                'onboarding_ctc' => $row['onboarding_ctc'] ?? null,
                 'notice_period' => MasterDataSpreadsheet::text($row['notice_period'] ?? null),
                 'current_company' => MasterDataSpreadsheet::text($row['current_company'] ?? null),
                 'current_location' => MasterDataSpreadsheet::text($row['current_location'] ?? null),
@@ -373,6 +376,7 @@ class CandidateController extends Controller
                 'variable' => 'nullable|numeric|min:0',
                 'current_ctc' => 'nullable|numeric|min:0',
                 'expected_ctc' => 'nullable|numeric|min:0',
+                'onboarding_ctc' => 'nullable|numeric|min:0',
                 'notice_period' => 'nullable|string|max:255',
                 'current_company' => 'nullable|string|max:255',
                 'current_location' => 'nullable|string|max:255',
@@ -536,6 +540,7 @@ class CandidateController extends Controller
             'variable' => 'nullable|numeric|min:0',
             'current_ctc' => 'required|integer|min:0',
             'expected_ctc' => 'required|integer|min:0',
+            'onboarding_ctc' => 'required|integer|min:0',
             'notice_period' => 'required|string|max:255',
             'current_company' => 'required|string|max:255',
             'current_location' => 'required|string|max:255',
@@ -549,6 +554,7 @@ class CandidateController extends Controller
             'email.unique' => 'This email address is already registered for another candidate.',
             'current_ctc.integer' => 'Current CTC must be entered as a whole amount (e.g. 650000).',
             'expected_ctc.integer' => 'Expected CTC must be entered as a whole amount (e.g. 800000).',
+            'onboarding_ctc.integer' => 'Onboarding CTC must be entered as a whole amount (e.g. 750000).',
         ]);
 
         if (! $this->visibleRecruiters()->whereKey($data['recruiter_id'])->exists()) {
@@ -597,6 +603,6 @@ class CandidateController extends Controller
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Created Date', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
+        return ['Record ID', 'Created Date', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Onboarding CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
     }
 }

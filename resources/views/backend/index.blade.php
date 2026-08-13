@@ -1258,6 +1258,18 @@
                         </div>
                     </div>
                 @endif
+                <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
+                    <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Chart Year</label>
+                    <select id="dashboardChartYear" class="form-select form-select-sm" style="width: 120px"
+                        data-url="{{ route('admin.dashboard.year-charts') }}"
+                        data-recruiter="{{ $selectedRecruiterId }}" data-client="{{ $selectedClientId }}">
+                        @for($year = now()->year + 1; $year >= now()->year - 9; $year--)
+                            <option value="{{ $year }}" {{ $year === $chartYear ? 'selected' : '' }}>{{ $year }}</option>
+                        @endfor
+                    </select>
+                    <span id="dashboardChartLoading" class="spinner-border spinner-border-sm text-primary d-none" role="status" aria-label="Loading"></span>
+                </div>
+                <div id="yearWiseDashboardCharts">
                 <div class="row g-4 mb-4">
                     @can('read', \App\Models\Candidate::class)
                         <div class="col-12">
@@ -1420,11 +1432,11 @@
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                     <div>
                                         <h5 class="section-title mb-1">Revenue Outcomes</h5>
-                                        <p class="text-muted small mb-0">Onboarded and joiner-declined revenue for the last seven months</p>
+                                        <p class="text-muted small mb-0">Onboarded and joiner-declined revenue for <span class="selected-chart-year">{{ $chartYear }}</span></p>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2">
-                                        <span class="badge bg-success-subtle text-success">Onboarded: &#8377;{{ number_format($onboardedRevenue, 2) }}</span>
-                                        <span class="badge bg-danger-subtle text-danger">Declined: &#8377;{{ number_format($declinedRevenue, 2) }}</span>
+                                        <span id="onboardedRevenueBadge" class="badge bg-success-subtle text-success">Onboarded: &#8377;{{ number_format($onboardedRevenue, 2) }}</span>
+                                        <span id="declinedRevenueBadge" class="badge bg-danger-subtle text-danger">Declined: &#8377;{{ number_format($declinedRevenue, 2) }}</span>
                                     </div>
                                 </div>
                                 <div id="monthlyRevenueBarChart" style="min-height: 300px;"></div>
@@ -1439,7 +1451,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div>
                                             <h5 class="section-title mb-1">Applicant Momentum</h5><span
-                                                class="text-muted small">New applicants over the last six months</span>
+                                                class="text-muted small">New applicants during <span class="selected-chart-year">{{ $chartYear }}</span></span>
                                         </div><span class="badge bg-danger-subtle text-danger">Live</span>
                                     </div>
                                     <div id="applicantChart" style="min-height:310px"></div>
@@ -1463,6 +1475,7 @@
                         </div> --}}
                     @endcan
                 </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1473,7 +1486,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             var target = document.querySelector('#applicantChart');
             if (!target || typeof ApexCharts === 'undefined') return;
-            new ApexCharts(target, {
+            window.dashboardApplicantChart = new ApexCharts(target, {
                 chart: {
                     type: 'area',
                     height: 310,
@@ -1534,7 +1547,8 @@
                         }
                     }
                 }
-            }).render();
+            });
+            window.dashboardApplicantChart.render();
         });
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -1545,7 +1559,7 @@
             function renderMonthlyOutcomeChart(target, positiveName, positiveData, negativeName, negativeData) {
                 if (!target) return;
 
-                new ApexCharts(target, {
+                var chart = new ApexCharts(target, {
                     chart: {
                         type: 'bar',
                         height: 250,
@@ -1610,17 +1624,19 @@
                         horizontalAlign: 'right'
                     },
                     noData: { text: 'No monthly data' }
-                }).render();
+                });
+                chart.render();
+                return chart;
             }
 
-            renderMonthlyOutcomeChart(
+            window.dashboardJoiningChart = renderMonthlyOutcomeChart(
                 joiningChartTarget,
                 'Offer Accepted',
                 @json($offerAcceptedChartTotals),
                 'Offer Declined',
                 @json($offerDeclinedChartTotals)
             );
-            renderMonthlyOutcomeChart(
+            window.dashboardOnboardingChart = renderMonthlyOutcomeChart(
                 onboardingChartTarget,
                 'Onboarded with Client',
                 @json($onboardedChartTotals),
@@ -1633,7 +1649,7 @@
             var revenueTarget = document.querySelector('#monthlyRevenueBarChart');
             if (!revenueTarget || typeof ApexCharts === 'undefined') return;
 
-            new ApexCharts(revenueTarget, {
+            window.dashboardRevenueChart = new ApexCharts(revenueTarget, {
                 chart: {
                     type: 'bar',
                     height: 300,
@@ -1691,7 +1707,82 @@
                     }
                 },
                 noData: { text: 'No revenue data' }
-            }).render();
+            });
+            window.dashboardRevenueChart.render();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var yearSelect = document.querySelector('#dashboardChartYear');
+            var loading = document.querySelector('#dashboardChartLoading');
+            if (!yearSelect) return;
+
+            var loadedYear = yearSelect.value;
+            var currency = new Intl.NumberFormat('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            yearSelect.addEventListener('change', async function() {
+                var requestedYear = yearSelect.value;
+                var url = new URL(yearSelect.dataset.url, window.location.origin);
+                url.searchParams.set('year', requestedYear);
+                if (yearSelect.dataset.recruiter) url.searchParams.set('recruiter_id', yearSelect.dataset.recruiter);
+                if (yearSelect.dataset.client) url.searchParams.set('client_id', yearSelect.dataset.client);
+
+                yearSelect.disabled = true;
+                loading?.classList.remove('d-none');
+
+                try {
+                    var response = await fetch(url, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!response.ok) throw new Error('Unable to load chart data.');
+                    var data = await response.json();
+
+                    await Promise.all([
+                        window.dashboardApplicantChart?.updateOptions({
+                            xaxis: { categories: data.months },
+                            series: [{ name: 'Applicants', data: data.applicants }]
+                        }),
+                        window.dashboardJoiningChart?.updateOptions({
+                            xaxis: { categories: data.months },
+                            series: [
+                                { name: 'Offer Accepted', data: data.offer_accepted },
+                                { name: 'Offer Declined', data: data.offer_declined }
+                            ]
+                        }),
+                        window.dashboardOnboardingChart?.updateOptions({
+                            xaxis: { categories: data.months },
+                            series: [
+                                { name: 'Onboarded with Client', data: data.onboarded },
+                                { name: 'Joiner Declined', data: data.joiner_declined }
+                            ]
+                        }),
+                        window.dashboardRevenueChart?.updateOptions({
+                            xaxis: { categories: data.months },
+                            series: [
+                                { name: 'Onboarded Revenue', data: data.onboarded_revenue },
+                                { name: 'Declined Revenue', data: data.declined_revenue }
+                            ]
+                        })
+                    ]);
+
+                    document.querySelectorAll('.selected-chart-year').forEach(function(label) {
+                        label.textContent = data.year;
+                    });
+                    var onboardedBadge = document.querySelector('#onboardedRevenueBadge');
+                    var declinedBadge = document.querySelector('#declinedRevenueBadge');
+                    if (onboardedBadge) onboardedBadge.textContent = 'Onboarded: ₹' + currency.format(data.onboarded_revenue_total);
+                    if (declinedBadge) declinedBadge.textContent = 'Declined: ₹' + currency.format(data.declined_revenue_total);
+                    loadedYear = requestedYear;
+                } catch (error) {
+                    yearSelect.value = loadedYear;
+                    window.alert(error.message);
+                } finally {
+                    yearSelect.disabled = false;
+                    loading?.classList.add('d-none');
+                }
+            });
         });
 
         document.addEventListener('DOMContentLoaded', function() {

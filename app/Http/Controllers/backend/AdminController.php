@@ -144,6 +144,9 @@ class AdminController extends Controller
             ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId))
             ->when($dateFrom, fn ($query) => $query->where('candidates.created_at', '>=', $dateFrom))
             ->when($dateTo, fn ($query) => $query->where('candidates.created_at', '<=', $dateTo));
+        $chartCandidates = Candidate::visibleTo($user)
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
+            ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId));
         $interviews = InterviewSchedule::query()
             ->when($isDeliveryLead, fn ($query) => $query->whereHas(
                 'candidate', fn ($candidate) => $candidate->whereIn('recruiter_id', $deliveryLeadRecruiterIds)
@@ -236,22 +239,25 @@ class AdminController extends Controller
 
         $maxLevel = max(1, $candidateLevels->max('candidates_count'));
 
-        $monthly = (clone $candidates)
-            ->where('candidates.created_at', '>=', now()->subMonths(5)->startOfMonth())
+        $chartYear = now()->year;
+        $yearStart = CarbonImmutable::create($chartYear, 1, 1)->startOfDay();
+        $yearEnd = CarbonImmutable::create($chartYear, 12, 31)->endOfDay();
+        $months = collect(range(1, 12))->map(fn ($month) => CarbonImmutable::create($chartYear, $month, 1));
+
+        $monthly = (clone $chartCandidates)
+            ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
-        $months = collect(range(5, 0))->map(fn ($offset) => now()->subMonths($offset));
-        $joiningMonths = collect(range(-3, 3))
-            ->map(fn ($offset) => now()->addMonthsNoOverflow($offset));
+        $joiningMonths = $months;
 
-        $monthlyCandidateLevelCounts = function (int $levelId) use ($candidates) {
-            return (clone $candidates)
+        $monthlyCandidateLevelCounts = function (int $levelId) use ($chartCandidates, $yearStart, $yearEnd) {
+            return (clone $chartCandidates)
                 ->where('level_of_interview_id', $levelId)
                 ->whereRaw(
                     'COALESCE(onboarding_date, candidates.updated_at) BETWEEN ? AND ?',
                     [
-                        now()->subMonthsNoOverflow(3)->startOfMonth(),
-                        now()->addMonthsNoOverflow(3)->endOfMonth(),
+                        $yearStart,
+                        $yearEnd,
                     ]
                 )
                 ->selectRaw("DATE_FORMAT(COALESCE(onboarding_date, candidates.updated_at), '%Y-%m') as month_key, COUNT(*) as total")
@@ -272,37 +278,34 @@ class AdminController extends Controller
             'joiner_declined' => (int) ($monthlyJoinerDeclined[$month->format('Y-m')] ?? 0),
         ]);
 
-        $revenueMonths = collect(range(6, 0))->map(fn ($offset) => now()->subMonthsNoOverflow($offset));
+        $revenueMonths = $months;
 
-        // Revenue is earned only when a candidate is onboarded. A joiner decline
-        // records the same requirement value as lost/declined revenue.
-        $requirementRevenue = (clone $requirements)
-            ->whereNotNull('revenue_amount')
-            ->orderByDesc('requirement_open_date')
-            ->orderByDesc('id')
-            ->get(['client_id', 'job_role_id', 'revenue_amount'])
-            ->unique(fn ($requirement) => $requirement->client_id.'|'.$requirement->job_role_id)
-            ->mapWithKeys(fn ($requirement) => [
-                $requirement->client_id.'|'.$requirement->job_role_id => (float) $requirement->revenue_amount,
-            ]);
-        $revenueOutcomes = (clone $candidates)
+        // Revenue is based on each candidate's onboarding CTC and client billing percentage.
+        $revenueOutcomes = (clone $chartCandidates)
+            ->with('client.billing')
             ->whereIn('level_of_interview_id', [20, 21])
-            ->whereRaw('COALESCE(onboarding_date, candidates.updated_at) >= ?', [
-                now()->subMonthsNoOverflow(6)->startOfMonth(),
-            ])
-            ->get(['client_id', 'job_role_id', 'level_of_interview_id', 'onboarding_date', 'updated_at']);
+            ->whereRaw('COALESCE(onboarding_date, candidates.updated_at) BETWEEN ? AND ?', [$yearStart, $yearEnd])
+            ->get(['client_id', 'level_of_interview_id', 'onboarding_ctc', 'onboarding_date', 'updated_at']);
+        $candidateRevenue = fn ($candidate) => (float) $candidate->onboarding_ctc
+            * (float) ($candidate->client?->billing?->value ?? 0) / 100;
         $monthlyOutcomeRevenue = $revenueOutcomes
             ->groupBy(fn ($candidate) => ($candidate->onboarding_date ?? $candidate->updated_at)->format('Y-m'));
         $monthlyOnboardedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
             ->where('level_of_interview_id', 20)
-            ->sum(fn ($candidate) => $requirementRevenue->get($candidate->client_id.'|'.$candidate->job_role_id, 0)));
+            ->sum($candidateRevenue));
         $monthlyDeclinedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
             ->where('level_of_interview_id', 21)
-            ->sum(fn ($candidate) => $requirementRevenue->get($candidate->client_id.'|'.$candidate->job_role_id, 0)));
+            ->sum($candidateRevenue));
         $onboardedRevenue = $revenueOutcomes->where('level_of_interview_id', 20)
-            ->sum(fn ($candidate) => $requirementRevenue->get($candidate->client_id.'|'.$candidate->job_role_id, 0));
+            ->sum($candidateRevenue);
         $declinedRevenue = $revenueOutcomes->where('level_of_interview_id', 21)
-            ->sum(fn ($candidate) => $requirementRevenue->get($candidate->client_id.'|'.$candidate->job_role_id, 0));
+            ->sum($candidateRevenue);
+        $totalOnboardingRevenue = (clone $candidates)
+            ->with('client.billing')
+            ->where('level_of_interview_id', 20)
+            ->whereNotNull('onboarding_ctc')
+            ->get(['client_id', 'onboarding_ctc'])
+            ->sum($candidateRevenue);
 
         $targetMultiplier = $selectedRecruiterId
             ? 1
@@ -341,6 +344,7 @@ class AdminController extends Controller
             'selectedClientId' => $selectedClientId,
             'selectedFromDate' => $selectedFromDate,
             'selectedToDate' => $selectedToDate,
+            'chartYear' => $chartYear,
             'fromDateError' => $fromDateError,
             'toDateError' => $toDateError,
             'monthlyTargetAnalytics' => $monthlyKpis,
@@ -375,7 +379,7 @@ class AdminController extends Controller
             'declinedRevenue' => round((float) $declinedRevenue, 2),
             'showRevenueDashboard' => $user->can('read', Revenue::class),
 
-            'revenue' => (clone $requirements)->sum('revenue_amount'),
+            'revenue' => round((float) $totalOnboardingRevenue, 2),
             'candidateLevels' => $candidateLevels,
             'chartMonths' => $months->map->format('M')->values(),
             'chartApplicants' => $months->map(fn ($month) => (int) ($monthly[$month->format('Y-m')] ?? 0))->values(),
@@ -386,6 +390,69 @@ class AdminController extends Controller
             'birthdayEmployee' => $birthdayEmployee,
             'employee' => $employee,
             'birthdayEmployees' => $birthdayEmployees,
+        ]);
+    }
+
+    public function yearCharts(Request $request)
+    {
+        $this->authorize('dashboard', General::class);
+
+        $data = $request->validate([
+            'year' => 'required|integer|min:2000|max:2100',
+            'recruiter_id' => 'nullable|integer',
+            'client_id' => 'nullable|integer',
+        ]);
+
+        $user = Auth::user()->loadMissing('role.permissions');
+        $year = (int) $data['year'];
+        $yearStart = CarbonImmutable::create($year, 1, 1)->startOfDay();
+        $yearEnd = CarbonImmutable::create($year, 12, 31)->endOfDay();
+        $months = collect(range(1, 12))->map(fn ($month) => CarbonImmutable::create($year, $month, 1));
+        $candidates = Candidate::visibleTo($user)
+            ->when($data['recruiter_id'] ?? null, fn ($query, $id) => $query->where('recruiter_id', $id))
+            ->when($data['client_id'] ?? null, fn ($query, $id) => $query->where('client_id', $id));
+
+        $applicants = (clone $candidates)
+            ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
+            ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
+            ->groupBy('month_key')->pluck('total', 'month_key');
+
+        $levelCounts = function (int $levelId) use ($candidates, $yearStart, $yearEnd) {
+            return (clone $candidates)
+                ->where('level_of_interview_id', $levelId)
+                ->whereRaw('COALESCE(onboarding_date, candidates.updated_at) BETWEEN ? AND ?', [$yearStart, $yearEnd])
+                ->selectRaw("DATE_FORMAT(COALESCE(onboarding_date, candidates.updated_at), '%Y-%m') as month_key, COUNT(*) as total")
+                ->groupBy('month_key')->pluck('total', 'month_key');
+        };
+
+        $offerAccepted = $levelCounts(30);
+        $offerDeclined = $levelCounts(22);
+        $onboarded = $levelCounts(20);
+        $joinerDeclined = $levelCounts(21);
+        $outcomes = $user->can('read', Revenue::class)
+            ? (clone $candidates)->with('client.billing')
+                ->whereIn('level_of_interview_id', [20, 21])
+                ->whereRaw('COALESCE(onboarding_date, candidates.updated_at) BETWEEN ? AND ?', [$yearStart, $yearEnd])
+                ->get(['client_id', 'level_of_interview_id', 'onboarding_ctc', 'onboarding_date', 'updated_at'])
+                ->groupBy(fn ($candidate) => ($candidate->onboarding_date ?? $candidate->updated_at)->format('Y-m'))
+            : collect();
+        $candidateRevenue = fn ($candidate) => (float) $candidate->onboarding_ctc
+            * (float) ($candidate->client?->billing?->value ?? 0) / 100;
+        $monthlyOnboardedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 20)->sum($candidateRevenue));
+        $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 21)->sum($candidateRevenue));
+
+        return response()->json([
+            'year' => $year,
+            'months' => $months->map->format('M')->values(),
+            'applicants' => $months->map(fn ($month) => (int) ($applicants[$month->format('Y-m')] ?? 0))->values(),
+            'offer_accepted' => $months->map(fn ($month) => (int) ($offerAccepted[$month->format('Y-m')] ?? 0))->values(),
+            'offer_declined' => $months->map(fn ($month) => (int) ($offerDeclined[$month->format('Y-m')] ?? 0))->values(),
+            'onboarded' => $months->map(fn ($month) => (int) ($onboarded[$month->format('Y-m')] ?? 0))->values(),
+            'joiner_declined' => $months->map(fn ($month) => (int) ($joinerDeclined[$month->format('Y-m')] ?? 0))->values(),
+            'onboarded_revenue' => $months->map(fn ($month) => round((float) ($monthlyOnboardedRevenue[$month->format('Y-m')] ?? 0), 2))->values(),
+            'declined_revenue' => $months->map(fn ($month) => round((float) ($monthlyDeclinedRevenue[$month->format('Y-m')] ?? 0), 2))->values(),
+            'onboarded_revenue_total' => round((float) $monthlyOnboardedRevenue->sum(), 2),
+            'declined_revenue_total' => round((float) $monthlyDeclinedRevenue->sum(), 2),
         ]);
     }
 

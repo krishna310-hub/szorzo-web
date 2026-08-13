@@ -95,6 +95,11 @@ class PermissionsSeeder extends Seeder
             ['name'=>'Edit',      'page'=>'candidate'],
             ['name'=>'Delete',    'page'=>'candidate'],
 
+            ['name'=>'Read',      'page'=>'profile_sourced'],
+            ['name'=>'Create',    'page'=>'profile_sourced'],
+            ['name'=>'Edit',      'page'=>'profile_sourced'],
+            ['name'=>'Delete',    'page'=>'profile_sourced'],
+
             ['name'=>'Read',      'page'=>'billing'],
             ['name'=>'Create',    'page'=>'billing'],
             ['name'=>'Edit',      'page'=>'billing'],

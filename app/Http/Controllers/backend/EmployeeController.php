@@ -27,6 +27,14 @@ class EmployeeController extends Controller
         'degree_certificate',
     ];
 
+    private const MULTIPLE_DOCUMENT_FIELDS = [
+        'previous_company_offer_letters',
+        'relieving_letters',
+        'pay_slips',
+        'bank_statements',
+        'passbook_cheques',
+    ];
+
     public function index(Request $request)
     {
         $this->authorize('read', Employee::class);
@@ -157,6 +165,18 @@ class EmployeeController extends Controller
             'contract_to_date' => [Rule::requiredIf($requiresContractDates), 'nullable', 'date', 'after_or_equal:contract_from_date'],
             'offer_letter' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'intent_letter' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'previous_company_offer_letters' => 'nullable|array',
+            'previous_company_offer_letters.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'relieving_letters' => 'nullable|array',
+            'relieving_letters.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'pay_slips' => 'nullable|array',
+            'pay_slips.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'bank_statements' => 'nullable|array',
+            'bank_statements.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'passbook_cheques' => 'nullable|array',
+            'passbook_cheques.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'removed_documents' => 'nullable|array',
+            'removed_documents.*' => 'string|max:255',
             'employee_uan_pf_number' => 'nullable|string|max:50',
             'employee_esi_number' => 'nullable|string|max:50',
 
@@ -252,6 +272,31 @@ class EmployeeController extends Controller
             $file->move(public_path('uploads/employees/documents'), $fileName);
             $data[$field] = $fileName;
         }
+
+        $removedDocuments = $request->input('removed_documents', []);
+
+        foreach (self::MULTIPLE_DOCUMENT_FIELDS as $field) {
+            $documents = array_values($employee?->{$field} ?? []);
+            $documentsToRemove = array_intersect($documents, $removedDocuments);
+
+            foreach ($documentsToRemove as $fileName) {
+                File::delete(public_path('uploads/employees/documents/'.$fileName));
+            }
+
+            $documents = array_values(array_diff($documents, $documentsToRemove));
+
+            foreach ($request->file($field, []) as $file) {
+                if (! $file) {
+                    continue;
+                }
+
+                $fileName = Str::uuid().'.'.$file->getClientOriginalExtension();
+                $file->move(public_path('uploads/employees/documents'), $fileName);
+                $documents[] = $fileName;
+            }
+
+            $data[$field] = $documents ?: null;
+        }
     }
 
     private function deleteEmployeeFiles(Employee $employee): void
@@ -263,6 +308,12 @@ class EmployeeController extends Controller
         foreach (self::DOCUMENT_FIELDS as $field) {
             if ($employee->{$field}) {
                 File::delete(public_path('uploads/employees/documents/'.$employee->{$field}));
+            }
+        }
+
+        foreach (self::MULTIPLE_DOCUMENT_FIELDS as $field) {
+            foreach ($employee->{$field} ?? [] as $fileName) {
+                File::delete(public_path('uploads/employees/documents/'.$fileName));
             }
         }
     }

@@ -177,6 +177,40 @@
             @error($field)<span class="text-danger small">{{ $message }}</span>@enderror
         </div>
     @endforeach
+    <div class="col-12 mt-4">
+        <h5 class="text-primary mb-3">Previous Employment &amp; Bank Documents</h5>
+    </div>
+    @php
+        $multipleDocumentFields = [
+            'previous_company_offer_letters' => "Previous Company's Offer Letter (All Companies)",
+            'relieving_letters' => 'Relieving Letter (All Companies)',
+            'pay_slips' => "3 Months' Pay Slips",
+            'bank_statements' => 'Bank Statements for the Past 3 Months',
+            'passbook_cheques' => 'Passbook Front Page / Cancelled Cheque (Photocopy)',
+        ];
+    @endphp
+    @foreach($multipleDocumentFields as $field => $label)
+        <div class="col-md-6 mt-3 repeatable-document" data-field="{{ $field }}">
+            <label class="form-label">{{ $label }}</label>
+            @if(!empty($employee->{$field}))
+                <div class="mb-2 existing-documents">
+                    @foreach($employee->{$field} as $document)
+                        <div class="d-flex align-items-center gap-2 mb-1 existing-document">
+                            <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank">View document {{ $loop->iteration }}</a>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document" data-file="{{ $document }}">Remove</button>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            <div class="document-inputs">
+                <div class="input-group mb-2 document-input-row">
+                    <input type="file" class="form-control" name="{{ $field }}[]" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
+            @error($field.'.*')<div class="text-danger small">{{ $message }}</div>@enderror
+        </div>
+    @endforeach
     <div class="col-md-4 mt-3">
         <label for="employee_uan_pf_number" class="form-label">UAN / PF Number</label>
         <input type="text" class="form-control" id="employee_uan_pf_number" name="employee_uan_pf_number" placeholder="Enter UAN/PF number"
@@ -525,6 +559,35 @@
 
         mode.addEventListener('change', toggleContractDates);
         toggleContractDates();
+
+        document.querySelectorAll('.repeatable-document').forEach(function (container) {
+            const inputs = container.querySelector('.document-inputs');
+
+            container.querySelector('.add-document').addEventListener('click', function () {
+                const row = document.createElement('div');
+                row.className = 'input-group mb-2 document-input-row';
+                row.innerHTML = '<input type="file" class="form-control" name="' + container.dataset.field + '[]" accept=".pdf,.jpg,.jpeg,.png">' +
+                    '<button type="button" class="btn btn-outline-danger remove-document-input" aria-label="Remove upload">Remove</button>';
+                inputs.appendChild(row);
+            });
+
+            container.addEventListener('click', function (event) {
+                const removeInput = event.target.closest('.remove-document-input');
+                if (removeInput) {
+                    removeInput.closest('.document-input-row').remove();
+                }
+
+                const removeExisting = event.target.closest('.remove-existing-document');
+                if (removeExisting) {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'removed_documents[]';
+                    hidden.value = removeExisting.dataset.file;
+                    container.appendChild(hidden);
+                    removeExisting.closest('.existing-document').remove();
+                }
+            });
+        });
     });
 </script>
 @endpush

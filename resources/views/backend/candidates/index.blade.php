@@ -31,6 +31,7 @@
                                             'Variable',
                                             'Current CTC',
                                             'Expected CTC',
+                                            'Onboarding CTC',
                                             'Notice Period',
                                             'Current Company',
                                             'Current Location',
@@ -66,6 +67,7 @@
                                                 <th>Variable</th>
                                                 <th>Current CTC</th>
                                                 <th>Expected CTC</th>
+                                                <th>Onboarding CTC</th>
                                                 <th>Notice Period</th>
                                                 <th>Current Company</th>
                                                 <th>Current Location</th>
@@ -269,6 +271,9 @@
                     }, {
                         data: 'expected_ctc',
                         name: 'expected_ctc'
+                    }, {
+                        data: 'onboarding_ctc',
+                        name: 'onboarding_ctc'
                     }, {
                         data: 'notice_period',
                         name: 'notice_period'

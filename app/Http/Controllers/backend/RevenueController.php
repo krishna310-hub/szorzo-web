@@ -50,6 +50,7 @@ class RevenueController extends Controller
         $this->authorize('create', Revenue::class);
         $candidates = Candidate::with(['client.billing'])
             ->where('level_of_interview_id', 20)
+            ->whereNotNull('onboarding_ctc')
             ->whereDoesntHave('revenue')
             ->orderBy('candidate_name')
             ->get();
@@ -120,7 +121,7 @@ class RevenueController extends Controller
             'client_name' => 'required|string|max:255',
             'client_address' => 'nullable|string|max:2000',
             'client_gst_number' => 'nullable|string|max:30',
-            'offered_ctc' => 'required|numeric|min:0',
+            'onboarding_ctc' => 'nullable|numeric|min:0',
             'billing_percentage' => 'required|numeric|min:0|max:100',
             'service_amount' => 'required|numeric|min:0',
             'gst_percentage' => 'required|numeric|min:0|max:100',
@@ -133,16 +134,20 @@ class RevenueController extends Controller
         return Candidate::with(['client.billing'])
             ->whereKey($id)
             ->where('level_of_interview_id', 20)
+            ->whereNotNull('onboarding_ctc')
             ->firstOrFail();
     }
 
     private function calculatedData(array $data, Candidate $candidate): array
     {
         $data['invoice_number'] ??= $this->nextInvoiceNumber();
-        $service = round((float) $data['service_amount'], 2);
+        $onboardingCtc = (float) $candidate->onboarding_ctc;
+        $service = round($onboardingCtc * (float) $data['billing_percentage'] / 100, 2);
         $gst = round($service * (float) $data['gst_percentage'] / 100, 2);
         $data['candidate_id'] = $candidate->id;
         $data['client_id'] = $candidate->client_id;
+        $data['onboarding_ctc'] = $onboardingCtc;
+        $data['offered_ctc'] = $onboardingCtc;
         $data['service_amount'] = $service;
         $data['gst_amount'] = $gst;
         $data['total_amount'] = round($service + $gst, 2);

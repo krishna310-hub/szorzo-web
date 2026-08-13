@@ -25,6 +25,7 @@ class Candidate extends Model
         'variable',
         'current_ctc',
         'expected_ctc',
+        'onboarding_ctc',
         'notice_period',
         'current_company',
         'current_location',

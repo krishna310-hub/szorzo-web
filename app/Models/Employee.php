@@ -26,6 +26,11 @@ class Employee extends Model
         'contract_to_date',
         'offer_letter',
         'intent_letter',
+        'previous_company_offer_letters',
+        'relieving_letters',
+        'pay_slips',
+        'bank_statements',
+        'passbook_cheques',
         'pan_card_file',
         'aadhaar_file',
         'twelfth_marksheet',
@@ -74,6 +79,11 @@ class Employee extends Model
         'date_of_joining' => 'date',
         'contract_from_date' => 'date',
         'contract_to_date' => 'date',
+        'previous_company_offer_letters' => 'array',
+        'relieving_letters' => 'array',
+        'pay_slips' => 'array',
+        'bank_statements' => 'array',
+        'passbook_cheques' => 'array',
     ];
 
     public function client()

@@ -20,6 +20,7 @@ use App\Http\Controllers\backend\InterviewModeController;
 use App\Http\Controllers\backend\JobRoleController;
 use App\Http\Controllers\backend\ModeController;
 use App\Http\Controllers\backend\PageController;
+use App\Http\Controllers\backend\ProfileSourcedController;
 use App\Http\Controllers\backend\RecruiterController;
 use App\Http\Controllers\backend\ReportController;
 use App\Http\Controllers\backend\RevenueController;
@@ -75,7 +76,8 @@ Route::group(['controller' => HomeController::class], function () {
 });
 
 Route::group(['controller' => LoginController::class], function () {
-    Route::get('/admin/login', 'index')->name('login');
+    Route::get('/mgmt/login', 'index')->name('login');
+    Route::get('/rinos/login', 'index')->name('login');
     Route::post('/check-login', 'login')->name('login.check');
     Route::post('/logout', 'logout')->name('logout');
 });
@@ -87,6 +89,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
 
     Route::group(['controller' => AdminController::class], function () {
         Route::get('/dashboard','index')->name('dashboard');
+        Route::get('/dashboard/year-charts', 'yearCharts')->name('dashboard.year-charts');
         Route::get('/profile', 'profile')->name('profile');
         Route::post('/upload-profile-image', 'uploadProfile')->name('upload.profile');
     });
@@ -166,6 +169,16 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}/update', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('profile-sourced')->name('profile-sourced.')->controller(ProfileSourcedController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{profileSourced}/edit', 'edit')->name('edit');
+            Route::put('/{profileSourced}', 'update')->name('update');
+            Route::post('/{profileSourced}/move-to-candidate', 'moveToCandidate')->name('move');
+            Route::delete('/{profileSourced}', 'destroy')->name('delete');
         });
 
         Route::prefix('job-roles')->name('job-roles.')->controller(JobRoleController::class)->group(function () {
