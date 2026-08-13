@@ -540,7 +540,7 @@ class CandidateController extends Controller
             'variable' => 'nullable|numeric|min:0',
             'current_ctc' => 'required|integer|min:0',
             'expected_ctc' => 'required|integer|min:0',
-            'onboarding_ctc' => 'required|integer|min:0',
+            'onboarding_ctc' => 'nullable|integer|min:0',
             'notice_period' => 'required|string|max:255',
             'current_company' => 'required|string|max:255',
             'current_location' => 'required|string|max:255',
