@@ -164,7 +164,7 @@
     </div>
     <div class="col-md-4">
         <label for="upload_cv" class="form-label">
-            Upload CV <span class="text-danger">*</span>
+            Upload CV 
 
             @if(isset($candidate) && $candidate->upload_cv)
                 <a href="{{ asset($candidate->upload_cv) }}" target="_blank" class="btn btn-sm btn-outline-primary">
@@ -177,9 +177,6 @@
 
         <span class="text-danger small">Maximum file size is 2MB</span>
 
-        @error('upload_cv')
-            <span class="text-danger small">{{ $message }}</span>
-        @enderror
     </div>
     <div class="col-md-8"><label for="reason_for_change" class="form-label">Reason For Change</label>
         <textarea class="form-control" id="reason_for_change" name="reason_for_change" rows="3">{{ old('reason_for_change', $candidate->reason_for_change ?? '') }}</textarea>

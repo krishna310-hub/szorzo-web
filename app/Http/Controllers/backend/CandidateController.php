@@ -547,7 +547,7 @@ class CandidateController extends Controller
             'preferred_location' => 'required|string|max:255',
             'reason_for_change' => 'nullable|string',
             'level_of_interview_id' => 'required|exists:level_of_interviews,id',
-            'upload_cv' => 'required|mimes:pdf,doc,docx|max:2048',
+            'upload_cv' => 'nullable|mimes:pdf,doc,docx|max:2048',
             'status' => 'required|in:0,1',
         ], [
             'mobile_no.unique' => 'This mobile number is already registered for another candidate.',
