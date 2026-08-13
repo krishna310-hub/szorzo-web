@@ -77,6 +77,52 @@
                                             @endforeach
                                         </div>
                                     @endforeach
+
+                                    @php
+                                        $profileDocuments = collect([
+                                            ['field' => 'offer_letter', 'label' => 'Offer Letter', 'icon' => 'ri-file-text-line', 'color' => 'primary'],
+                                            ['field' => 'intent_letter', 'label' => 'Intent Letter', 'icon' => 'ri-draft-line', 'color' => 'success'],
+                                        ])->filter(fn ($document) => filled($employee->{$document['field']}));
+                                    @endphp
+
+                                    <h5 class="text-primary mt-4 mb-3">Documents</h5>
+                                    @if ($profileDocuments->isNotEmpty())
+                                        <div class="row g-3">
+                                            @foreach ($profileDocuments as $document)
+                                                @php
+                                                    $fileName = $employee->{$document['field']};
+                                                    $documentUrl = asset('uploads/employees/documents/'.$fileName);
+                                                    $extension = strtoupper(pathinfo($fileName, PATHINFO_EXTENSION));
+                                                @endphp
+                                                <div class="col-md-6">
+                                                    <div class="border rounded-3 p-3 h-100 bg-light-subtle d-flex align-items-center gap-3">
+                                                        <div class="avatar-sm flex-shrink-0">
+                                                            <span class="avatar-title rounded-3 bg-{{ $document['color'] }}-subtle text-{{ $document['color'] }} fs-3">
+                                                                <i class="{{ $document['icon'] }}"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <h6 class="mb-1">{{ $document['label'] }}</h6>
+                                                            <span class="badge bg-secondary-subtle text-secondary">{{ $extension ?: 'FILE' }}</span>
+                                                        </div>
+                                                        <div class="d-flex gap-1 flex-shrink-0">
+                                                            <a href="{{ $documentUrl }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary" title="View {{ $document['label'] }}">
+                                                                <i class="ri-eye-line"></i> View
+                                                            </a>
+                                                            <a href="{{ $documentUrl }}" download class="btn btn-sm btn-outline-success" title="Download {{ $document['label'] }}">
+                                                                <i class="ri-download-2-line"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="border rounded-3 bg-light-subtle text-center text-muted py-4">
+                                            <i class="ri-file-upload-line fs-2 d-block mb-1"></i>
+                                            No offer or intent letter has been uploaded yet.
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
                         </div>
