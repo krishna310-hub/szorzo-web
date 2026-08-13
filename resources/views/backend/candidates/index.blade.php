@@ -54,6 +54,7 @@
                                                 <th>S.No</th>
                                                 <th>Candidate Name</th>
                                                 <th>CV</th>
+                                                <th>Onboarding Date</th>
                                                 <th>Recruiter</th>
                                                 <th>Client</th>
                                                 <th>Job Role</th>
@@ -73,7 +74,6 @@
                                                 <th>Current Location</th>
                                                 <th>Preferred Location</th>
                                                 <th>Reason For Change</th>
-                                                <th>Onboarding Date</th>
                                                 <th>Status</th>
                                                 <th>Created At</th>
                                                 <th>Action</th>
@@ -202,7 +202,7 @@
                 scrollCollapse: true,
                 autoWidth: false,
                 fixedColumns: {
-                    leftColumns: 4
+                    leftColumns: 5
                 },
                 ajax: {
                     url: indexUrl,
@@ -225,8 +225,12 @@
                         name: 'cv_preview',
                         orderable: false,
                         searchable: false
-                    },
-                    {
+                    }, {
+                        data: 'onboarding_date',
+                        name: 'onboarding_date',
+                        orderable: false,
+                        searchable: false
+                    }, {
                         data: 'recruiter_name',
                         name: 'recruiter_name',
                         orderable: false,
@@ -290,11 +294,6 @@
                     }, {
                         data: 'reason_for_change',
                         name: 'reason_for_change'
-                    }, {
-                        data: 'onboarding_date',
-                        name: 'onboarding_date',
-                        orderable: false,
-                        searchable: false
                     }, {
                         data: 'status',
                         name: 'status',
