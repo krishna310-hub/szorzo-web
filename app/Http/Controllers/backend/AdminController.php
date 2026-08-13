@@ -599,6 +599,30 @@ class AdminController extends Controller
         return back()->with('success', 'Profile images updated successfully.');
     }
 
+    public function changePassword(Request $request)
+    {
+        $user = User::findOrFail(Auth::id());
+        abort_unless($user->isSuperAdmin(), 403, 'Only the super administrator can change a password here.');
+
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:8|different:current_password|confirmed',
+        ], [
+            'password.different' => 'The new password must be different from the current password.',
+        ]);
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'current_password' => 'The current password is incorrect.',
+            ]);
+        }
+
+        $user->password = Hash::make($data['password']);
+        $user->save();
+
+        return back()->with('success', 'Password changed successfully.');
+    }
+
     public function lock()
     {
         session(['locked' => true]);

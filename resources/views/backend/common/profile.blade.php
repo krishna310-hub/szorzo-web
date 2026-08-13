@@ -83,6 +83,42 @@
                     </div>
                 </div>
             </form>
+
+            @if (Auth::user()->isSuperAdmin())
+                <div class="row justify-content-end mt-4">
+                    <div class="col-xxl-9">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Change Password</h5>
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('admin.profile.change-password') }}" method="POST">
+                                    @csrf
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="current_password" class="form-label">Current Password <span class="text-danger">*</span></label>
+                                            <input type="password" id="current_password" name="current_password" class="form-control" required autocomplete="current-password">
+                                            @error('current_password')<div class="text-danger small">{{ $message }}</div>@enderror
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="password" class="form-label">New Password <span class="text-danger">*</span></label>
+                                            <input type="password" id="password" name="password" class="form-control" required minlength="8" autocomplete="new-password">
+                                            @error('password')<div class="text-danger small">{{ $message }}</div>@enderror
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="password_confirmation" class="form-label">Confirm New Password <span class="text-danger">*</span></label>
+                                            <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required minlength="8" autocomplete="new-password">
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary">Change Password</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </div>

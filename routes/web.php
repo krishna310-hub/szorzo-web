@@ -92,6 +92,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/dashboard/year-charts', 'yearCharts')->name('dashboard.year-charts');
         Route::get('/profile', 'profile')->name('profile');
         Route::post('/upload-profile-image', 'uploadProfile')->name('upload.profile');
+        Route::post('/profile/change-password', 'changePassword')->middleware('throttle:6,1')->name('profile.change-password');
     });
 
     // Roles
