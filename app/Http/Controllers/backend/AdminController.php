@@ -10,6 +10,7 @@ use App\Models\Employee;
 use App\Models\General;
 use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
+use App\Models\ProfileSourced;
 use App\Models\Recruiter;
 use App\Models\Revenue;
 use App\Models\Target;
@@ -34,6 +35,7 @@ class AdminController extends Controller
         $today = Carbon::today();
         $user = Auth::user();
         $employee = Employee::query()
+            ->where('status', true)
             ->where(function ($query) use ($user) {
                 $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($user->email)])
                     ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($user->email)]);
@@ -53,6 +55,7 @@ class AdminController extends Controller
         $birthdayEmployees = collect();
         if ($user->role_id == 1) {
             $birthdayEmployees = Employee::query()
+                ->where('status', true)
                 ->whereNotNull('dob')
                 ->whereMonth('dob', $today->month)
                 ->whereDay('dob', $today->day)
@@ -144,6 +147,10 @@ class AdminController extends Controller
             ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId))
             ->when($dateFrom, fn ($query) => $query->where('candidates.created_at', '>=', $dateFrom))
             ->when($dateTo, fn ($query) => $query->where('candidates.created_at', '<=', $dateTo));
+        $myProfiles = ProfileSourced::visibleTo($user)
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
+            ->when($dateFrom, fn ($query) => $query->where('profile_sourced.created_at', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->where('profile_sourced.created_at', '<=', $dateTo));
         $chartCandidates = Candidate::visibleTo($user)
             ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
             ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId));
@@ -355,6 +362,7 @@ class AdminController extends Controller
             'inActiveRequirements' => (clone $requirements)->where('status', false)->count(), // sum('number_of_position')
 
             'myApplicants' => (clone $candidates)->count(),
+            'myProfiles' => (clone $myProfiles)->count(),
             'candidateInterviewStages' => (clone $candidates)
                 ->whereIn('level_of_interview_id', [7, 8, 31, 11, 12, 32, 23, 25, 33, 27, 28, 34])
                 ->get(['id', 'level_of_interview_id']),
