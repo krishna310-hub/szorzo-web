@@ -920,8 +920,18 @@
             z-index: 2;
         }
 
-        /* Mobile */
+        .independence-message {
+            white-space: nowrap;
+            font-size: 14px;
+        }
 
+        @media (max-width: 768px) {
+            .independence-message {
+                white-space: normal;
+            }
+        }
+
+        /* Mobile */
         @media (max-width: 576px) {
 
             .independence-day-banner {
@@ -939,8 +949,9 @@
                 font-size: 18px;
             }
 
-            .independence-content p {
-                font-size: 12px;
+            .independence-message {
+                white-space: nowrap;
+                font-size: 14px;
             }
 
             .independence-date {
@@ -1041,9 +1052,8 @@
                                         Happy Independence Day! 🇮🇳
                                     </h3>
 
-                                    <p>
-                                        Wishing you and your family a day filled with pride,
-                                        happiness and the spirit of freedom.
+                                    <p class="independence-message">
+                                        Wishing you and your family a day filled with pride, happiness and the spirit of freedom.
                                         <strong>Jai Hind!</strong>
                                     </p>
                                 </div>
