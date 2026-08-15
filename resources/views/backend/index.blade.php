@@ -724,6 +724,248 @@
             font-size: 65px;
             opacity: 0.15;
         }
+
+        /* Independence day */
+        .independence-day-banner {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-height: 125px;
+            padding: 22px 28px;
+            border-radius: 18px;
+            overflow: hidden;
+
+            background: linear-gradient(
+                120deg,
+                #ff9933 0%,
+                #ffb15c 22%,
+                #ffffff 50%,
+                #e9f7ec 78%,
+                #138808 100%
+            );
+
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        /* Left icon */
+
+        .independence-left {
+            position: relative;
+            z-index: 3;
+        }
+
+        .independence-icon {
+            width: 64px;
+            height: 64px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(255, 255, 255, 0.75);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+
+            border-radius: 50%;
+
+            font-size: 32px;
+
+            box-shadow:
+                0 6px 15px rgba(0, 0, 0, 0.1),
+                0 0 0 6px rgba(255, 255, 255, 0.18);
+        }
+
+        /* Main content */
+
+        .independence-content {
+            position: relative;
+            z-index: 4;
+            flex: 1;
+        }
+
+        .independence-date {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+
+            color: #6b7280;
+
+            margin-bottom: 5px;
+        }
+
+        .date-line {
+            width: 25px;
+            height: 2px;
+            background: #ff9933;
+            border-radius: 5px;
+        }
+
+        .independence-content h3 {
+            margin: 0 0 5px;
+
+            font-size: 23px;
+            font-weight: 800;
+
+            color: #1f2937;
+        }
+
+        .independence-content p {
+            margin: 0;
+
+            max-width: 650px;
+
+            font-size: 14px;
+            line-height: 1.6;
+
+            color: #4b5563;
+        }
+
+        .independence-content strong {
+            color: #138808;
+            font-weight: 800;
+        }
+
+        /* Ashoka Chakra */
+
+        .ashoka-chakra {
+            position: absolute;
+
+            right: 135px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            font-size: 105px;
+
+            color: #1d4ed8;
+
+            opacity: 0.08;
+
+            z-index: 1;
+        }
+
+        /* Flag */
+
+        .independence-flag {
+            position: relative;
+            z-index: 4;
+
+            font-size: 62px;
+
+            filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.1));
+
+            animation: flagFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes flagFloat {
+
+            0%, 100% {
+                transform: translateY(0) rotate(-2deg);
+            }
+
+            50% {
+                transform: translateY(-5px) rotate(2deg);
+            }
+        }
+
+        /* Decorative glowing circles */
+
+        .independence-glow {
+            position: absolute;
+
+            width: 120px;
+            height: 120px;
+
+            border-radius: 50%;
+
+            background: rgba(255, 255, 255, 0.18);
+
+            filter: blur(2px);
+        }
+
+        .glow-one {
+            left: -45px;
+            bottom: -70px;
+        }
+
+        .glow-two {
+            right: 50px;
+            top: -80px;
+        }
+
+        /* Bottom wave */
+
+        .wave-decoration {
+            position: absolute;
+
+            left: 0;
+            bottom: -32px;
+
+            width: 120%;
+
+            height: 55px;
+
+            background: rgba(255, 255, 255, 0.22);
+
+            border-radius: 50% 50% 0 0;
+
+            transform: rotate(-2deg);
+
+            z-index: 2;
+        }
+
+        .independence-message {
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .independence-message {
+                white-space: normal;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 576px) {
+
+            .independence-day-banner {
+                padding: 18px;
+                gap: 14px;
+            }
+
+            .independence-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 25px;
+            }
+
+            .independence-content h3 {
+                font-size: 18px;
+            }
+
+            .independence-message {
+                white-space: nowrap;
+                font-size: 14px;
+            }
+
+            .independence-date {
+                font-size: 8px;
+            }
+
+            .independence-flag {
+                display: none;
+            }
+
+            .ashoka-chakra {
+                right: 20px;
+            }
+        }
     </style>
 
     <div class="main-content dashboard-shell">
@@ -781,6 +1023,52 @@
                             <p class="mb-0 text-white-50">
                                 A live view of requirements, applicants and interviews available to your role.
                             </p>
+                        @endif
+
+                        {{-- Independence day --}}
+                        @php $isIndependenceDay = now()->format('m-d') === '08-14'; @endphp
+
+                        @if ($isIndependenceDay)
+                            <div class="independence-day-banner mb-4 mt-3">
+
+                                <!-- Decorative elements -->
+                                <div class="independence-glow glow-one"></div>
+                                <div class="independence-glow glow-two"></div>
+
+                                <div class="independence-left">
+                                    <div class="independence-icon">
+                                        🇮🇳
+                                    </div>
+                                </div>
+
+                                <div class="independence-content">
+                                    <div class="independence-date">
+                                        <span>15 AUGUST</span>
+                                        <span class="date-line"></span>
+                                        <span>INDEPENDENCE DAY</span>
+                                    </div>
+
+                                    <h3>
+                                        Happy Independence Day! 🇮🇳
+                                    </h3>
+
+                                    <p class="independence-message">
+                                        Wishing you and your family a day filled with pride, happiness and the spirit of freedom.
+                                        <strong>Jai Hind!</strong>
+                                    </p>
+                                </div>
+
+                                <div class="ashoka-chakra">
+                                    ☸
+                                </div>
+
+                                <div class="independence-flag">
+                                    🇮🇳
+                                </div>
+
+                                <div class="wave-decoration"></div>
+
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -915,14 +1203,14 @@
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
-                                                <div class="small text-muted mb-1">Applicants</div>
-                                                <div class="metric-value">{{ number_format($myApplicants ?? 0) }}</div>
+                                                <div class="small text-muted mb-1">Profile sourced</div>
+                                                <div class="metric-value">{{ number_format($myProfiles ?? 0) }}</div>
                                             </div>
                                         </div>
                                         <div class="col-6">
                                             <div class="border rounded-3 bg-light p-2 h-100">
-                                                <div class="small text-muted mb-1">HR Selected</div>
-                                                <div class="metric-value">{{ number_format($hrSelected ?? 0) }}</div>
+                                                <div class="small text-muted mb-1">Profile submitted</div>
+                                                <div class="metric-value">{{ number_format($myApplicants ?? 0) }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -969,6 +1257,12 @@
                                             <div class="interview-stat-value">
                                                 {{ number_format($candidateInterviewStages->whereIn('level_of_interview_id', [27, 28, 34])->count()) }}
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="border rounded-3 bg-light p-2 h-100 mt-3">
+                                            <div class="small text-muted mb-1">HR Selected</div>
+                                            <div class="metric-value">{{ number_format($hrSelected ?? 0) }}</div>
                                         </div>
                                     </div>
                                 </div>

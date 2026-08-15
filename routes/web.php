@@ -263,6 +263,16 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::delete('/{id}', 'destroy')->name('delete');
     });
 
+    Route::prefix('profile-sourced')->name('profile-sourced.')->controller(ProfileSourcedController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{profileSourced}/edit', 'edit')->name('edit');
+        Route::put('/{profileSourced}', 'update')->name('update');
+        Route::post('/{profileSourced}/move-to-candidate', 'moveToCandidate')->name('move');
+        Route::delete('/{profileSourced}', 'destroy')->name('delete');
+    });
+
     Route::prefix('candidates')->name('candidates.')->controller(CandidateController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/export', 'export')->name('export');

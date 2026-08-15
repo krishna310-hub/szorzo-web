@@ -214,14 +214,14 @@
                     </li>
                 @endcan
 
-                @can('read', \App\Models\ContactEnquiry::class)
+                {{-- @can('read', \App\Models\ContactEnquiry::class)
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/enquiries*') ? 'active' : '' }}"
                             href="{{ route('admin.enquiry.index') }}">
                             <i class="ri-question-answer-line"></i> <span data-key="t-dashboards">Enquiry List</span>
                         </a>
                     </li>
-                @endcan
+                @endcan --}}
 
                 {{-- @can('read', \App\Models\Pages::class)
                     <li class="nav-item">
@@ -253,6 +253,15 @@
                     </li>
                 @endcan
 
+                @can('read', \App\Models\ProfileSourced::class)
+                    <li class="nav-item">
+                        <a href="{{ route('admin.profile-sourced.index') }}"
+                            class="nav-link menu-link {{ request()->is('admin/profile-sourced*') ? 'active' : '' }}">
+                            <i class="ri-user-line"></i>
+                            Profiles </a>
+                    </li>
+                @endcan
+
                 @can('read', \App\Models\Candidate::class)
                     <li class="nav-item">
                         <a href="{{ route('admin.candidates.index') }}"
@@ -262,6 +271,14 @@
                         </a>
                     </li>
                 @endcan
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.interview-schedules.index') }}"
+                        class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">
+                        <i class="ri-calendar-check-line"></i>
+                        <span>Interview Scheduled List</span>
+                    </a>
+                </li>
 
                 @can('read', \App\Models\Report::class)
                     <li class="nav-item">
@@ -282,14 +299,6 @@
                         </a>
                     </li>
                 @endcan
-
-                <li class="nav-item">
-                    <a href="{{ route('admin.interview-schedules.index') }}"
-                        class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">
-                        <i class="ri-calendar-check-line"></i>
-                        <span>Interview Scheduled List</span>
-                    </a>
-                </li>
 
                 @if (auth()->user()->can('read', \App\Models\Client::class) ||
                         auth()->user()->can('read', \App\Models\ClientJobRole::class) ||
@@ -340,13 +349,6 @@
                                         <a href="{{ route('admin.recruiters.index') }}"
                                             class="nav-link {{ request()->is('admin/masters/recruiters*') ? 'active' : '' }}">
                                             Recruiters </a>
-                                    </li>
-                                @endcan
-                                @can('read', \App\Models\ProfileSourced::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.profile-sourced.index') }}"
-                                            class="nav-link {{ request()->is('admin/masters/profile-sourced*') ? 'active' : '' }}">
-                                            Profile Sourced </a>
                                     </li>
                                 @endcan
                                 @can('read', \App\Models\JobRole::class)
