@@ -152,6 +152,10 @@ class AdminController extends Controller
             ->whereNotNull('onboarding_date')
             ->when($dateFrom, fn ($query) => $query->whereDate('onboarding_date', '>=', $dateFrom->toDateString()))
             ->when($dateTo, fn ($query) => $query->whereDate('onboarding_date', '<=', $dateTo->toDateString()));
+        $myProfiles = ProfileSourced::visibleTo($user)
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
+            ->when($dateFrom, fn ($query) => $query->where('profile_sourced.created_at', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->where('profile_sourced.created_at', '<=', $dateTo));
         $chartCandidates = Candidate::visibleTo($user)
             ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
             ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId));
