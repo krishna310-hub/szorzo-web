@@ -138,6 +138,7 @@
     <script>
         $(document).ready(function() {
             var currentFilters = {};
+            var clientJobRoleMap = @json($clientJobRoleMap);
             var exportBaseUrl = @json(route('admin.interview-schedules.export'));
             var interviewLevelFilter = new Choices('#filter_level_of_interview_id', {
                 removeItemButton: true,
@@ -145,6 +146,17 @@
                 placeholder: true,
                 placeholderValue: 'Select interview levels'
             });
+
+            function filterJobRolesByClient() {
+                var clientId = $('#filter_client_id').val();
+                var allowed = clientId ? (clientJobRoleMap[clientId] || []).map(String) : null;
+                $('#filter_job_role_id option').each(function() {
+                    if (!this.value) return;
+                    $(this).prop('hidden', allowed !== null && !allowed.includes(String(this.value)));
+                });
+                if (allowed !== null && !allowed.includes(String($('#filter_job_role_id').val()))) $('#filter_job_role_id').val('');
+            }
+            $('#filter_client_id').on('change', filterJobRolesByClient);
 
             function collectFilters() {
                 var filters = {};

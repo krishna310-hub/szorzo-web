@@ -5,10 +5,12 @@ namespace App\Http\Controllers\backend;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Employee;
+use App\Models\EmployeeOnboardingLink;
 use App\Models\Mode;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
@@ -48,6 +50,9 @@ class EmployeeController extends Controller
                 ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
+                    if (! $row->status && $this->canManagePublicOnboarding()) {
+                        $buttons .= '<button type="button" data-route="'.route('admin.employees.activate', $row->id).'" class="btn btn-sm btn-success me-2 activate-record">Activate</button>';
+                    }
                     if (auth()->user()->can('edit', Employee::class)) {
                         $buttons .= '<a href="'.route('admin.employees.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }
@@ -69,6 +74,79 @@ class EmployeeController extends Controller
         $this->authorize('create', Employee::class);
 
         return view('backend.employees.create', $this->formOptions());
+    }
+
+    public function generateLink()
+    {
+        $this->authorize('create', Employee::class);
+        abort_unless($this->canManagePublicOnboarding(), 403);
+
+        do {
+            $token = Str::random(64);
+        } while (EmployeeOnboardingLink::where('token', $token)->exists());
+
+        EmployeeOnboardingLink::create([
+            'token' => $token,
+            'created_by_user_id' => auth()->id(),
+        ]);
+
+        return back()->with('onboarding_link', route('employee-onboarding.form', $token));
+    }
+
+    public function publicForm(string $token)
+    {
+        $link = EmployeeOnboardingLink::where('token', $token)->whereNull('used_at')->firstOrFail();
+
+        return view('backend.employees.public-form', [
+            'onboardingLink' => $link,
+            'publicEmployeeForm' => true,
+        ]);
+    }
+
+    public function publicStore(Request $request, string $token)
+    {
+        EmployeeOnboardingLink::where('token', $token)->whereNull('used_at')->firstOrFail();
+        $request->validate([
+            'employee_no' => 'prohibited',
+            'client_id' => 'prohibited',
+            'date_of_joining' => 'prohibited',
+            'mode_id' => 'prohibited',
+            'offer_letter' => 'prohibited',
+            'intent_letter' => 'prohibited',
+            'official_mail' => 'prohibited',
+        ]);
+        $request->merge(['status' => 0]);
+        $data = $this->validatedData($request);
+        unset($data['client_id'], $data['date_of_joining'], $data['mode_id'], $data['offer_letter'], $data['intent_letter'], $data['official_mail']);
+        $data['status'] = false;
+        $data['employee_no'] = $this->generateEmployeeNumber();
+
+        if ($request->hasFile('employee_image')) {
+            $image = $request->file('employee_image');
+            $imageName = Str::uuid().'.'.$image->getClientOriginalExtension();
+            File::ensureDirectoryExists(public_path('uploads/employees'));
+            $image->move(public_path('uploads/employees'), $imageName);
+            $data['employee_image'] = $imageName;
+        }
+        $this->storeDocuments($request, $data, null, ['offer_letter', 'intent_letter']);
+
+        DB::transaction(function () use ($token, $data) {
+            $link = EmployeeOnboardingLink::where('token', $token)->whereNull('used_at')->lockForUpdate()->firstOrFail();
+            $employee = Employee::create($data);
+            $link->update(['employee_id' => $employee->id, 'used_at' => now()]);
+        });
+
+        return view('backend.employees.public-success');
+    }
+
+    public function activate($id)
+    {
+        $this->authorize('edit', Employee::class);
+        abort_unless($this->canManagePublicOnboarding(), 403);
+        $employee = Employee::findOrFail($id);
+        $employee->update(['status' => true]);
+
+        return response()->json(['status' => true, 'message' => 'Employee activated successfully.']);
     }
 
     public function store(Request $request)
@@ -140,7 +218,7 @@ class EmployeeController extends Controller
         return response()->json(['status' => true, 'message' => 'Employee deleted successfully.']);
     }
 
-    private function validatedData(Request $request): array
+    private function validatedData(Request $request, ?int $employeeId = null): array
     {
         $selectedMode = $request->filled('mode_id') ? Mode::find($request->integer('mode_id')) : null;
         $requiresContractDates = in_array(strtolower(trim($selectedMode?->mode ?? '')), ['contract', 'c2h'], true);
@@ -156,7 +234,7 @@ class EmployeeController extends Controller
             'blood_group' => 'nullable|string|max:10',
 
             // Employee Details
-            'employee_no' => 'nullable|string|max:255',
+            'employee_no' => ['nullable', 'string', 'max:255', Rule::unique('employees', 'employee_no')->ignore($employeeId)->whereNull('deleted_at')],
             'designation' => 'nullable|string|max:255',
             'date_of_joining' => 'nullable|date',
             'client_id' => 'nullable|integer|exists:clients,id',
@@ -252,11 +330,15 @@ class EmployeeController extends Controller
         ];
     }
 
-    private function storeDocuments(Request $request, array &$data, ?Employee $employee = null): void
+    private function storeDocuments(Request $request, array &$data, ?Employee $employee = null, array $excludedFields = []): void
     {
         File::ensureDirectoryExists(public_path('uploads/employees/documents'));
 
         foreach (self::DOCUMENT_FIELDS as $field) {
+            if (in_array($field, $excludedFields, true)) {
+                unset($data[$field]);
+                continue;
+            }
             if (! $request->hasFile($field)) {
                 unset($data[$field]);
 
@@ -297,6 +379,22 @@ class EmployeeController extends Controller
 
             $data[$field] = $documents ?: null;
         }
+    }
+
+    private function canManagePublicOnboarding(): bool
+    {
+        $accessLevel = str_replace('_', '-', strtolower((string) auth()->user()?->role?->access_level));
+
+        return in_array($accessLevel, ['super-admin', 'delivery-lead', 'recruiter-dl'], true);
+    }
+
+    private function generateEmployeeNumber(): string
+    {
+        do {
+            $employeeNumber = 'SZ-'.strtoupper(Str::random(10));
+        } while (Employee::withTrashed()->where('employee_no', $employeeNumber)->exists());
+
+        return $employeeNumber;
     }
 
     private function deleteEmployeeFiles(Employee $employee): void

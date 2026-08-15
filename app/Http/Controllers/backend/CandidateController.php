@@ -10,6 +10,7 @@ use App\Models\ClientJobRole;
 use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
 use App\Models\JobRole;
+use App\Models\Mode;
 use App\Models\Recruiter;
 use App\Support\MasterDataSpreadsheet;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -53,6 +54,11 @@ class CandidateController extends Controller
                                     $clientQuery->where('client', 'like', "%{$search}%");
                                 })
 
+                            // Mode
+                                ->orWhereHas('mode', function ($modeQuery) use ($search) {
+                                    $modeQuery->where('mode', 'like', "%{$search}%");
+                                })
+
                             // Recruiter
                                 ->orWhereHas('recruiter', function ($recruiterQuery) use ($search) {
                                     $recruiterQuery->where('recruiter_name', 'like', "%{$search}%");
@@ -70,6 +76,7 @@ class CandidateController extends Controller
                 ->addColumn('recruiter_name', fn ($row) => $row->recruiter->recruiter_name ?? '-')
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_role_name', fn ($row) => $row->jobRole->job_role ?? '-')
+                ->addColumn('mode_name', fn ($row) => $row->mode?->mode ?? '-')
                 ->addColumn('interview_level', fn ($row) => $row->interviewLevel->level ?? '-')
                 ->editColumn('onboarding_date', fn ($row) => $row->onboarding_date?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
@@ -244,6 +251,7 @@ class CandidateController extends Controller
                 $candidate->recruiter?->recruiter_name,
                 $candidate->client?->client,
                 $candidate->jobRole?->job_role,
+                $candidate->mode?->mode,
                 $candidate->candidate_name,
                 $candidate->mobile_no,
                 $candidate->email,
@@ -276,12 +284,13 @@ class CandidateController extends Controller
             'Recruiter' => $this->visibleRecruiters()->where('status', true)->orderBy('recruiter_name')->pluck('recruiter_name')->all(),
             'Client' => Client::where('status', true)->orderBy('client')->pluck('client')->all(),
             'Job Role' => JobRole::where('status', true)->orderBy('job_role')->pluck('job_role')->all(),
+            'Mode' => Mode::where('status', true)->orderBy('mode')->pluck('mode')->all(),
             'Level Of Interview' => InterviewLevel::where('status', true)->orderBy('sort_order')->pluck('level')->all(),
         ];
 
         return Excel::download(new MasterDataExport($this->importHeadings(), [[
             null, now()->format('Y-m-d'), $dropdowns['Recruiter'][0] ?? null,
-            $dropdowns['Client'][0] ?? null, $dropdowns['Job Role'][0] ?? null, 'Example Candidate',
+            $dropdowns['Client'][0] ?? null, $dropdowns['Job Role'][0] ?? null, $dropdowns['Mode'][0] ?? null, 'Example Candidate',
             '9876543210', 'candidate@example.com', 'B.Tech', 5, 3, 60000, 5000, 900000,
             1100000, 1050000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
             $dropdowns['Level Of Interview'][0] ?? null, now()->format('Y-m-d'), 'Active',
@@ -317,6 +326,7 @@ class CandidateController extends Controller
             $recruiter = $row['recruiter'] ?? null;
             $client = $row['client'] ?? null;
             $jobRole = $row['job_role'] ?? null;
+            $mode = $row['mode'] ?? null;
             $interviewLevel = $row['level_of_interview'] ?? null;
 
             $data = [
@@ -325,6 +335,7 @@ class CandidateController extends Controller
                 'recruiter_id' => MasterDataSpreadsheet::lookup(Recruiter::class, 'recruiter_name', $recruiter),
                 'client_id' => MasterDataSpreadsheet::lookup(Client::class, 'client', $client),
                 'job_role_id' => MasterDataSpreadsheet::lookup(JobRole::class, 'job_role', $jobRole),
+                'mode_id' => MasterDataSpreadsheet::lookup(Mode::class, 'mode', $mode),
                 'candidate_name' => trim((string) ($row['candidate_name'] ?? '')),
                 'mobile_no' => ($mobile = MasterDataSpreadsheet::text($row['mobile_no'] ?? null)) !== null
                     ? trim($mobile)
@@ -356,6 +367,7 @@ class CandidateController extends Controller
                 'recruiter_id' => 'nullable|exists:recruiters,id',
                 'client_id' => 'nullable|exists:clients,id',
                 'job_role_id' => 'nullable|exists:job_roles,id',
+                'mode_id' => 'nullable|exists:modes,id',
                 'candidate_name' => 'required|string|max:255',
                 'mobile_no' => [
                     'nullable',
@@ -391,6 +403,7 @@ class CandidateController extends Controller
                 $recruiter,
                 $client,
                 $jobRole,
+                $mode,
                 $interviewLevel,
                 $data,
                 &$seenMobiles,
@@ -400,6 +413,7 @@ class CandidateController extends Controller
                     ['value' => $recruiter, 'id' => $data['recruiter_id'], 'label' => 'Recruiter'],
                     ['value' => $client, 'id' => $data['client_id'], 'label' => 'Client'],
                     ['value' => $jobRole, 'id' => $data['job_role_id'], 'label' => 'Job role'],
+                    ['value' => $mode, 'id' => $data['mode_id'], 'label' => 'Mode'],
                     ['value' => $interviewLevel, 'id' => $data['level_of_interview_id'], 'label' => 'Level of interview'],
                 ];
 
@@ -471,6 +485,7 @@ class CandidateController extends Controller
             'linkedRecruiter' => $linkedRecruiter,
             'clients' => Client::where('status', true)->orderBy('client')->get(),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
+            'modes' => Mode::where('status', true)->orderBy('mode')->get(),
             'clientJobRoleMap' => ClientJobRole::where('status', true)
                 ->get(['client_id', 'job_role_id'])
                 ->groupBy('client_id')
@@ -483,10 +498,10 @@ class CandidateController extends Controller
     {
         $isRecruiter = $this->accessLevel() === 'recruiter';
 
-        return Candidate::with(['recruiter', 'client', 'jobRole', 'interviewLevel'])
+        return Candidate::with(['recruiter', 'client', 'jobRole', 'mode', 'interviewLevel'])
             ->visibleTo(auth()->user()->loadMissing('role'))
-            ->when($request->filled('from_date'), fn ($query) => $query->whereDate('created_at', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn ($query) => $query->whereDate('created_at', '<=', $request->to_date))
+            ->when($request->filled('from_date'), fn ($query) => $query->whereDate('onboarding_date', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn ($query) => $query->whereDate('onboarding_date', '<=', $request->to_date))
             ->when(! $isRecruiter && $request->filled('recruiter_id'), fn ($query) => $query->where('recruiter_id', $request->recruiter_id))
             ->when($request->filled('job_role_id'), fn ($query) => $query->where('job_role_id', $request->job_role_id))
             ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
@@ -520,6 +535,7 @@ class CandidateController extends Controller
             'recruiter_id' => 'required|exists:recruiters,id',
             'client_id' => 'required|exists:clients,id',
             'job_role_id' => 'required|exists:job_roles,id',
+            'mode_id' => 'required|exists:modes,id',
             'candidate_name' => 'required|string|max:255',
             'mobile_no' => [
                 'required',
@@ -547,7 +563,7 @@ class CandidateController extends Controller
             'preferred_location' => 'required|string|max:255',
             'reason_for_change' => 'nullable|string',
             'level_of_interview_id' => 'required|exists:level_of_interviews,id',
-            'upload_cv' => 'nullable|mimes:pdf,doc,docx|max:2048',
+            'upload_cv' => [$candidate?->upload_cv ? 'nullable' : 'required', 'file', 'mimes:pdf,doc,docx', 'max:2048'],
             'status' => 'required|in:0,1',
         ], [
             'mobile_no.unique' => 'This mobile number is already registered for another candidate.',
@@ -603,6 +619,6 @@ class CandidateController extends Controller
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Created Date', 'Recruiter', 'Client', 'Job Role', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Onboarding CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
+        return ['Record ID', 'Created Date', 'Recruiter', 'Client', 'Job Role', 'Mode', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Onboarding CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
     }
 }

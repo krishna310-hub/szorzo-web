@@ -16,6 +16,7 @@
                                         'model' => \App\Models\ClientRequirement::class,
                                         'fields' => ['Record ID', 'Client', 'Billing', 'Revenue Amount', 'Job Description', 'Mode', 'Requirement Open Date', 'Job Role', 'Number Of Position', 'Closure Target Date', 'CV Required', 'CV Uploaded', 'Project Owner', 'Priority', 'CTC', 'Location', 'Status'],
                                     ])
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#requirementFilters"><i class="ri-filter-3-line me-1"></i>Filter</button>
                                     @can('create', \App\Models\ClientRequirement::class)
                                         <a href="{{ route('admin.client-requirements.create') }}" class="btn btn-sm btn-primary">Add Client Requirement</a>
                                     @endcan
@@ -62,6 +63,18 @@
         </div>
     </div>
 
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="requirementFilters">
+        <div class="offcanvas-header border-bottom"><h5 class="offcanvas-title">Client Requirement Filters</h5><button class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+        <form id="requirement-filter-form" class="offcanvas-body d-flex flex-column gap-3">
+            <div><label class="form-label">Client</label><select name="client_id" class="form-select"><option value="">All clients</option>@foreach($clients as $item)<option value="{{ $item->id }}">{{ $item->client }}</option>@endforeach</select></div>
+            <div><label class="form-label">Project Owner</label><select name="project_owner_id" class="form-select"><option value="">All project owners</option>@foreach($recruiters as $item)<option value="{{ $item->id }}">{{ $item->recruiter_name }}</option>@endforeach</select></div>
+            <div><label class="form-label">Priority</label><select name="priority" class="form-select"><option value="">All priorities</option><option value="1">Priority</option><option value="0">Non priority</option></select></div>
+            <div><label class="form-label">Mode</label><select name="mode_id" class="form-select"><option value="">All modes</option>@foreach($modes as $item)<option value="{{ $item->id }}">{{ $item->mode }}</option>@endforeach</select></div>
+            <div><label class="form-label">Status</label><select name="status" class="form-select"><option value="">All statuses</option><option value="1">Active</option><option value="0">Inactive</option></select></div>
+            <div class="mt-auto d-flex gap-2 border-top pt-3"><button type="button" id="requirement-filter-reset" class="btn btn-light w-50">Reset</button><button class="btn btn-primary w-50">Apply</button></div>
+        </form>
+    </div>
+
     <div class="modal fade" id="job-description-modal" tabindex="-1" aria-labelledby="job-description-modal-title" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
@@ -80,6 +93,8 @@
 @section('script')
     <script>
         $(document).ready(function() {
+            var currentFilters = {};
+            var exportBaseUrl = @json(route('admin.client-requirements.export'));
             var table = $('#client-requirements-table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -91,7 +106,8 @@
                 },
                 ajax: {
                     url: '{{ route('admin.client-requirements.index') }}',
-                    type: 'GET'
+                    type: 'GET',
+                    data: function(data) { Object.assign(data, currentFilters); }
                 },
                 columns: [{
                     data: 'DT_RowIndex',
@@ -175,6 +191,18 @@
                     searchable: false
                 }]
             });
+
+            function updateExportUrl() {
+                var url = new URL(exportBaseUrl, window.location.origin);
+                Object.keys(currentFilters).forEach(function(key) { url.searchParams.set(key, currentFilters[key]); });
+                $('a[href^="' + exportBaseUrl + '"]').attr('href', url.toString());
+            }
+            $('#requirement-filter-form').on('submit', function(event) {
+                event.preventDefault(); currentFilters = {};
+                $(this).serializeArray().forEach(function(item) { if (item.value !== '') currentFilters[item.name] = item.value; });
+                updateExportUrl(); table.ajax.reload(); bootstrap.Offcanvas.getInstance(document.getElementById('requirementFilters'))?.hide();
+            });
+            $('#requirement-filter-reset').on('click', function() { $('#requirement-filter-form')[0].reset(); currentFilters = {}; updateExportUrl(); table.ajax.reload(); });
 
             function sanitizeJobDescription(html) {
                 const parsed = new DOMParser().parseFromString(html || '', 'text/html');

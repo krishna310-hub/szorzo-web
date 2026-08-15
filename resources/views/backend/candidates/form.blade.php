@@ -59,6 +59,16 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    <div class="col-md-4">
+        <label for="mode_id" class="form-label">Mode <span class="text-danger">*</span></label>
+        <select class="form-select" id="mode_id" name="mode_id" required>
+            <option value="">Select mode</option>
+            @foreach ($modes as $mode)
+                <option value="{{ $mode->id }}" @selected((string) old('mode_id', $candidate->mode_id ?? '') === (string) $mode->id)>{{ $mode->mode }}</option>
+            @endforeach
+        </select>
+        @error('mode_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
     <div class="col-md-4"><label for="candidate_name" class="form-label">Candidate Name <span
                 class="text-danger">*</span></label><input class="form-control" id="candidate_name"
             name="candidate_name" value="{{ old('candidate_name', $candidate->candidate_name ?? '') }}">
@@ -164,7 +174,7 @@
     </div>
     <div class="col-md-4">
         <label for="upload_cv" class="form-label">
-            Upload CV 
+            Upload CV @if(empty($candidate->upload_cv))<span class="text-danger">*</span>@endif
 
             @if(isset($candidate) && $candidate->upload_cv)
                 <a href="{{ asset($candidate->upload_cv) }}" target="_blank" class="btn btn-sm btn-outline-primary">
@@ -173,9 +183,10 @@
             @endif
         </label>
 
-        <input type="file" class="form-control" id="upload_cv" name="upload_cv">
+        <input type="file" class="form-control" id="upload_cv" name="upload_cv" accept=".pdf,.doc,.docx" @if(empty($candidate->upload_cv)) required @endif>
 
         <span class="text-danger small">Maximum file size is 2MB</span>
+        @error('upload_cv')<div class="text-danger small">{{ $message }}</div>@enderror
 
     </div>
     <div class="col-md-8"><label for="reason_for_change" class="form-label">Reason For Change</label>

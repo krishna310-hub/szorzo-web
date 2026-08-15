@@ -10,6 +10,6 @@
             <a href="{{ route('admin.revenues.download', $revenue) }}" class="btn btn-success">Download PDF</a>
         @endcan
     </div>
-    <div class="card"><div class="card-body bg-light">@include('backend.revenues.invoice')</div></div>
+    <div class="card"><div class="card-body bg-light overflow-auto invoice-preview-shell">@include('backend.revenues.invoice-content')</div></div>
 </div></div></div>
 @endsection

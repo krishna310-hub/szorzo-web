@@ -15,6 +15,7 @@ class Candidate extends Model
         'recruiter_id',
         'client_id',
         'job_role_id',
+        'mode_id',
         'candidate_name',
         'mobile_no',
         'email',
@@ -55,6 +56,11 @@ class Candidate extends Model
     public function jobRole()
     {
         return $this->belongsTo(JobRole::class);
+    }
+
+    public function mode()
+    {
+        return $this->belongsTo(Mode::class);
     }
 
     public function interviewLevel()

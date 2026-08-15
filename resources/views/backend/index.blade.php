@@ -1259,7 +1259,7 @@
                     </div>
                 @endif
                 <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
-                    <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Chart Year</label>
+                    <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Calendar Year</label>
                     <select id="dashboardChartYear" class="form-select form-select-sm" style="width: 120px"
                         data-url="{{ route('admin.dashboard.year-charts') }}"
                         data-recruiter="{{ $selectedRecruiterId }}" data-client="{{ $selectedClientId }}">
@@ -1297,7 +1297,7 @@
                                             <div class="d-flex gap-4 position-relative" style="z-index: 1">
                                                 <div>
                                                     <div class="pipeline-overview-label">Activity</div>
-                                                    <div class="pipeline-overview-value">{{ number_format($pipelineTotal) }}</div>
+                                                    <div class="pipeline-overview-value" id="pipelineActivityTotal">{{ number_format($pipelineTotal) }}</div>
                                                 </div>
                                                 <div>
                                                     <div class="pipeline-overview-label">Statuses</div>
@@ -1325,7 +1325,7 @@
                                                             <div class="pipeline-stage-meta">{{ $design['caption'] }}</div>
                                                         </div>
                                                         @unless (in_array($group['title'], ['Monthly Joining Details', 'Monthly Onboarding Details'], true))
-                                                            <div class="pipeline-stage-count">
+                                                            <div class="pipeline-stage-count" data-pipeline-stage>
                                                                 <strong>{{ number_format($stageTotal) }}</strong>
                                                                 <span>Candidates</span>
                                                             </div>
@@ -1349,19 +1349,19 @@
                                                                 $percentage = round(($count / $stageMax) * 100);
                                                             @endphp
 
-                                                            <div class="pipeline-item">
+                                                            <div class="pipeline-item" data-pipeline-level="{{ $level->level }}">
                                                                 <div class="pipeline-item-header">
                                                                     <span class="pipeline-item-label">
                                                                         {{ $level->level }}
                                                                     </span>
 
-                                                                    <span class="pipeline-item-value">
+                                                                    <span class="pipeline-item-value" data-pipeline-count>
                                                                         {{ number_format($count) }}
                                                                     </span>
                                                                 </div>
 
                                                                 <div class="pipeline-track">
-                                                                    <div class="pipeline-fill"
+                                                                    <div class="pipeline-fill" data-pipeline-progress
                                                                         style="width: {{ $percentage }}%">
                                                                     </div>
                                                                 </div>
@@ -1774,6 +1774,31 @@
                     var declinedBadge = document.querySelector('#declinedRevenueBadge');
                     if (onboardedBadge) onboardedBadge.textContent = 'Onboarded: ₹' + currency.format(data.onboarded_revenue_total);
                     if (declinedBadge) declinedBadge.textContent = 'Declined: ₹' + currency.format(data.declined_revenue_total);
+                    var pipelineCounts = data.pipeline_counts || {};
+                    document.querySelectorAll('[data-pipeline-level]').forEach(function(item) {
+                        var count = Number(pipelineCounts[item.dataset.pipelineLevel] || 0);
+                        item.dataset.pipelineValue = count;
+                        var countTarget = item.querySelector('[data-pipeline-count]');
+                        if (countTarget) countTarget.textContent = count.toLocaleString('en-IN');
+                    });
+                    var pipelineTotal = 0;
+                    document.querySelectorAll('.pipeline-stage').forEach(function(stage) {
+                        var items = Array.from(stage.querySelectorAll('[data-pipeline-level]'));
+                        if (!items.length) return;
+                        var values = items.map(function(item) { return Number(item.dataset.pipelineValue || 0); });
+                        var stageTotal = values.reduce(function(total, value) { return total + value; }, 0);
+                        var stageMax = Math.max(1, ...values);
+                        pipelineTotal += stageTotal;
+                        var stageCount = stage.querySelector('[data-pipeline-stage] strong');
+                        if (stageCount) stageCount.textContent = stageTotal.toLocaleString('en-IN');
+                        items.forEach(function(item) {
+                            var value = Number(item.dataset.pipelineValue || 0);
+                            var progress = item.querySelector('[data-pipeline-progress]');
+                            if (progress) progress.style.width = Math.round((value / stageMax) * 100) + '%';
+                        });
+                    });
+                    var activityTotal = document.querySelector('#pipelineActivityTotal');
+                    if (activityTotal) activityTotal.textContent = pipelineTotal.toLocaleString('en-IN');
                     loadedYear = requestedYear;
                 } catch (error) {
                     yearSelect.value = loadedYear;

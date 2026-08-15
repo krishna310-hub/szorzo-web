@@ -82,6 +82,11 @@ Route::group(['controller' => LoginController::class], function () {
     Route::post('/logout', 'logout')->name('logout');
 });
 
+Route::controller(EmployeeController::class)->prefix('employee-onboarding')->name('employee-onboarding.')->group(function () {
+    Route::get('/{token}', 'publicForm')->name('form');
+    Route::post('/{token}', 'publicStore')->middleware('throttle:10,1')->name('store');
+});
+
 Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->group(function () {
     // Maintenance Mode
     Route::get('/lock-screen', [AdminController::class, 'lock'])->name('lock.screen');
@@ -174,6 +179,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
 
         Route::prefix('profile-sourced')->name('profile-sourced.')->controller(ProfileSourcedController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/export', 'export')->name('export');
             Route::get('/create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('/{profileSourced}/edit', 'edit')->name('edit');
@@ -233,6 +239,8 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
 
         Route::prefix('employees')->name('employees.')->controller(EmployeeController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::post('/generate-link', 'generateLink')->name('generate-link');
+            Route::post('/{id}/activate', 'activate')->name('activate');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');
