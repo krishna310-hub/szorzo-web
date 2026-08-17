@@ -34,6 +34,19 @@ class ClientRequirementController extends Controller
             $recruiterNames = Recruiter::pluck('recruiter_name', 'id');
             $query = ClientRequirement::visibleTo($request->user())
                 ->with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner', 'billing'])
+                ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
+                ->when($request->filled('project_owner_id'), function ($query) use ($request) {
+                    $id = (int) $request->project_owner_id;
+                    $query->where(fn ($ownerQuery) => $ownerQuery->whereJsonContains('project_owner_ids', $id)
+                        ->orWhere(fn ($legacyQuery) => $legacyQuery->whereNull('project_owner_ids')->where('project_owner', $id)));
+                })
+                ->when($request->filled('priority'), fn ($query) => $query->where('is_priority', $request->boolean('priority')))
+                ->when($request->filled('mode_id'), function ($query) use ($request) {
+                    $id = (int) $request->mode_id;
+                    $query->where(fn ($modeQuery) => $modeQuery->whereJsonContains('mode_ids', $id)
+                        ->orWhere(fn ($legacyQuery) => $legacyQuery->whereNull('mode_ids')->where('mode_id', $id)));
+                })
+                ->when($request->filled('status'), fn ($query) => $query->where('status', $request->boolean('status')))
                 ->latest();
 
             $dataTable = DataTables::of($query)
@@ -119,7 +132,11 @@ class ClientRequirementController extends Controller
                 ->make(true);
         }
 
-        return view('backend.client-requirements.index');
+        return view('backend.client-requirements.index', [
+            'clients' => Client::where('status', true)->orderBy('client')->get(),
+            'recruiters' => Recruiter::where('status', true)->orderBy('recruiter_name')->get(),
+            'modes' => Mode::where('status', true)->orderBy('mode')->get(),
+        ]);
     }
 
     public function create()
@@ -163,16 +180,29 @@ class ClientRequirementController extends Controller
         return response()->json(['status' => true, 'message' => 'Client requirement deleted successfully.']);
     }
 
-    public function export()
+    public function export(Request $request)
     {
         $this->authorize('read', ClientRequirement::class);
         $modeNames = Mode::pluck('mode', 'id');
         $locationNames = Location::pluck('location', 'id');
         $recruiterNames = Recruiter::pluck('recruiter_name', 'id');
 
-        $rows = ClientRequirement::visibleTo(request()->user())
+        $rows = ClientRequirement::visibleTo($request->user())
             ->with(['client', 'billing', 'jobDescription', 'mode', 'jobRole', 'projectOwner', 'location'])
-            ->latest()->get()->map(fn ($item) => [
+            ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
+            ->when($request->filled('project_owner_id'), function ($query) use ($request) {
+                $id = (int) $request->project_owner_id;
+                $query->where(fn ($ownerQuery) => $ownerQuery->whereJsonContains('project_owner_ids', $id)
+                    ->orWhere(fn ($legacyQuery) => $legacyQuery->whereNull('project_owner_ids')->where('project_owner', $id)));
+            })
+            ->when($request->filled('priority'), fn ($query) => $query->where('is_priority', $request->boolean('priority')))
+            ->when($request->filled('mode_id'), function ($query) use ($request) {
+                $id = (int) $request->mode_id;
+                $query->where(fn ($modeQuery) => $modeQuery->whereJsonContains('mode_ids', $id)
+                    ->orWhere(fn ($legacyQuery) => $legacyQuery->whereNull('mode_ids')->where('mode_id', $id)));
+            })
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->boolean('status')))
+            ->orderBy('id')->get()->map(fn ($item) => [
                 $item->id,
                 $item->client?->client,
                 $item->billing?->value,

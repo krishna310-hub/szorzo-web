@@ -77,8 +77,9 @@ class RevenueController extends Controller
     {
         $this->authorize('read', Revenue::class);
         $revenue->load(['candidate.jobRole', 'client']);
-        $amountInWords = $this->amountInWords((float) $revenue->total_amount);
-        return view('backend.revenues.show', compact('revenue', 'amountInWords'));
+        [$amountInWords, $offeredCtcDisplay] = $this->invoiceDisplayValues($revenue);
+
+        return view('backend.revenues.show', compact('revenue', 'amountInWords', 'offeredCtcDisplay'));
     }
 
     public function edit(Revenue $revenue)
@@ -103,8 +104,15 @@ class RevenueController extends Controller
     {
         $this->authorize('download', Revenue::class);
         $revenue->load(['candidate.jobRole', 'client']);
-        $amountInWords = $this->amountInWords((float) $revenue->total_amount);
-        $pdf = Pdf::loadView('backend.revenues.invoice', compact('revenue', 'amountInWords'))->setPaper('a4');
+        [$amountInWords, $offeredCtcDisplay] = $this->invoiceDisplayValues($revenue);
+        $pdf = Pdf::loadView('backend.revenues.invoice', compact('revenue', 'amountInWords', 'offeredCtcDisplay'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => false,
+                'defaultFont' => 'Helvetica',
+                'dpi' => 96,
+            ]);
         $name = preg_replace('/[^A-Za-z0-9_-]+/', '-', $revenue->invoice_number).'.pdf';
         return $pdf->download($name);
     }
@@ -171,6 +179,33 @@ class RevenueController extends Controller
     {
         $formatter = new \NumberFormatter('en_IN', \NumberFormatter::SPELLOUT);
         $words = $formatter->format((int) round($amount));
-        return ucfirst(str_replace('-', ' ', $words)).' Rupees Only.';
+
+        return mb_convert_case(str_replace('-', ' ', $words), MB_CASE_TITLE, 'UTF-8').' Rupees Only.';
+    }
+
+    private function invoiceDisplayValues(Revenue $revenue): array
+    {
+        return [
+            $this->amountInWords((float) $revenue->total_amount),
+            $this->indianNumber((float) ($revenue->offered_ctc ?? $revenue->onboarding_ctc)),
+        ];
+    }
+
+    private function indianNumber(float $amount): string
+    {
+        $whole = (string) (int) round($amount);
+        if (strlen($whole) <= 3) {
+            return $whole;
+        }
+
+        $lastThree = substr($whole, -3);
+        $leading = substr($whole, 0, -3);
+        $groups = [];
+        while ($leading !== '') {
+            array_unshift($groups, substr($leading, -2));
+            $leading = substr($leading, 0, -2);
+        }
+
+        return implode(',', $groups).','.$lastThree;
     }
 }

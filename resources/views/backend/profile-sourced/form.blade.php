@@ -7,9 +7,37 @@
     </div>
     <div class="col-md-6 mb-3">
         <label class="form-label">Recruiter Name</label>
-        <input class="form-control" value="{{ $profileSourced->recruiter?->recruiter_name ?? ($recruiter ?? null)?->recruiter_name ?? '' }}" readonly>
-        <small class="text-muted">Automatically populated from your login.</small>
+        @if ($canChooseRecruiter)
+            <select class="form-select" name="recruiter_id" required>
+                <option value="">Choose recruiter or delivery lead</option>
+                @foreach ($recruiters as $item)
+                    <option value="{{ $item->id }}" @selected((string) old('recruiter_id', $profileSourced->recruiter_id ?? '') === (string) $item->id)>
+                        {{ $item->recruiter_name }}{{ $item->deliveryLead ? ' — DL: '.$item->deliveryLead->name : '' }}
+                    </option>
+                @endforeach
+            </select>
+            <small class="text-muted">Delivery-lead mappings are shown beside recruiter names.</small>
+        @else
+            <input class="form-control" value="{{ $profileSourced->recruiter?->recruiter_name ?? ($recruiter ?? null)?->recruiter_name ?? '' }}" readonly>
+            <small class="text-muted">Automatically populated from your login.</small>
+        @endif
+        @error('recruiter_id')<div class="text-danger small">{{ $message }}</div>@enderror
         @error('recruiter')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="job_role_id" class="form-label">Job Role <span class="text-danger">*</span></label>
+        <select id="job_role_id" name="job_role_id" class="form-select" required>
+            <option value="">Select job role</option>
+            @foreach ($jobRoles as $jobRole)
+                <option value="{{ $jobRole->id }}" @selected((string) old('job_role_id', $profileSourced->job_role_id ?? '') === (string) $jobRole->id)>{{ $jobRole->job_role }}</option>
+            @endforeach
+        </select>
+        @error('job_role_id')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="need" class="form-label">Need</label>
+        <input id="need" name="need" class="form-control" value="{{ old('need', $profileSourced->need ?? '') }}">
+        @error('need')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3">
         <label for="mobile_number" class="form-label">Mobile Number <span class="text-danger">*</span></label>

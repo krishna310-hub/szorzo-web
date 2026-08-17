@@ -82,6 +82,11 @@ Route::group(['controller' => LoginController::class], function () {
     Route::post('/logout', 'logout')->name('logout');
 });
 
+Route::controller(EmployeeController::class)->prefix('employee-onboarding')->name('employee-onboarding.')->group(function () {
+    Route::get('/{token}', 'publicForm')->name('form');
+    Route::post('/{token}', 'publicStore')->middleware('throttle:10,1')->name('store');
+});
+
 Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->group(function () {
     // Maintenance Mode
     Route::get('/lock-screen', [AdminController::class, 'lock'])->name('lock.screen');
@@ -90,6 +95,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::group(['controller' => AdminController::class], function () {
         Route::get('/dashboard','index')->name('dashboard');
         Route::get('/dashboard/year-charts', 'yearCharts')->name('dashboard.year-charts');
+        Route::get('/dashboard/monthly-targets', 'monthlyTargets')->name('dashboard.monthly-targets');
         Route::get('/profile', 'profile')->name('profile');
         Route::post('/upload-profile-image', 'uploadProfile')->name('upload.profile');
         Route::post('/profile/change-password', 'changePassword')->middleware('throttle:6,1')->name('profile.change-password');
@@ -172,6 +178,17 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::delete('/{id}', 'destroy')->name('delete');
         });
 
+        Route::prefix('profile-sourced')->name('profile-sourced.')->controller(ProfileSourcedController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{profileSourced}/edit', 'edit')->name('edit');
+            Route::put('/{profileSourced}', 'update')->name('update');
+            Route::post('/{profileSourced}/move-to-candidate', 'moveToCandidate')->name('move');
+            Route::delete('/{profileSourced}', 'destroy')->name('delete');
+        });
+
         Route::prefix('job-roles')->name('job-roles.')->controller(JobRoleController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
@@ -223,6 +240,8 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
 
         Route::prefix('employees')->name('employees.')->controller(EmployeeController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::post('/generate-link', 'generateLink')->name('generate-link');
+            Route::post('/{id}/activate', 'activate')->name('activate');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');

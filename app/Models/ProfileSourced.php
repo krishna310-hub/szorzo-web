@@ -13,12 +13,17 @@ class ProfileSourced extends Model
     protected $table = 'profile_sourced';
 
     protected $fillable = [
-        'recruiter_id', 'created_by_user_id', 'candidate_name', 'cv_path', 'mobile_number', 'email',
+        'recruiter_id', 'job_role_id', 'created_by_user_id', 'candidate_name', 'need', 'cv_path', 'mobile_number', 'email',
     ];
 
     public function recruiter()
     {
         return $this->belongsTo(Recruiter::class);
+    }
+
+    public function jobRole()
+    {
+        return $this->belongsTo(JobRole::class);
     }
 
     public function createdBy()

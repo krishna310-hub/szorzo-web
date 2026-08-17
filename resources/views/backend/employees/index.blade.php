@@ -9,14 +9,27 @@
                         <div class="card">
                             <div class="card-header d-flex align-items-center">
                                 <h5 class="card-title mb-0 flex-grow-1">Employees</h5>
+                                @php($employeeAccess = str_replace('_', '-', strtolower((string) auth()->user()->role?->access_level)))
                                 @can('create', \App\Models\Employee::class)
                                 <div class="d-flex flex-wrap gap-2">
+                                    @if(in_array($employeeAccess, ['super-admin', 'delivery-lead', 'recruiter-dl'], true))
+                                    <form method="POST" action="{{ route('admin.employees.generate-link') }}">@csrf
+                                        <button class="btn btn-sm btn-outline-primary"><i class="ri-link me-1"></i>Generate Link</button>
+                                    </form>
+                                    @endif
                                     <a href="{{ route('admin.employees.create') }}" class="btn btn-sm btn-primary">Add New
                                         Employee</a>
                                 </div>
                                 @endcan
                             </div>
                             <div class="card-body">
+                                @if(session('onboarding_link'))
+                                    <div class="alert alert-success">
+                                        <label class="form-label fw-semibold">Unique employee onboarding link</label>
+                                        <div class="input-group"><input id="generated-onboarding-link" class="form-control" readonly value="{{ session('onboarding_link') }}"><button type="button" id="copy-onboarding-link" class="btn btn-success">Copy</button></div>
+                                        <small>This one-time link works without login.</small>
+                                    </div>
+                                @endif
                                 <div class="table-responsive">
                                     <table id="employees-table" class="table table-bordered dt-responsive nowrap w-100">
                                         <thead>
@@ -102,6 +115,15 @@
                         table.ajax.reload(null, false);
                     }
                 });
+            });
+            $(document).on('click', '.activate-record', function() {
+                var button = $(this); button.prop('disabled', true);
+                $.post(button.data('route')).done(function(res) { toastr.success(res.message); table.ajax.reload(null, false); })
+                    .fail(function(xhr) { toastr.error(xhr.responseJSON?.message || 'Employee could not be activated.'); })
+                    .always(function() { button.prop('disabled', false); });
+            });
+            $('#copy-onboarding-link').on('click', function() {
+                navigator.clipboard.writeText($('#generated-onboarding-link').val()).then(function() { toastr.success('Link copied.'); });
             });
         });
     </script>

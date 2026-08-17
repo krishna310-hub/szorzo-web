@@ -1327,7 +1327,22 @@
                                     @endif
                                 </p>
                             </div>
-                            <div class="target-month"><i class="ri-calendar-2-line"></i>{{ now()->format('F Y') }}</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="ri-calendar-2-line text-danger"></i>
+                                <select id="targetAnalyticsMonth" class="form-select form-select-sm" aria-label="Target analytics month">
+                                    @foreach (range(1, 12) as $month)
+                                        <option value="{{ $month }}" @selected($targetMonth === $month)>{{ Carbon\Carbon::create()->month($month)->format('F') }}</option>
+                                    @endforeach
+                                </select>
+                                <select id="targetAnalyticsYear" class="form-select form-select-sm" aria-label="Target analytics year"
+                                    data-url="{{ route('admin.dashboard.monthly-targets') }}"
+                                    data-recruiter="{{ $selectedRecruiterId }}" data-client="{{ $selectedClientId }}">
+                                    @foreach (range(now()->year, 2024) as $year)
+                                        <option value="{{ $year }}" @selected($targetYear === $year)>{{ $year }}</option>
+                                    @endforeach
+                                </select>
+                                <span id="targetAnalyticsLoading" class="spinner-border spinner-border-sm text-danger d-none" role="status"><span class="visually-hidden">Loading</span></span>
+                            </div>
                         </div>
 
                         {{-- <div class="row g-3 mb-4">
@@ -1373,7 +1388,7 @@
                                                 ? 'percentage-blue'
                                                 : 'percentage-red');
                                 @endphp
-                                <div class="col-md-6 col-xl-4">
+                                <div class="col-md-6 col-xl-4" data-target-kpi="{{ $loop->index }}">
                                     <div class="kpi-card">
                                         <div class="d-flex justify-content-between gap-3 mb-3">
                                             <div class="d-flex align-items-center gap-3">
@@ -1383,17 +1398,17 @@
                                                         class="text-muted">Monthly target</small>
                                                 </div>
                                             </div>
-                                            <div class="text-end"><strong
+                                            <div class="text-end"><strong data-target-value
                                                     class="text-dark">{{ $kpi['target'] }}</strong><small
                                                     class="d-block text-muted">{{ $kpi['unit'] }}</small></div>
                                         </div>
                                         <div class="d-flex justify-content-between small mb-2"><span
                                                 class="text-muted">Completed:
-                                                {{ number_format($kpi['completed']) }}</span><strong
-                                                class="individual-target-summary-value {{ $percentageColor }}">{{ $kpi['percentage'] }}%</strong>
+                                                <span data-target-completed>{{ number_format($kpi['completed']) }}</span></span><strong
+                                                data-target-percentage class="individual-target-summary-value {{ $percentageColor }}">{{ $kpi['percentage'] }}%</strong>
                                         </div>
                                         <div class="target-progress">
-                                            <div class="target-progress-bar {{ $percentageColor }}"
+                                            <div data-target-progress class="target-progress-bar {{ $percentageColor }}"
                                                 style="width:{{ $kpi['percentage'] }}%"></div>
                                         </div>
                                     </div>
@@ -1553,7 +1568,7 @@
                     </div>
                 @endif
                 <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
-                    <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Chart Year</label>
+                    <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Calendar Year</label>
                     <select id="dashboardChartYear" class="form-select form-select-sm" style="width: 120px"
                         data-url="{{ route('admin.dashboard.year-charts') }}"
                         data-recruiter="{{ $selectedRecruiterId }}" data-client="{{ $selectedClientId }}">
@@ -1591,7 +1606,7 @@
                                             <div class="d-flex gap-4 position-relative" style="z-index: 1">
                                                 <div>
                                                     <div class="pipeline-overview-label">Activity</div>
-                                                    <div class="pipeline-overview-value">{{ number_format($pipelineTotal) }}</div>
+                                                    <div class="pipeline-overview-value" id="pipelineActivityTotal">{{ number_format($pipelineTotal) }}</div>
                                                 </div>
                                                 <div>
                                                     <div class="pipeline-overview-label">Statuses</div>
@@ -1619,7 +1634,7 @@
                                                             <div class="pipeline-stage-meta">{{ $design['caption'] }}</div>
                                                         </div>
                                                         @unless (in_array($group['title'], ['Monthly Joining Details', 'Monthly Onboarding Details'], true))
-                                                            <div class="pipeline-stage-count">
+                                                            <div class="pipeline-stage-count" data-pipeline-stage>
                                                                 <strong>{{ number_format($stageTotal) }}</strong>
                                                                 <span>Candidates</span>
                                                             </div>
@@ -1643,19 +1658,19 @@
                                                                 $percentage = round(($count / $stageMax) * 100);
                                                             @endphp
 
-                                                            <div class="pipeline-item">
+                                                            <div class="pipeline-item" data-pipeline-level="{{ $level->level }}">
                                                                 <div class="pipeline-item-header">
                                                                     <span class="pipeline-item-label">
                                                                         {{ $level->level }}
                                                                     </span>
 
-                                                                    <span class="pipeline-item-value">
+                                                                    <span class="pipeline-item-value" data-pipeline-count>
                                                                         {{ number_format($count) }}
                                                                     </span>
                                                                 </div>
 
                                                                 <div class="pipeline-track">
-                                                                    <div class="pipeline-fill"
+                                                                    <div class="pipeline-fill" data-pipeline-progress
                                                                         style="width: {{ $percentage }}%">
                                                                     </div>
                                                                 </div>
@@ -2068,6 +2083,31 @@
                     var declinedBadge = document.querySelector('#declinedRevenueBadge');
                     if (onboardedBadge) onboardedBadge.textContent = 'Onboarded: ₹' + currency.format(data.onboarded_revenue_total);
                     if (declinedBadge) declinedBadge.textContent = 'Declined: ₹' + currency.format(data.declined_revenue_total);
+                    var pipelineCounts = data.pipeline_counts || {};
+                    document.querySelectorAll('[data-pipeline-level]').forEach(function(item) {
+                        var count = Number(pipelineCounts[item.dataset.pipelineLevel] || 0);
+                        item.dataset.pipelineValue = count;
+                        var countTarget = item.querySelector('[data-pipeline-count]');
+                        if (countTarget) countTarget.textContent = count.toLocaleString('en-IN');
+                    });
+                    var pipelineTotal = 0;
+                    document.querySelectorAll('.pipeline-stage').forEach(function(stage) {
+                        var items = Array.from(stage.querySelectorAll('[data-pipeline-level]'));
+                        if (!items.length) return;
+                        var values = items.map(function(item) { return Number(item.dataset.pipelineValue || 0); });
+                        var stageTotal = values.reduce(function(total, value) { return total + value; }, 0);
+                        var stageMax = Math.max(1, ...values);
+                        pipelineTotal += stageTotal;
+                        var stageCount = stage.querySelector('[data-pipeline-stage] strong');
+                        if (stageCount) stageCount.textContent = stageTotal.toLocaleString('en-IN');
+                        items.forEach(function(item) {
+                            var value = Number(item.dataset.pipelineValue || 0);
+                            var progress = item.querySelector('[data-pipeline-progress]');
+                            if (progress) progress.style.width = Math.round((value / stageMax) * 100) + '%';
+                        });
+                    });
+                    var activityTotal = document.querySelector('#pipelineActivityTotal');
+                    if (activityTotal) activityTotal.textContent = pipelineTotal.toLocaleString('en-IN');
                     loadedYear = requestedYear;
                 } catch (error) {
                     yearSelect.value = loadedYear;
@@ -2077,6 +2117,76 @@
                     loading?.classList.add('d-none');
                 }
             });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var monthSelect = document.querySelector('#targetAnalyticsMonth');
+            var yearSelect = document.querySelector('#targetAnalyticsYear');
+            var loading = document.querySelector('#targetAnalyticsLoading');
+            if (!monthSelect || !yearSelect) return;
+
+            var loadedMonth = monthSelect.value;
+            var loadedYear = yearSelect.value;
+
+            async function refreshMonthlyTargets() {
+                var url = new URL(yearSelect.dataset.url, window.location.origin);
+                url.searchParams.set('month', monthSelect.value);
+                url.searchParams.set('year', yearSelect.value);
+                if (yearSelect.dataset.recruiter) url.searchParams.set('recruiter_id', yearSelect.dataset.recruiter);
+                if (yearSelect.dataset.client) url.searchParams.set('client_id', yearSelect.dataset.client);
+
+                monthSelect.disabled = true;
+                yearSelect.disabled = true;
+                loading?.classList.remove('d-none');
+
+                try {
+                    var response = await fetch(url, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!response.ok) {
+                        var errorData = await response.json().catch(function() { return {}; });
+                        throw new Error(errorData.message || 'Unable to load monthly target analytics.');
+                    }
+
+                    var data = await response.json();
+                    (data.kpis || []).forEach(function(kpi, index) {
+                        var card = document.querySelector('[data-target-kpi="' + index + '"]');
+                        if (!card) return;
+                        var colorClass = kpi.percentage > 80
+                            ? 'percentage-green'
+                            : (kpi.percentage >= 60 ? 'percentage-blue' : 'percentage-red');
+                        var target = card.querySelector('[data-target-value]');
+                        var completed = card.querySelector('[data-target-completed]');
+                        var percentage = card.querySelector('[data-target-percentage]');
+                        var progress = card.querySelector('[data-target-progress]');
+                        if (target) target.textContent = Number(kpi.target).toLocaleString('en-IN');
+                        if (completed) completed.textContent = Number(kpi.completed).toLocaleString('en-IN');
+                        if (percentage) {
+                            percentage.textContent = kpi.percentage + '%';
+                            percentage.classList.remove('percentage-green', 'percentage-blue', 'percentage-red');
+                            percentage.classList.add(colorClass);
+                        }
+                        if (progress) {
+                            progress.style.width = kpi.percentage + '%';
+                            progress.classList.remove('percentage-green', 'percentage-blue', 'percentage-red');
+                            progress.classList.add(colorClass);
+                        }
+                    });
+                    loadedMonth = monthSelect.value;
+                    loadedYear = yearSelect.value;
+                } catch (error) {
+                    monthSelect.value = loadedMonth;
+                    yearSelect.value = loadedYear;
+                    window.alert(error.message);
+                } finally {
+                    monthSelect.disabled = false;
+                    yearSelect.disabled = false;
+                    loading?.classList.add('d-none');
+                }
+            }
+
+            monthSelect.addEventListener('change', refreshMonthlyTargets);
+            yearSelect.addEventListener('change', refreshMonthlyTargets);
         });
 
         document.addEventListener('DOMContentLoaded', function() {

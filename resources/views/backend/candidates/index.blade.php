@@ -21,6 +21,7 @@
                                             'Recruiter',
                                             'Client',
                                             'Job Role',
+                                            'Mode',
                                             'Candidate Name',
                                             'Mobile No',
                                             'Email',
@@ -58,6 +59,7 @@
                                                 <th>Recruiter</th>
                                                 <th>Client</th>
                                                 <th>Job Role</th>
+                                                <th>Mode</th>
                                                 <th>Level Of Interview</th>
                                                 <th>Mobile No</th>
                                                 <th>Email</th>
@@ -97,12 +99,20 @@
         </div>
         <form id="candidate-filter-form" class="offcanvas-body d-flex flex-column gap-3">
             <div>
-                <label for="filter_from_date" class="form-label">From Date</label>
+                <label for="filter_from_date" class="form-label">Created From Date</label>
                 <input type="date" class="form-control" id="filter_from_date" name="from_date">
             </div>
             <div>
-                <label for="filter_to_date" class="form-label">To Date</label>
+                <label for="filter_to_date" class="form-label">Created To Date</label>
                 <input type="date" class="form-control" id="filter_to_date" name="to_date">
+            </div>
+            <div>
+                <label for="filter_onboarding_from_date" class="form-label">Onboarding From Date</label>
+                <input type="date" class="form-control" id="filter_onboarding_from_date" name="onboarding_from_date">
+            </div>
+            <div>
+                <label for="filter_onboarding_to_date" class="form-label">Onboarding To Date</label>
+                <input type="date" class="form-control" id="filter_onboarding_to_date" name="onboarding_to_date">
             </div>
             <div>
                 <label for="filter_recruiter_id" class="form-label">Recruiter</label>
@@ -161,12 +171,24 @@
             var exportBaseUrl = @json(route('admin.candidates.export'));
             var indexUrl = @json(route('admin.candidates.index'));
             var currentFilters = {};
+            var clientJobRoleMap = @json($clientJobRoleMap);
             var interviewLevelFilter = new Choices('#filter_level_of_interview_id', {
                 removeItemButton: true,
                 shouldSort: false,
                 placeholder: true,
                 placeholderValue: 'Select interview levels'
             });
+
+            function filterJobRolesByClient() {
+                var clientId = $('#filter_client_id').val();
+                var allowed = clientId ? (clientJobRoleMap[clientId] || []).map(String) : null;
+                $('#filter_job_role_id option').each(function() {
+                    if (!this.value) return;
+                    $(this).prop('hidden', allowed !== null && !allowed.includes(String(this.value)));
+                });
+                if (allowed !== null && !allowed.includes(String($('#filter_job_role_id').val()))) $('#filter_job_role_id').val('');
+            }
+            $('#filter_client_id').on('change', filterJobRolesByClient);
 
             function collectFilters() {
                 var filters = {};
@@ -241,6 +263,10 @@
                     }, {
                         data: 'job_role_name',
                         name: 'job_role_name',
+                    }, {
+                        data: 'mode_name',
+                        name: 'mode_name',
+                        orderable: false
                     }, {
                         data: 'interview_level',
                         name: 'interview_level',

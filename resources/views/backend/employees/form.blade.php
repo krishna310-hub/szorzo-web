@@ -104,6 +104,7 @@
     <div class="col-12 mt-5">
         <h4 class="mt-4 mb-3 text-primary">Employee Details</h4>
     </div>
+    @unless($publicEmployeeForm ?? false)
     <div class="col-md-4">
         <label for="employee_no" class="form-label">Employee ID</label>
         <input type="text" class="form-control" id="employee_no" name="employee_no" placeholder="Enter employee id"
@@ -112,6 +113,7 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    @endunless
     <div class="col-md-4">
         <label for="designation" class="form-label">Designation</label>
         <input type="text" class="form-control" id="designation" name="designation" placeholder="Enter designation"
@@ -120,6 +122,7 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    @unless($publicEmployeeForm ?? false)
     <div class="col-md-4">
         <label for="date_of_joining" class="form-label">Date of Joining (DOJ)</label>
         <input type="date" class="form-control" id="date_of_joining" name="date_of_joining"
@@ -156,6 +159,7 @@
         </select>
         @error('mode_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+    @endunless
     <div class="col-md-4 mt-3 contract-date-field">
         <label for="contract_from_date" class="form-label">From Date <span class="text-danger">*</span></label>
         <input type="date" class="form-control" id="contract_from_date" name="contract_from_date"
@@ -168,6 +172,7 @@
             value="{{ old('contract_to_date', isset($employee) && $employee->contract_to_date ? $employee->contract_to_date->format('Y-m-d') : '') }}">
         @error('contract_to_date')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+    @unless($publicEmployeeForm ?? false)
     @foreach(['offer_letter' => 'Offer Letter', 'intent_letter' => 'Intent Letter'] as $field => $label)
         <div class="col-md-4 mt-3">
             <label for="{{ $field }}" class="form-label">{{ $label }}
@@ -177,6 +182,41 @@
             </label>
             <input type="file" class="form-control" id="{{ $field }}" name="{{ $field }}" accept=".pdf,.jpg,.jpeg,.png">
             @error($field)<span class="text-danger small">{{ $message }}</span>@enderror
+        </div>
+    @endforeach
+    @endunless
+    <div class="col-12 mt-4">
+        <h5 class="text-primary mb-3">Previous Employment &amp; Bank Documents</h5>
+    </div>
+    @php
+        $multipleDocumentFields = [
+            'previous_company_offer_letters' => "Previous Company's Offer Letter (All Companies)",
+            'relieving_letters' => 'Relieving Letter (All Companies)',
+            'pay_slips' => "3 Months' Pay Slips",
+            'bank_statements' => 'Bank Statements for the Past 3 Months',
+            'passbook_cheques' => 'Passbook Front Page / Cancelled Cheque (Photocopy)',
+        ];
+    @endphp
+    @foreach($multipleDocumentFields as $field => $label)
+        <div class="col-md-6 mt-3 repeatable-document" data-field="{{ $field }}">
+            <label class="form-label">{{ $label }}</label>
+            @if(!empty($employee->{$field}))
+                <div class="mb-2 existing-documents">
+                    @foreach($employee->{$field} as $document)
+                        <div class="d-flex align-items-center gap-2 mb-1 existing-document">
+                            <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank">View document {{ $loop->iteration }}</a>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document" data-file="{{ $document }}">Remove</button>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            <div class="document-inputs">
+                <div class="input-group mb-2 document-input-row">
+                    <input type="file" class="form-control" name="{{ $field }}[]" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
+            @error($field.'.*')<div class="text-danger small">{{ $message }}</div>@enderror
         </div>
     @endforeach
     <div class="col-md-4 mt-3">
@@ -214,6 +254,7 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    @unless($publicEmployeeForm ?? false)
     <div class="col-md-4">
         <label for="official_mail" class="form-label">Official Mail</label>
         <input type="email" class="form-control" id="official_mail" name="official_mail" placeholder="Enter official mail"
@@ -222,6 +263,7 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    @endunless
     <div class="col-md-4 mt-3">
         <label for="personal_mail" class="form-label">Personal Mail</label>
         <input type="email" class="form-control" id="personal_mail" name="personal_mail" placeholder="Enter personal mail"
@@ -528,6 +570,9 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    @if($publicEmployeeForm ?? false)
+        <input type="hidden" name="status" value="0">
+    @else
     <div class="col-md-4 mt-5">
         <label class="form-label">Status</label>
         <div class="d-flex">
@@ -542,6 +587,7 @@
         </div>
         @error('status')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+    @endif
 </div>
 @push('script')
 <script>
@@ -551,12 +597,12 @@
         const dateInputs = [document.getElementById('contract_from_date'), document.getElementById('contract_to_date')];
 
         function toggleContractDates() {
-            const requiresDates = mode.options[mode.selectedIndex]?.dataset.requiresContractDates === '1';
+            const requiresDates = mode && mode.options[mode.selectedIndex]?.dataset.requiresContractDates === '1';
             dateFields.forEach(field => field.classList.toggle('d-none', !requiresDates));
             dateInputs.forEach(input => input.required = requiresDates);
         }
 
-        mode.addEventListener('change', toggleContractDates);
+        mode?.addEventListener('change', toggleContractDates);
         toggleContractDates();
 
         document.querySelectorAll('.repeatable-document').forEach(function (container) {
