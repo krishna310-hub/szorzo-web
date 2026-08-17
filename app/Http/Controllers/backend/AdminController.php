@@ -329,7 +329,9 @@ class AdminController extends Controller
         $targetMultiplier = $selectedRecruiterId
             ? 1
             : max(1, $availableRecruiters->count());
-        $monthlyKpis = $this->monthlyTargetAnalytics($candidateScope, $targetMultiplier, $dateFrom, $dateTo);
+        $targetMonthStart = now()->startOfMonth();
+        $targetMonthEnd = now()->endOfMonth();
+        $monthlyKpis = $this->monthlyTargetAnalytics($candidateScope, $targetMultiplier, $targetMonthStart, $targetMonthEnd);
         $deliveryLeadAnalytics = $this->monthlyTargetAnalytics(
             Candidate::visibleTo($user),
             max(1, $availableRecruiters->count()),
@@ -367,6 +369,8 @@ class AdminController extends Controller
             'fromDateError' => $fromDateError,
             'toDateError' => $toDateError,
             'monthlyTargetAnalytics' => $monthlyKpis,
+            'targetMonth' => now()->month,
+            'targetYear' => now()->year,
             'deliveryLeadAnalytics' => $deliveryLeadAnalytics,
             'recruiterPerformance' => $recruiterPerformance,
             'activeRequirements' => (clone $requirements)->where('status', true)->count(), // sum('number_of_position')
@@ -588,6 +592,53 @@ class AdminController extends Controller
             'joining' => $kpis->firstWhere('label', 'Onboarding'),
             'targetMultiplier' => $targetMultiplier,
         ];
+    }
+
+    public function monthlyTargets(Request $request)
+    {
+        $this->authorize('dashboard', General::class);
+
+        $validated = $request->validate([
+            'month' => ['required', 'integer', 'between:1,12'],
+            'year' => ['required', 'integer', 'between:2000,2100'],
+            'recruiter_id' => ['nullable', 'integer'],
+            'client_id' => ['nullable', 'integer'],
+        ]);
+
+        $user = Auth::user()->loadMissing('role.permissions');
+        $accessLevel = str_replace('_', '-', strtolower((string) $user->role?->access_level));
+        $isSuperAdmin = $accessLevel === 'super-admin';
+        $isDeliveryLead = in_array($accessLevel, ['delivery-lead', 'recruiter-dl'], true);
+        $isRecruiter = $accessLevel === 'recruiter';
+        $availableRecruiters = ($isSuperAdmin || $isDeliveryLead)
+            ? Recruiter::where('status', true)
+                ->when($isDeliveryLead, fn ($query) => $query->visibleTo($user))
+                ->orderBy('recruiter_name')
+                ->get()
+            : collect();
+        $linkedRecruiterId = $isRecruiter
+            ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->value('id')
+            : null;
+        $requestedRecruiterId = isset($validated['recruiter_id']) ? (int) $validated['recruiter_id'] : null;
+        $selectedRecruiterId = $isRecruiter
+            ? ($linkedRecruiterId ?? 0)
+            : ($availableRecruiters->contains('id', $requestedRecruiterId) ? $requestedRecruiterId : null);
+        $selectedClientId = isset($validated['client_id'])
+            && Client::where('status', true)->whereKey($validated['client_id'])->exists()
+                ? (int) $validated['client_id']
+                : null;
+
+        $candidateScope = Candidate::visibleTo($user)
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
+            ->when($selectedClientId, fn ($query) => $query->where('client_id', $selectedClientId));
+        $targetMultiplier = $selectedRecruiterId ? 1 : max(1, $availableRecruiters->count());
+        $periodStart = CarbonImmutable::create((int) $validated['year'], (int) $validated['month'], 1)->startOfMonth();
+        $periodEnd = $periodStart->endOfMonth();
+
+        return response()->json(array_merge(
+            $this->monthlyTargetAnalytics($candidateScope, $targetMultiplier, $periodStart, $periodEnd),
+            ['monthLabel' => $periodStart->format('F Y')]
+        ));
     }
 
     public function profile()

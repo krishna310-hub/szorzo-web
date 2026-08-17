@@ -500,8 +500,10 @@ class CandidateController extends Controller
 
         return Candidate::with(['recruiter', 'client', 'jobRole', 'mode', 'interviewLevel'])
             ->visibleTo(auth()->user()->loadMissing('role'))
-            ->when($request->filled('from_date'), fn ($query) => $query->whereDate('onboarding_date', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn ($query) => $query->whereDate('onboarding_date', '<=', $request->to_date))
+            ->when($request->filled('from_date'), fn ($query) => $query->whereDate('created_at', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn ($query) => $query->whereDate('created_at', '<=', $request->to_date))
+            ->when($request->filled('onboarding_from_date'), fn ($query) => $query->whereDate('onboarding_date', '>=', $request->onboarding_from_date))
+            ->when($request->filled('onboarding_to_date'), fn ($query) => $query->whereDate('onboarding_date', '<=', $request->onboarding_to_date))
             ->when(! $isRecruiter && $request->filled('recruiter_id'), fn ($query) => $query->where('recruiter_id', $request->recruiter_id))
             ->when($request->filled('job_role_id'), fn ($query) => $query->where('job_role_id', $request->job_role_id))
             ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))

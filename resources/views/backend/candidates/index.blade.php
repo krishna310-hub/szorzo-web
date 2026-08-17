@@ -99,12 +99,20 @@
         </div>
         <form id="candidate-filter-form" class="offcanvas-body d-flex flex-column gap-3">
             <div>
-                <label for="filter_from_date" class="form-label">Onboarding From Date</label>
+                <label for="filter_from_date" class="form-label">Created From Date</label>
                 <input type="date" class="form-control" id="filter_from_date" name="from_date">
             </div>
             <div>
-                <label for="filter_to_date" class="form-label">Onboarding To Date</label>
+                <label for="filter_to_date" class="form-label">Created To Date</label>
                 <input type="date" class="form-control" id="filter_to_date" name="to_date">
+            </div>
+            <div>
+                <label for="filter_onboarding_from_date" class="form-label">Onboarding From Date</label>
+                <input type="date" class="form-control" id="filter_onboarding_from_date" name="onboarding_from_date">
+            </div>
+            <div>
+                <label for="filter_onboarding_to_date" class="form-label">Onboarding To Date</label>
+                <input type="date" class="form-control" id="filter_onboarding_to_date" name="onboarding_to_date">
             </div>
             <div>
                 <label for="filter_recruiter_id" class="form-label">Recruiter</label>

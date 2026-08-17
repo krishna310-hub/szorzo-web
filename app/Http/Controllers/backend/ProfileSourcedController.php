@@ -175,7 +175,7 @@ class ProfileSourcedController extends Controller
             'candidate_name' => 'required|string|max:255',
             'recruiter_id' => 'nullable|integer|exists:recruiters,id',
             'job_role_id' => 'required|integer|exists:job_roles,id',
-            'need' => 'required|string|max:255',
+            'need' => 'nullable|string|max:255',
             'cv' => [$profile ? 'nullable' : 'required', 'file', 'mimes:pdf,doc,docx', 'max:2048'],
             'mobile_number' => ['required', 'string', 'max:30', Rule::unique('profile_sourced', 'mobile_number')->ignore($profile?->id)->whereNull('deleted_at')],
             'email' => ['required', 'email', 'max:255', Rule::unique('profile_sourced', 'email')->ignore($profile?->id)->whereNull('deleted_at')],
