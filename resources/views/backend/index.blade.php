@@ -1026,7 +1026,7 @@
                         @endif
 
                         {{-- Independence day --}}
-                        @php $isIndependenceDay = now()->format('m-d') === '08-14'; @endphp
+                        @php $isIndependenceDay = now()->format('m-d') === '08-15'; @endphp
 
                         @if ($isIndependenceDay)
                             <div class="independence-day-banner mb-4 mt-3">
