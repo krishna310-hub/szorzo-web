@@ -213,6 +213,7 @@ class AdminController extends Controller
                 'Screen Select',
                 'Screen Reject',
                 'Position Hold',
+                'Position Closed',
                 'Candidate Not Interested',
                 'Candidate Not Responding',
             ],
