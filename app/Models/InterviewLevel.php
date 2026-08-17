@@ -12,6 +12,7 @@ class InterviewLevel extends Model
 
     public const CANDIDATE_NOT_INTERESTED_ID = 5;
     public const CANDIDATE_NOT_RESPONDING_ID = 36;
+    public const CANDIDATE_POSITION_CLOSED_ID = 37;
     public const CANDIDATE_NOT_POSITION_ID = 6;
 
     protected $table = 'level_of_interviews';
