@@ -193,8 +193,15 @@ class AdminController extends Controller
         // Onboarding outcomes must follow the actual onboarding date, not the
         // date on which the candidate record was created.
         $onboardingLevelCounts = (clone $candidateScope)
-            ->whereIn('level_of_interview_id', [20, 21])
-            ->whereBetween('onboarding_date', [$yearStart, $yearEnd])
+            ->where(function ($query) use ($yearStart, $yearEnd) {
+                $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
+                    $onboarded->where('level_of_interview_id', 20)
+                        ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
+                })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
+                    $declined->where('level_of_interview_id', 21)
+                        ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
+                });
+            })
             ->selectRaw('level_of_interview_id, COUNT(*) as total')
             ->groupBy('level_of_interview_id')
             ->pluck('total', 'level_of_interview_id');
@@ -276,11 +283,11 @@ class AdminController extends Controller
             ->groupBy('month_key')->pluck('total', 'month_key');
         $joiningMonths = $months;
 
-        $monthlyCandidateLevelCounts = function (int $levelId) use ($chartCandidates, $yearStart, $yearEnd) {
+        $monthlyCandidateLevelCounts = function (int $levelId, string $dateColumn = 'onboarding_date') use ($chartCandidates, $yearStart, $yearEnd) {
             return (clone $chartCandidates)
                 ->where('level_of_interview_id', $levelId)
-                ->whereBetween('onboarding_date', [$yearStart, $yearEnd])
-                ->selectRaw("DATE_FORMAT(onboarding_date, '%Y-%m') as month_key, COUNT(*) as total")
+                ->whereBetween($dateColumn, [$yearStart, $yearEnd])
+                ->selectRaw("DATE_FORMAT({$dateColumn}, '%Y-%m') as month_key, COUNT(*) as total")
                 ->groupBy('month_key')
                 ->pluck('total', 'month_key');
         };
@@ -289,7 +296,7 @@ class AdminController extends Controller
         $monthlyOfferAccepted = $monthlyCandidateLevelCounts(30);
         $monthlyOfferDeclined = $monthlyCandidateLevelCounts(22);
         $monthlyOnboarded = $monthlyCandidateLevelCounts(20);
-        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts(21);
+        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts(21, 'candidates.updated_at');
         $monthlyJoiningDetails = $joiningMonths->map(fn ($month) => [
             'label' => $month->format('M Y'),
             'offer_accepted' => (int) ($monthlyOfferAccepted[$month->format('Y-m')] ?? 0),
@@ -451,18 +458,18 @@ class AdminController extends Controller
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
 
-        $levelCounts = function (int $levelId) use ($candidates, $yearStart, $yearEnd) {
+        $levelCounts = function (int $levelId, string $dateColumn = 'onboarding_date') use ($candidates, $yearStart, $yearEnd) {
             return (clone $candidates)
                 ->where('level_of_interview_id', $levelId)
-                ->whereBetween('onboarding_date', [$yearStart, $yearEnd])
-                ->selectRaw("DATE_FORMAT(onboarding_date, '%Y-%m') as month_key, COUNT(*) as total")
+                ->whereBetween($dateColumn, [$yearStart, $yearEnd])
+                ->selectRaw("DATE_FORMAT({$dateColumn}, '%Y-%m') as month_key, COUNT(*) as total")
                 ->groupBy('month_key')->pluck('total', 'month_key');
         };
 
         $offerAccepted = $levelCounts(30);
         $offerDeclined = $levelCounts(22);
         $onboarded = $levelCounts(20);
-        $joinerDeclined = $levelCounts(21);
+        $joinerDeclined = $levelCounts(21, 'candidates.updated_at');
         $outcomes = $user->can('read', Revenue::class)
             ? (clone $candidates)->with('client.billing')
                 ->where(function ($query) use ($yearStart, $yearEnd) {
@@ -487,8 +494,15 @@ class AdminController extends Controller
             ->pluck('total', 'level_of_interview_id')
             ->mapWithKeys(fn ($total, $levelId) => [($levelNames[$levelId] ?? (string) $levelId) => (int) $total]);
         $onboardingPipelineCounts = (clone $candidates)
-            ->whereIn('level_of_interview_id', [20, 21])
-            ->whereBetween('onboarding_date', [$yearStart, $yearEnd])
+            ->where(function ($query) use ($yearStart, $yearEnd) {
+                $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
+                    $onboarded->where('level_of_interview_id', 20)
+                        ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
+                })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
+                    $declined->where('level_of_interview_id', 21)
+                        ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
+                });
+            })
             ->selectRaw('level_of_interview_id, COUNT(*) as total')
             ->groupBy('level_of_interview_id')
             ->pluck('total', 'level_of_interview_id');
