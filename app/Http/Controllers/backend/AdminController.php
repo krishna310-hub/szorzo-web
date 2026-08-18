@@ -319,9 +319,14 @@ class AdminController extends Controller
                         ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                 });
             })
-            ->get(['client_id', 'level_of_interview_id', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
-        $candidateRevenue = fn ($candidate) => (float) $candidate->onboarding_ctc
-            * (float) ($candidate->client?->billing?->value ?? 0) / 100;
+            ->get(['client_id', 'level_of_interview_id', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
+        $candidateRevenue = function ($candidate): float {
+            $ctc = (int) $candidate->level_of_interview_id === 21
+                ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
+                : $candidate->onboarding_ctc;
+
+            return (float) $ctc * (float) ($candidate->client?->billing?->value ?? 0) / 100;
+        };
         $monthlyOutcomeRevenue = $revenueOutcomes
             ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
                 ? $candidate->updated_at->format('Y-m')
@@ -481,7 +486,7 @@ class AdminController extends Controller
                             ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                     });
                 })
-                ->get(['client_id', 'level_of_interview_id', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
+                ->get(['client_id', 'level_of_interview_id', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
                 ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
                     ? $candidate->updated_at->format('Y-m')
                     : $candidate->onboarding_date->format('Y-m'))
@@ -511,8 +516,13 @@ class AdminController extends Controller
                 $pipelineCounts[$levelNames[$levelId]] = (int) ($onboardingPipelineCounts[$levelId] ?? 0);
             }
         }
-        $candidateRevenue = fn ($candidate) => (float) $candidate->onboarding_ctc
-            * (float) ($candidate->client?->billing?->value ?? 0) / 100;
+        $candidateRevenue = function ($candidate): float {
+            $ctc = (int) $candidate->level_of_interview_id === 21
+                ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
+                : $candidate->onboarding_ctc;
+
+            return (float) $ctc * (float) ($candidate->client?->billing?->value ?? 0) / 100;
+        };
         $monthlyOnboardedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 20)->sum($candidateRevenue));
         $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 21)->sum($candidateRevenue));
 
