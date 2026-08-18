@@ -19,7 +19,7 @@
                     <div class="table-responsive">
                         <table id="profile-sourced-table" class="table table-bordered nowrap w-100">
                             <thead><tr>
-                                <th>S.No</th><th>Candidate Name</th><th>Job Role</th><th>Need</th><th>CV</th><th>Recruiter Name</th>
+                                <th>S.No</th><th>Candidate Name</th><th>Job Role</th><th>Remarks</th><th>CV</th><th>Recruiter Name</th>
                                 <th>Mobile Number</th><th>Email</th><th>Created At</th><th>Action</th>
                             </tr></thead>
                             <tbody></tbody>

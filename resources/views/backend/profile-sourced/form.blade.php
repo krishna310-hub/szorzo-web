@@ -35,7 +35,7 @@
         @error('job_role_id')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3">
-        <label for="need" class="form-label">Need</label>
+        <label for="need" class="form-label">Remarks</label>
         <input id="need" name="need" class="form-control" value="{{ old('need', $profileSourced->need ?? '') }}">
         @error('need')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
