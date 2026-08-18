@@ -1992,8 +1992,24 @@
                 dataLabels: {
                     enabled: true,
                     offsetY: -18,
-                    formatter: function(value) {
-                        return value > 0 ? '₹' + Number(value).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '';
+                    formatter: function(value, options) {
+                        if (Number(value) <= 0) return '';
+
+                        var pointIndex = options.dataPointIndex;
+                        var seriesIndex = options.seriesIndex;
+                        var valuesAtMonth = options.w.config.series.map(function(series) {
+                            return Number(series.data[pointIndex] || 0);
+                        });
+                        var largestValue = Math.max.apply(null, valuesAtMonth);
+                        var firstLargestSeries = valuesAtMonth.indexOf(largestValue);
+
+                        // Avoid overlapping labels when both outcome bars exist.
+                        // Every exact value remains available in the tooltip.
+                        if (value < largestValue || (value === largestValue && seriesIndex !== firstLargestSeries)) {
+                            return '';
+                        }
+
+                        return '₹' + Number(value).toLocaleString('en-IN', { maximumFractionDigits: 0 });
                     },
                     style: {
                         fontSize: '10px',
