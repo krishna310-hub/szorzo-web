@@ -172,18 +172,22 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    @php
+        $isCandidateEdit = isset($candidate) && $candidate->exists;
+        $hasExistingCv = $isCandidateEdit && filled($candidate->upload_cv);
+    @endphp
     <div class="col-md-4">
         <label for="upload_cv" class="form-label">
-            Upload CV @if(empty($candidate->upload_cv))<span class="text-danger">*</span>@endif
+            Upload CV @unless($isCandidateEdit)<span class="text-danger">*</span>@endunless
 
-            @if(isset($candidate) && $candidate->upload_cv)
+            @if($hasExistingCv)
                 <a href="{{ asset($candidate->upload_cv) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                     View CV
                 </a>
             @endif
         </label>
 
-        <input type="file" class="form-control" id="upload_cv" name="upload_cv" accept=".pdf,.doc,.docx" @if(empty($candidate->upload_cv)) required @endif>
+        <input type="file" class="form-control" id="upload_cv" name="upload_cv" accept=".pdf,.doc,.docx" @unless($isCandidateEdit) required @endunless>
 
         <span class="text-danger small">Maximum file size is 2MB</span>
         @error('upload_cv')<div class="text-danger small">{{ $message }}</div>@enderror

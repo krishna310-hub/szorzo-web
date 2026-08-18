@@ -1337,7 +1337,7 @@
                                 <select id="targetAnalyticsYear" class="form-select form-select-sm" aria-label="Target analytics year"
                                     data-url="{{ route('admin.dashboard.monthly-targets') }}"
                                     data-recruiter="{{ $selectedRecruiterId }}" data-client="{{ $selectedClientId }}">
-                                    @foreach (range(now()->year, 2024) as $year)
+                                    @foreach (range(now()->year, 2025) as $year)
                                         <option value="{{ $year }}" @selected($targetYear === $year)>{{ $year }}</option>
                                     @endforeach
                                 </select>

@@ -303,13 +303,22 @@ class AdminController extends Controller
         // Revenue is based on each candidate's onboarding CTC and client billing percentage.
         $revenueOutcomes = (clone $chartCandidates)
             ->with('client.billing')
-            ->whereIn('level_of_interview_id', [20, 21])
-            ->whereBetween('onboarding_date', [$yearStart, $yearEnd])
-            ->get(['client_id', 'level_of_interview_id', 'onboarding_ctc', 'onboarding_date']);
+            ->where(function ($query) use ($yearStart, $yearEnd) {
+                $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
+                    $onboarded->where('level_of_interview_id', 20)
+                        ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
+                })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
+                    $declined->where('level_of_interview_id', 21)
+                        ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
+                });
+            })
+            ->get(['client_id', 'level_of_interview_id', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
         $candidateRevenue = fn ($candidate) => (float) $candidate->onboarding_ctc
             * (float) ($candidate->client?->billing?->value ?? 0) / 100;
         $monthlyOutcomeRevenue = $revenueOutcomes
-            ->groupBy(fn ($candidate) => $candidate->onboarding_date->format('Y-m'));
+            ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
+                ? $candidate->updated_at->format('Y-m')
+                : $candidate->onboarding_date->format('Y-m'));
         $monthlyOnboardedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
             ->where('level_of_interview_id', 20)
             ->sum($candidateRevenue));
@@ -456,10 +465,19 @@ class AdminController extends Controller
         $joinerDeclined = $levelCounts(21);
         $outcomes = $user->can('read', Revenue::class)
             ? (clone $candidates)->with('client.billing')
-                ->whereIn('level_of_interview_id', [20, 21])
-                ->whereBetween('onboarding_date', [$yearStart, $yearEnd])
-                ->get(['client_id', 'level_of_interview_id', 'onboarding_ctc', 'onboarding_date'])
-                ->groupBy(fn ($candidate) => $candidate->onboarding_date->format('Y-m'))
+                ->where(function ($query) use ($yearStart, $yearEnd) {
+                    $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
+                        $onboarded->where('level_of_interview_id', 20)
+                            ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
+                    })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
+                        $declined->where('level_of_interview_id', 21)
+                            ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
+                    });
+                })
+                ->get(['client_id', 'level_of_interview_id', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
+                ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
+                    ? $candidate->updated_at->format('Y-m')
+                    : $candidate->onboarding_date->format('Y-m'))
             : collect();
         $levelNames = InterviewLevel::pluck('level', 'id');
         $pipelineCounts = (clone $candidates)
