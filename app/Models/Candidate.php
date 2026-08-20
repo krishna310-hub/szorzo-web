@@ -78,6 +78,11 @@ class Candidate extends Model
         return $this->hasOne(Revenue::class);
     }
 
+    public function contractReports()
+    {
+        return $this->hasMany(ContractReport::class);
+    }
+
     /** Limit candidates to the recruiter team available to the user. */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {

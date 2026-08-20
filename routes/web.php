@@ -15,6 +15,7 @@ use App\Http\Controllers\backend\RoleController;
 use App\Http\Controllers\backend\SettingsController;
 use App\Http\Controllers\backend\UserController;
 use App\Http\Controllers\backend\ContactController;
+use App\Http\Controllers\backend\ContractReportController;
 use App\Http\Controllers\backend\EmployeeController;
 use App\Http\Controllers\backend\InterviewModeController;
 use App\Http\Controllers\backend\JobRoleController;
@@ -289,6 +290,13 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::prefix('reports')->name('reports.')->controller(ReportController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/export', 'export')->name('export');
+        Route::get('/pdf', 'pdf')->name('pdf');
+    });
+
+    Route::prefix('contract-reports')->name('contract-reports.')->controller(ContractReportController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/refresh', 'refresh')->name('refresh');
+        Route::put('/{contractReport}', 'update')->name('update');
         Route::get('/pdf', 'pdf')->name('pdf');
     });
 

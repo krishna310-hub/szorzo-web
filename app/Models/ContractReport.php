@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class ContractReport extends Model
+{
+    protected $fillable = [
+        'candidate_id',
+        'salary_month',
+        'monthly_take_home',
+        'present_days',
+        'absent_days',
+        'payable_salary',
+    ];
+
+    protected $casts = [
+        'salary_month' => 'date',
+        'monthly_take_home' => 'decimal:2',
+        'payable_salary' => 'decimal:2',
+    ];
+
+    public function candidate()
+    {
+        return $this->belongsTo(Candidate::class);
+    }
+}

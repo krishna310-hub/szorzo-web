@@ -1568,12 +1568,12 @@
                     </div>
                 @endif
                 <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
-                    <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Calendar Year</label>
-                    <select id="dashboardChartYear" class="form-select form-select-sm" style="width: 120px"
+                    <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Financial Year</label>
+                    <select id="dashboardChartYear" class="form-select form-select-sm" style="width: 150px"
                         data-url="{{ route('admin.dashboard.year-charts') }}"
                         data-recruiter="{{ $selectedRecruiterId }}" data-client="{{ $selectedClientId }}">
-                        @for($year = now()->year + 1; $year >= now()->year - 9; $year--)
-                            <option value="{{ $year }}" {{ $year === $chartYear ? 'selected' : '' }}>{{ $year }}</option>
+                        @for($year = $chartYear + 1; $year >= $chartYear - 9; $year--)
+                            <option value="{{ $year }}" {{ $year === $chartYear ? 'selected' : '' }}>{{ $year }}-{{ $year + 1 }}</option>
                         @endfor
                     </select>
                     <span id="dashboardChartLoading" class="spinner-border spinner-border-sm text-primary d-none" role="status" aria-label="Loading"></span>
@@ -1741,7 +1741,7 @@
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                     <div>
                                         <h5 class="section-title mb-1">Revenue Outcomes</h5>
-                                        <p class="text-muted small mb-0">Onboarded and joiner-declined revenue for <span class="selected-chart-year">{{ $chartYear }}</span></p>
+                                        <p class="text-muted small mb-0">Onboarded and joiner-declined revenue for <span class="selected-chart-year">{{ $chartYearLabel }}</span></p>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2">
                                         <span id="onboardedRevenueBadge" class="badge bg-success-subtle text-success">Onboarded: &#8377;{{ number_format($onboardedRevenue, 2) }}</span>
@@ -1760,7 +1760,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div>
                                             <h5 class="section-title mb-1">Applicant Momentum</h5><span
-                                                class="text-muted small">New applicants during <span class="selected-chart-year">{{ $chartYear }}</span></span>
+                                                class="text-muted small">New applicants during <span class="selected-chart-year">{{ $chartYearLabel }}</span></span>
                                         </div><span class="badge bg-danger-subtle text-danger">Live</span>
                                     </div>
                                     <div id="applicantChart" style="min-height:310px"></div>
@@ -2077,7 +2077,7 @@
                     ]);
 
                     document.querySelectorAll('.selected-chart-year').forEach(function(label) {
-                        label.textContent = data.year;
+                        label.textContent = data.financial_year;
                     });
                     var onboardedBadge = document.querySelector('#onboardedRevenueBadge');
                     var declinedBadge = document.querySelector('#declinedRevenueBadge');

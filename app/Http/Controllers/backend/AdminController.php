@@ -174,9 +174,9 @@ class AdminController extends Controller
             ->when($dateFrom, fn ($query) => $query->where('interview_schedules.schedule_date', '>=', $dateFrom))
             ->when($dateTo, fn ($query) => $query->where('interview_schedules.schedule_date', '<=', $dateTo));
 
-        $chartYear = now()->year;
-        $yearStart = CarbonImmutable::create($chartYear, 1, 1)->startOfDay();
-        $yearEnd = CarbonImmutable::create($chartYear, 12, 31)->endOfDay();
+        $chartYear = now()->month >= 4 ? now()->year : now()->year - 1;
+        $yearStart = CarbonImmutable::create($chartYear, 4, 1)->startOfDay();
+        $yearEnd = $yearStart->addYear()->subDay()->endOfDay();
 
         $candidateLevelScope = function ($query) use ($isDeliveryLead, $deliveryLeadRecruiterIds, $selectedRecruiterId, $selectedClientId, $yearStart, $yearEnd) {
             $query
@@ -275,7 +275,7 @@ class AdminController extends Controller
 
         $maxLevel = max(1, $candidateLevels->max('candidates_count'));
 
-        $months = collect(range(1, 12))->map(fn ($month) => CarbonImmutable::create($chartYear, $month, 1));
+        $months = collect(range(0, 11))->map(fn ($offset) => $yearStart->addMonths($offset));
 
         $monthly = (clone $chartCandidates)
             ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
@@ -388,6 +388,7 @@ class AdminController extends Controller
             'selectedFromDate' => $selectedFromDate,
             'selectedToDate' => $selectedToDate,
             'chartYear' => $chartYear,
+            'chartYearLabel' => $chartYear.'-'.($chartYear + 1),
             'fromDateError' => $fromDateError,
             'toDateError' => $toDateError,
             'monthlyTargetAnalytics' => $monthlyKpis,
@@ -427,7 +428,7 @@ class AdminController extends Controller
 
             'revenue' => round((float) $totalOnboardingRevenue, 2),
             'candidateLevels' => $candidateLevels,
-            'chartMonths' => $months->map->format('M')->values(),
+            'chartMonths' => $months->map->format('M Y')->values(),
             'chartApplicants' => $months->map(fn ($month) => (int) ($monthly[$month->format('Y-m')] ?? 0))->values(),
             'upcomingInterviews' => (clone $interviews)->with(['candidate', 'client', 'interviewLevel'])
                 ->where('schedule_date', '>=', now())->orderBy('schedule_date')->limit(6)->get(),
@@ -451,9 +452,9 @@ class AdminController extends Controller
 
         $user = Auth::user()->loadMissing('role.permissions');
         $year = (int) $data['year'];
-        $yearStart = CarbonImmutable::create($year, 1, 1)->startOfDay();
-        $yearEnd = CarbonImmutable::create($year, 12, 31)->endOfDay();
-        $months = collect(range(1, 12))->map(fn ($month) => CarbonImmutable::create($year, $month, 1));
+        $yearStart = CarbonImmutable::create($year, 4, 1)->startOfDay();
+        $yearEnd = $yearStart->addYear()->subDay()->endOfDay();
+        $months = collect(range(0, 11))->map(fn ($offset) => $yearStart->addMonths($offset));
         $candidates = Candidate::visibleTo($user)
             ->when($data['recruiter_id'] ?? null, fn ($query, $id) => $query->where('recruiter_id', $id))
             ->when($data['client_id'] ?? null, fn ($query, $id) => $query->where('client_id', $id));
@@ -528,7 +529,8 @@ class AdminController extends Controller
 
         return response()->json([
             'year' => $year,
-            'months' => $months->map->format('M')->values(),
+            'financial_year' => $year.'-'.($year + 1),
+            'months' => $months->map->format('M Y')->values(),
             'applicants' => $months->map(fn ($month) => (int) ($applicants[$month->format('Y-m')] ?? 0))->values(),
             'offer_accepted' => $months->map(fn ($month) => (int) ($offerAccepted[$month->format('Y-m')] ?? 0))->values(),
             'offer_declined' => $months->map(fn ($month) => (int) ($offerDeclined[$month->format('Y-m')] ?? 0))->values(),

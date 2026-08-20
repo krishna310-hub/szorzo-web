@@ -290,6 +290,16 @@
                     </li>
                 @endcan
 
+                @can('read', \App\Models\Report::class)
+                    <li class="nav-item">
+                        <a href="{{ route('admin.contract-reports.index') }}"
+                            class="nav-link menu-link {{ request()->is('admin/contract-reports*') ? 'active' : '' }}">
+                            <i class="ri-file-list-3-line"></i>
+                            <span>Contract Report</span>
+                        </a>
+                    </li>
+                @endcan
+
                 @can('read', \App\Models\Revenue::class)
                     <li class="nav-item">
                         <a href="{{ route('admin.revenues.index') }}"
