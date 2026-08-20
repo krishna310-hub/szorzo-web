@@ -51,9 +51,9 @@ class ProfileSourcedController extends Controller
                 ->editColumn('created_at', fn ($row) => $row->created_at?->format('d-m-Y H:i:s') ?? '-')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
-                    if (auth()->user()->can('create', Candidate::class) && auth()->user()->can('delete', ProfileSourced::class)) {
+                    // if (auth()->user()->can('create', Candidate::class) && auth()->user()->can('delete', ProfileSourced::class)) {
                         $buttons .= '<button type="button" data-route="'.route('admin.profile-sourced.move', $row).'" class="btn btn-sm btn-success me-1 move-to-candidate">Move to Candidate</button>';
-                    }
+                    // }
                     if (auth()->user()->can('edit', ProfileSourced::class)) {
                         $buttons .= '<a href="'.route('admin.profile-sourced.edit', $row).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }
