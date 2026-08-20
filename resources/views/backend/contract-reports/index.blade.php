@@ -39,7 +39,7 @@
                         <td><input form="contract-report-{{ $report->id }}" type="number" name="present_days" min="0" max="{{ $daysInMonth }}" value="{{ $report->present_days }}" class="form-control form-control-sm" required></td>
                         <td><input form="contract-report-{{ $report->id }}" type="number" name="absent_days" min="0" max="{{ $daysInMonth }}" value="{{ $report->absent_days }}" class="form-control form-control-sm" required></td>
                         <td class="text-end fw-semibold text-success">&#8377;{{ number_format($report->payable_salary, 2) }}</td>
-                        <td>@can('export', \App\Models\Report::class)<form id="contract-report-{{ $report->id }}" method="POST" action="{{ route('admin.contract-reports.update', $report) }}">@csrf @method('PUT')<button class="btn btn-sm btn-success">Save</button></form>@endcan</td>
+                        <td>@can('export', \App\Models\Report::class)<div class="d-flex gap-1"><form id="contract-report-{{ $report->id }}" method="POST" action="{{ route('admin.contract-reports.update', $report) }}">@csrf @method('PUT')<button class="btn btn-sm btn-success">Save</button></form><a class="btn btn-sm btn-danger" href="{{ route('admin.contract-reports.invoice', $report) }}" title="Download individual invoice"><i class="ri-file-pdf-2-line"></i></a></div>@endcan</td>
                     </tr>
                 @empty
                     <tr><td colspan="8" class="text-center text-muted py-5">No contract candidates are in this month yet. Click <strong>Refresh Candidates</strong> to add candidates whose mode is Contract.</td></tr>

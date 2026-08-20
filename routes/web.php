@@ -298,6 +298,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::post('/refresh', 'refresh')->name('refresh');
         Route::put('/{contractReport}', 'update')->name('update');
         Route::get('/pdf', 'pdf')->name('pdf');
+        Route::get('/{contractReport}/invoice', 'invoice')->name('invoice');
     });
 
     Route::prefix('revenues')->name('revenues.')->controller(RevenueController::class)->group(function () {

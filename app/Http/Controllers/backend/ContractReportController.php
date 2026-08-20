@@ -88,6 +88,28 @@ class ContractReportController extends Controller
             ->download('contract-report-'.$month->format('Y-m').'.pdf');
     }
 
+    public function invoice(Request $request, ContractReport $contractReport)
+    {
+        $this->authorize('export', Report::class);
+        $this->ensureVisible($request, $contractReport);
+        $contractReport->load(['candidate.client', 'candidate.jobRole', 'candidate.recruiter']);
+
+        $invoiceNumber = sprintf(
+            'CR-%s-%05d',
+            $contractReport->salary_month->format('Ym'),
+            $contractReport->id
+        );
+        $candidateName = preg_replace(
+            '/[^A-Za-z0-9_-]+/',
+            '-',
+            $contractReport->candidate?->candidate_name ?? 'candidate'
+        );
+
+        return Pdf::loadView('backend.contract-reports.invoice', compact('contractReport', 'invoiceNumber'))
+            ->setPaper('a4', 'portrait')
+            ->download($invoiceNumber.'-'.trim($candidateName, '-').'.pdf');
+    }
+
     private function month(Request $request): CarbonImmutable
     {
         $data = $request->validate(['month' => ['nullable', 'date_format:Y-m']]);
