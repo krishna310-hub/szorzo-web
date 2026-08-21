@@ -42,7 +42,7 @@
                         <td>@can('export', \App\Models\Report::class)<div class="d-flex gap-1"><form id="contract-report-{{ $report->id }}" method="POST" action="{{ route('admin.contract-reports.update', $report) }}">@csrf @method('PUT')<button class="btn btn-sm btn-success">Save</button></form><a class="btn btn-sm btn-danger" href="{{ route('admin.contract-reports.invoice', $report) }}" title="Download individual invoice"><i class="ri-file-pdf-2-line"></i></a></div>@endcan</td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="text-center text-muted py-5">No contract candidates are in this month yet. Click <strong>Refresh Candidates</strong> to add candidates whose mode is Contract.</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted py-5">No active candidates with mode ID 2 have a contract covering this month. Click <strong>Refresh Candidates</strong> after adding the contract dates in the candidate module.</td></tr>
                 @endforelse
                 </tbody>
                 @if($reports->count())<tfoot class="table-light fw-semibold"><tr><td colspan="3">Page total</td><td class="text-end">&#8377;{{ number_format($reports->sum('monthly_take_home'), 2) }}</td><td class="text-center">{{ $reports->sum('present_days') }}</td><td class="text-center">{{ $reports->sum('absent_days') }}</td><td class="text-end">&#8377;{{ number_format($reports->sum('payable_salary'), 2) }}</td><td></td></tr></tfoot>@endif

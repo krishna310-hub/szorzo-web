@@ -79,6 +79,8 @@ class CandidateController extends Controller
                 ->addColumn('mode_name', fn ($row) => $row->mode?->mode ?? '-')
                 ->addColumn('interview_level', fn ($row) => $row->interviewLevel->level ?? '-')
                 ->editColumn('onboarding_date', fn ($row) => $row->onboarding_date?->format('d-m-Y') ?? '-')
+                ->editColumn('contract_from_date', fn ($row) => $row->contract_from_date?->format('d-m-Y') ?? '-')
+                ->editColumn('contract_to_date', fn ($row) => $row->contract_to_date?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -253,6 +255,8 @@ class CandidateController extends Controller
                 $candidate->client?->client,
                 $candidate->jobRole?->job_role,
                 $candidate->mode?->mode,
+                $candidate->contract_from_date?->format('d-m-Y'),
+                $candidate->contract_to_date?->format('d-m-Y'),
                 $candidate->candidate_name,
                 $candidate->mobile_no,
                 $candidate->email,
@@ -291,7 +295,8 @@ class CandidateController extends Controller
 
         return Excel::download(new MasterDataExport($this->importHeadings(), [[
             null, now()->format('Y-m-d'), $dropdowns['Recruiter'][0] ?? null,
-            $dropdowns['Client'][0] ?? null, $dropdowns['Job Role'][0] ?? null, $dropdowns['Mode'][0] ?? null, 'Example Candidate',
+            $dropdowns['Client'][0] ?? null, $dropdowns['Job Role'][0] ?? null, $dropdowns['Mode'][0] ?? null,
+            now()->format('Y-m-d'), now()->addYear()->format('Y-m-d'), 'Example Candidate',
             '9876543210', 'candidate@example.com', 'B.Tech', 5, 3, 60000, 5000, 900000,
             1100000, 1050000, '30 days', 'Example Company', 'Chennai', 'Bengaluru', 'Career growth',
             $dropdowns['Level Of Interview'][0] ?? null, now()->format('Y-m-d'), 'Active',
@@ -337,6 +342,8 @@ class CandidateController extends Controller
                 'client_id' => MasterDataSpreadsheet::lookup(Client::class, 'client', $client),
                 'job_role_id' => MasterDataSpreadsheet::lookup(JobRole::class, 'job_role', $jobRole),
                 'mode_id' => MasterDataSpreadsheet::lookup(Mode::class, 'mode', $mode),
+                'contract_from_date' => MasterDataSpreadsheet::date($row['contract_from_date'] ?? null),
+                'contract_to_date' => MasterDataSpreadsheet::date($row['contract_to_date'] ?? null),
                 'candidate_name' => trim((string) ($row['candidate_name'] ?? '')),
                 'mobile_no' => ($mobile = MasterDataSpreadsheet::text($row['mobile_no'] ?? null)) !== null
                     ? trim($mobile)
@@ -369,6 +376,8 @@ class CandidateController extends Controller
                 'client_id' => 'nullable|exists:clients,id',
                 'job_role_id' => 'nullable|exists:job_roles,id',
                 'mode_id' => 'nullable|exists:modes,id',
+                'contract_from_date' => 'nullable|date|required_if:mode_id,2',
+                'contract_to_date' => 'nullable|date|required_if:mode_id,2|after_or_equal:contract_from_date',
                 'candidate_name' => 'required|string|max:255',
                 'mobile_no' => [
                     'nullable',
@@ -446,6 +455,11 @@ class CandidateController extends Controller
             if ($validator->fails()) {
                 $errors[] = 'Row '.$number.': '.implode(', ', $validator->errors()->all());
             } else {
+                if ((int) $data['mode_id'] !== 2) {
+                    $data['contract_from_date'] = null;
+                    $data['contract_to_date'] = null;
+                }
+
                 $validRows[] = $data;
 
                 if ($data['mobile_no']) {
@@ -539,6 +553,8 @@ class CandidateController extends Controller
             'client_id' => 'required|exists:clients,id',
             'job_role_id' => 'required|exists:job_roles,id',
             'mode_id' => 'required|exists:modes,id',
+            'contract_from_date' => 'nullable|date|required_if:mode_id,2',
+            'contract_to_date' => 'nullable|date|required_if:mode_id,2|after_or_equal:contract_from_date',
             'candidate_name' => 'required|string|max:255',
             'mobile_no' => [
                 'required',
@@ -575,6 +591,11 @@ class CandidateController extends Controller
             'expected_ctc.integer' => 'Expected CTC must be entered as a whole amount (e.g. 800000).',
             'onboarding_ctc.integer' => 'Onboarding CTC must be entered as a whole amount (e.g. 750000).',
         ]);
+
+        if ((int) $data['mode_id'] !== 2) {
+            $data['contract_from_date'] = null;
+            $data['contract_to_date'] = null;
+        }
 
         if (! $this->visibleRecruiters()->whereKey($data['recruiter_id'])->exists()) {
             throw ValidationException::withMessages([
@@ -622,6 +643,6 @@ class CandidateController extends Controller
 
     private function importHeadings(): array
     {
-        return ['Record ID', 'Created Date', 'Recruiter', 'Client', 'Job Role', 'Mode', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Onboarding CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
+        return ['Record ID', 'Created Date', 'Recruiter', 'Client', 'Job Role', 'Mode', 'Contract From Date', 'Contract To Date', 'Candidate Name', 'Mobile No', 'Email', 'Qualification', 'Total Experience', 'Relevant Experience', 'Take Home', 'Variable', 'Current CTC', 'Expected CTC', 'Onboarding CTC', 'Notice Period', 'Current Company', 'Current Location', 'Preferred Location', 'Reason For Change', 'Level Of Interview', 'Onboarding Date', 'Status'];
     }
 }

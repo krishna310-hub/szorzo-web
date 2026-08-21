@@ -63,7 +63,7 @@ class ContractReportController extends Controller
             'absent_days' => ['required', 'integer', 'min:0', 'max:'.$days],
         ]);
 
-        if ($data['present_days'] + $data['absent_days'] !== $days) {
+        if ($days !== $data['present_days'] + $data['absent_days']) {
             throw ValidationException::withMessages([
                 'present_days' => 'Present and absent days must total '.$days.' days for '.$contractReport->salary_month->format('F Y').'.',
             ]);
@@ -121,9 +121,13 @@ class ContractReportController extends Controller
 
     private function contractCandidates(Request $request)
     {
+        $month = $this->month($request);
+
         return Candidate::query()->visibleTo($request->user()->loadMissing('role'))
             ->where('status', true)
-            ->whereHas('mode', fn ($query) => $query->whereRaw('LOWER(TRIM(mode)) = ?', ['contract']));
+            ->where('mode_id', 2)
+            ->whereDate('contract_from_date', '<=', $month->endOfMonth()->toDateString())
+            ->whereDate('contract_to_date', '>=', $month->startOfMonth()->toDateString());
     }
 
     private function query(Request $request, CarbonImmutable $month)
@@ -131,14 +135,27 @@ class ContractReportController extends Controller
         return ContractReport::query()
             ->with(['candidate.client', 'candidate.jobRole', 'candidate.recruiter'])
             ->whereDate('salary_month', $month->toDateString())
-            ->whereHas('candidate', fn ($query) => $query->visibleTo($request->user()->loadMissing('role')))
+            ->whereHas('candidate', fn ($query) => $query
+                ->visibleTo($request->user()->loadMissing('role'))
+                ->where('status', true)
+                ->where('mode_id', 2)
+                ->whereDate('contract_from_date', '<=', $month->endOfMonth()->toDateString())
+                ->whereDate('contract_to_date', '>=', $month->startOfMonth()->toDateString()))
             ->orderBy(Candidate::select('candidate_name')->whereColumn('candidates.id', 'contract_reports.candidate_id'));
     }
 
     private function ensureVisible(Request $request, ContractReport $report): void
     {
+        $month = $report->salary_month->toImmutable();
+
         abort_unless(
-            Candidate::visibleTo($request->user()->loadMissing('role'))->whereKey($report->candidate_id)->exists(),
+            Candidate::visibleTo($request->user()->loadMissing('role'))
+                ->whereKey($report->candidate_id)
+                ->where('status', true)
+                ->where('mode_id', 2)
+                ->whereDate('contract_from_date', '<=', $month->endOfMonth()->toDateString())
+                ->whereDate('contract_to_date', '>=', $month->startOfMonth()->toDateString())
+                ->exists(),
             403
         );
     }

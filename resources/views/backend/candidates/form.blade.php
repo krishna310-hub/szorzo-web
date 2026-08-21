@@ -69,6 +69,18 @@
         </select>
         @error('mode_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+    <div class="col-md-4 contract-date-field">
+        <label for="contract_from_date" class="form-label">Contract From Date <span class="text-danger">*</span></label>
+        <input type="date" class="form-control" id="contract_from_date" name="contract_from_date"
+            value="{{ old('contract_from_date', isset($candidate) && $candidate->contract_from_date ? $candidate->contract_from_date->format('Y-m-d') : '') }}">
+        @error('contract_from_date')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 contract-date-field">
+        <label for="contract_to_date" class="form-label">Contract To Date <span class="text-danger">*</span></label>
+        <input type="date" class="form-control" id="contract_to_date" name="contract_to_date"
+            value="{{ old('contract_to_date', isset($candidate) && $candidate->contract_to_date ? $candidate->contract_to_date->format('Y-m-d') : '') }}">
+        @error('contract_to_date')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
     <div class="col-md-4"><label for="candidate_name" class="form-label">Candidate Name <span
                 class="text-danger">*</span></label><input class="form-control" id="candidate_name"
             name="candidate_name" value="{{ old('candidate_name', $candidate->candidate_name ?? '') }}">
@@ -342,6 +354,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     client.addEventListener('change', filterRoles);
     filterRoles();
+
+    const mode = document.getElementById('mode_id');
+    const contractDateFields = document.querySelectorAll('.contract-date-field');
+    const contractDateInputs = [
+        document.getElementById('contract_from_date'),
+        document.getElementById('contract_to_date')
+    ];
+    function toggleContractDates() {
+        const isContract = mode.value === '2';
+        contractDateFields.forEach(field => field.classList.toggle('d-none', !isContract));
+        contractDateInputs.forEach(input => input.required = isContract);
+    }
+    mode.addEventListener('change', toggleContractDates);
+    toggleContractDates();
 });
 </script>
 <div class="d-flex gap-3 mt-5 justify-content-center"><button type="reset"

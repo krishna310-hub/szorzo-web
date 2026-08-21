@@ -22,6 +22,8 @@
                                             'Client',
                                             'Job Role',
                                             'Mode',
+                                            'Contract From Date',
+                                            'Contract To Date',
                                             'Candidate Name',
                                             'Mobile No',
                                             'Email',
@@ -60,6 +62,8 @@
                                                 <th>Client</th>
                                                 <th>Job Role</th>
                                                 <th>Mode</th>
+                                                <th>Contract From Date</th>
+                                                <th>Contract To Date</th>
                                                 <th>Level Of Interview</th>
                                                 <th>Mobile No</th>
                                                 <th>Email</th>
@@ -267,6 +271,12 @@
                         data: 'mode_name',
                         name: 'mode_name',
                         orderable: false
+                    }, {
+                        data: 'contract_from_date',
+                        name: 'contract_from_date'
+                    }, {
+                        data: 'contract_to_date',
+                        name: 'contract_to_date'
                     }, {
                         data: 'interview_level',
                         name: 'interview_level',

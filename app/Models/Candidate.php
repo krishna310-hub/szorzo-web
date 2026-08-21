@@ -16,6 +16,8 @@ class Candidate extends Model
         'client_id',
         'job_role_id',
         'mode_id',
+        'contract_from_date',
+        'contract_to_date',
         'candidate_name',
         'mobile_no',
         'email',
@@ -41,6 +43,8 @@ class Candidate extends Model
     protected $casts = [
         'status' => 'boolean',
         'onboarding_date' => 'date',
+        'contract_from_date' => 'date',
+        'contract_to_date' => 'date',
     ];
 
     public function recruiter()
