@@ -33,24 +33,38 @@ class ContractReportController extends Controller
         $this->authorize('export', Report::class);
         $month = $this->month($request);
         $candidates = $this->contractCandidates($request)
-            ->get(['candidates.id', 'candidates.take_home']);
+            ->get(['candidates.id', 'candidates.take_home', 'candidates.onboarding_ctc']);
         $created = 0;
 
         foreach ($candidates as $candidate) {
+            $monthlyTakeHome = $this->monthlyTakeHome($candidate);
             $report = ContractReport::firstOrCreate(
                 ['candidate_id' => $candidate->id, 'salary_month' => $month->toDateString()],
                 [
-                    'monthly_take_home' => $candidate->take_home ?? 0,
+                    'monthly_take_home' => $monthlyTakeHome,
                     'present_days' => $month->daysInMonth,
                     'absent_days' => 0,
-                    'payable_salary' => $candidate->take_home ?? 0,
+                    'payable_salary' => $monthlyTakeHome,
                 ]
             );
+
+            if (! $report->wasRecentlyCreated) {
+                $report->update([
+                    'monthly_take_home' => $monthlyTakeHome,
+                    'payable_salary' => round(
+                        ($monthlyTakeHome / $month->daysInMonth) * $report->present_days,
+                        2
+                    ),
+                ]);
+            }
+
             $created += $report->wasRecentlyCreated ? 1 : 0;
         }
 
+        $updated = $candidates->count() - $created;
+
         return redirect()->route('admin.contract-reports.index', ['month' => $month->format('Y-m')])
-            ->with('success', $created.' contract candidate(s) added for '.$month->format('F Y').'.');
+            ->with('success', $created.' contract candidate(s) added and '.$updated.' updated for '.$month->format('F Y').'.');
     }
 
     public function update(Request $request, ContractReport $contractReport)
@@ -128,6 +142,17 @@ class ContractReportController extends Controller
             ->where('mode_id', 2)
             ->whereDate('contract_from_date', '<=', $month->endOfMonth()->toDateString())
             ->whereDate('contract_to_date', '>=', $month->startOfMonth()->toDateString());
+    }
+
+    private function monthlyTakeHome(Candidate $candidate): float
+    {
+        $takeHome = (float) $candidate->take_home;
+
+        if ($takeHome > 0) {
+            return round($takeHome, 2);
+        }
+
+        return round((float) $candidate->onboarding_ctc / 12, 2);
     }
 
     private function query(Request $request, CarbonImmutable $month)
