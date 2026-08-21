@@ -49,7 +49,7 @@
 
 <div class="section">
     <table class="summary">
-        <thead><tr><th>Description</th><th class="num">Present</th><th class="num">Absent</th><th class="num">Amount</th></tr></thead>
+        <thead><tr><th>Description</th><th class="num">Present</th><th class="num">Leave Days</th><th class="num">Amount</th></tr></thead>
         <tbody>
             <tr><td>Monthly contract take-home</td><td class="num">{{ $contractReport->present_days }}</td><td class="num">{{ $contractReport->absent_days }}</td><td class="num">INR {{ number_format($contractReport->monthly_take_home, 2) }}</td></tr>
             <tr class="total"><td colspan="3">Net Payable Amount</td><td class="num">INR {{ number_format($contractReport->payable_salary, 2) }}</td></tr>

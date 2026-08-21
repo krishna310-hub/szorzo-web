@@ -62,7 +62,7 @@
                                         <th>Recruiter</th>
                                         <th class="text-end">Monthly Take Home</th>
                                         <th style="min-width:110px">Present</th>
-                                        <th style="min-width:110px">Absent</th>
+                                        <th style="min-width:110px">Leave Days</th>
                                         <th class="text-end">Payable Salary</th>
                                         <th></th>
                                     </tr>

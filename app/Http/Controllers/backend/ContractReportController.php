@@ -20,11 +20,16 @@ class ContractReportController extends Controller
     {
         $this->authorize('read', Report::class);
         $month = $this->month($request);
+        $reports = $this->query($request, $month)->paginate(50)->withQueryString();
+
+        $reports->getCollection()->each(function (ContractReport $report) use ($month) {
+            $this->syncReportSalary($report, $month->daysInMonth);
+        });
 
         return view('backend.contract-reports.index', [
             'month' => $month,
             'daysInMonth' => $month->daysInMonth,
-            'reports' => $this->query($request, $month)->paginate(50)->withQueryString(),
+            'reports' => $reports,
         ]);
     }
 
@@ -49,13 +54,7 @@ class ContractReportController extends Controller
             );
 
             if (! $report->wasRecentlyCreated) {
-                $report->update([
-                    'monthly_take_home' => $monthlyTakeHome,
-                    'payable_salary' => round(
-                        ($monthlyTakeHome / $month->daysInMonth) * $report->present_days,
-                        2
-                    ),
-                ]);
+                $this->syncReportSalary($report, $month->daysInMonth);
             }
 
             $created += $report->wasRecentlyCreated ? 1 : 0;
@@ -79,13 +78,17 @@ class ContractReportController extends Controller
 
         if ($days !== $data['present_days'] + $data['absent_days']) {
             throw ValidationException::withMessages([
-                'present_days' => 'Present and absent days must total '.$days.' days for '.$contractReport->salary_month->format('F Y').'.',
+                'present_days' => 'Present and leave days must total '.$days.' days for '.$contractReport->salary_month->format('F Y').'.',
             ]);
         }
 
         $contractReport->update([
             ...$data,
-            'payable_salary' => round(((float) $contractReport->monthly_take_home / $days) * $data['present_days'], 2),
+            'payable_salary' => $this->payableSalary(
+                (float) $contractReport->monthly_take_home,
+                $data['absent_days'],
+                $days
+            ),
         ]);
 
         return back()->with('success', 'Monthly attendance and salary updated.');
@@ -153,6 +156,38 @@ class ContractReportController extends Controller
         }
 
         return round((float) $candidate->onboarding_ctc / 12, 2);
+    }
+
+    private function syncReportSalary(ContractReport $report, int $daysInMonth): void
+    {
+        if (! $report->relationLoaded('candidate')) {
+            $report->load('candidate');
+        }
+
+        if (! $report->candidate) {
+            return;
+        }
+
+        $monthlyTakeHome = $this->monthlyTakeHome($report->candidate);
+        $report->fill([
+            'monthly_take_home' => $monthlyTakeHome,
+            'payable_salary' => $this->payableSalary(
+                $monthlyTakeHome,
+                (int) $report->absent_days,
+                $daysInMonth
+            ),
+        ]);
+
+        if ($report->isDirty(['monthly_take_home', 'payable_salary'])) {
+            $report->save();
+        }
+    }
+
+    private function payableSalary(float $monthlySalary, int $leaveDays, int $daysInMonth): float
+    {
+        $leaveDeduction = ($monthlySalary / $daysInMonth) * $leaveDays;
+
+        return round(max(0, $monthlySalary - $leaveDeduction), 2);
     }
 
     private function query(Request $request, CarbonImmutable $month)
