@@ -7,17 +7,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
     <!-- Accessibility + Mobile -->
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- SEO -->
-     <meta
-        name="description"
+    <meta name="description"
         content="SZORZO is India's leading GCC launchpad and global business transformation partner specializing in GCC setup, AI solutions, engineering services, market expansion, talent consolidation, and technology-driven business growth.">
 
-    <meta
-        name="keywords"
+    <meta name="keywords"
         content="SZORZO, GCC launchpad, Global Capability Center, AI partner, business transformation, engineering services, market expansion, talent mapping, India GCC, digital transformation, enterprise solutions">
 
     <meta name="author" content="Awaiken">
@@ -27,11 +23,14 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3GR0JSC9LC"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-3GR0JSC9LC');
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-3GR0JSC9LC');
     </script>
 
     <!-- Page Title -->
@@ -40,87 +39,42 @@
     </title>
 
     <!-- Favicon -->
-    <link
-        rel="shortcut icon"
-        type="image/x-icon"
-        href="{{ asset('frontend/images/favicon.png') }}">
+    <link rel="shortcut icon" type="image/png" sizes="200x200" href="{{ asset('frontend/images/rhino-logo.png') }}">
 
-    <link
-        rel="icon"
-        type="image/png"
-        href="{{ asset('frontend/images/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="200x200" href="{{ asset('frontend/images/rhino-logo.png') }}">
 
     <!-- Google Fonts -->
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
 
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <!-- Preload Font CSS -->
-    <link
-        rel="preload"
-        as="style"
+    <link rel="preload" as="style"
         href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap">
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
 
     <!-- Critical CSS -->
-    <link
-        href="{{ asset('frontend/css/bootstrap.min.css') }}"
-        rel="stylesheet">
+    <link href="{{ asset('frontend/css/bootstrap.min.css') }}" rel="stylesheet">
 
-    <link
-        href="{{ asset('frontend/css/custom.css') }}"
-        rel="stylesheet">
+    <link href="{{ asset('frontend/css/custom.css') }}" rel="stylesheet">
 
     <!-- Non-Critical CSS -->
-    <link
-        rel="stylesheet"
-        href="{{ asset('frontend/css/animate.css') }}"
-        media="print"
+    <link rel="stylesheet" href="{{ asset('frontend/css/animate.css') }}" media="print" onload="this.media='all'">
+
+    <link rel="stylesheet" href="{{ asset('frontend/css/slicknav.min.css') }}" media="print" onload="this.media='all'">
+
+    <link rel="stylesheet" href="{{ asset('frontend/css/swiper-bundle.min.css') }}" media="print"
         onload="this.media='all'">
 
-    <link
-        rel="stylesheet"
-        href="{{ asset('frontend/css/slicknav.min.css') }}"
-        media="print"
+    <link rel="stylesheet" href="{{ asset('frontend/css/all.min.css') }}" media="print" onload="this.media='all'">
+
+    <link rel="stylesheet" href="{{ asset('frontend/css/magnific-popup.css') }}" media="print"
         onload="this.media='all'">
 
-    <link
-        rel="stylesheet"
-        href="{{ asset('frontend/css/swiper-bundle.min.css') }}"
-        media="print"
-        onload="this.media='all'">
+    <link rel="stylesheet" href="{{ asset('frontend/css/remixicon.css') }}" media="print" onload="this.media='all'">
 
-    <link
-        rel="stylesheet"
-        href="{{ asset('frontend/css/all.min.css') }}"
-        media="print"
-        onload="this.media='all'">
-
-    <link
-        rel="stylesheet"
-        href="{{ asset('frontend/css/magnific-popup.css') }}"
-        media="print"
-        onload="this.media='all'">
-
-    <link
-        rel="stylesheet"
-        href="{{ asset('frontend/css/remixicon.css') }}"
-        media="print"
-        onload="this.media='all'">
-
-    <link
-        rel="stylesheet"
-        href="{{ asset('frontend/css/mousecursor.css') }}"
-        media="print"
-        onload="this.media='all'">
+    <link rel="stylesheet" href="{{ asset('frontend/css/mousecursor.css') }}" media="print" onload="this.media='all'">
 
     <!-- NoScript Fallback -->
     <noscript>
@@ -142,11 +96,7 @@
             <div class="loading"></div>
 
             <div id="loading-icon">
-                <img
-                    src="{{ asset('frontend/images/loader.webp') }}"
-                    alt="Loading"
-                    width="80"
-                    height="80">
+                <img src="{{ asset('frontend/images/loader.webp') }}" alt="Loading" width="80" height="80">
             </div>
         </div>
     </div>
@@ -164,7 +114,7 @@
 
     <!-- Preloader Script -->
     <script defer>
-        window.addEventListener('load', function () {
+        window.addEventListener('load', function() {
             const preloader = document.querySelector('.preloader');
 
             if (preloader) {
@@ -184,20 +134,16 @@
         defer>
     </script> --}}
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        defer>
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
 
     <!-- Ajax Setup -->
     <script defer>
-        window.addEventListener('load', function () {
+        window.addEventListener('load', function() {
             $.ajaxSetup({
                 headers: {
-                    'X-CSRF-TOKEN':
-                        document
-                            .querySelector('meta[name="csrf-token"]')
-                            .getAttribute('content')
+                    'X-CSRF-TOKEN': document
+                        .querySelector('meta[name="csrf-token"]')
+                        .getAttribute('content')
                 }
             });
         });

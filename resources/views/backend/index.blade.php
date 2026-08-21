@@ -1990,15 +1990,7 @@
                     }
                 },
                 dataLabels: {
-                    enabled: true,
-                    offsetY: -18,
-                    formatter: function(value) {
-                        return value > 0 ? '₹' + Number(value).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '';
-                    },
-                    style: {
-                        fontSize: '10px',
-                        colors: ['#334155']
-                    }
+                    enabled: false
                 },
                 grid: {
                     borderColor: '#eef2f7',
