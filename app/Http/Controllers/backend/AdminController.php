@@ -319,14 +319,8 @@ class AdminController extends Controller
                         ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                 });
             })
-            ->get(['client_id', 'level_of_interview_id', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
-        $candidateRevenue = function ($candidate): float {
-            $ctc = (int) $candidate->level_of_interview_id === 21
-                ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
-                : $candidate->onboarding_ctc;
-
-            return (float) $ctc * (float) ($candidate->client?->billing?->value ?? 0) / 100;
-        };
+            ->get(['client_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
+        $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate);
         $monthlyOutcomeRevenue = $revenueOutcomes
             ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
                 ? $candidate->updated_at->format('Y-m')
@@ -344,8 +338,7 @@ class AdminController extends Controller
         $totalOnboardingRevenue = (clone $onboardingCandidates)
             ->with('client.billing')
             ->where('level_of_interview_id', 20)
-            ->whereNotNull('onboarding_ctc')
-            ->get(['client_id', 'onboarding_ctc'])
+            ->get(['client_id', 'mode_id', 'take_home', 'onboarding_ctc'])
             ->sum($candidateRevenue);
 
         $targetMultiplier = $selectedRecruiterId
@@ -487,7 +480,7 @@ class AdminController extends Controller
                             ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                     });
                 })
-                ->get(['client_id', 'level_of_interview_id', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
+                ->get(['client_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
                 ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
                     ? $candidate->updated_at->format('Y-m')
                     : $candidate->onboarding_date->format('Y-m'))
@@ -517,13 +510,7 @@ class AdminController extends Controller
                 $pipelineCounts[$levelNames[$levelId]] = (int) ($onboardingPipelineCounts[$levelId] ?? 0);
             }
         }
-        $candidateRevenue = function ($candidate): float {
-            $ctc = (int) $candidate->level_of_interview_id === 21
-                ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
-                : $candidate->onboarding_ctc;
-
-            return (float) $ctc * (float) ($candidate->client?->billing?->value ?? 0) / 100;
-        };
+        $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate);
         $monthlyOnboardedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 20)->sum($candidateRevenue));
         $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 21)->sum($candidateRevenue));
 
@@ -542,6 +529,24 @@ class AdminController extends Controller
             'declined_revenue_total' => round((float) $monthlyDeclinedRevenue->sum(), 2),
             'pipeline_counts' => $pipelineCounts,
         ]);
+    }
+
+    private function candidateRevenue(Candidate $candidate): float
+    {
+        $ctc = (int) $candidate->level_of_interview_id === 21
+            ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
+            : $candidate->onboarding_ctc;
+
+        // Contract candidates may only have their monthly take-home recorded.
+        // Annualize it so their revenue is not silently calculated as zero.
+        if ((int) $candidate->mode_id === 2 && (float) $ctc <= 0) {
+            $ctc = (float) $candidate->take_home * 12;
+        }
+
+        return round(
+            (float) $ctc * (float) ($candidate->client?->billing?->value ?? 0) / 100,
+            2
+        );
     }
 
     private function monthlyTargetAnalytics(

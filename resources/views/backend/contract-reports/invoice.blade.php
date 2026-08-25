@@ -49,13 +49,17 @@
 
 <div class="section">
     <table class="summary">
-        <thead><tr><th>Description</th><th class="num">Present</th><th class="num">Leave Days</th><th class="num">Amount</th></tr></thead>
+        <thead><tr><th>Description</th><th class="num">Present</th><th class="num">Leave Days</th><th class="num">Worked Hours</th><th class="num">Amount</th></tr></thead>
         <tbody>
-            <tr><td>Monthly contract take-home</td><td class="num">{{ $contractReport->present_days }}</td><td class="num">{{ $contractReport->absent_days }}</td><td class="num">INR {{ number_format($contractReport->monthly_take_home, 2) }}</td></tr>
-            <tr class="total"><td colspan="3">Net Payable Amount</td><td class="num">INR {{ number_format($contractReport->payable_salary, 2) }}</td></tr>
+            <tr><td>Monthly contract take-home</td><td class="num">{{ $contractReport->present_days }}</td><td class="num">{{ $contractReport->absent_days }}</td><td class="num">{{ $contractReport->worked_hours !== null ? number_format($contractReport->worked_hours, 2) : '—' }}</td><td class="num">INR {{ number_format($contractReport->monthly_take_home, 2) }}</td></tr>
+            <tr class="total"><td colspan="4">Net Payable Amount</td><td class="num">INR {{ number_format($contractReport->payable_salary, 2) }}</td></tr>
         </tbody>
     </table>
-    <div class="formula">Calculation: INR {{ number_format($contractReport->monthly_take_home, 2) }} / {{ $contractReport->salary_month->daysInMonth }} days × {{ $contractReport->present_days }} present days.</div>
+    @if ($contractReport->worked_hours !== null)
+        <div class="formula">Hourly calculation: INR {{ number_format($contractReport->monthly_take_home, 2) }} / ({{ $contractReport->salary_month->daysInMonth }} days × 8 hours) × {{ number_format($contractReport->worked_hours, 2) }} worked hours.</div>
+    @else
+        <div class="formula">Calculation: INR {{ number_format($contractReport->monthly_take_home, 2) }} / {{ $contractReport->salary_month->daysInMonth }} days × {{ $contractReport->present_days }} present days.</div>
+    @endif
 </div>
 
 <div class="footer">Computer-generated contract invoice &middot; {{ $invoiceNumber }}</div>

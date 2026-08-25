@@ -63,6 +63,7 @@
                                         <th class="text-end">Monthly Take Home</th>
                                         <th style="min-width:110px">Present</th>
                                         <th style="min-width:110px">Leave Days</th>
+                                        <th style="min-width:125px">Worked Hours</th>
                                         <th class="text-end">Payable Salary</th>
                                         <th></th>
                                     </tr>
@@ -88,6 +89,11 @@
                                                     name="absent_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->absent_days }}" class="form-control form-control-sm"
                                                     required></td>
+                                            <td><input form="contract-report-{{ $report->id }}" type="number"
+                                                    name="worked_hours" min="0" max="{{ $daysInMonth * 8 }}"
+                                                    step="0.25"
+                                                    value="{{ old('worked_hours', $report->worked_hours ?? ($report->present_days * 8)) }}"
+                                                    class="form-control form-control-sm" required></td>
                                             <td class="text-end fw-semibold text-success">
                                                 &#8377;{{ number_format($report->payable_salary, 2) }}</td>
                                             <td>
@@ -107,7 +113,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted py-5">No active candidates with
+                                            <td colspan="9" class="text-center text-muted py-5">No active candidates with
                                                 mode ID 2 have a contract covering this month. Click <strong>Refresh
                                                     Candidates</strong> after adding the contract dates in the candidate
                                                 module.</td>
@@ -122,6 +128,7 @@
                                                 &#8377;{{ number_format($reports->sum('monthly_take_home'), 2) }}</td>
                                             <td class="text-center">{{ $reports->sum('present_days') }}</td>
                                             <td class="text-center">{{ $reports->sum('absent_days') }}</td>
+                                            <td class="text-center">{{ number_format($reports->sum(fn ($report) => $report->worked_hours ?? ($report->present_days * 8)), 2) }}</td>
                                             <td class="text-end">
                                                 &#8377;{{ number_format($reports->sum('payable_salary'), 2) }}</td>
                                             <td></td>

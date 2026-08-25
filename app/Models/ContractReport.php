@@ -12,12 +12,14 @@ class ContractReport extends Model
         'monthly_take_home',
         'present_days',
         'absent_days',
+        'worked_hours',
         'payable_salary',
     ];
 
     protected $casts = [
         'salary_month' => 'date',
         'monthly_take_home' => 'decimal:2',
+        'worked_hours' => 'decimal:2',
         'payable_salary' => 'decimal:2',
     ];
 
