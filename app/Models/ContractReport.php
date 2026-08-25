@@ -10,6 +10,8 @@ class ContractReport extends Model
         'candidate_id',
         'salary_month',
         'monthly_take_home',
+        'is_hourly',
+        'hourly_salary',
         'present_days',
         'absent_days',
         'worked_hours',
@@ -19,6 +21,8 @@ class ContractReport extends Model
     protected $casts = [
         'salary_month' => 'date',
         'monthly_take_home' => 'decimal:2',
+        'is_hourly' => 'boolean',
+        'hourly_salary' => 'decimal:2',
         'worked_hours' => 'decimal:2',
         'payable_salary' => 'decimal:2',
     ];

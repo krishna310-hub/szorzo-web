@@ -18,6 +18,8 @@ class Candidate extends Model
         'mode_id',
         'contract_from_date',
         'contract_to_date',
+        'is_hourly',
+        'hourly_salary',
         'candidate_name',
         'mobile_no',
         'email',
@@ -45,6 +47,8 @@ class Candidate extends Model
         'onboarding_date' => 'date',
         'contract_from_date' => 'date',
         'contract_to_date' => 'date',
+        'is_hourly' => 'boolean',
+        'hourly_salary' => 'decimal:2',
     ];
 
     public function recruiter()

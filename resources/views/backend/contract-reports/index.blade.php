@@ -61,10 +61,11 @@
                                         <th>Client / Role</th>
                                         <th>Recruiter</th>
                                         <th class="text-end">Monthly Take Home</th>
+                                        <th class="text-end">Hourly Salary</th>
                                         <th style="min-width:110px">Present</th>
                                         <th style="min-width:110px">Leave Days</th>
                                         <th style="min-width:125px">Worked Hours</th>
-                                        <th class="text-end">Payable Salary</th>
+                                        <th class="text-end">Total Salary</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -79,8 +80,8 @@
                                                     class="text-muted">{{ $report->candidate?->jobRole?->job_role ?? '—' }}</small>
                                             </td>
                                             <td>{{ $report->candidate?->recruiter?->recruiter_name ?? '—' }}</td>
-                                            <td class="text-end">&#8377;{{ number_format($report->monthly_take_home, 2) }}
-                                            </td>
+                                            <td class="text-end">{{ $report->is_hourly ? '—' : '₹'.number_format($report->monthly_take_home, 2) }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->hourly_salary, 2).'/hr' : '—' }}</td>
                                             <td><input form="contract-report-{{ $report->id }}" type="number"
                                                     name="present_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->present_days }}"
@@ -89,11 +90,16 @@
                                                     name="absent_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->absent_days }}" class="form-control form-control-sm"
                                                     required></td>
-                                            <td><input form="contract-report-{{ $report->id }}" type="number"
-                                                    name="worked_hours" min="0" max="{{ $daysInMonth * 8 }}"
-                                                    step="0.25"
-                                                    value="{{ old('worked_hours', $report->worked_hours ?? ($report->present_days * 8)) }}"
-                                                    class="form-control form-control-sm" required></td>
+                                            <td>
+                                                @if ($report->is_hourly)
+                                                    <input form="contract-report-{{ $report->id }}" type="number"
+                                                        name="worked_hours" min="0"
+                                                        step="0.25" value="{{ old('worked_hours', $report->worked_hours) }}"
+                                                        class="form-control form-control-sm" required>
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
                                             <td class="text-end fw-semibold text-success">
                                                 &#8377;{{ number_format($report->payable_salary, 2) }}</td>
                                             <td>
@@ -113,7 +119,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" class="text-center text-muted py-5">No active candidates with
+                                            <td colspan="10" class="text-center text-muted py-5">No active candidates with
                                                 mode ID 2 have a contract covering this month. Click <strong>Refresh
                                                     Candidates</strong> after adding the contract dates in the candidate
                                                 module.</td>
@@ -126,9 +132,10 @@
                                             <td colspan="3">Page total</td>
                                             <td class="text-end">
                                                 &#8377;{{ number_format($reports->sum('monthly_take_home'), 2) }}</td>
+                                            <td class="text-end">—</td>
                                             <td class="text-center">{{ $reports->sum('present_days') }}</td>
                                             <td class="text-center">{{ $reports->sum('absent_days') }}</td>
-                                            <td class="text-center">{{ number_format($reports->sum(fn ($report) => $report->worked_hours ?? ($report->present_days * 8)), 2) }}</td>
+                                            <td class="text-center">{{ number_format($reports->where('is_hourly', true)->sum('worked_hours'), 2) }}</td>
                                             <td class="text-end">
                                                 &#8377;{{ number_format($reports->sum('payable_salary'), 2) }}</td>
                                             <td></td>

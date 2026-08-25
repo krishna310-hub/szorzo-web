@@ -546,6 +546,7 @@ class CandidateController extends Controller
         $request->merge([
             'mobile_no' => $request->filled('mobile_no') ? trim((string) $request->mobile_no) : null,
             'email' => $request->filled('email') ? strtolower(trim((string) $request->email)) : null,
+            'is_hourly' => $request->boolean('is_hourly'),
         ]);
 
         $data = $request->validate([
@@ -555,6 +556,8 @@ class CandidateController extends Controller
             'mode_id' => 'required|exists:modes,id',
             'contract_from_date' => 'nullable|date|required_if:mode_id,2',
             'contract_to_date' => 'nullable|date|required_if:mode_id,2|after_or_equal:contract_from_date',
+            'is_hourly' => 'required|boolean',
+            'hourly_salary' => 'nullable|required_if:is_hourly,1|numeric|min:0.01',
             'candidate_name' => 'required|string|max:255',
             'mobile_no' => [
                 'required',
@@ -595,6 +598,10 @@ class CandidateController extends Controller
         if ((int) $data['mode_id'] !== 2) {
             $data['contract_from_date'] = null;
             $data['contract_to_date'] = null;
+            $data['is_hourly'] = false;
+            $data['hourly_salary'] = null;
+        } elseif (! $data['is_hourly']) {
+            $data['hourly_salary'] = null;
         }
 
         if (! $this->visibleRecruiters()->whereKey($data['recruiter_id'])->exists()) {

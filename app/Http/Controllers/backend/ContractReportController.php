@@ -16,8 +16,6 @@ class ContractReportController extends Controller
 {
     use AuthorizesRequests;
 
-    private const WORKING_HOURS_PER_DAY = 8;
-
     public function index(Request $request)
     {
         $this->authorize('read', Report::class);
@@ -40,7 +38,13 @@ class ContractReportController extends Controller
         $this->authorize('export', Report::class);
         $month = $this->month($request);
         $candidates = $this->contractCandidates($request)
-            ->get(['candidates.id', 'candidates.take_home', 'candidates.onboarding_ctc']);
+            ->get([
+                'candidates.id',
+                'candidates.take_home',
+                'candidates.onboarding_ctc',
+                'candidates.is_hourly',
+                'candidates.hourly_salary',
+            ]);
         $created = 0;
 
         foreach ($candidates as $candidate) {
@@ -49,9 +53,12 @@ class ContractReportController extends Controller
                 ['candidate_id' => $candidate->id, 'salary_month' => $month->toDateString()],
                 [
                     'monthly_take_home' => $monthlyTakeHome,
+                    'is_hourly' => $candidate->is_hourly,
+                    'hourly_salary' => $candidate->is_hourly ? $candidate->hourly_salary : null,
                     'present_days' => $month->daysInMonth,
                     'absent_days' => 0,
-                    'payable_salary' => $monthlyTakeHome,
+                    'worked_hours' => $candidate->is_hourly ? 0 : null,
+                    'payable_salary' => $candidate->is_hourly ? 0 : $monthlyTakeHome,
                 ]
             );
 
@@ -76,7 +83,11 @@ class ContractReportController extends Controller
         $data = $request->validate([
             'present_days' => ['required', 'integer', 'min:0', 'max:'.$days],
             'absent_days' => ['required', 'integer', 'min:0', 'max:'.$days],
-            'worked_hours' => ['nullable', 'numeric', 'min:0', 'max:'.($days * self::WORKING_HOURS_PER_DAY)],
+            'worked_hours' => [
+                $contractReport->is_hourly ? 'required' : 'nullable',
+                'numeric',
+                'min:0',
+            ],
         ]);
 
         if ($days !== $data['present_days'] + $data['absent_days']) {
@@ -87,12 +98,11 @@ class ContractReportController extends Controller
 
         $contractReport->update([
             ...$data,
-            'worked_hours' => isset($data['worked_hours']) ? round((float) $data['worked_hours'], 2) : null,
-            'payable_salary' => isset($data['worked_hours'])
+            'worked_hours' => $contractReport->is_hourly ? round((float) $data['worked_hours'], 2) : null,
+            'payable_salary' => $contractReport->is_hourly
                 ? $this->hourlyPayableSalary(
-                    (float) $contractReport->monthly_take_home,
+                    (float) $contractReport->hourly_salary,
                     (float) $data['worked_hours'],
-                    $days
                 )
                 : $this->payableSalary(
                     (float) $contractReport->monthly_take_home,
@@ -181,11 +191,17 @@ class ContractReportController extends Controller
         $monthlyTakeHome = $this->monthlyTakeHome($report->candidate);
         $report->fill([
             'monthly_take_home' => $monthlyTakeHome,
-            'payable_salary' => $report->worked_hours !== null
+            'is_hourly' => $report->candidate->is_hourly,
+            'hourly_salary' => $report->candidate->is_hourly
+                ? $report->candidate->hourly_salary
+                : null,
+            'worked_hours' => $report->candidate->is_hourly
+                ? ($report->worked_hours ?? 0)
+                : null,
+            'payable_salary' => $report->candidate->is_hourly
                 ? $this->hourlyPayableSalary(
-                    $monthlyTakeHome,
-                    (float) $report->worked_hours,
-                    $daysInMonth
+                    (float) $report->candidate->hourly_salary,
+                    (float) ($report->worked_hours ?? 0),
                 )
                 : $this->payableSalary(
                     $monthlyTakeHome,
@@ -194,7 +210,7 @@ class ContractReportController extends Controller
                 ),
         ]);
 
-        if ($report->isDirty(['monthly_take_home', 'payable_salary'])) {
+        if ($report->isDirty(['monthly_take_home', 'is_hourly', 'hourly_salary', 'worked_hours', 'payable_salary'])) {
             $report->save();
         }
     }
@@ -206,15 +222,9 @@ class ContractReportController extends Controller
         return round(max(0, $monthlySalary - $leaveDeduction), 2);
     }
 
-    private function hourlyPayableSalary(float $monthlySalary, float $workedHours, int $daysInMonth): float
+    private function hourlyPayableSalary(float $hourlySalary, float $workedHours): float
     {
-        $monthlyHours = $daysInMonth * self::WORKING_HOURS_PER_DAY;
-
-        if ($monthlyHours <= 0) {
-            return 0;
-        }
-
-        return round(max(0, ($monthlySalary / $monthlyHours) * $workedHours), 2);
+        return round(max(0, $hourlySalary * $workedHours), 2);
     }
 
     private function query(Request $request, CarbonImmutable $month)
