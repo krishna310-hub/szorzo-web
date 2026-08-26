@@ -13,10 +13,11 @@
                         @can('export', \App\Models\Report::class)
                             <form method="POST" action="{{ route('admin.contract-reports.refresh') }}">@csrf
                                 <input type="hidden" name="month" value="{{ $month->format('Y-m') }}">
+                                <input type="hidden" name="contract_type" value="{{ $contractType }}">
                                 <button class="btn btn-primary"><i class="ri-refresh-line me-1"></i>Refresh Candidates</button>
                             </form>
                             <a class="btn btn-danger"
-                                href="{{ route('admin.contract-reports.pdf', ['month' => $month->format('Y-m')]) }}"><i
+                                href="{{ route('admin.contract-reports.pdf', ['month' => $month->format('Y-m'), 'contract_type' => $contractType]) }}"><i
                                     class="ri-file-pdf-2-line me-1"></i>Download PDF</a>
                         @endcan
                     </div>
@@ -42,6 +43,14 @@
                             <div class="col-sm-4 col-lg-3"><label class="form-label">Salary month</label><input
                                     type="month" name="month" value="{{ $month->format('Y-m') }}" class="form-control"
                                     required></div>
+                            <div class="col-sm-4 col-lg-3">
+                                <label class="form-label" for="contractType">Contract type</label>
+                                <select id="contractType" name="contract_type" class="form-select">
+                                    <option value="all" @selected($contractType === 'all')>All</option>
+                                    <option value="monthly" @selected($contractType === 'monthly')>Monthly</option>
+                                    <option value="hourly" @selected($contractType === 'hourly')>Hourly</option>
+                                </select>
+                            </div>
                             <div class="col-auto"><button class="btn btn-primary">View Month</button></div>
                         </form>
                     </div>
@@ -119,8 +128,8 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="10" class="text-center text-muted py-5">No active candidates with
-                                                mode ID 2 have a contract covering this month. Click <strong>Refresh
+                                            <td colspan="10" class="text-center text-muted py-5">No {{ $contractType === 'all' ? '' : $contractType.' ' }}contract candidates
+                                                were found for this month. Click <strong>Refresh
                                                     Candidates</strong> after adding the contract dates in the candidate
                                                 module.</td>
                                         </tr>

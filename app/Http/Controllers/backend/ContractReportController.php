@@ -20,7 +20,8 @@ class ContractReportController extends Controller
     {
         $this->authorize('read', Report::class);
         $month = $this->month($request);
-        $reports = $this->query($request, $month)->paginate(50)->withQueryString();
+        $contractType = $this->contractType($request);
+        $reports = $this->query($request, $month, $contractType)->paginate(50)->withQueryString();
 
         $reports->getCollection()->each(function (ContractReport $report) use ($month) {
             $this->syncReportSalary($report, $month->daysInMonth);
@@ -30,6 +31,7 @@ class ContractReportController extends Controller
             'month' => $month,
             'daysInMonth' => $month->daysInMonth,
             'reports' => $reports,
+            'contractType' => $contractType,
         ]);
     }
 
@@ -37,6 +39,7 @@ class ContractReportController extends Controller
     {
         $this->authorize('export', Report::class);
         $month = $this->month($request);
+        $contractType = $this->contractType($request);
         $candidates = $this->contractCandidates($request)
             ->get([
                 'candidates.id',
@@ -71,7 +74,10 @@ class ContractReportController extends Controller
 
         $updated = $candidates->count() - $created;
 
-        return redirect()->route('admin.contract-reports.index', ['month' => $month->format('Y-m')])
+        return redirect()->route('admin.contract-reports.index', [
+            'month' => $month->format('Y-m'),
+            'contract_type' => $contractType,
+        ])
             ->with('success', $created.' contract candidate(s) added and '.$updated.' updated for '.$month->format('F Y').'.');
     }
 
@@ -118,9 +124,10 @@ class ContractReportController extends Controller
     {
         $this->authorize('export', Report::class);
         $month = $this->month($request);
-        $reports = $this->query($request, $month)->get();
+        $contractType = $this->contractType($request);
+        $reports = $this->query($request, $month, $contractType)->get();
 
-        return Pdf::loadView('backend.contract-reports.pdf', compact('month', 'reports'))
+        return Pdf::loadView('backend.contract-reports.pdf', compact('month', 'reports', 'contractType'))
             ->setPaper('a4', 'landscape')
             ->download('contract-report-'.$month->format('Y-m').'.pdf');
     }
@@ -154,6 +161,15 @@ class ContractReportController extends Controller
         return isset($data['month'])
             ? CarbonImmutable::createFromFormat('!Y-m', $data['month'])->startOfMonth()
             : CarbonImmutable::now()->startOfMonth();
+    }
+
+    private function contractType(Request $request): string
+    {
+        $data = $request->validate([
+            'contract_type' => ['nullable', 'in:all,monthly,hourly'],
+        ]);
+
+        return $data['contract_type'] ?? 'all';
     }
 
     private function contractCandidates(Request $request)
@@ -227,11 +243,13 @@ class ContractReportController extends Controller
         return round(max(0, $hourlySalary * $workedHours), 2);
     }
 
-    private function query(Request $request, CarbonImmutable $month)
+    private function query(Request $request, CarbonImmutable $month, string $contractType)
     {
         return ContractReport::query()
             ->with(['candidate.client', 'candidate.jobRole', 'candidate.recruiter'])
             ->whereDate('salary_month', $month->toDateString())
+            ->when($contractType === 'monthly', fn ($query) => $query->where('is_hourly', false))
+            ->when($contractType === 'hourly', fn ($query) => $query->where('is_hourly', true))
             ->whereHas('candidate', fn ($query) => $query
                 ->visibleTo($request->user()->loadMissing('role'))
                 ->where('status', true)
