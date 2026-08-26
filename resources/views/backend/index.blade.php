@@ -966,6 +966,195 @@
                 right: 20px;
             }
         }
+
+        /* =========================
+        ONAM BANNER
+        ========================= */
+
+        .onam-day-banner {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            min-height: 145px;
+            padding: 25px 35px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #fff8df, #fff1b8, #ffe69a);
+            border: 1px solid #f2c94c;
+            box-shadow: 0 8px 25px rgba(180, 130, 20, 0.15);
+        }
+
+        /* Decorative glow */
+        .onam-glow {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255, 193, 7, 0.15);
+            filter: blur(25px);
+        }
+
+        .onam-glow.glow-one {
+            top: -100px;
+            left: 15%;
+        }
+
+        .onam-glow.glow-two {
+            bottom: -100px;
+            right: 20%;
+        }
+
+        /* Left icon */
+        .onam-left {
+            position: relative;
+            z-index: 2;
+            margin-right: 25px;
+        }
+
+        .onam-icon {
+            width: 75px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #e5a900;
+            font-size: 40px;
+            box-shadow: 0 5px 15px rgba(150, 100, 0, 0.15);
+        }
+
+        /* Content */
+        .onam-content {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .onam-date {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #9a6500;
+        }
+
+        .date-line {
+            width: 35px;
+            height: 2px;
+            background: #d89b00;
+        }
+
+        .onam-content h3 {
+            margin: 5px 0 6px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #7a4500;
+        }
+
+        .onam-message {
+            margin: 0;
+            max-width: 650px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #6b4a13;
+        }
+
+        .onam-message strong {
+            color: #a65f00;
+        }
+
+        /* Pookalam */
+        .onam-pookalam {
+            position: relative;
+            z-index: 2;
+            width: 85px;
+            height: 85px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle,
+                    #fff 0 12%,
+                    #f7c948 13% 28%,
+                    #f2994a 29% 43%,
+                    #e76f51 44% 58%,
+                    #f7c948 59% 72%,
+                    #fff 73%);
+            font-size: 30px;
+            margin-right: 20px;
+            box-shadow: 0 5px 15px rgba(150, 90, 0, 0.18);
+        }
+
+        /* Lamp */
+        .onam-decoration {
+            position: relative;
+            z-index: 2;
+            font-size: 42px;
+            animation: lampGlow 2s infinite alternate;
+        }
+
+        /* Bottom decoration */
+        .onam-wave-decoration {
+            position: absolute;
+            left: -5%;
+            bottom: -45px;
+            width: 110%;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 50%;
+        }
+
+        /* Animation */
+        @keyframes lampGlow {
+            from {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            to {
+                transform: scale(1.08);
+                opacity: 1;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+
+            .onam-day-banner {
+                padding: 20px;
+                min-height: auto;
+            }
+
+            .onam-left {
+                margin-right: 15px;
+            }
+
+            .onam-icon {
+                width: 55px;
+                height: 55px;
+                font-size: 30px;
+            }
+
+            .onam-content h3 {
+                font-size: 18px;
+            }
+
+            .onam-message {
+                font-size: 12px;
+            }
+
+            .onam-pookalam {
+                display: none;
+            }
+
+            .onam-decoration {
+                font-size: 30px;
+            }
+        }
     </style>
 
     <div class="main-content dashboard-shell">
@@ -1067,6 +1256,55 @@
                                 </div>
 
                                 <div class="wave-decoration"></div>
+
+                            </div>
+                        @endif
+
+                        {{-- Onam Wish --}}
+                        @php
+                            $isOnam = now()->format('m-d') === '08-26';
+                        @endphp
+
+                        @if ($isOnam)
+                            <div class="onam-day-banner mb-4 mt-3">
+
+                                <!-- Decorative elements -->
+                                <div class="onam-glow glow-one"></div>
+                                <div class="onam-glow glow-two"></div>
+
+                                <div class="onam-left">
+                                    <div class="onam-icon">
+                                        🌸
+                                    </div>
+                                </div>
+
+                                <div class="onam-content">
+                                    <div class="onam-date">
+                                        <span>26 AUGUST</span>
+                                        <span class="date-line"></span>
+                                        <span>ONAM</span>
+                                    </div>
+
+                                    <h3>
+                                        Happy Onam! 🌸🌼
+                                    </h3>
+
+                                    <p class="onam-message">
+                                        May this Onam bring happiness, prosperity, peace and success
+                                        to you and your family.
+                                        <strong>Onam Ashamsakal! ❤️</strong>
+                                    </p>
+                                </div>
+
+                                <div class="onam-pookalam">
+                                    🌼
+                                </div>
+
+                                <div class="onam-decoration">
+                                    🪔
+                                </div>
+
+                                <div class="onam-wave-decoration"></div>
 
                             </div>
                         @endif
