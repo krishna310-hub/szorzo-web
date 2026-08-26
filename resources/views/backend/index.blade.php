@@ -1979,11 +1979,12 @@
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                     <div>
                                         <h5 class="section-title mb-1">Revenue Outcomes</h5>
-                                        <p class="text-muted small mb-0">Onboarded and joiner-declined revenue for <span class="selected-chart-year">{{ $chartYearLabel }}</span></p>
+                                        <p class="text-muted small mb-0">Onboarded, joiner-declined, and contract revenue for <span class="selected-chart-year">{{ $chartYearLabel }}</span></p>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2">
                                         <span id="onboardedRevenueBadge" class="badge bg-success-subtle text-success">Onboarded: &#8377;{{ number_format($onboardedRevenue, 2) }}</span>
                                         <span id="declinedRevenueBadge" class="badge bg-danger-subtle text-danger">Declined: &#8377;{{ number_format($declinedRevenue, 2) }}</span>
+                                        <span id="contractRevenueBadge" class="badge bg-primary-subtle text-primary">Contract: &#8377;{{ number_format($contractRevenue, 2) }}</span>
                                     </div>
                                 </div>
                                 <div id="monthlyRevenueBarChart" style="min-height: 300px;"></div>
@@ -2204,7 +2205,8 @@
                 },
                 series: [
                     { name: 'Onboarded Revenue', data: @json($revenueChartTotals) },
-                    { name: 'Declined Revenue', data: @json($declinedRevenueChartTotals) }
+                    { name: 'Declined Revenue', data: @json($declinedRevenueChartTotals) },
+                    { name: 'Contract Revenue', data: @json($contractRevenueChartTotals) }
                 ],
                 xaxis: {
                     categories: @json($revenueChartMonths),
@@ -2219,7 +2221,7 @@
                         }
                     }
                 },
-                colors: ['#22c55e', '#ef4444'],
+                colors: ['#22c55e', '#ef4444', '#3b82f6'],
                 plotOptions: {
                     bar: {
                         borderRadius: 5,
@@ -2301,7 +2303,8 @@
                             xaxis: { categories: data.months },
                             series: [
                                 { name: 'Onboarded Revenue', data: data.onboarded_revenue },
-                                { name: 'Declined Revenue', data: data.declined_revenue }
+                                { name: 'Declined Revenue', data: data.declined_revenue },
+                                { name: 'Contract Revenue', data: data.contract_revenue }
                             ]
                         })
                     ]);
@@ -2311,8 +2314,10 @@
                     });
                     var onboardedBadge = document.querySelector('#onboardedRevenueBadge');
                     var declinedBadge = document.querySelector('#declinedRevenueBadge');
+                    var contractBadge = document.querySelector('#contractRevenueBadge');
                     if (onboardedBadge) onboardedBadge.textContent = 'Onboarded: ₹' + currency.format(data.onboarded_revenue_total);
                     if (declinedBadge) declinedBadge.textContent = 'Declined: ₹' + currency.format(data.declined_revenue_total);
+                    if (contractBadge) contractBadge.textContent = 'Contract: ₹' + currency.format(data.contract_revenue_total);
                     var pipelineCounts = data.pipeline_counts || {};
                     document.querySelectorAll('[data-pipeline-level]').forEach(function(item) {
                         var count = Number(pipelineCounts[item.dataset.pipelineLevel] || 0);

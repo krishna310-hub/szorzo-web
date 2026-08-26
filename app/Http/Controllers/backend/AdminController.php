@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\ClientRequirement;
+use App\Models\ContractReport;
 use App\Models\Employee;
 use App\Models\General;
 use App\Models\InterviewLevel;
@@ -331,10 +332,17 @@ class AdminController extends Controller
         $monthlyDeclinedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
             ->where('level_of_interview_id', 21)
             ->sum($candidateRevenue));
+        $monthlyContractRevenue = ContractReport::query()
+            ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
+            ->whereIn('candidate_id', (clone $chartCandidates)->select('candidates.id'))
+            ->selectRaw("DATE_FORMAT(salary_month, '%Y-%m') as month_key, SUM(payable_salary) as total")
+            ->groupBy('month_key')
+            ->pluck('total', 'month_key');
         $onboardedRevenue = $revenueOutcomes->where('level_of_interview_id', 20)
             ->sum($candidateRevenue);
         $declinedRevenue = $revenueOutcomes->where('level_of_interview_id', 21)
             ->sum($candidateRevenue);
+        $contractRevenue = $monthlyContractRevenue->sum();
         $totalOnboardingRevenue = (clone $onboardingCandidates)
             ->with('client.billing')
             ->where('level_of_interview_id', 20)
@@ -415,8 +423,12 @@ class AdminController extends Controller
             'declinedRevenueChartTotals' => $revenueMonths
                 ->map(fn ($month) => round((float) ($monthlyDeclinedRevenue[$month->format('Y-m')] ?? 0), 2))
                 ->values(),
+            'contractRevenueChartTotals' => $revenueMonths
+                ->map(fn ($month) => round((float) ($monthlyContractRevenue[$month->format('Y-m')] ?? 0), 2))
+                ->values(),
             'onboardedRevenue' => round((float) $onboardedRevenue, 2),
             'declinedRevenue' => round((float) $declinedRevenue, 2),
+            'contractRevenue' => round((float) $contractRevenue, 2),
             'showRevenueDashboard' => $user->can('read', Revenue::class),
 
             'revenue' => round((float) $totalOnboardingRevenue, 2),
@@ -513,6 +525,14 @@ class AdminController extends Controller
         $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate);
         $monthlyOnboardedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 20)->sum($candidateRevenue));
         $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 21)->sum($candidateRevenue));
+        $monthlyContractRevenue = $user->can('read', Revenue::class)
+            ? ContractReport::query()
+                ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
+                ->whereIn('candidate_id', (clone $candidates)->select('candidates.id'))
+                ->selectRaw("DATE_FORMAT(salary_month, '%Y-%m') as month_key, SUM(payable_salary) as total")
+                ->groupBy('month_key')
+                ->pluck('total', 'month_key')
+            : collect();
 
         return response()->json([
             'year' => $year,
@@ -525,8 +545,10 @@ class AdminController extends Controller
             'joiner_declined' => $months->map(fn ($month) => (int) ($joinerDeclined[$month->format('Y-m')] ?? 0))->values(),
             'onboarded_revenue' => $months->map(fn ($month) => round((float) ($monthlyOnboardedRevenue[$month->format('Y-m')] ?? 0), 2))->values(),
             'declined_revenue' => $months->map(fn ($month) => round((float) ($monthlyDeclinedRevenue[$month->format('Y-m')] ?? 0), 2))->values(),
+            'contract_revenue' => $months->map(fn ($month) => round((float) ($monthlyContractRevenue[$month->format('Y-m')] ?? 0), 2))->values(),
             'onboarded_revenue_total' => round((float) $monthlyOnboardedRevenue->sum(), 2),
             'declined_revenue_total' => round((float) $monthlyDeclinedRevenue->sum(), 2),
+            'contract_revenue_total' => round((float) $monthlyContractRevenue->sum(), 2),
             'pipeline_counts' => $pipelineCounts,
         ]);
     }
