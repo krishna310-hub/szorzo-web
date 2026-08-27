@@ -5,19 +5,18 @@
     $phases = [
         ['title' => 'Discovery & Research', 'stages' => [
             ['Intro & Business Objectives', 'Align business goals with software solution capabilities & establish ROI targets.', ['Define core problem statement', 'Identify key business KPIs', 'Determine budget & feasibility'], 'Executive & Product Lead', 'Week 1', 'ri-focus-2-line'],
-            ['Requirements Gathering', 'Elicit detailed stakeholder feedback & turn business needs into user stories.', ['Stakeholder interview sessions', 'User persona mapping', 'Functional requirements document'], 'Business Analyst & Client', 'Weeks 1–2', 'ri-discuss-line'],
-            ['Market Research', 'Analyze competitor landscapes, technology trends, and industry benchmarks.', ['Competitor feature matrix', 'SWOT & tech stack gap analysis', 'Target audience behavior evaluation'], 'Strategy & Product Ops', 'Week 2', 'ri-line-chart-line'],
+            ['Requirements Gathering', 'Elicit detailed client feedback & turn business needs into user stories.', ['User persona mapping', 'Functional requirements document'], 'Business Analyst & Client', 'Weeks 1–2', 'ri-discuss-line'],
+            ['Market Research', 'Analyze competitor landscapes, technology trends, and industry benchmarks.', ['Competitor feature matrix', 'Target audience behavior evaluation'], 'Strategy & Product Ops', 'Week 2', 'ri-line-chart-line'],
         ]],
         ['title' => 'Scope & Architecture', 'stages' => [
             ['Scope, Features & Deliverables', 'Prevent scope creep by setting strict boundaries, MVP definitions, and acceptance criteria.', ['Drafting Software Requirement Specification (SRS)', 'Prioritizing backlog features (MoSCoW framework)', 'Sign-off on project milestone deliverables'], 'Product Manager, Tech Lead & Client', 'Week 3', 'ri-file-list-3-line'],
-            ['Tech Selection & Architecture', 'Choose scalable languages, frameworks, cloud infrastructures, and system topologies.', ['Selecting Microservices vs. Monolith framework', 'Frontend (React/Vue/Flutter) & Backend (Node/Python) stack selection', 'High-Level Design (HLD) diagram generation'], 'Solution Architect & Principal Engineer', 'Weeks 3–4', 'ri-node-tree'],
+            ['Tech Selection & Architecture', 'Choose scalable languages, frameworks, cloud infrastructures, and system topologies.', ['Selecting Microservices vs. Monolith framework', 'Frontend (HTML/CSS) & Backend (PHP) stack selection', 'High-Level Design (HLD) diagram generation'], 'Solution Architect & Principal Engineer', 'Weeks 3–4', 'ri-node-tree'],
         ]],
         ['title' => 'Project Planning & Roadmap', 'stages' => [
-            ['Project Planning & Roadmap', 'Establish structured Agile sprint cycles, resource allocations, risk mitigation protocols, and milestone delivery dates across the complete delivery lifecycle.', ['Project charter and Agile backlog', 'Resource allocation & risk planning', 'Milestone-based delivery roadmap'], 'Project Manager, Scrum Master & Leads', '', 'ri-road-map-line'],
         ]],
         ['title' => 'Design & System Schematics', 'stages' => [
             ['UI/UX Design & Wireframing', 'Create intuitive visual experiences and seamless user flows.', ['Low-fidelity wireframes & user journey maps', 'High-fidelity Figma prototypes & Design System', 'Usability testing & interactive client walkthrough'], 'Lead UI/UX Designer', 'Weeks 4–6', 'ri-tools-line'],
-            ['Database & Low-Level Design', 'Architect optimized, normalized database schemas and relationships.', ['Entity-Relationship Diagrams (ERD) & indexing strategy', 'SQL / NoSQL schema definition & migration plans', 'Data access layer & caching mechanisms (Redis)'], 'Database Admin & Backend Architect', 'Weeks 5–6', 'ri-database-2-line'],
+            ['Database & Low-Level Design', 'Architect optimized, normalized database schemas and relationships.', ['Entity-Relationship Diagrams (ERD) & indexing strategy', 'SQL schema definition & migration plans', 'Data access layer & caching mechanisms (Redis)'], 'Database Admin & Backend Architect', 'Weeks 5–6', 'ri-database-2-line'],
         ]],
         ['title' => 'Core Application Engineering', 'stages' => [
             ['Frontend Dev', 'Build responsive web interfaces matching Figma specs.', ['Component Library', 'State Management', 'Responsive Layouts'], 'Frontend Team', 'Weeks 6–10', 'ri-code-s-slash-line'],
@@ -62,7 +61,7 @@
                 <div class="col-lg-10">
                     <span class="tech-eyebrow wow fadeInUp"><i class="ri-code-box-line"></i> Software Engineering Lifecycle</span>
                     <h1 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">End-to-End Software<br><span>Development Workflow</span></h1>
-                    <p class="wow fadeInUp" data-wow-delay="0.3s">A complete 21-stage framework covering initial business discovery, technical architecture, agile engineering, QA, deployment, and post-launch maintenance.</p>
+                    <p class="wow fadeInUp" data-wow-delay="0.3s">A complete 21-stage framework covering initial business discovery, technical architecture, agile engineering, deployment, and post-launch maintenance.</p>
                     <div class="tech-actions wow fadeInUp" data-wow-delay="0.4s">
                         <a href="#workflow" class="tech-btn tech-btn-primary">Explore our workflow <i class="ri-arrow-down-line"></i></a>
                         {{-- <a href="{{ route('contact.it.services.form') }}" class="tech-btn tech-btn-ghost">Start a project <i class="ri-arrow-right-up-line"></i></a> --}}
@@ -107,7 +106,7 @@
                     <div class="tech-card-top"><div class="tech-icon"><img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="" width="38" height="38" loading="lazy" decoding="async"></div><span>Stage {{ str_pad($stageNumber, 2, '0', STR_PAD_LEFT) }}</span></div>
                     <h3>{{ $stage[0] }}</h3><p class="tech-purpose"><strong>Purpose:</strong> {{ $stage[1] }}</p>
                     <ul>@foreach($stage[2] as $item)<li>{{ $item }}</li>@endforeach</ul>
-                    <div class="tech-card-meta"><span><i class="ri-team-line"></i>{{ $stage[3] }}</span></div>
+                    {{-- <div class="tech-card-meta"><span><i class="ri-team-line"></i>{{ $stage[3] }}</span></div> --}}
                 </article>
                 @endforeach
             </div>
