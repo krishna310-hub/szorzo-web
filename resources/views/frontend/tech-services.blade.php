@@ -176,7 +176,6 @@
 }
 .tech-page .tech-hero{
     background:
-        linear-gradient(90deg,rgba(2,4,7,.45),rgba(2,8,13,.18)),
         url("{{ asset('frontend/images/tech-services-background-clean.webp') }}") center center / cover no-repeat;
     min-height:840px !important;
     padding-top:230px;
