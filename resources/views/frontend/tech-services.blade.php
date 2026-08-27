@@ -13,7 +13,7 @@
             ['Tech Selection & Architecture', 'Choose scalable languages, frameworks, cloud infrastructures, and system topologies.', ['Selecting Microservices vs. Monolith framework', 'Frontend (React/Vue/Flutter) & Backend (Node/Python) stack selection', 'High-Level Design (HLD) diagram generation'], 'Solution Architect & Principal Engineer', 'Weeks 3–4', 'ri-node-tree'],
         ]],
         ['title' => 'Project Planning & Roadmap', 'stages' => [
-            ['Project Planning & Roadmap', 'Establish structured Agile sprint cycles, resource allocations, risk mitigation protocols, and milestone delivery dates across a sample 16-week cycle.', ['Project charter and Agile backlog', 'Resource allocation & risk planning', 'Milestone-based delivery roadmap'], 'Project Manager, Scrum Master & Leads', 'Weeks 1–16', 'ri-road-map-line'],
+            ['Project Planning & Roadmap', 'Establish structured Agile sprint cycles, resource allocations, risk mitigation protocols, and milestone delivery dates across the complete delivery lifecycle.', ['Project charter and Agile backlog', 'Resource allocation & risk planning', 'Milestone-based delivery roadmap'], 'Project Manager, Scrum Master & Leads', '', 'ri-road-map-line'],
         ]],
         ['title' => 'Design & System Schematics', 'stages' => [
             ['UI/UX Design & Wireframing', 'Create intuitive visual experiences and seamless user flows.', ['Low-fidelity wireframes & user journey maps', 'High-fidelity Figma prototypes & Design System', 'Usability testing & interactive client walkthrough'], 'Lead UI/UX Designer', 'Weeks 4–6', 'ri-tools-line'],
@@ -59,20 +59,13 @@
         <div class="tech-orb tech-orb-one"></div><div class="tech-orb tech-orb-two"></div>
         <div class="container position-relative">
             <div class="row align-items-center g-5">
-                <div class="col-lg-8">
-                    <span class="tech-eyebrow"><i class="ri-code-box-line"></i> Software Engineering Lifecycle</span>
-                    <h1>End-to-End Software<br><span>Development Workflow</span></h1>
-                    <p>A complete 21-stage framework covering initial business discovery, technical architecture, agile engineering, QA, deployment, and post-launch maintenance.</p>
-                    <div class="tech-actions">
+                <div class="col-lg-10">
+                    <span class="tech-eyebrow wow fadeInUp"><i class="ri-code-box-line"></i> Software Engineering Lifecycle</span>
+                    <h1 class="wow fadeInUp" data-wow-delay="0.2s" data-cursor="-opaque">End-to-End Software<br><span>Development Workflow</span></h1>
+                    <p class="wow fadeInUp" data-wow-delay="0.3s">A complete 21-stage framework covering initial business discovery, technical architecture, agile engineering, QA, deployment, and post-launch maintenance.</p>
+                    <div class="tech-actions wow fadeInUp" data-wow-delay="0.4s">
                         <a href="#workflow" class="tech-btn tech-btn-primary">Explore our workflow <i class="ri-arrow-down-line"></i></a>
-                        <a href="{{ route('contact.it.services.form') }}" class="tech-btn tech-btn-ghost">Start a project <i class="ri-arrow-right-up-line"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="tech-hero-panel">
-                        <div class="tech-panel-top"><span>Delivery system</span><span class="tech-live"><i></i> Always on</span></div>
-                        <div class="tech-ring"><strong>21</strong><span>stages</span></div>
-                        <div class="tech-mini-stats"><span><strong>9</strong> phases</span><span><strong>16</strong> weeks</span><span><strong>24/7</strong> support</span></div>
+                        {{-- <a href="{{ route('contact.it.services.form') }}" class="tech-btn tech-btn-ghost">Start a project <i class="ri-arrow-right-up-line"></i></a> --}}
                     </div>
                 </div>
             </div>
@@ -87,34 +80,34 @@
 
     <section class="tech-intro" id="workflow">
         <div class="container">
-            <div class="tech-section-head"><div><span class="tech-kicker">How we deliver</span><h2>One disciplined path from <span>idea to impact.</span></h2></div><p>Every stage has a clear purpose, accountable experts, concrete outputs, and a defined place on the delivery timeline.</p></div>
+            <div class="tech-section-head wow fadeInUp"><div><span class="tech-kicker">How we deliver</span><h2 data-cursor="-opaque">One disciplined path from <span>idea to impact.</span></h2></div><p>Every stage has a clear purpose, accountable experts, concrete outputs, and a defined place on the delivery timeline.</p></div>
         </div>
     </section>
 
     @foreach($phases as $phaseIndex => $phase)
     <section class="tech-phase {{ $phaseIndex % 2 ? 'tech-phase-alt' : '' }}" id="phase-{{ $phaseIndex + 1 }}">
         <div class="container">
-            <div class="tech-phase-heading"><div class="tech-phase-number">0{{ $phaseIndex + 1 }}</div><div><span>Phase {{ $phaseIndex + 1 }}</span><h2>{{ $phase['title'] }}</h2></div><div class="tech-stage-range">{{ count($phase['stages']) }} {{ Str::plural('stage', count($phase['stages'])) }}</div></div>
+            <div class="tech-phase-heading wow fadeInUp"><div class="tech-phase-number">0{{ $phaseIndex + 1 }}</div><div><span>Phase {{ $phaseIndex + 1 }}</span><h2 data-cursor="-opaque">{{ $phase['title'] }}</h2></div><div class="tech-stage-range">{{ count($phase['stages']) }} {{ Str::plural('stage', count($phase['stages'])) }}</div></div>
             @if($phaseIndex === 2)
             <div class="tech-roadmap">
                 @foreach([
-                    ['Sprint 0: Setup','Weeks 1–4',['Discovery & Architecture','Jira / Backlog setup','Environment preparation']],
-                    ['Sprints 1–4: Core','Weeks 5–10',['UX/UI Finalization','Frontend & API dev','Database integration']],
-                    ['Sprints 5–6: Integration','Weeks 11–13',['3rd-party integrations','Admin & Mobile build','Security hardening']],
-                    ['Release & Launch','Weeks 14–16',['UAT & QA regression','Production deployment','Training & SEO setup']]
+                    ['Sprint 0: Setup','Foundation',['Discovery & Architecture','Jira / Backlog setup','Environment preparation']],
+                    ['Core Engineering','Build',['UX/UI Finalization','Frontend & API dev','Database integration']],
+                    ['Integration Sprints','Connect',['3rd-party integrations','Admin & Mobile build','Security hardening']],
+                    ['Release & Launch','Deliver',['UAT & QA regression','Production deployment','Training & SEO setup']]
                 ] as $roadIndex => $road)
-                <article><div class="tech-road-num">{{ $roadIndex + 1 }}</div><h3>{{ $road[0] }}</h3><span>{{ $road[1] }}</span><ul>@foreach($road[2] as $item)<li>{{ $item }}</li>@endforeach</ul></article>
+                <article class="wow fadeInUp" data-wow-delay="{{ number_format(($roadIndex + 1) * 0.1, 1) }}s"><div class="tech-road-num">{{ $roadIndex + 1 }}</div><h3>{{ $road[0] }}</h3><span>{{ $road[1] }}</span><ul>@foreach($road[2] as $item)<li>{{ $item }}</li>@endforeach</ul></article>
                 @endforeach
             </div>
             @endif
             <div class="tech-stage-grid {{ count($phase['stages']) === 1 ? 'tech-single-stage' : '' }}">
                 @foreach($phase['stages'] as $stage)
                 @php $stageNumber++; @endphp
-                <article class="tech-stage-card">
-                    <div class="tech-card-top"><div class="tech-icon"><i class="{{ $stage[5] }}"></i></div><span>Stage {{ str_pad($stageNumber, 2, '0', STR_PAD_LEFT) }}</span></div>
+                <article class="tech-stage-card wow fadeInUp" data-wow-delay="{{ number_format(($loop->index + 1) * 0.1, 1) }}s">
+                    <div class="tech-card-top"><div class="tech-icon"><img src="{{ asset('frontend/images/rhino-logo.webp') }}" alt="" width="38" height="38" loading="lazy" decoding="async"></div><span>Stage {{ str_pad($stageNumber, 2, '0', STR_PAD_LEFT) }}</span></div>
                     <h3>{{ $stage[0] }}</h3><p class="tech-purpose"><strong>Purpose:</strong> {{ $stage[1] }}</p>
                     <ul>@foreach($stage[2] as $item)<li>{{ $item }}</li>@endforeach</ul>
-                    <div class="tech-card-meta"><span><i class="ri-team-line"></i>{{ $stage[3] }}</span><span><i class="ri-calendar-line"></i>{{ $stage[4] }}</span></div>
+                    <div class="tech-card-meta"><span><i class="ri-team-line"></i>{{ $stage[3] }}</span></div>
                 </article>
                 @endforeach
             </div>
@@ -124,8 +117,8 @@
 
     <section class="tech-raci">
         <div class="container">
-            <div class="tech-section-head tech-light"><div><span class="tech-kicker">Built-in accountability</span><h2>Team Responsibilities <span>Matrix (RACI)</span></h2></div><p>Cross-functional accountability mapping across core SDLC phases.</p></div>
-            <div class="tech-table-wrap"><table><thead><tr><th>SDLC Phase</th><th>Product / PM</th><th>UI/UX Design</th><th>Engineering</th><th>QA Team</th><th>DevOps/Infra</th></tr></thead><tbody>
+            <div class="tech-section-head tech-light wow fadeInUp"><div><span class="tech-kicker">Built-in accountability</span><h2 data-cursor="-opaque">Team Responsibilities <span>Matrix (RACI)</span></h2></div><p>Cross-functional accountability mapping across core SDLC phases.</p></div>
+            <div class="tech-table-wrap wow fadeInUp" data-wow-delay="0.2s"><table><thead><tr><th>SDLC Phase</th><th>Product / PM</th><th>UI/UX Design</th><th>Engineering</th><th>QA Team</th><th>DevOps/Infra</th></tr></thead><tbody>
                 @foreach($raci as $row)
                 <tr>
                     <th>{{ $row[0] }}</th>
@@ -136,7 +129,9 @@
         </div>
     </section>
 
-    <section class="tech-success"><div class="container"><div class="tech-success-card"><div><span class="tech-kicker">Summary & project success</span><h2>Engineered for confident, <span>predictable delivery.</span></h2><p>By following a disciplined, 21-stage software development lifecycle, engineering teams deliver high-quality, scalable, and secure applications predictably on schedule.</p><a href="{{ route('contact.it.services.form') }}" class="tech-btn tech-btn-primary">Discuss your project <i class="ri-arrow-right-line"></i></a></div><div class="tech-success-stats"><div><strong>21</strong><span>Structured Stages</span></div><div><strong>9</strong><span>Core Phases</span></div><div><strong>100%</strong><span>Traceability & Quality</span></div><div><strong>24/7</strong><span>Production Maintenance</span></div></div></div></div></section>
+    <section class="tech-success"><div class="container"><div class="tech-success-card wow fadeInUp"><div><span class="tech-kicker">Summary & project success</span><h2 data-cursor="-opaque">Engineered for confident, <span>predictable delivery.</span></h2><p>By following a disciplined, 21-stage software development lifecycle, engineering teams deliver high-quality, scalable, and secure applications predictably on schedule.</p>
+        {{-- <a href="{{ route('contact.it.services.form') }}" class="tech-btn tech-btn-primary">Discuss your project <i class="ri-arrow-right-line"></i></a> --}}
+    </div><div class="tech-success-stats"><div><strong>21</strong><span>Structured Stages</span></div><div><strong>9</strong><span>Core Phases</span></div><div><strong>100%</strong><span>Traceability & Quality</span></div><div><strong>∞</strong><span>Continuous Improvement</span></div></div></div></div></section>
 </div>
 
 <style>
@@ -215,14 +210,42 @@ body:has(.tech-page) .header{
 .tech-page .tech-phase-number{background:#fee2e2;color:#b91c1c}
 .tech-page .tech-stage-card:hover{border-color:#f0a3a3;box-shadow:0 20px 50px rgba(127,29,29,.12)}
 .tech-page .tech-icon{color:#dc2626;background:linear-gradient(135deg,#fee2e2,#fff1f2)}
+.tech-page .tech-icon img{display:block;width:38px;height:38px;object-fit:contain}
 .tech-page .tech-roadmap article:not(:last-child)::after{color:#dc2626}
 .tech-page .tech-road-num{background:linear-gradient(135deg,#dc2626,#991b1b)}
 .tech-page .tech-raci{background:radial-gradient(circle at 85% 10%,rgba(220,38,38,.23),transparent 32%),linear-gradient(145deg,#090909,#1b0c0c)}
 .tech-page .tech-success-stats div{background:#fff5f5;border-color:#fecaca}
 .tech-page .tech-success-stats strong{color:#dc2626}
+
+/* Match the Szorzo AI page's typography scale and interaction language. */
+.tech-page{font-size:17px;line-height:1.75;font-weight:400;-webkit-font-smoothing:antialiased}
+.tech-page .tech-hero h1{font-size:clamp(46px,5.5vw,70px);font-weight:600;line-height:1.1;letter-spacing:-.03em}
+.tech-page .tech-section-head h2,
+.tech-page .tech-success h2{font-size:clamp(38px,4.7vw,60px);font-weight:600;line-height:1.15;letter-spacing:-.03em}
+.tech-page .tech-phase-heading h2{font-size:clamp(32px,3.5vw,48px);font-weight:600;line-height:1.2;letter-spacing:-.03em}
+.tech-page .tech-stage-card h3{font-size:22px;font-weight:600;line-height:1.3}
+.tech-page .tech-purpose,
+.tech-page .tech-stage-card li{font-size:17px;line-height:1.65}
+.tech-page .tech-card-meta span{font-size:14px;line-height:1.4}
+.tech-page .tech-hero h1 span,
+.tech-page .tech-section-head h2 span,
+.tech-page .tech-success h2 span{background-size:200% auto;transition:background-position .4s ease-in-out}
+.tech-page .tech-hero h1:hover span,
+.tech-page .tech-section-head h2:hover span,
+.tech-page .tech-success h2:hover span{background-position:right center}
+.tech-page .tech-stage-card,
+.tech-page .tech-roadmap article,
+.tech-page .tech-success-stats div{transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease,background-color .35s ease}
+.tech-page .tech-icon img{transition:transform .35s ease}
+.tech-page .tech-stage-card:hover .tech-icon img{transform:scale(1.12)}
+.tech-page .tech-roadmap article:hover,
+.tech-page .tech-success-stats div:hover{transform:translateY(-6px);border-color:#f0a3a3;box-shadow:0 18px 40px rgba(127,29,29,.12)}
+@media(prefers-reduced-motion:reduce){.tech-page *{animation:none!important;transition:none!important}}
 @media(max-width:1199px){.tech-stage-grid:has(.tech-stage-card:nth-child(3)){grid-template-columns:repeat(2,1fr)}.tech-roadmap{grid-template-columns:repeat(2,1fr)}.tech-roadmap article:after{display:none}}
 @media(max-width:991px){.tech-hero{padding:150px 0 80px}.tech-section-head{align-items:start;flex-direction:column;gap:20px}.tech-success-card{grid-template-columns:1fr;padding:38px}.tech-stage-grid,.tech-stage-grid:has(.tech-stage-card:nth-child(3)),.tech-stage-grid:has(.tech-stage-card:nth-child(4)){grid-template-columns:1fr 1fr}}
 @media(max-width:767px){.tech-hero h1{font-size:44px}.tech-hero p{font-size:15px}.tech-intro{padding:70px 0 35px}.tech-phase{padding:45px 0 65px}.tech-phase-heading{grid-template-columns:auto 1fr}.tech-stage-range{display:none}.tech-stage-grid,.tech-stage-grid:has(.tech-stage-card:nth-child(3)),.tech-stage-grid:has(.tech-stage-card:nth-child(4)),.tech-roadmap{grid-template-columns:1fr}.tech-success{padding:60px 0}.tech-success-card{padding:25px}.tech-success-stats{grid-template-columns:1fr 1fr}.tech-success-stats strong{font-size:28px}}
 @media(max-width:420px){.tech-hero h1{font-size:38px}.tech-actions .tech-btn{width:100%}.tech-success-stats{grid-template-columns:1fr}.tech-stage-card{padding:22px}}
+@media(max-width:767px){.tech-page .tech-hero h1{font-size:42px}.tech-page .tech-section-head h2,.tech-page .tech-success h2{font-size:38px}.tech-page .tech-phase-heading h2{font-size:32px}.tech-page .tech-purpose,.tech-page .tech-stage-card li{font-size:16px}}
+@media(max-width:420px){.tech-page .tech-hero h1{font-size:36px}.tech-page .tech-section-head h2,.tech-page .tech-success h2{font-size:33px}}
 </style>
 @endsection

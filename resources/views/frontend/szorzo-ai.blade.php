@@ -483,8 +483,8 @@
                             </div>
 
                             <div class="approach-image">
-                                <figure class="image-anime reveal">
-                                    <img src="{{ asset('frontend/images/loader.webp') }}" alt="">
+                                <figure class="image-anime reveal" style="opacity: 1; visibility: inherit; translate: none; rotate: none; scale: none; transform: translate(0px, 0px);">
+                                    <img src="http://127.0.0.1:8000/frontend/images/loader-about.webp" alt="about" style="translate: none; rotate: none; scale: none; transform: translate(0px, 0px);">
                                 </figure>
                             </div>
                         </div>

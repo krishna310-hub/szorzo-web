@@ -9801,7 +9801,7 @@ ul {
     width: 40px; /* adjust size */
     height: 40px;
 
-    background-image: url("../images/rhino-logo.png");
+    background-image: url("../images/rhino-logo.webp");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
