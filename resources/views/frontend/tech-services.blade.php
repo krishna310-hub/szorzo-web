@@ -180,7 +180,7 @@ body:has(.tech-page) .header{
 }
 .tech-page .tech-hero{
     background:
-        linear-gradient(90deg,rgba(2,4,7,.88) 0%,rgba(3,9,13,.7) 52%,rgba(2,12,18,.48) 100%),
+        /* linear-gradient(90deg,rgba(2,4,7,.88) 0%,rgba(3,9,13,.7) 52%,rgba(2,12,18,.48) 100%), */
         url("{{ asset('frontend/images/tech-services-background-clean.webp') }}") center center / cover no-repeat;
 }
 .tech-page .tech-hero::before{display:none}
