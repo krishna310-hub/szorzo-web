@@ -212,6 +212,13 @@
                             </div>
                         </li>
 
+                        <li>
+                            <a href="{{ route('tech.services') }}"
+                            style="font-size: large; color: white; font-weight: bold;">
+                                TECH SERVICES
+                            </a>
+                        </li>
+
                         <!-- TELECOM SERVICES -->
                         <li>
                             <a

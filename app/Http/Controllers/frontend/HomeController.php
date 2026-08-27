@@ -33,6 +33,9 @@ class HomeController extends Controller
     public function szorzoAi(){
         return view('frontend.szorzo-ai');
     }
+    public function techServices(){
+        return view('frontend.tech-services');
+    }
 
     public function careers(){
         return view('frontend.careers');

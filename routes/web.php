@@ -39,6 +39,7 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/careers','careers')->name('careers');
     Route::get('/careers/list','careersList')->name('careers.list');
     Route::get('/szorzo-ai','szorzoAi')->name('szorzo.ai');
+    Route::get('/tech-services','techServices')->name('tech.services');
 
     //Enterprise Transformation
     //Enterprice
