@@ -291,9 +291,14 @@
 .tech-page .tech-phase,
 .tech-page .tech-phase-alt{
     background:#fff;
+    padding-top:30px;
+    padding-bottom:25px;
 }
+.tech-page .tech-phase-heading{margin-bottom:22px}
 
 @media(max-width:767px){
+    .tech-page .tech-phase,
+    .tech-page .tech-phase-alt{padding-top:15px;padding-bottom:20px}
     .tech-page .tech-hero p{font-size:19px !important}
     .tech-page .tech-section-head>p{font-size:19px !important}
     .tech-page .tech-stage-card h3{font-size:25px !important}
