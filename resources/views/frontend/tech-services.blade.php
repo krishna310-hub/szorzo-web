@@ -55,7 +55,6 @@
 
 <div class="tech-page">
     <section class="tech-hero">
-        <div class="tech-orb tech-orb-one"></div><div class="tech-orb tech-orb-two"></div>
         <div class="container position-relative">
             <div class="row align-items-center g-5">
                 <div class="col-lg-10">
@@ -175,14 +174,15 @@ body:has(.tech-page) .header .mobile-menu-trigger span::after{
 }
 body:has(.tech-page) .header{
     background:
-        linear-gradient(90deg,rgba(5,5,8,.9),rgba(18,4,4,.72)),
-        url("{{ asset('frontend/images/tech-services-background.webp') }}") center 18% / cover no-repeat !important;
+        linear-gradient(90deg,rgba(3,5,8,.94),rgba(4,13,19,.86)),
+        url("{{ asset('frontend/images/tech-services-background-clean.webp') }}") center top / cover no-repeat !important;
 }
 .tech-page .tech-hero{
     background:
-        linear-gradient(90deg,rgba(3,6,10,.88) 0%,rgba(4,9,14,.74) 52%,rgba(13,4,5,.68) 100%),
-        url("{{ asset('frontend/images/tech-services-background.webp') }}") center center / cover no-repeat;
+        /* linear-gradient(90deg,rgba(2,4,7,.88) 0%,rgba(3,9,13,.7) 52%,rgba(2,12,18,.48) 100%), */
+        url("{{ asset('frontend/images/tech-services-background-clean.webp') }}") center center / cover no-repeat;
 }
+.tech-page .tech-hero::before{display:none}
 .tech-page .tech-orb-one{background:#dc2626}
 .tech-page .tech-orb-two{background:#991b1b}
 .tech-page .tech-eyebrow{color:#fca5a5;border-color:rgba(239,68,68,.28);background:rgba(220,38,38,.09)}
@@ -246,37 +246,54 @@ body:has(.tech-page) .header{
 @media(max-width:420px){.tech-page .tech-hero h1{font-size:36px}.tech-page .tech-section-head h2,.tech-page .tech-success h2{font-size:33px}}
 
 /* Final readable type scale — intentionally last so compact legacy rules do not override it. */
-.tech-page .tech-hero p{font-size:20px !important;line-height:1.65 !important;max-width:900px}
-.tech-page .tech-phase-scroll a{font-size:14px !important;line-height:1.3;padding:20px 16px}
+.tech-page,
+.tech-page button,
+.tech-page input,
+.tech-page textarea,
+.tech-page select,
+.tech-page table,
+.tech-page a,
+.tech-page p,
+.tech-page span,
+.tech-page li,
+.tech-page h1,
+.tech-page h2,
+.tech-page h3,
+.tech-page h4,
+.tech-page strong{
+    font-family:"Oswald",var(--default-font),sans-serif !important;
+}
+.tech-page .tech-hero p{font-size:23px !important;line-height:1.6 !important;max-width:950px}
+.tech-page .tech-phase-scroll a{font-size:17px !important;line-height:1.3;padding:22px 18px}
 .tech-page .tech-eyebrow,
-.tech-page .tech-kicker{font-size:14px !important;line-height:1.3}
-.tech-page .tech-section-head>p{font-size:19px !important;line-height:1.65;max-width:460px}
-.tech-page .tech-phase-heading>div>span{font-size:13px !important}
-.tech-page .tech-stage-range{font-size:13px !important}
-.tech-page .tech-stage-card h3{font-size:20px !important;line-height:1.35;font-weight:600}
-.tech-page .tech-purpose{font-size:18px !important;line-height:1.7 !important}
-.tech-page .tech-stage-card li{font-size:18px !important;line-height:1.65 !important}
-.tech-page .tech-card-meta span{font-size:15px !important;line-height:1.45}
-.tech-page .tech-card-top>span{font-size:12px !important}
-.tech-page .tech-roadmap h3{font-size:21px !important;line-height:1.35}
-.tech-page .tech-roadmap article>span{font-size:15px !important}
-.tech-page .tech-roadmap li{font-size:16px !important;line-height:1.6}
+.tech-page .tech-kicker{font-size:16px !important;line-height:1.3}
+.tech-page .tech-section-head>p{font-size:23px !important;line-height:1.6;max-width:540px}
+.tech-page .tech-phase-heading>div>span{font-size:17px !important}
+.tech-page .tech-stage-range{font-size:16px !important}
+.tech-page .tech-stage-card h3{font-size:31px !important;line-height:1.25;font-weight:600}
+.tech-page .tech-purpose{font-size:22px !important;line-height:1.6 !important}
+.tech-page .tech-stage-card li{font-size:21px !important;line-height:1.6 !important}
+.tech-page .tech-card-meta span{font-size:18px !important;line-height:1.45}
+.tech-page .tech-card-top>span{font-size:15px !important}
+.tech-page .tech-roadmap h3{font-size:28px !important;line-height:1.3}
+.tech-page .tech-roadmap article>span{font-size:19px !important}
+.tech-page .tech-roadmap li{font-size:20px !important;line-height:1.6}
 .tech-page .tech-table-wrap th,
-.tech-page .tech-table-wrap td{font-size:16px !important;line-height:1.4}
-.tech-page .tech-table-wrap thead th{font-size:13px !important}
-.tech-page .tech-table-wrap td span{font-size:13px !important}
-.tech-page .tech-success p{font-size:19px !important;line-height:1.7}
-.tech-page .tech-success-stats span{font-size:14px !important;line-height:1.4}
+.tech-page .tech-table-wrap td{font-size:18px !important;line-height:1.4}
+.tech-page .tech-table-wrap thead th{font-size:15px !important}
+.tech-page .tech-table-wrap td span{font-size:15px !important}
+.tech-page .tech-success p{font-size:23px !important;line-height:1.65}
+.tech-page .tech-success-stats span{font-size:17px !important;line-height:1.4}
 .tech-page .wow{animation-duration:.8s;animation-timing-function:ease-out}
 .tech-page .tech-stage-card:hover{transform:translateY(-8px);box-shadow:0 22px 48px rgba(127,29,29,.14)}
 
 @media(max-width:767px){
-    .tech-page .tech-hero p{font-size:17px !important}
-    .tech-page .tech-section-head>p{font-size:17px !important}
-    .tech-page .tech-stage-card h3{font-size:19px !important}
+    .tech-page .tech-hero p{font-size:19px !important}
+    .tech-page .tech-section-head>p{font-size:19px !important}
+    .tech-page .tech-stage-card h3{font-size:25px !important}
     .tech-page .tech-purpose,
-    .tech-page .tech-stage-card li{font-size:16px !important}
-    .tech-page .tech-card-meta span{font-size:14px !important}
+    .tech-page .tech-stage-card li{font-size:18px !important}
+    .tech-page .tech-card-meta span{font-size:16px !important}
 }
 </style>
 @endsection
