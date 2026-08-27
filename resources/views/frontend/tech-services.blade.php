@@ -247,5 +247,39 @@ body:has(.tech-page) .header{
 @media(max-width:420px){.tech-hero h1{font-size:38px}.tech-actions .tech-btn{width:100%}.tech-success-stats{grid-template-columns:1fr}.tech-stage-card{padding:22px}}
 @media(max-width:767px){.tech-page .tech-hero h1{font-size:42px}.tech-page .tech-section-head h2,.tech-page .tech-success h2{font-size:38px}.tech-page .tech-phase-heading h2{font-size:32px}.tech-page .tech-purpose,.tech-page .tech-stage-card li{font-size:16px}}
 @media(max-width:420px){.tech-page .tech-hero h1{font-size:36px}.tech-page .tech-section-head h2,.tech-page .tech-success h2{font-size:33px}}
+
+/* Final readable type scale — intentionally last so compact legacy rules do not override it. */
+.tech-page .tech-hero p{font-size:20px !important;line-height:1.65 !important;max-width:900px}
+.tech-page .tech-phase-scroll a{font-size:14px !important;line-height:1.3;padding:20px 16px}
+.tech-page .tech-eyebrow,
+.tech-page .tech-kicker{font-size:14px !important;line-height:1.3}
+.tech-page .tech-section-head>p{font-size:19px !important;line-height:1.65;max-width:460px}
+.tech-page .tech-phase-heading>div>span{font-size:13px !important}
+.tech-page .tech-stage-range{font-size:13px !important}
+.tech-page .tech-stage-card h3{font-size:20px !important;line-height:1.35;font-weight:600}
+.tech-page .tech-purpose{font-size:18px !important;line-height:1.7 !important}
+.tech-page .tech-stage-card li{font-size:18px !important;line-height:1.65 !important}
+.tech-page .tech-card-meta span{font-size:15px !important;line-height:1.45}
+.tech-page .tech-card-top>span{font-size:12px !important}
+.tech-page .tech-roadmap h3{font-size:21px !important;line-height:1.35}
+.tech-page .tech-roadmap article>span{font-size:15px !important}
+.tech-page .tech-roadmap li{font-size:16px !important;line-height:1.6}
+.tech-page .tech-table-wrap th,
+.tech-page .tech-table-wrap td{font-size:16px !important;line-height:1.4}
+.tech-page .tech-table-wrap thead th{font-size:13px !important}
+.tech-page .tech-table-wrap td span{font-size:13px !important}
+.tech-page .tech-success p{font-size:19px !important;line-height:1.7}
+.tech-page .tech-success-stats span{font-size:14px !important;line-height:1.4}
+.tech-page .wow{animation-duration:.8s;animation-timing-function:ease-out}
+.tech-page .tech-stage-card:hover{transform:translateY(-8px);box-shadow:0 22px 48px rgba(127,29,29,.14)}
+
+@media(max-width:767px){
+    .tech-page .tech-hero p{font-size:17px !important}
+    .tech-page .tech-section-head>p{font-size:17px !important}
+    .tech-page .tech-stage-card h3{font-size:19px !important}
+    .tech-page .tech-purpose,
+    .tech-page .tech-stage-card li{font-size:16px !important}
+    .tech-page .tech-card-meta span{font-size:14px !important}
+}
 </style>
 @endsection
