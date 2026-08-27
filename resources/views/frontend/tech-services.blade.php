@@ -176,15 +176,13 @@ body:has(.tech-page) .header .mobile-menu-trigger span::after{
 }
 body:has(.tech-page) .header{
     background:
-        linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),
-        radial-gradient(circle at 82% 0,rgba(220,38,38,.36),transparent 38%),
-        linear-gradient(135deg,#090909,#181010) !important;
+        linear-gradient(90deg,rgba(5,5,8,.9),rgba(18,4,4,.72)),
+        url("{{ asset('frontend/images/tech-services-background.webp') }}") center 18% / cover no-repeat !important;
 }
 .tech-page .tech-hero{
     background:
-        radial-gradient(circle at 80% 18%,rgba(220,38,38,.34),transparent 36%),
-        linear-gradient(135deg,#090909,#1c0d0d);
+        linear-gradient(90deg,rgba(3,6,10,.88) 0%,rgba(4,9,14,.74) 52%,rgba(13,4,5,.68) 100%),
+        url("{{ asset('frontend/images/tech-services-background.webp') }}") center center / cover no-repeat;
 }
 .tech-page .tech-orb-one{background:#dc2626}
 .tech-page .tech-orb-two{background:#991b1b}
