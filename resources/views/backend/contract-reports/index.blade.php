@@ -140,7 +140,7 @@
                                         <tr>
                                             <td colspan="3">Page total</td>
                                             <td class="text-end">
-                                                &#8377;{{ number_format($reports->sum('monthly_take_home'), 2) }}</td>
+                                                &#8377;{{ number_format($reports->where('is_hourly', false)->sum('monthly_take_home'), 2) }}</td>
                                             <td class="text-end">—</td>
                                             <td class="text-center">{{ $reports->sum('present_days') }}</td>
                                             <td class="text-center">{{ $reports->sum('absent_days') }}</td>
