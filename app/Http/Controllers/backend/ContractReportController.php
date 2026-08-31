@@ -193,17 +193,13 @@ class ContractReportController extends Controller
 
     private function monthlyTakeHome(Candidate $candidate): float
     {
-        $individualFinalAmount = (float) $candidate->take_home;
+        $monthlyTakeHome = (float) $candidate->take_home;
 
-        if ($individualFinalAmount <= 0) {
-            $individualFinalAmount = (float) $candidate->onboarding_ctc / 12;
+        if ($monthlyTakeHome <= 0) {
+            $monthlyTakeHome = (float) $candidate->onboarding_ctc / 12;
         }
 
-        // Billing values are stored as percentages (for example, 80.00), not
-        // decimal multipliers (0.80).
-        $billingPercentage = (float) $candidate->client?->billing?->value;
-
-        return round(($individualFinalAmount * $billingPercentage) / 100, 2);
+        return round(max(0, $monthlyTakeHome), 2);
     }
 
     private function syncReportSalary(ContractReport $report, int $daysInMonth): void

@@ -282,22 +282,29 @@ class AdminController extends Controller
             ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
+        $monthlyProfilesSourced = ProfileSourced::visibleTo($user)
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
+            ->whereBetween('profile_sourced.created_at', [$yearStart, $yearEnd])
+            ->selectRaw("DATE_FORMAT(profile_sourced.created_at, '%Y-%m') as month_key, COUNT(*) as total")
+            ->groupBy('month_key')->pluck('total', 'month_key');
         $joiningMonths = $months;
 
-        $monthlyCandidateLevelCounts = function (int $levelId, string $dateColumn = 'onboarding_date') use ($chartCandidates, $yearStart, $yearEnd) {
+        $monthlyCandidateLevelCounts = function (array $levelIds, string $dateColumn) use ($chartCandidates, $yearStart, $yearEnd) {
             return (clone $chartCandidates)
-                ->where('level_of_interview_id', $levelId)
+                ->whereIn('level_of_interview_id', $levelIds)
                 ->whereBetween($dateColumn, [$yearStart, $yearEnd])
                 ->selectRaw("DATE_FORMAT({$dateColumn}, '%Y-%m') as month_key, COUNT(*) as total")
                 ->groupBy('month_key')
                 ->pluck('total', 'month_key');
         };
 
-        // IDs are taken from level_of_interviews and candidates.level_of_interview_id.
-        $monthlyOfferAccepted = $monthlyCandidateLevelCounts(30);
-        $monthlyOfferDeclined = $monthlyCandidateLevelCounts(22);
-        $monthlyOnboarded = $monthlyCandidateLevelCounts(20);
-        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts(21, 'candidates.updated_at');
+        // Accepted candidates remain part of the acceptance trend after they
+        // advance to onboarding. Declined offers have no onboarding date, so
+        // their status update date is the available outcome date.
+        $monthlyOfferAccepted = $monthlyCandidateLevelCounts([30, 20], 'onboarding_date');
+        $monthlyOfferDeclined = $monthlyCandidateLevelCounts([22], 'candidates.updated_at');
+        $monthlyOnboarded = $monthlyCandidateLevelCounts([20], 'onboarding_date');
+        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts([21], 'candidates.updated_at');
         $monthlyJoiningDetails = $joiningMonths->map(fn ($month) => [
             'label' => $month->format('M Y'),
             'offer_accepted' => (int) ($monthlyOfferAccepted[$month->format('Y-m')] ?? 0),
@@ -435,6 +442,7 @@ class AdminController extends Controller
             'candidateLevels' => $candidateLevels,
             'chartMonths' => $months->map->format('M Y')->values(),
             'chartApplicants' => $months->map(fn ($month) => (int) ($monthly[$month->format('Y-m')] ?? 0))->values(),
+            'chartProfilesSourced' => $months->map(fn ($month) => (int) ($monthlyProfilesSourced[$month->format('Y-m')] ?? 0))->values(),
             'upcomingInterviews' => (clone $interviews)->with(['candidate', 'client', 'interviewLevel'])
                 ->where('schedule_date', '>=', now())->orderBy('schedule_date')->limit(6)->get(),
             'groupedLevels' => $groupedLevels,
@@ -468,19 +476,24 @@ class AdminController extends Controller
             ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
+        $profilesSourced = ProfileSourced::visibleTo($user)
+            ->when($data['recruiter_id'] ?? null, fn ($query, $id) => $query->where('recruiter_id', $id))
+            ->whereBetween('profile_sourced.created_at', [$yearStart, $yearEnd])
+            ->selectRaw("DATE_FORMAT(profile_sourced.created_at, '%Y-%m') as month_key, COUNT(*) as total")
+            ->groupBy('month_key')->pluck('total', 'month_key');
 
-        $levelCounts = function (int $levelId, string $dateColumn = 'onboarding_date') use ($candidates, $yearStart, $yearEnd) {
+        $levelCounts = function (array $levelIds, string $dateColumn) use ($candidates, $yearStart, $yearEnd) {
             return (clone $candidates)
-                ->where('level_of_interview_id', $levelId)
+                ->whereIn('level_of_interview_id', $levelIds)
                 ->whereBetween($dateColumn, [$yearStart, $yearEnd])
                 ->selectRaw("DATE_FORMAT({$dateColumn}, '%Y-%m') as month_key, COUNT(*) as total")
                 ->groupBy('month_key')->pluck('total', 'month_key');
         };
 
-        $offerAccepted = $levelCounts(30);
-        $offerDeclined = $levelCounts(22);
-        $onboarded = $levelCounts(20);
-        $joinerDeclined = $levelCounts(21, 'candidates.updated_at');
+        $offerAccepted = $levelCounts([30, 20], 'onboarding_date');
+        $offerDeclined = $levelCounts([22], 'candidates.updated_at');
+        $onboarded = $levelCounts([20], 'onboarding_date');
+        $joinerDeclined = $levelCounts([21], 'candidates.updated_at');
         $outcomes = $user->can('read', Revenue::class)
             ? (clone $candidates)->with('client.billing')
                 ->where(function ($query) use ($yearStart, $yearEnd) {
@@ -539,6 +552,7 @@ class AdminController extends Controller
             'financial_year' => $year.'-'.($year + 1),
             'months' => $months->map->format('M Y')->values(),
             'applicants' => $months->map(fn ($month) => (int) ($applicants[$month->format('Y-m')] ?? 0))->values(),
+            'profiles_sourced' => $months->map(fn ($month) => (int) ($profilesSourced[$month->format('Y-m')] ?? 0))->values(),
             'offer_accepted' => $months->map(fn ($month) => (int) ($offerAccepted[$month->format('Y-m')] ?? 0))->values(),
             'offer_declined' => $months->map(fn ($month) => (int) ($offerDeclined[$month->format('Y-m')] ?? 0))->values(),
             'onboarded' => $months->map(fn ($month) => (int) ($onboarded[$month->format('Y-m')] ?? 0))->values(),
