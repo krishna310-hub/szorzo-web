@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Facades\DataTables;
 class UserController extends Controller
 {
@@ -82,10 +83,9 @@ class UserController extends Controller
             $data['resource_type'] = $role->access_level;
         }
         $data['role_id'] = $request['role_id'];
-        $data['ref'] = $request['password'];
         $data['name'] = $request['user_name'];
         $data['email'] = $request['email'];
-        $data['password'] = bcrypt($request['password']);
+        $data['password'] = Hash::make($request['password']);
         $data['phone_number'] = $request['mobile'];
         $data['is_active'] = $request['status'];
         User::create($data);
@@ -110,6 +110,7 @@ class UserController extends Controller
             'role_id'  => 'required|integer',
             'user_name'=> 'required|string|max:100',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8',
         ]);
 
         $role = Role::find($request->role_id);
@@ -117,11 +118,10 @@ class UserController extends Controller
             $data['resource_type'] = $role->access_level;
         }
         if ($request->filled('password')) {
-            $data['password'] = bcrypt($request->password);
+            $data['password'] = Hash::make($request->password);
         }
         
         $data['role_id'] = $request['role_id'];
-        $data['ref'] = $request['password'];
         $data['name'] = $request['user_name'];
         $data['email'] = $request['email'];
         $data['phone_number'] = $request['mobile'];

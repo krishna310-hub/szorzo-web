@@ -59,9 +59,10 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <div>
-                                                    <label for="password" class="form-label">Change New Password <span class="text-danger">* Current Password : {{ $user->ref ?? '-' }}</span></label>
+                                                    <label for="password" class="form-label">Change Password</label>
                                                     <input type="password" id="password" class="form-control" name="password"
-                                                        placeholder="Enter password" value="">
+                                                        placeholder="Leave blank to keep the current password" value=""
+                                                        autocomplete="new-password">
                                                         <button
                                                         class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
                                                         type="button" id="password-addon" style=" margin-top: 28px; margin-right: 35px;"><i
@@ -209,4 +210,3 @@
 </script>
 
 @endsection
-

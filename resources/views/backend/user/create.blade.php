@@ -60,7 +60,7 @@
                                                 <div>
                                                     <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                                                     <input type="password" id="password" class="form-control" name="password"
-                                                        placeholder="Enter password" value="{{ old('password') }}">
+                                                        placeholder="Enter password" value="" autocomplete="new-password">
                                                         <button
                                                         class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
                                                         type="button" id="password-addon" style=" margin-top: 28px; margin-right: 35px;"><i
@@ -213,4 +213,3 @@
 </script>
 
 @endsection
-

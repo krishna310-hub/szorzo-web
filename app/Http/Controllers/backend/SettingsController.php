@@ -40,7 +40,6 @@ class SettingsController extends Controller
             }
 
             $user->update([
-                'ref'=> $request->ref,
                 'password' => Hash::make($request->new_password)
             ]);
 
