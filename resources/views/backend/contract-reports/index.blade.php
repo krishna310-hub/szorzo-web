@@ -71,10 +71,14 @@
                                         <th>Recruiter</th>
                                         <th class="text-end">Monthly Take Home</th>
                                         <th class="text-end">Hourly Salary</th>
+                                        <th class="text-end">Billing / Hr</th>
+                                        <th class="text-end">Revenue %</th>
+                                        <th class="text-end">Revenue / Hr</th>
                                         <th style="min-width:110px">Present</th>
                                         <th style="min-width:110px">Leave Days</th>
                                         <th style="min-width:125px">Worked Hours</th>
                                         <th class="text-end">Total Salary</th>
+                                        <th class="text-end">Total Revenue</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -91,6 +95,9 @@
                                             <td>{{ $report->candidate?->recruiter?->recruiter_name ?? '—' }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? '—' : '₹'.number_format($report->monthly_take_home, 2) }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->hourly_salary, 2).'/hr' : '—' }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->billing_amount_per_hour, 2) : '—' }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? number_format($report->revenue_percentage, 2).'%' : '—' }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->revenue_per_hour, 2) : '—' }}</td>
                                             <td><input form="contract-report-{{ $report->id }}" type="number"
                                                     name="present_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->present_days }}"
@@ -111,6 +118,8 @@
                                             </td>
                                             <td class="text-end fw-semibold text-success">
                                                 &#8377;{{ number_format($report->payable_salary, 2) }}</td>
+                                            <td class="text-end fw-semibold text-primary">
+                                                &#8377;{{ number_format($report->contract_revenue, 2) }}</td>
                                             <td>
                                                 @can('export', \App\Models\Report::class)
                                                     <div class="d-flex gap-1">
@@ -128,7 +137,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="10" class="text-center text-muted py-5">No {{ $contractType === 'all' ? '' : $contractType.' ' }}contract candidates
+                                            <td colspan="14" class="text-center text-muted py-5">No {{ $contractType === 'all' ? '' : $contractType.' ' }}contract candidates
                                                 were found for this month. Click <strong>Refresh
                                                     Candidates</strong> after adding the contract dates in the candidate
                                                 module.</td>
@@ -142,11 +151,16 @@
                                             <td class="text-end">
                                                 &#8377;{{ number_format($reports->where('is_hourly', false)->sum('monthly_take_home'), 2) }}</td>
                                             <td class="text-end">—</td>
+                                            <td class="text-end">—</td>
+                                            <td class="text-end">—</td>
+                                            <td class="text-end">—</td>
                                             <td class="text-center">{{ $reports->sum('present_days') }}</td>
                                             <td class="text-center">{{ $reports->sum('absent_days') }}</td>
                                             <td class="text-center">{{ number_format($reports->where('is_hourly', true)->sum('worked_hours'), 2) }}</td>
                                             <td class="text-end">
                                                 &#8377;{{ number_format($reports->sum('payable_salary'), 2) }}</td>
+                                            <td class="text-end text-primary">
+                                                &#8377;{{ number_format($reports->sum('contract_revenue'), 2) }}</td>
                                             <td></td>
                                         </tr>
                                     </tfoot>

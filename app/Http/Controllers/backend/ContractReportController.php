@@ -4,6 +4,7 @@ namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
+use App\Models\ClientRequirement;
 use App\Models\ContractReport;
 use App\Models\Report;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -26,6 +27,7 @@ class ContractReportController extends Controller
         $reports->getCollection()->each(function (ContractReport $report) use ($month) {
             $this->syncReportSalary($report, $month->daysInMonth);
         });
+        $this->addRevenueMetrics($reports->getCollection());
 
         return view('backend.contract-reports.index', [
             'month' => $month,
@@ -131,6 +133,7 @@ class ContractReportController extends Controller
         $reports->each(function (ContractReport $report) use ($month) {
             $this->syncReportSalary($report, $month->daysInMonth);
         });
+        $this->addRevenueMetrics($reports);
 
         return Pdf::loadView('backend.contract-reports.pdf', compact('month', 'reports', 'contractType'))
             ->setPaper('a4', 'landscape')
@@ -143,6 +146,7 @@ class ContractReportController extends Controller
         $this->ensureVisible($request, $contractReport);
         $contractReport->load(['candidate.client.billing', 'candidate.jobRole', 'candidate.recruiter']);
         $this->syncReportSalary($contractReport, $contractReport->salary_month->daysInMonth);
+        $this->addRevenueMetrics(collect([$contractReport]));
 
         $invoiceNumber = sprintf(
             'CR-%s-%05d',
@@ -249,6 +253,42 @@ class ContractReportController extends Controller
     private function hourlyPayableSalary(float $hourlySalary, float $workedHours): float
     {
         return round(max(0, $hourlySalary * $workedHours), 2);
+    }
+
+    private function addRevenueMetrics($reports): void
+    {
+        $clientIds = $reports->pluck('candidate.client_id')->filter()->unique();
+        $jobRoleIds = $reports->pluck('candidate.job_role_id')->filter()->unique();
+        $requirements = ClientRequirement::query()
+            ->with('billing:id,value')
+            ->whereIn('client_id', $clientIds)
+            ->whereIn('job_role_id', $jobRoleIds)
+            ->where(function ($query) {
+                $query->where('mode_id', 2)->orWhereJsonContains('mode_ids', 2);
+            })
+            ->orderBy('id')
+            ->get()
+            ->keyBy(fn (ClientRequirement $requirement) => $requirement->client_id.':'.$requirement->job_role_id);
+
+        $reports->each(function (ContractReport $report) use ($requirements) {
+            $candidate = $report->candidate;
+            $requirement = $candidate
+                ? $requirements->get($candidate->client_id.':'.$candidate->job_role_id)
+                : null;
+            $billingAmountPerHour = $report->is_hourly ? (float) ($requirement?->ctc ?? 0) : null;
+            $revenuePercentage = $report->is_hourly ? (float) ($requirement?->billing?->value ?? 0) : null;
+            $revenuePerHour = $report->is_hourly
+                ? round(($billingAmountPerHour * $revenuePercentage) / 100, 2)
+                : null;
+            $totalRevenue = $report->is_hourly
+                ? round($revenuePerHour * (float) ($report->worked_hours ?? 0), 2)
+                : (float) $report->payable_salary;
+
+            $report->setAttribute('billing_amount_per_hour', $billingAmountPerHour);
+            $report->setAttribute('revenue_percentage', $revenuePercentage);
+            $report->setAttribute('revenue_per_hour', $revenuePerHour);
+            $report->setAttribute('contract_revenue', $totalRevenue);
+        });
     }
 
     private function query(Request $request, CarbonImmutable $month, string $contractType)
