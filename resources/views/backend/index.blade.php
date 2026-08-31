@@ -1773,12 +1773,11 @@
                                         <div
                                             class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
                                             <div>
-                                                <h6 class="section-title mb-1">Monthly Profile Completion</h6><span
-                                                    class="text-muted small">Candidate profiles recorded during the selected financial year</span>
+                                                <h6 class="section-title mb-1">Monthly Profiles Sourced</h6><span
+                                                    class="text-muted small">Profiles sourced {{ $individualAnalyticsIsOverall ? 'by all recruiters' : 'by this recruiter' }} during the selected financial year</span>
                                             </div>
-                                            <span class="badge bg-danger-subtle text-danger">Target: 100/month</span>
                                         </div>
-                                        <div id="individualCompletionChart" class="analytics-chart-wrap"></div>
+                                        <div id="individualProfilesSourcedChart" class="analytics-chart-wrap"></div>
                                     </div>
                                 </div>
                                 <div class="col-xl-6">
@@ -1786,11 +1785,12 @@
                                         <div
                                             class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
                                             <div>
-                                                <h6 class="section-title mb-1">Monthly Profiles Sourced</h6><span
-                                                    class="text-muted small">Profiles sourced {{ $individualAnalyticsIsOverall ? 'by all recruiters' : 'by this recruiter' }} during the selected financial year</span>
+                                                <h6 class="section-title mb-1">Monthly Profile Completion</h6><span
+                                                    class="text-muted small">Candidate profiles recorded during the selected financial year</span>
                                             </div>
+                                            <span class="badge bg-danger-subtle text-danger">Target: 100/month</span>
                                         </div>
-                                        <div id="individualProfilesSourcedChart" class="analytics-chart-wrap"></div>
+                                        <div id="individualCompletionChart" class="analytics-chart-wrap"></div>
                                     </div>
                                 </div>
                             </div>
