@@ -1540,10 +1540,11 @@
                     $selectedDashboardRecruiter = $selectedRecruiterId
                         ? $recruiters->firstWhere('id', (int) $selectedRecruiterId)
                         : null;
-                    $individualAnalyticsVisible = $isRecruiterDashboard || (bool) $selectedDashboardRecruiter;
+                    $individualAnalyticsVisible = $isSuperAdminDashboard || $isRecruiterDashboard || (bool) $selectedDashboardRecruiter;
+                    $individualAnalyticsIsOverall = $isSuperAdminDashboard && ! $selectedDashboardRecruiter;
                     $individualAnalyticsName = $isRecruiterDashboard
                         ? auth()->user()->name
-                        : $selectedDashboardRecruiter?->recruiter_name ?? 'All recruiters';
+                        : $selectedDashboardRecruiter?->recruiter_name ?? 'All Recruiters';
                     $monthlyKpis = $monthlyTargetAnalytics['kpis'];
                 @endphp
 
@@ -1723,7 +1724,7 @@
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                                 <div>
                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                        <h5 class="section-title mb-0">Individual Recruiter Analytics</h5>
+                                        <h5 class="section-title mb-0">{{ $individualAnalyticsIsOverall ? 'Overall Recruiter Analytics' : 'Individual Recruiter Analytics' }}</h5>
                                         <span class="badge bg-success-subtle text-success">Live records</span>
                                     </div>
                                     <p class="text-muted small mb-0">Monthly candidate-profile activity and visible
@@ -1734,7 +1735,7 @@
                                     </div>
                                     <div>
                                         <div class="fw-bold text-dark">{{ $individualAnalyticsName }}</div><small
-                                            class="text-muted">{{ $isRecruiterDashboard ? 'My analytics' : 'Selected recruiter' }}</small>
+                                            class="text-muted">{{ $isRecruiterDashboard ? 'My analytics' : ($individualAnalyticsIsOverall ? 'Overall counts' : 'Selected recruiter') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -1773,8 +1774,7 @@
                                             class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
                                             <div>
                                                 <h6 class="section-title mb-1">Monthly Profile Completion</h6><span
-                                                    class="text-muted small">Candidate profiles recorded during the last
-                                                    six months</span>
+                                                    class="text-muted small">Candidate profiles recorded during the selected financial year</span>
                                             </div>
                                             <span class="badge bg-danger-subtle text-danger">Target: 100/month</span>
                                         </div>
@@ -1787,23 +1787,13 @@
                                             class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
                                             <div>
                                                 <h6 class="section-title mb-1">Monthly Profiles Sourced</h6><span
-                                                    class="text-muted small">Profiles sourced by this recruiter during the selected financial year</span>
+                                                    class="text-muted small">Profiles sourced {{ $individualAnalyticsIsOverall ? 'by all recruiters' : 'by this recruiter' }} during the selected financial year</span>
                                             </div>
                                         </div>
                                         <div id="individualProfilesSourcedChart" class="analytics-chart-wrap"></div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                @elseif ($isSuperAdminDashboard)
-                    <div class="card panel-card mb-4 target-panel">
-                        <div class="card-body text-center py-5">
-                            <div class="metric-icon bg-danger-subtle text-danger mx-auto mb-3"><i
-                                    class="ri-user-search-line"></i></div>
-                            <h5 class="section-title">Select a recruiter to view individual analytics</h5>
-                            <p class="text-muted mb-0">Use the recruiter filter or an Analytics button in the
-                                role-performance list.</p>
                         </div>
                     </div>
                 @endif
