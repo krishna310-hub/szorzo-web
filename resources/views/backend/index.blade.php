@@ -1991,38 +1991,6 @@
                             </div>
                         </div>
                 @endif
-                <div class="row g-4">
-                    @can('read', \App\Models\Candidate::class)
-                        <div class="col-xl-8">
-                            <div class="card panel-card target-panel">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                            <h5 class="section-title mb-1">Applicant Momentum</h5><span
-                                                class="text-muted small">New applicants during <span class="selected-chart-year">{{ $chartYearLabel }}</span></span>
-                                        </div><span class="badge bg-danger-subtle text-danger">Live</span>
-                                    </div>
-                                    <div id="applicantChart" style="min-height:310px"></div>
-                                </div>
-                            </div>
-                        </div>
-                        {{-- <div class="col-xl-4">
-                            <div class="card panel-card">
-                                <div class="card-body p-4">
-                                    <h5 class="section-title">Revenue Overview</h5>
-                                    <p class="text-muted small">Revenue recorded on visible requirements</p>
-                                    <div class="py-4">
-                                        <div class="metric-label mb-2">Total Pipeline Revenue</div>
-                                        <div class="display-6 fw-bold text-dark">&#8377;{{ number_format($revenue, 2) }}</div>
-                                    </div>
-                                    <div class="rounded-4 bg-danger-subtle text-danger p-3 small"><i
-                                            class="ri-information-line me-1"></i> Values follow your role-based requirement
-                                        access.</div>
-                                </div>
-                            </div>
-                        </div> --}}
-                    @endcan
-                </div>
                 </div>
             </div>
         </div>
@@ -2031,74 +1999,6 @@
 
 @section('script')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var target = document.querySelector('#applicantChart');
-            if (!target || typeof ApexCharts === 'undefined') return;
-            window.dashboardApplicantChart = new ApexCharts(target, {
-                chart: {
-                    type: 'area',
-                    height: 310,
-                    toolbar: {
-                        show: false
-                    },
-                    zoom: {
-                        enabled: false
-                    }
-                },
-                series: [{
-                    name: 'Applicants',
-                    data: @json($chartApplicants)
-                }],
-                xaxis: {
-                    categories: @json($chartMonths),
-                    axisBorder: {
-                        show: false
-                    },
-                    axisTicks: {
-                        show: false
-                    }
-                },
-                yaxis: {
-                    min: 0,
-                    forceNiceScale: true,
-                    labels: {
-                        formatter: function(v) {
-                            return Math.round(v);
-                        }
-                    }
-                },
-                colors: ['#b91c1c'],
-                stroke: {
-                    curve: 'smooth',
-                    width: 3
-                },
-                fill: {
-                    type: 'gradient',
-                    gradient: {
-                        shadeIntensity: 1,
-                        opacityFrom: .35,
-                        opacityTo: .03,
-                        stops: [0, 95, 100]
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                grid: {
-                    borderColor: '#eef2f7',
-                    strokeDashArray: 4
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(v) {
-                            return v + ' applicant' + (v === 1 ? '' : 's');
-                        }
-                    }
-                }
-            });
-            window.dashboardApplicantChart.render();
-        });
-
         document.addEventListener('DOMContentLoaded', function() {
             var joiningChartTarget = document.querySelector('#pipelineMonthlyJoiningBarChart');
             var onboardingChartTarget = document.querySelector('#pipelineMonthlyOnboardingBarChart');
@@ -2281,10 +2181,6 @@
                     var data = await response.json();
 
                     await Promise.all([
-                        window.dashboardApplicantChart?.updateOptions({
-                            xaxis: { categories: data.months },
-                            series: [{ name: 'Applicants', data: data.applicants }]
-                        }),
                         window.dashboardJoiningChart?.updateOptions({
                             xaxis: { categories: data.months },
                             series: [

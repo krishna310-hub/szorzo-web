@@ -284,20 +284,22 @@ class AdminController extends Controller
             ->groupBy('month_key')->pluck('total', 'month_key');
         $joiningMonths = $months;
 
-        $monthlyCandidateLevelCounts = function (int $levelId, string $dateColumn = 'onboarding_date') use ($chartCandidates, $yearStart, $yearEnd) {
+        $monthlyCandidateLevelCounts = function (array $levelIds, string $dateColumn) use ($chartCandidates, $yearStart, $yearEnd) {
             return (clone $chartCandidates)
-                ->where('level_of_interview_id', $levelId)
+                ->whereIn('level_of_interview_id', $levelIds)
                 ->whereBetween($dateColumn, [$yearStart, $yearEnd])
                 ->selectRaw("DATE_FORMAT({$dateColumn}, '%Y-%m') as month_key, COUNT(*) as total")
                 ->groupBy('month_key')
                 ->pluck('total', 'month_key');
         };
 
-        // IDs are taken from level_of_interviews and candidates.level_of_interview_id.
-        $monthlyOfferAccepted = $monthlyCandidateLevelCounts(30);
-        $monthlyOfferDeclined = $monthlyCandidateLevelCounts(22);
-        $monthlyOnboarded = $monthlyCandidateLevelCounts(20);
-        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts(21, 'candidates.updated_at');
+        // Accepted candidates remain part of the acceptance trend after they
+        // advance to onboarding. Declined offers have no onboarding date, so
+        // their status update date is the available outcome date.
+        $monthlyOfferAccepted = $monthlyCandidateLevelCounts([30, 20], 'onboarding_date');
+        $monthlyOfferDeclined = $monthlyCandidateLevelCounts([22], 'candidates.updated_at');
+        $monthlyOnboarded = $monthlyCandidateLevelCounts([20], 'onboarding_date');
+        $monthlyJoinerDeclined = $monthlyCandidateLevelCounts([21], 'candidates.updated_at');
         $monthlyJoiningDetails = $joiningMonths->map(fn ($month) => [
             'label' => $month->format('M Y'),
             'offer_accepted' => (int) ($monthlyOfferAccepted[$month->format('Y-m')] ?? 0),
@@ -469,18 +471,18 @@ class AdminController extends Controller
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
 
-        $levelCounts = function (int $levelId, string $dateColumn = 'onboarding_date') use ($candidates, $yearStart, $yearEnd) {
+        $levelCounts = function (array $levelIds, string $dateColumn) use ($candidates, $yearStart, $yearEnd) {
             return (clone $candidates)
-                ->where('level_of_interview_id', $levelId)
+                ->whereIn('level_of_interview_id', $levelIds)
                 ->whereBetween($dateColumn, [$yearStart, $yearEnd])
                 ->selectRaw("DATE_FORMAT({$dateColumn}, '%Y-%m') as month_key, COUNT(*) as total")
                 ->groupBy('month_key')->pluck('total', 'month_key');
         };
 
-        $offerAccepted = $levelCounts(30);
-        $offerDeclined = $levelCounts(22);
-        $onboarded = $levelCounts(20);
-        $joinerDeclined = $levelCounts(21, 'candidates.updated_at');
+        $offerAccepted = $levelCounts([30, 20], 'onboarding_date');
+        $offerDeclined = $levelCounts([22], 'candidates.updated_at');
+        $onboarded = $levelCounts([20], 'onboarding_date');
+        $joinerDeclined = $levelCounts([21], 'candidates.updated_at');
         $outcomes = $user->can('read', Revenue::class)
             ? (clone $candidates)->with('client.billing')
                 ->where(function ($query) use ($yearStart, $yearEnd) {
