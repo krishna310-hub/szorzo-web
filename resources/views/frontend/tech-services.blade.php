@@ -1,5 +1,7 @@
 @extends('frontend.includes.master')
 
+@section('body_class', 'tech-services-page')
+
 @section('content')
 @php
     $phases = [
@@ -141,23 +143,19 @@
     height:auto;
 }
 
-/* Continue the Tech Services hero treatment through the site header. */
-body:has(.tech-page) .header{
-    background:
-        linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),
-        radial-gradient(circle at 80% 20%,#222660 0,transparent 35%),
-        linear-gradient(135deg,#090f24,#171540) !important;
-    background-size:46px 46px,46px 46px,auto,auto !important;
-    border-bottom:1px solid rgba(255,255,255,.08);
+/* Overlay the shared header on the hero so the artwork remains uninterrupted. */
+.tech-services-page .header{
+    position:absolute;
+    background:transparent !important;
+    border-bottom:0;
 }
-body:has(.tech-page) .header .menu > ul > li > a{
+.tech-services-page .header .menu > ul > li > a{
     color:#fff !important;
     background:transparent !important;
 }
-body:has(.tech-page) .header .mobile-menu-trigger span,
-body:has(.tech-page) .header .mobile-menu-trigger span::before,
-body:has(.tech-page) .header .mobile-menu-trigger span::after{
+.tech-services-page .header .mobile-menu-trigger span,
+.tech-services-page .header .mobile-menu-trigger span::before,
+.tech-services-page .header .mobile-menu-trigger span::after{
     background:#fff !important;
 }
 .tech-page{--ink:#0b1225;--navy:#0d1330;--purple:#6657f6;--cyan:#38c9f2;--mint:#26c997;--line:#e4e7f0;background:#fff;color:var(--ink);font-family:Manrope,sans-serif;overflow:hidden}.tech-page *{box-sizing:border-box}.tech-hero{position:relative;padding:190px 0 110px;background:radial-gradient(circle at 80% 20%,#222660 0,transparent 35%),linear-gradient(135deg,#090f24,#171540);color:#fff}.tech-hero:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:46px 46px;mask-image:linear-gradient(to bottom,black,transparent)}.tech-orb{position:absolute;border-radius:50%;filter:blur(2px);opacity:.45}.tech-orb-one{width:280px;height:280px;background:#5949ff;right:-80px;top:100px}.tech-orb-two{width:160px;height:160px;background:#1dc8ef;left:-80px;bottom:-40px}.tech-eyebrow,.tech-kicker{display:inline-flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:800}.tech-eyebrow{padding:9px 14px;border:1px solid rgba(255,255,255,.16);border-radius:999px;color:#71dcff;background:rgba(255,255,255,.05)}.tech-hero h1{font-size:clamp(48px,6.4vw,88px);letter-spacing:-.055em;line-height:1.02;margin:26px 0 24px;color:#fff}.tech-hero h1 span,.tech-section-head h2 span,.tech-success h2 span{background:linear-gradient(90deg,#8b7cff,#35c8ee);-webkit-background-clip:text;color:transparent}.tech-hero p{max-width:800px;font-size:18px;line-height:1.8;color:#b8bed4;margin:0}.tech-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:38px}.tech-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:12px;padding:14px 20px;font-weight:800;transition:.25s}.tech-btn-primary{color:#fff;background:linear-gradient(135deg,#6756f7,#4b3bd1);box-shadow:0 12px 30px rgba(89,73,255,.28)}.tech-btn:hover{transform:translateY(-2px);color:#fff}.tech-btn-ghost{color:#fff;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05)}.tech-hero-panel{position:relative;padding:24px;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:rgba(255,255,255,.07);box-shadow:0 25px 80px rgba(0,0,0,.25);backdrop-filter:blur(14px)}.tech-panel-top{display:flex;justify-content:space-between;color:#aeb5cc;font-size:12px;text-transform:uppercase;letter-spacing:.08em}.tech-live{color:#74e4c2}.tech-live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#2be0a7;margin-right:6px;box-shadow:0 0 0 5px rgba(43,224,167,.12)}.tech-ring{width:176px;height:176px;margin:34px auto;display:grid;place-content:center;text-align:center;border-radius:50%;background:radial-gradient(circle at center,#15183c 56%,transparent 57%),conic-gradient(#5c4cf2 0 76%,#37caee 76% 92%,rgba(255,255,255,.1) 92%)}.tech-ring strong{font-size:56px;line-height:1}.tech-ring span{text-transform:uppercase;letter-spacing:.15em;font-size:10px;color:#9fa7c2}.tech-mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tech-mini-stats span{padding:12px 5px;text-align:center;background:rgba(255,255,255,.05);border-radius:10px;font-size:10px;text-transform:uppercase;color:#9ea6c0}.tech-mini-stats strong{display:block;font-size:18px;color:#fff}.tech-phase-nav{position:relative;z-index:4;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 10px 35px rgba(15,22,48,.05)}.tech-phase-scroll{display:flex;overflow:auto;scrollbar-width:none}.tech-phase-scroll a{min-width:max-content;color:#555f73;padding:19px 18px;border-bottom:2px solid transparent;font-size:12px;font-weight:700}.tech-phase-scroll a:hover{color:var(--purple);border-color:var(--purple)}.tech-phase-scroll span{color:var(--purple);margin-right:8px}.tech-intro{padding:100px 0 60px}.tech-section-head{display:flex;align-items:end;justify-content:space-between;gap:60px}.tech-section-head>div{max-width:760px}.tech-kicker{color:var(--purple);margin-bottom:14px}.tech-section-head h2,.tech-success h2{font-size:clamp(34px,4vw,58px);letter-spacing:-.045em;line-height:1.08;margin:0}.tech-section-head>p{max-width:420px;color:#687186;line-height:1.8}.tech-phase{padding:65px 0 90px;scroll-margin-top:30px}.tech-phase-alt{background:#f7f8fc}.tech-phase-heading{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;margin-bottom:34px}.tech-phase-number{font-size:13px;font-weight:800;color:var(--purple);width:52px;height:52px;border-radius:16px;background:#eae8ff;display:grid;place-content:center}.tech-phase-heading span{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#848ca0;font-weight:800}.tech-phase-heading h2{font-size:clamp(28px,3vw,42px);margin:3px 0 0;letter-spacing:-.035em}.tech-stage-range{font-size:11px;text-transform:uppercase;letter-spacing:.12em;padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:#687186}.tech-stage-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.tech-stage-grid:has(.tech-stage-card:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}.tech-stage-grid:has(.tech-stage-card:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))}.tech-single-stage{grid-template-columns:1fr!important}.tech-stage-card{display:flex;flex-direction:column;min-height:100%;padding:28px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 38px rgba(17,24,52,.055);transition:.25s}.tech-stage-card:hover{transform:translateY(-5px);border-color:#c9c3ff;box-shadow:0 20px 50px rgba(43,36,105,.11)}.tech-card-top{display:flex;align-items:center;justify-content:space-between}.tech-icon{width:48px;height:48px;border-radius:14px;display:grid;place-content:center;color:var(--purple);font-size:23px;background:linear-gradient(135deg,#eceaff,#e5f9ff)}.tech-card-top>span{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#858da0;font-weight:800}.tech-stage-card h3{font-size:22px;line-height:1.3;margin:20px 0 12px}.tech-purpose{color:#657085;line-height:1.7;margin-bottom:17px}.tech-purpose strong{color:#20283c}.tech-stage-card ul,.tech-roadmap ul{list-style:none;padding:0;margin:0 0 22px}.tech-stage-card li,.tech-roadmap li{position:relative;padding:5px 0 5px 23px;color:#4e586c;line-height:1.55}.tech-stage-card li:before,.tech-roadmap li:before{content:'✓';position:absolute;left:0;color:var(--mint);font-weight:900}.tech-card-meta{display:flex;flex-wrap:wrap;gap:10px 16px;padding-top:17px;margin-top:auto;border-top:1px dashed #d9dce5}.tech-card-meta span{display:flex;gap:7px;align-items:center;font-size:11px;color:#737d91}.tech-card-meta i{color:var(--purple);font-size:16px}.tech-roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.tech-roadmap article{position:relative;padding:25px 20px;border:1px solid var(--line);border-radius:18px;background:#fff}.tech-roadmap article:not(:last-child):after{content:'→';position:absolute;right:-14px;top:31px;z-index:2;color:#8f86ef;font-size:20px}.tech-road-num{width:33px;height:33px;display:grid;place-content:center;background:var(--purple);color:#fff;border-radius:50%;font-size:12px;font-weight:800}.tech-roadmap h3{font-size:17px;margin:17px 0 3px}.tech-roadmap article>span{color:#7c8598;font-size:12px}.tech-roadmap ul{margin-top:15px;font-size:12px}.tech-raci{padding:100px 0;background:linear-gradient(145deg,#0a1024,#16143b);color:#fff}.tech-light h2{color:#fff}.tech-light>p{color:#aeb5ca}.tech-table-wrap{overflow:auto;margin-top:42px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(255,255,255,.045)}.tech-table-wrap table{width:100%;min-width:960px;border-collapse:collapse}.tech-table-wrap th,.tech-table-wrap td{padding:20px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}.tech-table-wrap thead th{color:#a9b0c5;text-transform:uppercase;letter-spacing:.08em;font-size:10px}.tech-table-wrap tbody th{color:#fff}.tech-table-wrap td span{display:inline-block;padding:7px 10px;border-radius:7px;font-size:10px;font-weight:800}.raci-accountable{background:#fff0b8;color:#875c00}.raci-responsible{background:#ffd7dc;color:#a62735}.raci-consulted{background:#d8e8ff;color:#24599c}.raci-informed{background:#c9f5e5;color:#147259}.tech-success{padding:100px 0;background:#f7f8fc}.tech-success-card{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;padding:64px;border-radius:28px;background:#fff;border:1px solid var(--line);box-shadow:0 25px 75px rgba(13,19,48,.08)}.tech-success p{color:#687186;line-height:1.8;max-width:700px;margin:20px 0 28px}.tech-success-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}.tech-success-stats div{display:flex;flex-direction:column;justify-content:center;padding:24px;border-radius:18px;background:#f5f4ff;border:1px solid #e9e6ff}.tech-success-stats strong{font-size:36px;color:var(--purple)}.tech-success-stats span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#626c80;font-weight:800}
@@ -172,15 +170,16 @@ body:has(.tech-page) .header .mobile-menu-trigger span::after{
     --navy:#111111;
     font-family:var(--default-font,"Oswald",sans-serif);
 }
-body:has(.tech-page) .header{
-    background:
-        linear-gradient(90deg,rgba(3,5,8,.94),rgba(4,13,19,.86)),
-        url("{{ asset('frontend/images/tech-services-background-clean.webp') }}") center top / cover no-repeat !important;
+.tech-services-page .header{
+    background:transparent !important;
 }
 .tech-page .tech-hero{
     background:
-        /* linear-gradient(90deg,rgba(2,4,7,.88) 0%,rgba(3,9,13,.7) 52%,rgba(2,12,18,.48) 100%), */
         url("{{ asset('frontend/images/tech-services-background-clean.webp') }}") center center / cover no-repeat;
+    min-height:840px !important;
+    padding-top:230px;
+    display:flex;
+    align-items:center;
 }
 .tech-page .tech-hero::before{display:none}
 .tech-page .tech-orb-one{background:#dc2626}
@@ -287,7 +286,18 @@ body:has(.tech-page) .header{
 .tech-page .wow{animation-duration:.8s;animation-timing-function:ease-out}
 .tech-page .tech-stage-card:hover{transform:translateY(-8px);box-shadow:0 22px 48px rgba(127,29,29,.14)}
 
+/* Keep every workflow phase on the same background as Phase 1. */
+.tech-page .tech-phase,
+.tech-page .tech-phase-alt{
+    background:#fff;
+    padding-top:30px;
+    padding-bottom:25px;
+}
+.tech-page .tech-phase-heading{margin-bottom:22px}
+
 @media(max-width:767px){
+    .tech-page .tech-phase,
+    .tech-page .tech-phase-alt{padding-top:15px;padding-bottom:20px}
     .tech-page .tech-hero p{font-size:19px !important}
     .tech-page .tech-section-head>p{font-size:19px !important}
     .tech-page .tech-stage-card h3{font-size:25px !important}

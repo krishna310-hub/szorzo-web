@@ -43,6 +43,7 @@ class ContractReportController extends Controller
         $candidates = $this->contractCandidates($request)
             ->get([
                 'candidates.id',
+                'candidates.client_id',
                 'candidates.take_home',
                 'candidates.onboarding_ctc',
                 'candidates.is_hourly',
@@ -127,6 +128,10 @@ class ContractReportController extends Controller
         $contractType = $this->contractType($request);
         $reports = $this->query($request, $month, $contractType)->get();
 
+        $reports->each(function (ContractReport $report) use ($month) {
+            $this->syncReportSalary($report, $month->daysInMonth);
+        });
+
         return Pdf::loadView('backend.contract-reports.pdf', compact('month', 'reports', 'contractType'))
             ->setPaper('a4', 'landscape')
             ->download('contract-report-'.$month->format('Y-m').'.pdf');
@@ -136,7 +141,8 @@ class ContractReportController extends Controller
     {
         $this->authorize('export', Report::class);
         $this->ensureVisible($request, $contractReport);
-        $contractReport->load(['candidate.client', 'candidate.jobRole', 'candidate.recruiter']);
+        $contractReport->load(['candidate.client.billing', 'candidate.jobRole', 'candidate.recruiter']);
+        $this->syncReportSalary($contractReport, $contractReport->salary_month->daysInMonth);
 
         $invoiceNumber = sprintf(
             'CR-%s-%05d',
@@ -176,7 +182,9 @@ class ContractReportController extends Controller
     {
         $month = $this->month($request);
 
-        return Candidate::query()->visibleTo($request->user()->loadMissing('role'))
+        return Candidate::query()
+            ->with('client.billing')
+            ->visibleTo($request->user()->loadMissing('role'))
             ->where('status', true)
             ->where('mode_id', 2)
             ->whereDate('contract_from_date', '<=', $month->endOfMonth()->toDateString())
@@ -185,13 +193,17 @@ class ContractReportController extends Controller
 
     private function monthlyTakeHome(Candidate $candidate): float
     {
-        $takeHome = (float) $candidate->take_home;
+        $individualFinalAmount = (float) $candidate->take_home;
 
-        if ($takeHome > 0) {
-            return round($takeHome, 2);
+        if ($individualFinalAmount <= 0) {
+            $individualFinalAmount = (float) $candidate->onboarding_ctc / 12;
         }
 
-        return round((float) $candidate->onboarding_ctc / 12, 2);
+        // Billing values are stored as percentages (for example, 80.00), not
+        // decimal multipliers (0.80).
+        $billingPercentage = (float) $candidate->client?->billing?->value;
+
+        return round(($individualFinalAmount * $billingPercentage) / 100, 2);
     }
 
     private function syncReportSalary(ContractReport $report, int $daysInMonth): void
@@ -246,7 +258,7 @@ class ContractReportController extends Controller
     private function query(Request $request, CarbonImmutable $month, string $contractType)
     {
         return ContractReport::query()
-            ->with(['candidate.client', 'candidate.jobRole', 'candidate.recruiter'])
+            ->with(['candidate.client.billing', 'candidate.jobRole', 'candidate.recruiter'])
             ->whereDate('salary_month', $month->toDateString())
             ->when($contractType === 'monthly', fn ($query) => $query->where('is_hourly', false))
             ->when($contractType === 'hourly', fn ($query) => $query->where('is_hourly', true))
