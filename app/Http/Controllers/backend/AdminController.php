@@ -339,17 +339,11 @@ class AdminController extends Controller
         $monthlyDeclinedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
             ->where('level_of_interview_id', 21)
             ->sum($candidateRevenue));
-        $monthlyContractRevenue = ContractReport::query()
-            ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
-            ->whereIn('candidate_id', (clone $chartCandidates)->select('candidates.id'))
-            ->whereHas('candidate', fn ($query) => $query
-                ->where('status', true)
-                ->where('mode_id', 2)
-                ->whereRaw('DATE(candidates.contract_from_date) <= LAST_DAY(contract_reports.salary_month)')
-                ->whereColumn('candidates.contract_to_date', '>=', 'contract_reports.salary_month'))
-            ->selectRaw("DATE_FORMAT(salary_month, '%Y-%m') as month_key, SUM(payable_salary) as total")
-            ->groupBy('month_key')
-            ->pluck('total', 'month_key');
+        $monthlyContractRevenue = $this->contractRevenueByMonth(
+            $chartCandidates,
+            $yearStart,
+            $yearEnd
+        );
         $onboardedRevenue = $revenueOutcomes->where('level_of_interview_id', 20)
             ->sum($candidateRevenue);
         $declinedRevenue = $revenueOutcomes->where('level_of_interview_id', 21)
@@ -544,17 +538,7 @@ class AdminController extends Controller
         $monthlyOnboardedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 20)->sum($candidateRevenue));
         $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 21)->sum($candidateRevenue));
         $monthlyContractRevenue = $user->can('read', Revenue::class)
-            ? ContractReport::query()
-                ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
-                ->whereIn('candidate_id', (clone $candidates)->select('candidates.id'))
-                ->whereHas('candidate', fn ($query) => $query
-                    ->where('status', true)
-                    ->where('mode_id', 2)
-                    ->whereRaw('DATE(candidates.contract_from_date) <= LAST_DAY(contract_reports.salary_month)')
-                    ->whereColumn('candidates.contract_to_date', '>=', 'contract_reports.salary_month'))
-                ->selectRaw("DATE_FORMAT(salary_month, '%Y-%m') as month_key, SUM(payable_salary) as total")
-                ->groupBy('month_key')
-                ->pluck('total', 'month_key')
+            ? $this->contractRevenueByMonth($candidates, $yearStart, $yearEnd)
             : collect();
 
         return response()->json([
@@ -593,6 +577,53 @@ class AdminController extends Controller
             (float) $ctc * (float) ($candidate->client?->billing?->value ?? 0) / 100,
             2
         );
+    }
+
+    private function contractRevenueByMonth($candidates, CarbonImmutable $yearStart, CarbonImmutable $yearEnd)
+    {
+        $reports = ContractReport::query()
+            ->with('candidate:id,client_id,job_role_id')
+            ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
+            ->whereIn('candidate_id', (clone $candidates)->select('candidates.id'))
+            ->whereHas('candidate', fn ($query) => $query
+                ->where('status', true)
+                ->where('mode_id', 2)
+                ->whereRaw('DATE(candidates.contract_from_date) <= LAST_DAY(contract_reports.salary_month)')
+                ->whereColumn('candidates.contract_to_date', '>=', 'contract_reports.salary_month'))
+            ->get();
+
+        $clientIds = $reports->pluck('candidate.client_id')->filter()->unique();
+        $jobRoleIds = $reports->pluck('candidate.job_role_id')->filter()->unique();
+        $requirements = ClientRequirement::query()
+            ->with('billing:id,value')
+            ->whereIn('client_id', $clientIds)
+            ->whereIn('job_role_id', $jobRoleIds)
+            ->where(function ($query) {
+                $query->where('mode_id', 2)->orWhereJsonContains('mode_ids', 2);
+            })
+            ->orderBy('id')
+            ->get()
+            ->keyBy(fn (ClientRequirement $requirement) => $requirement->client_id.':'.$requirement->job_role_id);
+
+        return $reports
+            ->groupBy(fn (ContractReport $report) => $report->salary_month->format('Y-m'))
+            ->map(function ($monthlyReports) use ($requirements) {
+                return round($monthlyReports->sum(function (ContractReport $report) use ($requirements) {
+                    if (! $report->is_hourly) {
+                        return (float) $report->payable_salary;
+                    }
+
+                    $candidate = $report->candidate;
+                    $requirement = $candidate
+                        ? $requirements->get($candidate->client_id.':'.$candidate->job_role_id)
+                        : null;
+                    $billingAmountPerHour = (float) ($requirement?->ctc ?? 0);
+                    $revenuePercentage = (float) ($requirement?->billing?->value ?? 0);
+                    $revenuePerHour = ($billingAmountPerHour * $revenuePercentage) / 100;
+
+                    return $revenuePerHour * (float) ($report->worked_hours ?? 0);
+                }), 2);
+            });
     }
 
     private function monthlyTargetAnalytics(
