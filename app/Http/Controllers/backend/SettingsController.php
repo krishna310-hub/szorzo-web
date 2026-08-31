@@ -43,6 +43,7 @@ class SettingsController extends Controller
                 'password' => Hash::make($request->new_password)
             ]);
 
+
             return back()->with([
                 'success' => 'Password changed successfully!',
                 'type' => $type

@@ -342,6 +342,11 @@ class AdminController extends Controller
         $monthlyContractRevenue = ContractReport::query()
             ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
             ->whereIn('candidate_id', (clone $chartCandidates)->select('candidates.id'))
+            ->whereHas('candidate', fn ($query) => $query
+                ->where('status', true)
+                ->where('mode_id', 2)
+                ->whereRaw('DATE(candidates.contract_from_date) <= LAST_DAY(contract_reports.salary_month)')
+                ->whereColumn('candidates.contract_to_date', '>=', 'contract_reports.salary_month'))
             ->selectRaw("DATE_FORMAT(salary_month, '%Y-%m') as month_key, SUM(payable_salary) as total")
             ->groupBy('month_key')
             ->pluck('total', 'month_key');
@@ -542,6 +547,11 @@ class AdminController extends Controller
             ? ContractReport::query()
                 ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
                 ->whereIn('candidate_id', (clone $candidates)->select('candidates.id'))
+                ->whereHas('candidate', fn ($query) => $query
+                    ->where('status', true)
+                    ->where('mode_id', 2)
+                    ->whereRaw('DATE(candidates.contract_from_date) <= LAST_DAY(contract_reports.salary_month)')
+                    ->whereColumn('candidates.contract_to_date', '>=', 'contract_reports.salary_month'))
                 ->selectRaw("DATE_FORMAT(salary_month, '%Y-%m') as month_key, SUM(payable_salary) as total")
                 ->groupBy('month_key')
                 ->pluck('total', 'month_key')
