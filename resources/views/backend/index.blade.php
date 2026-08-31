@@ -1767,7 +1767,7 @@
                             </div> --}}
 
                             <div class="row g-4 align-items-stretch">
-                                <div class="col-xl-8">
+                                <div class="col-xl-6">
                                     <div class="border rounded-4 h-100 p-3">
                                         <div
                                             class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
@@ -1781,14 +1781,16 @@
                                         <div id="individualCompletionChart" class="analytics-chart-wrap"></div>
                                     </div>
                                 </div>
-                                <div class="col-xl-4">
-                                    <div class="border rounded-4 h-100 p-4">
-                                        <h6 class="section-title mb-1">Current Month Completion</h6>
-                                        <p class="text-muted small mb-4">Against the minimum profile target</p>
-                                        <div id="individualRadialChart" style="min-height:220px"></div>
-                                        <div class="analytics-note"><i class="ri-information-line me-1"></i>This graph
-                                            uses actual candidate records. HR assessments, acceptances and joining will
-                                            appear after those data fields are connected.</div>
+                                <div class="col-xl-6">
+                                    <div class="border rounded-4 h-100 p-3">
+                                        <div
+                                            class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
+                                            <div>
+                                                <h6 class="section-title mb-1">Monthly Profiles Sourced</h6><span
+                                                    class="text-muted small">Profiles sourced by this recruiter during the selected financial year</span>
+                                            </div>
+                                        </div>
+                                        <div id="individualProfilesSourcedChart" class="analytics-chart-wrap"></div>
                                     </div>
                                 </div>
                             </div>
@@ -2202,6 +2204,14 @@
                                 { name: 'Declined Revenue', data: data.declined_revenue },
                                 { name: 'Contract Revenue', data: data.contract_revenue }
                             ]
+                        }),
+                        window.individualCompletionChart?.updateOptions({
+                            xaxis: { categories: data.months },
+                            series: [{ name: 'Completed profiles', data: data.applicants }]
+                        }),
+                        window.individualProfilesSourcedChart?.updateOptions({
+                            xaxis: { categories: data.months },
+                            series: [{ name: 'Profiles sourced', data: data.profiles_sourced }]
                         })
                     ]);
 
@@ -2322,16 +2332,14 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             var completionTarget = document.querySelector('#individualCompletionChart');
-            var radialTarget = document.querySelector('#individualRadialChart');
-            if ((!completionTarget && !radialTarget) || typeof ApexCharts === 'undefined') return;
+            var profilesSourcedTarget = document.querySelector('#individualProfilesSourcedChart');
+            if ((!completionTarget && !profilesSourcedTarget) || typeof ApexCharts === 'undefined') return;
 
             var monthlyProfiles = @json($chartApplicants);
-            var currentMonthProfiles = Number(monthlyProfiles[monthlyProfiles.length - 1] || 0);
             var profileTarget = 100;
-            var completionPercent = Math.min(100, Math.round((currentMonthProfiles / profileTarget) * 100));
 
             if (completionTarget) {
-                new ApexCharts(completionTarget, {
+                window.individualCompletionChart = new ApexCharts(completionTarget, {
                     chart: {
                         type: 'bar',
                         height: 310,
@@ -2396,48 +2404,56 @@
                             }
                         }
                     }
-                }).render();
+                });
+                window.individualCompletionChart.render();
             }
 
-            if (radialTarget) {
-                new ApexCharts(radialTarget, {
+            if (profilesSourcedTarget) {
+                window.individualProfilesSourcedChart = new ApexCharts(profilesSourcedTarget, {
                     chart: {
-                        type: 'radialBar',
-                        height: 235,
-                        sparkline: {
-                            enabled: true
-                        }
+                        type: 'bar',
+                        height: 310,
+                        toolbar: { show: false }
                     },
-                    series: [completionPercent],
-                    colors: ['#b91c1c'],
-                    plotOptions: {
-                        radialBar: {
-                            hollow: {
-                                size: '62%'
-                            },
-                            track: {
-                                background: '#f1f5f9'
-                            },
-                            dataLabels: {
-                                name: {
-                                    show: true,
-                                    offsetY: 22,
-                                    color: '#64748b'
-                                },
-                                value: {
-                                    offsetY: -14,
-                                    fontSize: '28px',
-                                    fontWeight: 800,
-                                    color: '#172033',
-                                    formatter: function(value) {
-                                        return Math.round(value) + '%';
-                                    }
-                                }
+                    series: [{
+                        name: 'Profiles sourced',
+                        data: @json($chartProfilesSourced)
+                    }],
+                    xaxis: {
+                        categories: @json($chartMonths),
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: {
+                        min: 0,
+                        forceNiceScale: true,
+                        labels: {
+                            formatter: function(value) {
+                                return Number.isInteger(value) ? value : '';
                             }
                         }
                     },
-                    labels: [currentMonthProfiles + ' of ' + profileTarget + ' profiles']
-                }).render();
+                    colors: ['#2563eb'],
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 7,
+                            columnWidth: '48%'
+                        }
+                    },
+                    dataLabels: { enabled: false },
+                    grid: {
+                        borderColor: '#eef2f7',
+                        strokeDashArray: 4
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(value) {
+                                return value + ' sourced profile' + (value === 1 ? '' : 's');
+                            }
+                        }
+                    }
+                });
+                window.individualProfilesSourcedChart.render();
             }
         });
     </script>

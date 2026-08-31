@@ -282,6 +282,11 @@ class AdminController extends Controller
             ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
+        $monthlyProfilesSourced = ProfileSourced::visibleTo($user)
+            ->when($selectedRecruiterId !== null, fn ($query) => $query->where('recruiter_id', $selectedRecruiterId))
+            ->whereBetween('profile_sourced.created_at', [$yearStart, $yearEnd])
+            ->selectRaw("DATE_FORMAT(profile_sourced.created_at, '%Y-%m') as month_key, COUNT(*) as total")
+            ->groupBy('month_key')->pluck('total', 'month_key');
         $joiningMonths = $months;
 
         $monthlyCandidateLevelCounts = function (array $levelIds, string $dateColumn) use ($chartCandidates, $yearStart, $yearEnd) {
@@ -437,6 +442,7 @@ class AdminController extends Controller
             'candidateLevels' => $candidateLevels,
             'chartMonths' => $months->map->format('M Y')->values(),
             'chartApplicants' => $months->map(fn ($month) => (int) ($monthly[$month->format('Y-m')] ?? 0))->values(),
+            'chartProfilesSourced' => $months->map(fn ($month) => (int) ($monthlyProfilesSourced[$month->format('Y-m')] ?? 0))->values(),
             'upcomingInterviews' => (clone $interviews)->with(['candidate', 'client', 'interviewLevel'])
                 ->where('schedule_date', '>=', now())->orderBy('schedule_date')->limit(6)->get(),
             'groupedLevels' => $groupedLevels,
@@ -469,6 +475,11 @@ class AdminController extends Controller
         $applicants = (clone $candidates)
             ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
             ->selectRaw("DATE_FORMAT(candidates.created_at, '%Y-%m') as month_key, COUNT(*) as total")
+            ->groupBy('month_key')->pluck('total', 'month_key');
+        $profilesSourced = ProfileSourced::visibleTo($user)
+            ->when($data['recruiter_id'] ?? null, fn ($query, $id) => $query->where('recruiter_id', $id))
+            ->whereBetween('profile_sourced.created_at', [$yearStart, $yearEnd])
+            ->selectRaw("DATE_FORMAT(profile_sourced.created_at, '%Y-%m') as month_key, COUNT(*) as total")
             ->groupBy('month_key')->pluck('total', 'month_key');
 
         $levelCounts = function (array $levelIds, string $dateColumn) use ($candidates, $yearStart, $yearEnd) {
@@ -541,6 +552,7 @@ class AdminController extends Controller
             'financial_year' => $year.'-'.($year + 1),
             'months' => $months->map->format('M Y')->values(),
             'applicants' => $months->map(fn ($month) => (int) ($applicants[$month->format('Y-m')] ?? 0))->values(),
+            'profiles_sourced' => $months->map(fn ($month) => (int) ($profilesSourced[$month->format('Y-m')] ?? 0))->values(),
             'offer_accepted' => $months->map(fn ($month) => (int) ($offerAccepted[$month->format('Y-m')] ?? 0))->values(),
             'offer_declined' => $months->map(fn ($month) => (int) ($offerDeclined[$month->format('Y-m')] ?? 0))->values(),
             'onboarded' => $months->map(fn ($month) => (int) ($onboarded[$month->format('Y-m')] ?? 0))->values(),
