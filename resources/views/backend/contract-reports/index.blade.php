@@ -73,7 +73,6 @@
                                         <th class="text-end">Hourly Salary</th>
                                         <th class="text-end">Billing %</th>
                                         <th class="text-end">Salary</th>
-                                        <th class="text-end">Revenue</th>
                                         <th style="min-width:110px">Present</th>
                                         <th style="min-width:110px">Leave Days</th>
                                         <th style="min-width:125px">Worked Hours</th>
@@ -97,7 +96,6 @@
                                             <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->hourly_salary, 2).'/hr' : '—' }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? number_format($report->revenue_percentage, 2).'%' : '—' }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->hourly_salary * (float) $report->worked_hours, 2) : '—' }}</td>
-                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->hourly_salary * (float) $report->worked_hours - (float) $report->revenue_percentage / 100, 2) : '—' }}</td>
                                             <td><input form="contract-report-{{ $report->id }}" type="number"
                                                     name="present_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->present_days }}"
