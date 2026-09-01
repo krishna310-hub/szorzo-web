@@ -71,9 +71,9 @@
                                         <th>Recruiter</th>
                                         <th class="text-end">Monthly Take Home</th>
                                         <th class="text-end">Hourly Salary</th>
-                                        <th class="text-end">Billing / Hr</th>
-                                        <th class="text-end">Revenue %</th>
-                                        <th class="text-end">Revenue / Hr</th>
+                                        <th class="text-end">Billing %</th>
+                                        <th class="text-end">Salary</th>
+                                        <th class="text-end">Revenue</th>
                                         <th style="min-width:110px">Present</th>
                                         <th style="min-width:110px">Leave Days</th>
                                         <th style="min-width:125px">Worked Hours</th>
@@ -95,9 +95,9 @@
                                             <td>{{ $report->candidate?->recruiter?->recruiter_name ?? '—' }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? '—' : '₹'.number_format($report->monthly_take_home, 2) }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->hourly_salary, 2).'/hr' : '—' }}</td>
-                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->billing_amount_per_hour, 2) : '—' }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? number_format($report->revenue_percentage, 2).'%' : '—' }}</td>
-                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->revenue_per_hour, 2) : '—' }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->payable_salary, 2) : '—' }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->contract_revenue, 2) : '—' }}</td>
                                             <td><input form="contract-report-{{ $report->id }}" type="number"
                                                     name="present_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->present_days }}"
