@@ -276,7 +276,9 @@ class ContractReportController extends Controller
                 ? $requirements->get($candidate->client_id.':'.$candidate->job_role_id)
                 : null;
             $billingAmountPerHour = $report->is_hourly ? (float) ($requirement?->ctc ?? 0) : null;
-            $revenuePercentage = $report->is_hourly ? (float) ($requirement?->billing?->value ?? 0) : null;
+            // Billing percentage belongs to the matched client requirement and
+            // applies to both monthly and hourly contract candidates.
+            $revenuePercentage = (float) ($requirement?->billing?->value ?? 0);
             $revenuePerHour = $report->is_hourly
                 ? round(($billingAmountPerHour * $revenuePercentage) / 100, 2)
                 : null;
