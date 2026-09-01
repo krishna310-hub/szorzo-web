@@ -114,10 +114,15 @@
                                                     <span class="text-muted">—</span>
                                                 @endif
                                             </td>
+                                            @php
+                                                $revenueAmount = (float) $report->payable_salary
+                                                    * (float) $report->revenue_percentage / 100;
+                                                $salaryAfterRevenue = (float) $report->payable_salary - $revenueAmount;
+                                            @endphp
                                             <td class="text-end fw-semibold text-success">
-                                                &#8377;{{ number_format($report->payable_salary - $report->revenue_percentage / 100, 2) }}</td>
+                                                &#8377;{{ number_format($salaryAfterRevenue, 2) }}</td>
                                             <td class="text-end fw-semibold text-primary">
-                                                &#8377;{{ number_format($report->payable_salary - $report->revenue_percentage / 100, 2) - $report->payable_salary }}</td>
+                                                &#8377;{{ number_format($revenueAmount, 2) }}</td>
                                             <td>
                                                 @can('export', \App\Models\Report::class)
                                                     <div class="d-flex gap-1">
@@ -143,6 +148,13 @@
                                     @endforelse
                                 </tbody>
                                 @if ($reports->count())
+                                    @php
+                                        $pageRevenue = $reports->sum(fn ($report) =>
+                                            (float) $report->payable_salary
+                                            * (float) $report->revenue_percentage / 100
+                                        );
+                                        $pageSalary = (float) $reports->sum('payable_salary') - $pageRevenue;
+                                    @endphp
                                     <tfoot class="table-light fw-semibold">
                                         <tr>
                                             <td colspan="3">Page total</td>
@@ -156,9 +168,9 @@
                                             <td class="text-center">{{ $reports->sum('absent_days') }}</td>
                                             <td class="text-center">{{ number_format($reports->where('is_hourly', true)->sum('worked_hours'), 2) }}</td>
                                             <td class="text-end">
-                                                &#8377;{{ number_format($reports->sum('payable_salary') - $reports->sum('revenue_percentage') / 100, 2) }}</td>
+                                                &#8377;{{ number_format($pageSalary, 2) }}</td>
                                             <td class="text-end text-primary">
-                                                &#8377;{{ number_format($reports->sum('contract_revenue'), 2) }}</td>
+                                                &#8377;{{ number_format($pageRevenue, 2) }}</td>
                                             <td></td>
                                         </tr>
                                     </tfoot>
