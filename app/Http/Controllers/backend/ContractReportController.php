@@ -263,9 +263,6 @@ class ContractReportController extends Controller
             ->with('billing:id,value')
             ->whereIn('client_id', $clientIds)
             ->whereIn('job_role_id', $jobRoleIds)
-            ->where(function ($query) {
-                $query->where('mode_id', 2)->orWhereJsonContains('mode_ids', 2);
-            })
             ->orderBy('id')
             ->get()
             ->keyBy(fn (ClientRequirement $requirement) => $requirement->client_id.':'.$requirement->job_role_id);
