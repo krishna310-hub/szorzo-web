@@ -9,17 +9,12 @@ class ContractReportPolicy
 {
     public function read(User $user): bool
     {
-        return $this->allowed($user, 'Read');
+        return $this->hasPermission($user, 'Read');
     }
 
-    public function edit(User $user): bool
+    public function export(User $user): bool
     {
-        return $this->allowed($user, 'Edit');
-    }
-
-    public function download(User $user): bool
-    {
-        return $this->allowed($user, 'Download');
+        return $this->hasPermission($user, 'Export');
     }
 
     public function before(User $user): ?bool
@@ -27,12 +22,18 @@ class ContractReportPolicy
         return $user->isSuperAdmin() ? true : null;
     }
 
-    private function allowed(User $user, string $name): bool
+    private function hasPermission(User $user, string $name): bool
     {
+        if (! $user->role) {
+            return false;
+        }
+
         $permissionId = Permission::where('page', 'contract_report')
             ->where('name', $name)
             ->value('id');
 
-        return (bool) ($permissionId && $user->role?->permissions->contains('id', $permissionId));
+        return $permissionId
+            ? $user->role->permissions->contains('id', $permissionId)
+            : false;
     }
 }

@@ -38,7 +38,7 @@ class ContractReportController extends Controller
 
     public function refresh(Request $request)
     {
-        $this->authorize('edit', ContractReport::class);
+        $this->authorize('export', ContractReport::class);
         $month = $this->month($request);
         $contractType = $this->contractType($request);
         $candidates = $this->contractCandidates($request)
@@ -85,7 +85,7 @@ class ContractReportController extends Controller
 
     public function update(Request $request, ContractReport $contractReport)
     {
-        $this->authorize('edit', ContractReport::class);
+        $this->authorize('export', ContractReport::class);
         $this->ensureVisible($request, $contractReport);
         $days = $contractReport->salary_month->daysInMonth;
         $data = $request->validate([
@@ -124,7 +124,7 @@ class ContractReportController extends Controller
 
     public function pdf(Request $request)
     {
-        $this->authorize('download', ContractReport::class);
+        $this->authorize('export', ContractReport::class);
         $month = $this->month($request);
         $contractType = $this->contractType($request);
         $reports = $this->query($request, $month, $contractType)->get();
@@ -141,7 +141,7 @@ class ContractReportController extends Controller
 
     public function invoice(Request $request, ContractReport $contractReport)
     {
-        $this->authorize('download', ContractReport::class);
+        $this->authorize('export', ContractReport::class);
         $this->ensureVisible($request, $contractReport);
         $contractReport->load(['candidate.client.billing', 'candidate.jobRole', 'candidate.recruiter']);
         $this->syncReportSalary($contractReport, $contractReport->salary_month->daysInMonth);

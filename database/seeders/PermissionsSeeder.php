@@ -123,8 +123,7 @@ class PermissionsSeeder extends Seeder
             ['name' => 'Export',    'page' => 'reports'],
 
             ['name' => 'Read',      'page' => 'contract_report'],
-            ['name' => 'Edit',      'page' => 'contract_report'],
-            ['name' => 'Download',  'page' => 'contract_report'],
+            ['name' => 'Export',    'page' => 'contract_report'],
 
             ['name' => 'Read',      'page' => 'revenue'],
             ['name' => 'Create',    'page' => 'revenue'],

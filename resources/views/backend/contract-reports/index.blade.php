@@ -10,14 +10,12 @@
                         <div class="text-muted">Monthly attendance and payable salary for contract candidates</div>
                     </div>
                     <div class="d-flex gap-2">
-                        @can('edit', \App\Models\ContractReport::class)
+                        @can('export', \App\Models\ContractReport::class)
                             <form method="POST" action="{{ route('admin.contract-reports.refresh') }}">@csrf
                                 <input type="hidden" name="month" value="{{ $month->format('Y-m') }}">
                                 <input type="hidden" name="contract_type" value="{{ $contractType }}">
                                 <button class="btn btn-primary"><i class="ri-refresh-line me-1"></i>Refresh Candidates</button>
                             </form>
-                        @endcan
-                        @can('download', \App\Models\ContractReport::class)
                             <a class="btn btn-danger"
                                 href="{{ route('admin.contract-reports.pdf', ['month' => $month->format('Y-m'), 'contract_type' => $contractType]) }}"><i
                                     class="ri-file-pdf-2-line me-1"></i>Download PDF</a>
@@ -126,23 +124,19 @@
                                             <td class="text-end fw-semibold text-primary">
                                                 &#8377;{{ number_format($revenueAmount, 2) }}</td>
                                             <td>
-                                                @if(auth()->user()->can('edit', \App\Models\ContractReport::class) || auth()->user()->can('download', \App\Models\ContractReport::class))
+                                                @can('export', \App\Models\ContractReport::class)
                                                     <div class="d-flex gap-1">
-                                                        @can('edit', \App\Models\ContractReport::class)
                                                         <form id="contract-report-{{ $report->id }}" method="POST"
                                                             action="{{ route('admin.contract-reports.update', $report) }}">
                                                             @csrf @method('PUT')<button
                                                             class="btn btn-sm btn-success">Save</button></form>
-                                                        @endcan
-                                                        @can('download', \App\Models\ContractReport::class)
                                                         <a
                                                             class="btn btn-sm btn-danger"
                                                             href="{{ route('admin.contract-reports.invoice', $report) }}"
                                                             title="Download individual invoice"><i
                                                                 class="ri-file-pdf-2-line"></i></a>
-                                                        @endcan
                                                     </div>
-                                                @endif
+                                                @endcan
                                             </td>
                                         </tr>
                                     @empty
