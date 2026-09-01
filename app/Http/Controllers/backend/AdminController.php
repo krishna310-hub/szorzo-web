@@ -598,9 +598,6 @@ class AdminController extends Controller
             ->with('billing:id,value')
             ->whereIn('client_id', $clientIds)
             ->whereIn('job_role_id', $jobRoleIds)
-            ->where(function ($query) {
-                $query->where('mode_id', 2)->orWhereJsonContains('mode_ids', 2);
-            })
             ->orderBy('id')
             ->get()
             ->keyBy(fn (ClientRequirement $requirement) => $requirement->client_id.':'.$requirement->job_role_id);
@@ -609,19 +606,13 @@ class AdminController extends Controller
             ->groupBy(fn (ContractReport $report) => $report->salary_month->format('Y-m'))
             ->map(function ($monthlyReports) use ($requirements) {
                 return round($monthlyReports->sum(function (ContractReport $report) use ($requirements) {
-                    if (! $report->is_hourly) {
-                        return (float) $report->payable_salary;
-                    }
-
                     $candidate = $report->candidate;
                     $requirement = $candidate
                         ? $requirements->get($candidate->client_id.':'.$candidate->job_role_id)
                         : null;
-                    $billingAmountPerHour = (float) ($requirement?->ctc ?? 0);
                     $revenuePercentage = (float) ($requirement?->billing?->value ?? 0);
-                    $revenuePerHour = ($billingAmountPerHour * $revenuePercentage) / 100;
 
-                    return $revenuePerHour * (float) ($report->worked_hours ?? 0);
+                    return (float) $report->payable_salary * $revenuePercentage / 100;
                 }), 2);
             });
     }
