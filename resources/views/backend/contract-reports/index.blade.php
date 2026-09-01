@@ -96,8 +96,8 @@
                                             <td class="text-end">{{ $report->is_hourly ? '—' : '₹'.number_format($report->monthly_take_home, 2) }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->hourly_salary, 2).'/hr' : '—' }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? number_format($report->revenue_percentage, 2).'%' : '—' }}</td>
-                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->payable_salary, 2) : '—' }}</td>
-                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->contract_revenue, 2) : '—' }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->hourly_salary * (float) $report->worked_hours, 2) : '—' }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->hourly_salary * (float) $report->worked_hours - (float) $report->revenue_percentage / 100, 2) : '—' }}</td>
                                             <td><input form="contract-report-{{ $report->id }}" type="number"
                                                     name="present_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->present_days }}"
