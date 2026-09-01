@@ -2,44 +2,45 @@
 
 namespace App\Providers;
 
-use App\Models\Client;
 use App\Models\Billing;
 use App\Models\Candidate;
+use App\Models\Client;
 use App\Models\ClientJobRole;
 use App\Models\ClientRequirement;
+use App\Models\ContractReport;
 use App\Models\Division;
+use App\Models\Employee;
 use App\Models\InterviewLevel;
+use App\Models\InterviewMode;
 use App\Models\JobRole;
 use App\Models\Location;
 use App\Models\Mode;
-use App\Models\Employee;
-use App\Models\InterviewMode;
-use App\Models\Target;
-use App\Models\Pages;
-use App\Models\Recruiter;
 use App\Models\ProfileSourced;
+use App\Models\Recruiter;
 use App\Models\Report;
-use App\Policies\CandidatePolicy;
+use App\Models\Target;
 use App\Policies\BillingPolicy;
+use App\Policies\CandidatePolicy;
 use App\Policies\ClientJobRolePolicy;
-use App\Policies\ClientRequirementPolicy;
 use App\Policies\ClientPolicy;
-use App\Policies\DivisionPolicy;
+use App\Policies\ClientRequirementPolicy;
 use App\Policies\ContactEnquiryPolicy;
+use App\Policies\ContractReportPolicy;
+use App\Policies\DivisionPolicy;
+use App\Policies\EmployeePolicy;
 use App\Policies\GeneralPolicy;
 use App\Policies\InterviewLevelPolicy;
+use App\Policies\InterviewModePolicy;
 use App\Policies\JobRolePolicy;
 use App\Policies\LocationPolicy;
 use App\Policies\ModePolicy;
-use App\Policies\EmployeePolicy;
-use App\Policies\InterviewModePolicy;
-use App\Policies\TargetPolicy;
-use App\Policies\RecruiterPolicy;
+use App\Policies\PagesPolicy;
 use App\Policies\ProfileSourcedPolicy;
+use App\Policies\RecruiterPolicy;
 use App\Policies\ReportPolicy;
 use App\Policies\RolePolicy;
+use App\Policies\TargetPolicy;
 use App\Policies\UserPolicy;
-use App\Policies\PagesPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -52,8 +53,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         'App\Models\General' => GeneralPolicy::class,
-        'App\Models\User'    => UserPolicy::class,
-        'App\Models\Role'    => RolePolicy::class,
+        'App\Models\User' => UserPolicy::class,
+        'App\Models\Role' => RolePolicy::class,
         'App\Models\ContactEnquiry' => ContactEnquiryPolicy::class,
         'App\Models\Pages' => PagesPolicy::class,
         Client::class => ClientPolicy::class,
@@ -72,6 +73,7 @@ class AuthServiceProvider extends ServiceProvider
         InterviewMode::class => InterviewModePolicy::class,
         Target::class => TargetPolicy::class,
         Report::class => ReportPolicy::class,
+        ContractReport::class => ContractReportPolicy::class,
     ];
 
     /**
@@ -79,23 +81,23 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->registerPolicies(); 
+        $this->registerPolicies();
 
-        Gate::Resource('General','App\Policies\GeneralPolicy');
-        Gate::Resource('User','App\Policies\UserPolicy');
-        Gate::Resource('Role','App\Policies\RolePolicy');
-        Gate::Resource('ContactEnquiry','App\Policies\ContactEnquiryPolicy');
-        Gate::Resource('Pages','App\Policies\PagesPolicy');
-        Gate::Resource('Client','App\Policies\ClientPolicy');
-        Gate::Resource('InterviewLevel','App\Policies\InterviewLevelPolicy');
-        Gate::Resource('Location','App\Policies\LocationPolicy');
-        Gate::Resource('Recruiter','App\Policies\RecruiterPolicy');
-        Gate::Resource('JobRole','App\Policies\JobRolePolicy');
-        Gate::Resource('Mode','App\Policies\ModePolicy');
-        Gate::Resource('ClientJobRole','App\Policies\ClientJobRolePolicy');
-        Gate::Resource('ClientRequirement','App\Policies\ClientRequirementPolicy');
-        Gate::Resource('Candidate','App\Policies\CandidatePolicy');
-        Gate::Resource('Division','App\Policies\DivisionPolicy');
+        Gate::Resource('General', 'App\Policies\GeneralPolicy');
+        Gate::Resource('User', 'App\Policies\UserPolicy');
+        Gate::Resource('Role', 'App\Policies\RolePolicy');
+        Gate::Resource('ContactEnquiry', 'App\Policies\ContactEnquiryPolicy');
+        Gate::Resource('Pages', 'App\Policies\PagesPolicy');
+        Gate::Resource('Client', 'App\Policies\ClientPolicy');
+        Gate::Resource('InterviewLevel', 'App\Policies\InterviewLevelPolicy');
+        Gate::Resource('Location', 'App\Policies\LocationPolicy');
+        Gate::Resource('Recruiter', 'App\Policies\RecruiterPolicy');
+        Gate::Resource('JobRole', 'App\Policies\JobRolePolicy');
+        Gate::Resource('Mode', 'App\Policies\ModePolicy');
+        Gate::Resource('ClientJobRole', 'App\Policies\ClientJobRolePolicy');
+        Gate::Resource('ClientRequirement', 'App\Policies\ClientRequirementPolicy');
+        Gate::Resource('Candidate', 'App\Policies\CandidatePolicy');
+        Gate::Resource('Division', 'App\Policies\DivisionPolicy');
         Gate::Resource('Billing','App\Policies\BillingPolicy');
     }
 }

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\ClientRequirement;
 use App\Models\ContractReport;
-use App\Models\Report;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -19,7 +18,7 @@ class ContractReportController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorize('read', Report::class);
+        $this->authorize('read', ContractReport::class);
         $month = $this->month($request);
         $contractType = $this->contractType($request);
         $reports = $this->query($request, $month, $contractType)->paginate(50)->withQueryString();
@@ -39,7 +38,7 @@ class ContractReportController extends Controller
 
     public function refresh(Request $request)
     {
-        $this->authorize('export', Report::class);
+        $this->authorize('edit', ContractReport::class);
         $month = $this->month($request);
         $contractType = $this->contractType($request);
         $candidates = $this->contractCandidates($request)
@@ -86,7 +85,7 @@ class ContractReportController extends Controller
 
     public function update(Request $request, ContractReport $contractReport)
     {
-        $this->authorize('export', Report::class);
+        $this->authorize('edit', ContractReport::class);
         $this->ensureVisible($request, $contractReport);
         $days = $contractReport->salary_month->daysInMonth;
         $data = $request->validate([
@@ -125,7 +124,7 @@ class ContractReportController extends Controller
 
     public function pdf(Request $request)
     {
-        $this->authorize('export', Report::class);
+        $this->authorize('download', ContractReport::class);
         $month = $this->month($request);
         $contractType = $this->contractType($request);
         $reports = $this->query($request, $month, $contractType)->get();
@@ -142,7 +141,7 @@ class ContractReportController extends Controller
 
     public function invoice(Request $request, ContractReport $contractReport)
     {
-        $this->authorize('export', Report::class);
+        $this->authorize('download', ContractReport::class);
         $this->ensureVisible($request, $contractReport);
         $contractReport->load(['candidate.client.billing', 'candidate.jobRole', 'candidate.recruiter']);
         $this->syncReportSalary($contractReport, $contractReport->salary_month->daysInMonth);
