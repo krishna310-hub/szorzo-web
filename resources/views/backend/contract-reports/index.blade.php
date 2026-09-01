@@ -163,7 +163,6 @@
                                             <td class="text-end">—</td>
                                             <td class="text-end">—</td>
                                             <td class="text-end">—</td>
-                                            <td class="text-end">—</td>
                                             <td class="text-center">{{ $reports->sum('present_days') }}</td>
                                             <td class="text-center">{{ $reports->sum('absent_days') }}</td>
                                             <td class="text-center">{{ number_format($reports->where('is_hourly', true)->sum('worked_hours'), 2) }}</td>
