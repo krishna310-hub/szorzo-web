@@ -69,10 +69,10 @@
                                         <th>Candidate</th>
                                         <th>Client / Role</th>
                                         <th>Recruiter</th>
-                                        <th class="text-end">Monthly Take Home</th>
+                                        <th class="text-end">Monthly Billing Payment</th>
                                         <th class="text-end">Hourly Salary</th>
-                                        <th class="text-end">Billing %</th>
-                                        <th class="text-end">Salary</th>
+                                        <th class="text-end">Billing</th>
+                                        <th class="text-end">Hourly Billing Payment</th>
                                         <th style="min-width:110px">Present</th>
                                         <th style="min-width:110px">Leave Days</th>
                                         <th style="min-width:125px">Worked Hours</th>
