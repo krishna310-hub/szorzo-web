@@ -582,7 +582,7 @@ class AdminController extends Controller
     private function contractRevenueByMonth($candidates, CarbonImmutable $yearStart, CarbonImmutable $yearEnd)
     {
         $reports = ContractReport::query()
-            ->with('candidate:id,client_id,job_role_id')
+            ->with('candidate:id,client_id,job_role_id,take_home,onboarding_ctc,is_hourly,hourly_salary')
             ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
             ->whereIn('candidate_id', (clone $candidates)->select('candidates.id'))
             ->whereHas('candidate', fn ($query) => $query
@@ -611,8 +611,32 @@ class AdminController extends Controller
                         ? $requirements->get($candidate->client_id.':'.$candidate->job_role_id)
                         : null;
                     $revenuePercentage = (float) ($requirement?->billing?->value ?? 0);
+                    $workedHours = (float) ($report->worked_hours ?? 0);
 
-                    return (float) $report->payable_salary * $revenuePercentage / 100;
+                    if ($candidate?->is_hourly) {
+                        $payableSalary = round(
+                            max(0, (float) $candidate->hourly_salary * $workedHours),
+                            2
+                        );
+                    } else {
+                        $monthlyTakeHome = (float) ($candidate?->take_home ?? 0);
+
+                        if ($monthlyTakeHome <= 0) {
+                            $monthlyTakeHome = (float) ($candidate?->onboarding_ctc ?? 0) / 12;
+                        }
+
+                        $daysInMonth = $report->salary_month->daysInMonth;
+                        $leaveDays = min($daysInMonth, max(0, (int) $report->absent_days));
+                        $payableSalary = round(
+                            max(
+                                0,
+                                $monthlyTakeHome - (($monthlyTakeHome / $daysInMonth) * $leaveDays)
+                            ),
+                            2
+                        );
+                    }
+
+                    return $payableSalary * $revenuePercentage / 100;
                 }), 2);
             });
     }
