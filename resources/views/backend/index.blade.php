@@ -1974,9 +1974,9 @@
                                         <p class="text-muted small mb-0">Onboarded, joiner-declined, and contract revenue for <span class="selected-chart-year">{{ $chartYearLabel }}</span></p>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2">
-                                        <span id="onboardedRevenueBadge" class="badge bg-success-subtle text-success">Onboarded: &#8377;{{ number_format($onboardedRevenue, 2) }}</span>
-                                        <span id="declinedRevenueBadge" class="badge bg-danger-subtle text-danger">Declined: &#8377;{{ number_format($declinedRevenue, 2) }}</span>
-                                        <span id="contractRevenueBadge" class="badge bg-primary-subtle text-primary">Contract: &#8377;{{ number_format($contractRevenue, 2) }}</span>
+                                        <span id="onboardedRevenueBadge" class="badge bg-success-subtle text-success" style="font-size: 1rem; padding: 0.5rem 0.75rem;">Onboarded: &#8377;{{ number_format($onboardedRevenue, 2) }}</span>
+                                        <span id="declinedRevenueBadge" class="badge bg-danger-subtle text-danger" style="font-size: 1rem; padding: 0.5rem 0.75rem;">Declined: &#8377;{{ number_format($declinedRevenue, 2) }}</span>
+                                        <span id="contractRevenueBadge" class="badge bg-primary-subtle text-primary" style="font-size: 1rem; padding: 0.5rem 0.75rem;">Contract: &#8377;{{ number_format($contractRevenue, 2) }}</span>
                                     </div>
                                 </div>
                                 <div id="monthlyRevenueBarChart" style="min-height: 300px;"></div>

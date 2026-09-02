@@ -61,7 +61,7 @@
                                 >
 
                                 {{-- Optional --}}
-                                {{-- 
+                                {{--
                                 <img
                                     src="{{ asset('frontend/images/logo-bg.webp') }}"
                                     alt="Szorzo Logo"
@@ -209,11 +209,11 @@
                                         </a>
                                     </li>
 
-                                    <li>
+                                    {{-- <li>
                                         <a href="{{ route('tech.services') }}">
                                             Tech Services
                                         </a>
-                                    </li>
+                                    </li> --}}
                                 </ul>
                             </div>
                         </li>
