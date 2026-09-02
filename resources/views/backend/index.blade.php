@@ -1785,8 +1785,8 @@
                                         <div
                                             class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-1">
                                             <div>
-                                                <h6 class="section-title mb-1">Monthly Profile Completion</h6><span
-                                                    class="text-muted small">Candidate profiles recorded during the selected financial year</span>
+                                                <h6 class="section-title mb-1">Monthly Profile Submitted</h6><span
+                                                    class="text-muted small">Candidate profiles submitted during the selected financial year</span>
                                             </div>
                                             <span class="badge bg-danger-subtle text-danger">Target: 100/month</span>
                                         </div>
@@ -1797,7 +1797,7 @@
                         </div>
                     </div>
                 @endif
-                <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
+                {{-- <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
                     <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Financial Year</label>
                     <select id="dashboardChartYear" class="form-select form-select-sm" style="width: 150px"
                         data-url="{{ route('admin.dashboard.year-charts') }}"
@@ -1807,7 +1807,7 @@
                         @endfor
                     </select>
                     <span id="dashboardChartLoading" class="spinner-border spinner-border-sm text-primary d-none" role="status" aria-label="Loading"></span>
-                </div>
+                </div> --}}
                 <div id="yearWiseDashboardCharts">
                 <div class="row g-4 mb-4">
                     @can('read', \App\Models\Candidate::class)
