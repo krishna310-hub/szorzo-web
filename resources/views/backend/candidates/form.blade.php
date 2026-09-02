@@ -70,13 +70,13 @@
         @error('mode_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4 contract-date-field">
-        <label for="contract_from_date" class="form-label">Contract From Date <span class="text-danger">*</span></label>
+        <label for="contract_from_date" class="form-label">Contract From Date</label>
         <input type="date" class="form-control" id="contract_from_date" name="contract_from_date"
             value="{{ old('contract_from_date', isset($candidate) && $candidate->contract_from_date ? $candidate->contract_from_date->format('Y-m-d') : '') }}">
         @error('contract_from_date')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4 contract-date-field">
-        <label for="contract_to_date" class="form-label">Contract To Date <span class="text-danger">*</span></label>
+        <label for="contract_to_date" class="form-label">Contract To Date</label>
         <input type="date" class="form-control" id="contract_to_date" name="contract_to_date"
             value="{{ old('contract_to_date', isset($candidate) && $candidate->contract_to_date ? $candidate->contract_to_date->format('Y-m-d') : '') }}">
         @error('contract_to_date')<span class="text-danger small">{{ $message }}</span>@enderror
@@ -90,7 +90,7 @@
         @error('is_hourly')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4 contract-hourly-salary-field">
-        <label for="hourly_salary" class="form-label">Hourly Salary <span class="text-danger">*</span></label>
+        <label for="hourly_salary" class="form-label">Hourly Salary</label>
         <input type="number" step="0.01" min="0.01" class="form-control" id="hourly_salary"
             name="hourly_salary" value="{{ old('hourly_salary', $candidate->hourly_salary ?? '') }}"
             placeholder="Enter salary per hour">
@@ -376,14 +376,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const hourlySalaryField = document.querySelector('.contract-hourly-salary-field');
     const isHourly = document.getElementById('is_hourly');
     const hourlySalary = document.getElementById('hourly_salary');
-    const contractDateInputs = [
-        document.getElementById('contract_from_date'),
-        document.getElementById('contract_to_date')
-    ];
     function toggleContractDates() {
         const isContract = mode.value === '2';
         contractDateFields.forEach(field => field.classList.toggle('d-none', !isContract));
-        contractDateInputs.forEach(input => input.required = isContract);
         contractHourlyField.classList.toggle('d-none', !isContract);
         if (!isContract) isHourly.checked = false;
         toggleHourlySalary();
@@ -391,7 +386,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function toggleHourlySalary() {
         const showHourlySalary = mode.value === '2' && isHourly.checked;
         hourlySalaryField.classList.toggle('d-none', !showHourlySalary);
-        hourlySalary.required = showHourlySalary;
         if (!showHourlySalary) hourlySalary.value = '';
     }
     mode.addEventListener('change', toggleContractDates);

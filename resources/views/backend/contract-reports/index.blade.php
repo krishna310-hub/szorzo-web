@@ -10,7 +10,7 @@
                         <div class="text-muted">Monthly attendance and payable salary for contract candidates</div>
                     </div>
                     <div class="d-flex gap-2">
-                        @can('export', \App\Models\Report::class)
+                        @can('export', \App\Models\ContractReport::class)
                             <form method="POST" action="{{ route('admin.contract-reports.refresh') }}">@csrf
                                 <input type="hidden" name="month" value="{{ $month->format('Y-m') }}">
                                 <input type="hidden" name="contract_type" value="{{ $contractType }}">
@@ -124,12 +124,13 @@
                                             <td class="text-end fw-semibold text-primary">
                                                 &#8377;{{ number_format($revenueAmount, 2) }}</td>
                                             <td>
-                                                @can('export', \App\Models\Report::class)
+                                                @can('export', \App\Models\ContractReport::class)
                                                     <div class="d-flex gap-1">
                                                         <form id="contract-report-{{ $report->id }}" method="POST"
                                                             action="{{ route('admin.contract-reports.update', $report) }}">
                                                             @csrf @method('PUT')<button
-                                                                class="btn btn-sm btn-success">Save</button></form><a
+                                                            class="btn btn-sm btn-success">Save</button></form>
+                                                        <a
                                                             class="btn btn-sm btn-danger"
                                                             href="{{ route('admin.contract-reports.invoice', $report) }}"
                                                             title="Download individual invoice"><i
