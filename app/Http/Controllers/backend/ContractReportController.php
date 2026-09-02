@@ -4,7 +4,6 @@ namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
-use App\Models\ClientRequirement;
 use App\Models\ContractReport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
@@ -143,7 +142,7 @@ class ContractReportController extends Controller
     {
         $this->authorize('export', ContractReport::class);
         $this->ensureVisible($request, $contractReport);
-        $contractReport->load(['candidate.client.billing', 'candidate.jobRole', 'candidate.recruiter']);
+        $contractReport->load(['candidate.clientRequirement.billing', 'candidate.client', 'candidate.jobRole', 'candidate.recruiter']);
         $this->syncReportSalary($contractReport, $contractReport->salary_month->daysInMonth);
         $this->addRevenueMetrics(collect([$contractReport]));
 
@@ -256,21 +255,9 @@ class ContractReportController extends Controller
 
     private function addRevenueMetrics($reports): void
     {
-        $clientIds = $reports->pluck('candidate.client_id')->filter()->unique();
-        $jobRoleIds = $reports->pluck('candidate.job_role_id')->filter()->unique();
-        $requirements = ClientRequirement::query()
-            ->with('billing:id,value')
-            ->whereIn('client_id', $clientIds)
-            ->whereIn('job_role_id', $jobRoleIds)
-            ->orderBy('id')
-            ->get()
-            ->keyBy(fn (ClientRequirement $requirement) => $requirement->client_id.':'.$requirement->job_role_id);
-
-        $reports->each(function (ContractReport $report) use ($requirements) {
+        $reports->each(function (ContractReport $report) {
             $candidate = $report->candidate;
-            $requirement = $candidate
-                ? $requirements->get($candidate->client_id.':'.$candidate->job_role_id)
-                : null;
+            $requirement = $candidate?->clientRequirement;
             $billingAmountPerHour = $report->is_hourly ? (float) ($requirement?->ctc ?? 0) : null;
             // Billing percentage belongs to the matched client requirement and
             // applies to both monthly and hourly contract candidates.
@@ -280,7 +267,7 @@ class ContractReportController extends Controller
                 : null;
             $totalRevenue = $report->is_hourly
                 ? round($revenuePerHour * (float) ($report->worked_hours ?? 0), 2)
-                : (float) $report->payable_salary;
+                : round((float) $report->monthly_take_home * $revenuePercentage / 100, 2);
 
             $report->setAttribute('billing_amount_per_hour', $billingAmountPerHour);
             $report->setAttribute('revenue_percentage', $revenuePercentage);
@@ -292,7 +279,7 @@ class ContractReportController extends Controller
     private function query(Request $request, CarbonImmutable $month, string $contractType)
     {
         return ContractReport::query()
-            ->with(['candidate.client.billing', 'candidate.jobRole', 'candidate.recruiter'])
+            ->with(['candidate.clientRequirement.billing', 'candidate.client', 'candidate.jobRole', 'candidate.recruiter'])
             ->whereDate('salary_month', $month->toDateString())
             ->when($contractType === 'monthly', fn ($query) => $query->where('is_hourly', false))
             ->when($contractType === 'hourly', fn ($query) => $query->where('is_hourly', true))

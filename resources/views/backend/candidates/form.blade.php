@@ -60,6 +60,21 @@
         @enderror
     </div>
     <div class="col-md-4">
+        <label for="client_requirement_id" class="form-label">Client Requirement <span class="text-danger">*</span></label>
+        <select class="form-select" id="client_requirement_id" name="client_requirement_id" required>
+            <option value="">Select client requirement</option>
+            @foreach ($clientRequirements as $requirement)
+                <option value="{{ $requirement->id }}"
+                    data-client="{{ $requirement->client_id }}" data-role="{{ $requirement->job_role_id }}"
+                    data-modes='@json($requirement->mode_ids ?: array_filter([$requirement->mode_id]))'
+                    @selected((string) old('client_requirement_id', $candidate->client_requirement_id ?? '') === (string) $requirement->id)>
+                    #{{ $requirement->id }} · {{ $requirement->jobRole?->job_role ?? 'No role' }} · Billing {{ $requirement->billing?->value ?? 0 }}%{{ $requirement->position_level ? ' · '.$requirement->position_level : '' }}
+                </option>
+            @endforeach
+        </select>
+        @error('client_requirement_id')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4">
         <label for="mode_id" class="form-label">Mode <span class="text-danger">*</span></label>
         <select class="form-select" id="mode_id" name="mode_id" required>
             <option value="">Select mode</option>
@@ -351,10 +366,33 @@
 document.addEventListener('DOMContentLoaded', function () {
     const client = document.getElementById('client_id');
     const role = document.getElementById('job_role_id');
+    const requirement = document.getElementById('client_requirement_id');
+    const mode = document.getElementById('mode_id');
     const roleMap = @json($clientJobRoleMap);
     const original = Array.from(role.options).map(option => ({
         value: option.value, text: option.text, selected: option.selected
     }));
+    const originalRequirements = Array.from(requirement.options).map(option => ({
+        value: option.value,
+        text: option.text,
+        client: option.dataset.client || '',
+        role: option.dataset.role || '',
+        modes: JSON.parse(option.dataset.modes || '[]').map(String),
+        selected: option.selected
+    }));
+    function filterRequirements() {
+        const selected = requirement.value;
+        requirement.innerHTML = '';
+        originalRequirements.forEach(item => {
+            if (!item.value || (item.client === String(client.value) && item.role === String(role.value) && item.modes.includes(String(mode.value)))) {
+                const option = new Option(item.text, item.value, false, String(item.value) === String(selected));
+                option.dataset.client = item.client;
+                option.dataset.role = item.role;
+                requirement.add(option);
+            }
+        });
+        requirement.disabled = !client.value || !role.value || !mode.value;
+    }
     function filterRoles() {
         const selected = role.value;
         const allowed = (roleMap[client.value] || []).map(String);
@@ -366,11 +404,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         if (selected && !allowed.includes(String(selected))) role.value = '';
         role.disabled = !client.value;
+        filterRequirements();
     }
     client.addEventListener('change', filterRoles);
+    role.addEventListener('change', filterRequirements);
+    mode.addEventListener('change', filterRequirements);
     filterRoles();
 
-    const mode = document.getElementById('mode_id');
     const contractDateFields = document.querySelectorAll('.contract-date-field');
     const contractHourlyField = document.querySelector('.contract-hourly-field');
     const hourlySalaryField = document.querySelector('.contract-hourly-salary-field');

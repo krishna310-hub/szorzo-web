@@ -14,6 +14,7 @@ class Candidate extends Model
         'created_at',
         'recruiter_id',
         'client_id',
+        'client_requirement_id',
         'job_role_id',
         'mode_id',
         'contract_from_date',
@@ -59,6 +60,11 @@ class Candidate extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function clientRequirement()
+    {
+        return $this->belongsTo(ClientRequirement::class);
     }
 
     public function jobRole()

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\ClientJobRole;
+use App\Models\ClientRequirement;
 use App\Models\InterviewLevel;
 use App\Models\InterviewSchedule;
 use App\Models\JobRole;
@@ -499,6 +500,10 @@ class CandidateController extends Controller
             'isRecruiterCandidateList' => $isRecruiter,
             'linkedRecruiter' => $linkedRecruiter,
             'clients' => Client::where('status', true)->orderBy('client')->get(),
+            'clientRequirements' => ClientRequirement::with(['billing:id,value', 'jobRole:id,job_role'])
+                ->where('status', true)
+                ->orderBy('id')
+                ->get(['id', 'client_id', 'job_role_id', 'billing_id', 'mode_id', 'mode_ids', 'position_level']),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
             'modes' => Mode::where('status', true)->orderBy('mode')->get(),
             'clientJobRoleMap' => ClientJobRole::where('status', true)
@@ -552,6 +557,7 @@ class CandidateController extends Controller
         $data = $request->validate([
             'recruiter_id' => 'required|exists:recruiters,id',
             'client_id' => 'required|exists:clients,id',
+            'client_requirement_id' => 'required|exists:client_requirements,id',
             'job_role_id' => 'required|exists:job_roles,id',
             'mode_id' => 'required|exists:modes,id',
             'contract_from_date' => 'nullable|date',
@@ -607,6 +613,24 @@ class CandidateController extends Controller
         if (! $this->visibleRecruiters()->whereKey($data['recruiter_id'])->exists()) {
             throw ValidationException::withMessages([
                 'recruiter_id' => 'You can only assign candidates to a recruiter available to your login.',
+            ]);
+        }
+
+        $requirementMatchesCandidate = ClientRequirement::whereKey($data['client_requirement_id'])
+            ->where('client_id', $data['client_id'])
+            ->where('job_role_id', $data['job_role_id'])
+            ->where('status', true)
+            ->where(function ($query) use ($data) {
+                $query->whereJsonContains('mode_ids', (int) $data['mode_id'])
+                    ->orWhere(function ($legacyQuery) use ($data) {
+                        $legacyQuery->whereNull('mode_ids')
+                            ->where('mode_id', $data['mode_id']);
+                    });
+            })
+            ->exists();
+        if (! $requirementMatchesCandidate) {
+            throw ValidationException::withMessages([
+                'client_requirement_id' => 'Select an active requirement matching the chosen client and job role.',
             ]);
         }
 
