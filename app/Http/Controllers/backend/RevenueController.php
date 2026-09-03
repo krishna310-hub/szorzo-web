@@ -5,12 +5,13 @@ namespace App\Http\Controllers\backend;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Revenue;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Yajra\DataTables\Facades\DataTables;
 
 class RevenueController extends Controller
 {
@@ -48,29 +49,46 @@ class RevenueController extends Controller
     public function create()
     {
         $this->authorize('create', Revenue::class);
-        $candidates = Candidate::with(['client.billing'])
+        $candidates = Candidate::with(['clientRequirement.billing', 'client'])
             ->where('level_of_interview_id', 20)
             ->whereNotNull('onboarding_ctc')
+            ->whereHas('clientRequirement', fn ($query) => $this->requirementMode($query, 1)->whereHas('billing'))
+            ->whereDoesntHave('revenue')
+            ->orderBy('candidate_name')
+            ->get();
+        $contractCandidates = Candidate::with(['clientRequirement.billing', 'client'])
+            ->where('status', true)
+            ->whereNotNull('client_requirement_id')
+            ->whereHas('clientRequirement', fn ($requirement) => $this->requirementMode($requirement, 2)
+                ->whereNotNull('ctc')
+                ->whereHas('billing'))
             ->whereDoesntHave('revenue')
             ->orderBy('candidate_name')
             ->get();
 
         $invoiceNumber = $this->nextInvoiceNumber();
-        return view('backend.revenues.create', compact('candidates', 'invoiceNumber'));
+
+        return view('backend.revenues.create', compact('candidates', 'contractCandidates', 'invoiceNumber'));
     }
 
     public function store(Request $request)
     {
         $this->authorize('create', Revenue::class);
         $data = $this->validated($request);
-        $candidate = $this->eligibleCandidate((int) $data['candidate_id']);
-        $data = $this->calculatedData($data, $candidate);
-        DB::transaction(function () use ($data) {
-            $data['invoice_number'] = $this->nextInvoiceNumber();
-            Revenue::create($data);
+        $candidateIds = $data['invoice_type'] === 'contract'
+            ? array_values(array_unique(array_map('intval', $data['candidate_ids'])))
+            : [(int) $data['candidate_id']];
+        $candidates = $this->eligibleCandidates($candidateIds, $data['invoice_type']);
+
+        DB::transaction(function () use ($data, $candidates) {
+            foreach ($candidates as $index => $candidate) {
+                $invoiceData = $this->calculatedData($data, $candidate);
+                $invoiceData['invoice_number'] = $this->invoiceNumberForSelection($data['invoice_number'], $index);
+                Revenue::create($invoiceData);
+            }
         });
 
-        return redirect()->route('admin.revenues.index')->with('success', 'Revenue invoice created successfully.');
+        return redirect()->route('admin.revenues.index')->with('success', $candidates->count().' revenue invoice(s) created successfully.');
     }
 
     public function show(Revenue $revenue)
@@ -85,7 +103,8 @@ class RevenueController extends Controller
     public function edit(Revenue $revenue)
     {
         $this->authorize('edit', Revenue::class);
-        $revenue->load(['candidate.client.billing']);
+        $revenue->load(['candidate.clientRequirement.billing', 'candidate.client']);
+
         return view('backend.revenues.edit', compact('revenue'));
     }
 
@@ -93,8 +112,8 @@ class RevenueController extends Controller
     {
         $this->authorize('edit', Revenue::class);
         $data = $this->validated($request, $revenue);
-        $candidate = $this->eligibleCandidate((int) $revenue->candidate_id);
-        unset($data['candidate_id']);
+        $candidate = Candidate::with(['clientRequirement.billing', 'client'])->findOrFail($revenue->candidate_id);
+        unset($data['candidate_ids'], $data['invoice_type']);
         $revenue->update($this->calculatedData($data, $candidate));
 
         return redirect()->route('admin.revenues.index')->with('success', 'Revenue invoice updated successfully.');
@@ -114,15 +133,18 @@ class RevenueController extends Controller
                 'dpi' => 96,
             ]);
         $name = preg_replace('/[^A-Za-z0-9_-]+/', '-', $revenue->invoice_number).'.pdf';
+
         return $pdf->download($name);
     }
 
     private function validated(Request $request, ?Revenue $revenue = null): array
     {
         return $request->validate([
-            'candidate_id' => [$revenue ? 'nullable' : 'required', 'integer', 'exists:candidates,id',
-                Rule::unique('revenues', 'candidate_id')->ignore($revenue?->id)],
-            'invoice_number' => [$revenue ? 'required' : 'nullable', 'string', 'max:100',
+            'invoice_type' => [$revenue ? 'nullable' : 'required', Rule::in(['fte', 'contract'])],
+            'candidate_id' => ['nullable', 'required_if:invoice_type,fte', 'integer', 'exists:candidates,id'],
+            'candidate_ids' => ['nullable', 'required_if:invoice_type,contract', 'array', 'min:1'],
+            'candidate_ids.*' => ['integer', 'distinct', 'exists:candidates,id', Rule::unique('revenues', 'candidate_id')],
+            'invoice_number' => ['required', 'string', 'max:100',
                 Rule::unique('revenues', 'invoice_number')->ignore($revenue?->id)],
             'invoice_date' => 'required|date',
             'universe_number' => 'nullable|string|max:100',
@@ -137,29 +159,82 @@ class RevenueController extends Controller
         ]);
     }
 
-    private function eligibleCandidate(int $id): Candidate
+    private function eligibleCandidates(array $ids, string $type)
     {
-        return Candidate::with(['client.billing'])
-            ->whereKey($id)
-            ->where('level_of_interview_id', 20)
-            ->whereNotNull('onboarding_ctc')
-            ->firstOrFail();
+        $query = Candidate::with(['clientRequirement.billing', 'client'])
+            ->whereIn('id', $ids)
+            ->whereDoesntHave('revenue');
+
+        $type === 'fte'
+            ? $query->where('level_of_interview_id', 20)->whereNotNull('onboarding_ctc')
+            : $query->where('status', true)->whereNotNull('client_requirement_id');
+        $query->whereHas('clientRequirement', fn ($requirement) => $this->requirementMode($requirement, $type === 'fte' ? 1 : 2)
+            ->whereHas('billing')
+            ->when($type === 'contract', fn ($query) => $query->whereNotNull('ctc')));
+
+        $candidates = $query->get();
+        if ($candidates->count() !== count($ids)) {
+            throw ValidationException::withMessages(['candidate_ids' => 'One or more selected candidates are not eligible or are already invoiced.']);
+        }
+        if ($candidates->pluck('client_id')->unique()->count() !== 1) {
+            throw ValidationException::withMessages(['candidate_ids' => 'All selected candidates must belong to the same client.']);
+        }
+
+        return $candidates->sortBy(fn ($candidate) => array_search($candidate->id, $ids, true))->values();
     }
 
     private function calculatedData(array $data, Candidate $candidate): array
     {
-        $data['invoice_number'] ??= $this->nextInvoiceNumber();
-        $onboardingCtc = (float) $candidate->onboarding_ctc;
-        $service = round($onboardingCtc * (float) $data['billing_percentage'] / 100, 2);
+        $isContract = $this->candidateHasRequirementMode($candidate, 2);
+        $base = $isContract ? (float) $candidate->clientRequirement->ctc : (float) $candidate->onboarding_ctc;
+        $billing = (float) $candidate->clientRequirement?->billing?->value;
+        $service = round($base * $billing / 100, 2);
         $gst = round($service * (float) $data['gst_percentage'] / 100, 2);
         $data['candidate_id'] = $candidate->id;
         $data['client_id'] = $candidate->client_id;
-        $data['onboarding_ctc'] = $onboardingCtc;
-        $data['offered_ctc'] = $onboardingCtc;
+        $data['client_name'] = $candidate->client?->client ?? $data['client_name'];
+        $data['onboarding_ctc'] = $base;
+        $data['offered_ctc'] = $base;
+        $data['billing_percentage'] = $billing;
         $data['service_amount'] = $service;
         $data['gst_amount'] = $gst;
         $data['total_amount'] = round($service + $gst, 2);
+        unset($data['candidate_ids'], $data['invoice_type']);
+
         return $data;
+    }
+
+    private function requirementMode($query, int $modeId)
+    {
+        return $query->where(function ($query) use ($modeId) {
+            $query->whereJsonContains('mode_ids', $modeId)
+                ->orWhere(fn ($query) => $query
+                    ->where(fn ($query) => $query->whereNull('mode_ids')->orWhereJsonLength('mode_ids', 0))
+                    ->where('mode_id', $modeId));
+        });
+    }
+
+    private function candidateHasRequirementMode(Candidate $candidate, int $modeId): bool
+    {
+        $modes = $candidate->clientRequirement?->mode_ids
+            ?: array_filter([$candidate->clientRequirement?->mode_id]);
+
+        return in_array($modeId, array_map('intval', $modes), true);
+    }
+
+    private function invoiceNumberForSelection(string $base, int $index): string
+    {
+        if ($index === 0) {
+            return $base;
+        }
+
+        $suffix = $index + 1;
+        $candidate = $base.'-'.$suffix;
+        while (Revenue::where('invoice_number', $candidate)->exists()) {
+            $candidate = $base.'-'.++$suffix;
+        }
+
+        return $candidate;
     }
 
     private function nextInvoiceNumber(): string

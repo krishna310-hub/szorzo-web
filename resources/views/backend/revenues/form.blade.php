@@ -1,7 +1,13 @@
 @php($editing = isset($revenue))
 <div class="row">
     @if(!$editing)
-    <div class="col-md-6 mb-3">
+    <div class="col-12 mb-3">
+        <label class="form-label d-block">Revenue Type <span class="text-danger">*</span></label>
+        <div class="form-check form-check-inline"><input class="form-check-input revenue-type" type="radio" name="invoice_type" id="type_fte" value="fte" @checked(old('invoice_type', 'fte') === 'fte')><label class="form-check-label" for="type_fte">FTE</label></div>
+        <div class="form-check form-check-inline"><input class="form-check-input revenue-type" type="radio" name="invoice_type" id="type_contract" value="contract" @checked(old('invoice_type') === 'contract')><label class="form-check-label" for="type_contract">Contract</label></div>
+        @error('invoice_type')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+    <div class="col-md-6 mb-3" id="fte_candidate_field">
         <label class="form-label">Offer Accepted Candidate <span class="text-danger">*</span></label>
         <select name="candidate_id" id="candidate_id" class="form-select" required>
             <option value="">Select candidate</option>
@@ -9,25 +15,43 @@
                 <option value="{{ $candidate->id }}"
                     data-client="{{ $candidate->client?->client }}"
                     data-ctc="{{ $candidate->onboarding_ctc }}"
-                    data-billing="{{ $candidate->client?->billing?->value }}"
+                    data-billing="{{ $candidate->clientRequirement?->billing?->value }}"
                     {{ old('candidate_id') == $candidate->id ? 'selected' : '' }}>
                     {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }}
                 </option>
             @endforeach
         </select>
         <small class="text-muted">Only onboarded candidates with an Onboarding CTC are listed.</small>
+        @error('candidate_id')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+    <div class="col-md-6 mb-3 d-none" id="contract_candidates_field">
+        <label class="form-label">Contract Candidates <span class="text-danger">*</span></label>
+        <select name="candidate_ids[]" id="candidate_ids" class="form-select" multiple size="6">
+            @foreach($contractCandidates as $candidate)
+                <option value="{{ $candidate->id }}" data-client-id="{{ $candidate->client_id }}"
+                    data-client="{{ $candidate->client?->client }}"
+                    data-base="{{ $candidate->clientRequirement?->ctc ?? 0 }}"
+                    data-billing="{{ $candidate->clientRequirement?->billing?->value ?? 0 }}"
+                    @selected(in_array($candidate->id, old('candidate_ids', [])))>
+                    {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }} — {{ $candidate->clientRequirement?->billing?->value ?? 0 }}%
+                </option>
+            @endforeach
+        </select>
+        <small class="text-muted">Select one or multiple candidates from the same client. One existing-format invoice is created per candidate.</small>
+        @error('candidate_ids')<div class="text-danger small">{{ $message }}</div>@enderror
+        @error('candidate_ids.*')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     @else
         <input type="hidden" name="candidate_id" value="{{ $revenue->candidate_id }}">
         <div class="col-md-6 mb-3"><label class="form-label">Candidate</label><input class="form-control" value="{{ $revenue->candidate->candidate_name }}" disabled></div>
     @endif
     <div class="col-md-6 mb-3"><label class="form-label">Client Name <span class="text-danger">*</span></label><input name="client_name" id="client_name" class="form-control" required value="{{ old('client_name', $revenue->client_name ?? '') }}"></div>
-    <div class="col-md-6 mb-3"><label class="form-label">Invoice Number</label><input class="form-control" value="{{ old('invoice_number', $revenue->invoice_number ?? $invoiceNumber ?? '') }}" readonly><input type="hidden" name="invoice_number" value="{{ old('invoice_number', $revenue->invoice_number ?? $invoiceNumber ?? '') }}"><small class="text-muted">Generated automatically by financial year.</small></div>
+    <div class="col-md-6 mb-3"><label class="form-label">Invoice Number <span class="text-danger">*</span></label><input name="invoice_number" class="form-control" required value="{{ old('invoice_number', $revenue->invoice_number ?? $invoiceNumber ?? '') }}"><small class="text-muted">Generated initially and editable before saving.</small>@error('invoice_number')<div class="text-danger small">{{ $message }}</div>@enderror</div>
     <div class="col-md-3 mb-3"><label class="form-label">Invoice Date <span class="text-danger">*</span></label><input type="date" name="invoice_date" class="form-control" required value="{{ old('invoice_date', isset($revenue) ? $revenue->invoice_date->format('Y-m-d') : now()->format('Y-m-d')) }}"></div>
     <div class="col-md-3 mb-3"><label class="form-label">SZ Universe Number</label><input name="universe_number" class="form-control" value="{{ old('universe_number', $revenue->universe_number ?? '786') }}"></div>
     <div class="col-md-8 mb-3"><label class="form-label">Client Address</label><textarea name="client_address" class="form-control" rows="3">{{ old('client_address', $revenue->client_address ?? '') }}</textarea></div>
     <div class="col-md-4 mb-3"><label class="form-label">Client GST Number</label><input name="client_gst_number" class="form-control" value="{{ old('client_gst_number', $revenue->client_gst_number ?? '') }}"></div>
-    <div class="col-md-4 mb-3"><label class="form-label">Onboarding CTC (₹)</label><input type="number" step="0.01" min="0" name="onboarding_ctc" id="onboarding_ctc" class="form-control" readonly value="{{ old('onboarding_ctc', $revenue->onboarding_ctc ?? '') }}"><small class="text-muted">Taken from the selected candidate.</small></div>
+    <div class="col-md-4 mb-3"><label class="form-label" id="base_amount_label">Onboarding CTC (₹)</label><input type="number" step="0.01" min="0" name="onboarding_ctc" id="onboarding_ctc" class="form-control" readonly value="{{ old('onboarding_ctc', $revenue->onboarding_ctc ?? '') }}"><small class="text-muted" id="base_amount_help">Taken from the selected candidate.</small></div>
     <div class="col-md-4 mb-3"><label class="form-label">Billing Percentage <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" max="100" name="billing_percentage" id="billing_percentage" class="form-control calc" required value="{{ old('billing_percentage', $revenue->billing_percentage ?? '') }}"></div>
     <div class="col-md-4 mb-3"><label class="form-label">GST Percentage <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" max="100" name="gst_percentage" id="gst_percentage" class="form-control calc" required value="{{ old('gst_percentage', $revenue->gst_percentage ?? 18) }}"></div>
     <div class="col-md-4 mb-3"><label class="form-label">Invoice Amount (₹) <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" name="service_amount" id="service_amount" class="form-control" required value="{{ old('service_amount', $revenue->service_amount ?? '') }}"><small class="text-muted">Editable; initially calculated from CTC and billing %.</small></div>
@@ -46,6 +70,36 @@ function calculateRevenue() {
     $('#total_preview').val('₹' + (revenue + gst).toFixed(2));
 }
 $(function () {
+    function selectedType() { return $('input[name="invoice_type"]:checked').val() || 'fte'; }
+    function toggleRevenueType() {
+        const contract = selectedType() === 'contract';
+        $('#fte_candidate_field').toggleClass('d-none', contract);
+        $('#contract_candidates_field').toggleClass('d-none', !contract);
+        $('#candidate_id').prop('required', !contract).prop('disabled', contract);
+        $('#candidate_ids').prop('required', contract).prop('disabled', !contract);
+        $('#billing_percentage, #service_amount').prop('readonly', contract);
+        $('#base_amount_label').text(contract ? 'Billing Base Total (₹)' : 'Onboarding CTC (₹)');
+        $('#base_amount_help').text(contract ? 'Total from the mapped client requirements.' : 'Taken from the selected candidate.');
+        if (contract) updateContractSelection(); else $('#candidate_id').trigger('change');
+    }
+    function updateContractSelection() {
+        const options = Array.from(document.getElementById('candidate_ids').selectedOptions);
+        const clientIds = [...new Set(options.map(option => option.dataset.clientId))];
+        if (clientIds.length > 1) {
+            const last = options[options.length - 1];
+            Array.from(document.getElementById('candidate_ids').options).forEach(option => {
+                option.selected = option === last;
+            });
+            return updateContractSelection();
+        }
+        const base = options.reduce((sum, option) => sum + Number(option.dataset.base || 0), 0);
+        const service = options.reduce((sum, option) => sum + Number(option.dataset.base || 0) * Number(option.dataset.billing || 0) / 100, 0);
+        $('#client_name').val(options[0]?.dataset.client || '');
+        $('#onboarding_ctc').val(base ? base.toFixed(2) : '');
+        $('#billing_percentage').val(base ? (service * 100 / base).toFixed(2) : '');
+        $('#service_amount').val(service.toFixed(2));
+        calculateRevenue();
+    }
     $('#candidate_id').on('change', function () {
         const option = this.options[this.selectedIndex];
         $('#client_name').val(option.dataset.client || '');
@@ -54,6 +108,8 @@ $(function () {
         $('#service_amount').val((Number(option.dataset.ctc || 0) * Number(option.dataset.billing || 0) / 100).toFixed(2));
         calculateRevenue();
     });
+    $('.revenue-type').on('change', toggleRevenueType);
+    $('#candidate_ids').on('change', updateContractSelection);
     $('.calc, #service_amount').on('input', function () {
         if (this.id === 'billing_percentage') {
             $('#service_amount').val((Number($('#onboarding_ctc').val() || 0) * Number($('#billing_percentage').val() || 0) / 100).toFixed(2));
@@ -61,6 +117,7 @@ $(function () {
         calculateRevenue();
     });
     calculateRevenue();
+    @if(!$editing) toggleRevenueType(); @endif
 });
 </script>
 @endpush
