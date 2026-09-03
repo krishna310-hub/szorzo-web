@@ -1,10 +1,13 @@
-@php($editing = isset($revenue))
+@php
+    $editing = isset($revenue);
+    $selectedInvoiceType = old('invoice_type', request()->filled('contract_month') ? 'contract' : 'fte');
+@endphp
 <div class="row">
     @if(!$editing)
     <div class="col-12 mb-3">
         <label class="form-label d-block">Revenue Type <span class="text-danger">*</span></label>
-        <div class="form-check form-check-inline"><input class="form-check-input revenue-type" type="radio" name="invoice_type" id="type_fte" value="fte" @checked(old('invoice_type', 'fte') === 'fte')><label class="form-check-label" for="type_fte">FTE</label></div>
-        <div class="form-check form-check-inline"><input class="form-check-input revenue-type" type="radio" name="invoice_type" id="type_contract" value="contract" @checked(old('invoice_type') === 'contract')><label class="form-check-label" for="type_contract">Contract</label></div>
+        <div class="form-check form-check-inline"><input class="form-check-input revenue-type" type="radio" name="invoice_type" id="type_fte" value="fte" @checked($selectedInvoiceType === 'fte')><label class="form-check-label" for="type_fte">FTE</label></div>
+        <div class="form-check form-check-inline"><input class="form-check-input revenue-type" type="radio" name="invoice_type" id="type_contract" value="contract" @checked($selectedInvoiceType === 'contract')><label class="form-check-label" for="type_contract">Contract</label></div>
         @error('invoice_type')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3" id="fte_candidate_field">
@@ -25,16 +28,24 @@
         @error('candidate_id')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3 d-none" id="contract_candidates_field">
+        <label class="form-label">Contract Report Month <span class="text-danger">*</span></label>
+        <div class="input-group mb-3">
+            <input type="month" name="contract_month" id="contract_month" class="form-control"
+                value="{{ old('contract_month', $contractMonth ?? now()->format('Y-m')) }}">
+            <button type="button" class="btn btn-outline-primary" id="load_contract_month">Load Month</button>
+        </div>
+        @error('contract_month')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
         <label class="form-label">Contract Candidates <span class="text-danger">*</span></label>
         <select name="candidate_ids[]" id="candidate_ids" class="form-select" multiple
             data-placeholder="Search and select contract candidates">
             @foreach($contractCandidates as $candidate)
                 <option value="{{ $candidate->id }}" data-client-id="{{ $candidate->client_id }}"
                     data-client="{{ $candidate->client?->client }}"
-                    data-base="{{ $candidate->clientRequirement?->ctc ?? 0 }}"
+                    data-base="{{ $candidate->contract_invoice_base ?? 0 }}"
+                    data-service="{{ $candidate->contract_invoice_service ?? 0 }}"
                     data-billing="{{ $candidate->clientRequirement?->billing?->value ?? 0 }}"
                     @selected(old('invoice_type') === 'contract' && in_array($candidate->id, old('candidate_ids', [])))>
-                    {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }} — {{ $candidate->clientRequirement?->billing?->value ?? 0 }}%
+                    {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }} — {{ $candidate->clientRequirement?->billing?->value ?? 0 }}%{{ $candidate->contract_is_hourly ? ' — '.$candidate->contract_worked_hours.' hrs' : ' — Monthly' }}
                 </option>
             @endforeach
         </select>
@@ -95,6 +106,7 @@ $(function () {
         $('#contract_candidates_field').toggleClass('d-none', !contract);
         $('#candidate_id').prop('required', !contract).prop('disabled', contract);
         $('#candidate_ids').prop('required', contract).prop('disabled', !contract);
+        $('#contract_month').prop('required', contract).prop('disabled', !contract);
         if (contractChoices) contract ? contractChoices.enable() : contractChoices.disable();
         $('#billing_percentage, #service_amount').prop('readonly', true);
         $('#base_amount_label').text(contract ? 'Billing Base Total (₹)' : 'Onboarding CTC (₹)');
@@ -111,7 +123,9 @@ $(function () {
         const roundMoney = value => Math.round((value + Number.EPSILON) * 100) / 100;
         const gstRate = Number($('#gst_percentage').val() || 0);
         const base = options.reduce((sum, option) => sum + Number(option.dataset.base || 0), 0);
-        const lineServices = options.map(option => roundMoney(Number(option.dataset.base || 0) * Number(option.dataset.billing || 0) / 100));
+        const lineServices = options.map(option => option.dataset.service !== undefined
+            ? Number(option.dataset.service || 0)
+            : roundMoney(Number(option.dataset.base || 0) * Number(option.dataset.billing || 0) / 100));
         const service = roundMoney(lineServices.reduce((sum, amount) => sum + amount, 0));
         const gst = roundMoney(lineServices.reduce((sum, amount) => sum + roundMoney(amount * gstRate / 100), 0));
         $('#client_name').val(options[0]?.dataset.client || '');
@@ -122,6 +136,16 @@ $(function () {
         $('#total_preview').val('₹' + roundMoney(service + gst).toFixed(2));
     }
     $('.revenue-type').on('change', toggleRevenueType);
+    $('#load_contract_month').on('click', function () {
+        const month = $('#contract_month').val();
+        if (!month) {
+            toastr.error('Select a contract report month.');
+            return;
+        }
+        const url = new URL(@json(route('admin.revenues.create')), window.location.origin);
+        url.searchParams.set('contract_month', month);
+        window.location.href = url.toString();
+    });
     $('#candidate_id').on('change', function () { updateCandidateSelection(fteSelect); });
     $('#candidate_ids').on('change', function () { updateCandidateSelection(contractSelect); });
     function preventMixedClients(select, choices, label) {

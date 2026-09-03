@@ -4,8 +4,10 @@ namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
+use App\Models\ContractReport;
 use App\Models\Revenue;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +48,7 @@ class RevenueController extends Controller
         return view('backend.revenues.index');
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create', Revenue::class);
         $candidates = Candidate::with(['clientRequirement.billing', 'client'])
@@ -56,19 +58,17 @@ class RevenueController extends Controller
             ->whereDoesntHave('revenue')
             ->orderBy('candidate_name')
             ->get();
-        $contractCandidates = Candidate::with(['clientRequirement.billing', 'client'])
-            ->where('status', true)
-            ->whereNotNull('client_requirement_id')
-            ->whereHas('clientRequirement', fn ($requirement) => $this->requirementMode($requirement, 2)
-                ->whereNotNull('ctc')
-                ->whereHas('billing'))
-            ->whereDoesntHave('revenue')
-            ->orderBy('candidate_name')
-            ->get();
+        $contractMonth = preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', (string) $request->contract_month)
+            ? $request->contract_month
+            : now()->format('Y-m');
+        $contractCandidates = $this->contractReportsForMonth($contractMonth)
+            ->pluck('candidate')
+            ->sortBy('candidate_name')
+            ->values();
 
         $invoiceNumber = $this->nextInvoiceNumber();
 
-        return view('backend.revenues.create', compact('candidates', 'contractCandidates', 'invoiceNumber'));
+        return view('backend.revenues.create', compact('candidates', 'contractCandidates', 'contractMonth', 'invoiceNumber'));
     }
 
     public function store(Request $request)
@@ -78,7 +78,7 @@ class RevenueController extends Controller
         $candidateIds = $data['invoice_type'] === 'contract'
             ? array_values(array_unique(array_map('intval', $data['candidate_ids'])))
             : [(int) $data['candidate_id']];
-        $candidates = $this->eligibleCandidates($candidateIds, $data['invoice_type']);
+        $candidates = $this->eligibleCandidates($candidateIds, $data['invoice_type'], $data['contract_month'] ?? null);
 
         DB::transaction(function () use ($data, $candidates) {
             foreach ($candidates as $index => $candidate) {
@@ -114,7 +114,20 @@ class RevenueController extends Controller
         $data = $this->validated($request, $revenue);
         $candidate = Candidate::with(['clientRequirement.billing', 'client'])->findOrFail($revenue->candidate_id);
         unset($data['candidate_ids'], $data['invoice_type']);
-        $revenue->update($this->calculatedData($data, $candidate));
+        if ($this->candidateHasRequirementMode($candidate, 2)) {
+            $data['candidate_id'] = $candidate->id;
+            $data['client_id'] = $candidate->client_id;
+            $data['onboarding_ctc'] = $revenue->onboarding_ctc;
+            $data['offered_ctc'] = $revenue->offered_ctc;
+            $data['billing_percentage'] = $revenue->billing_percentage;
+            $data['service_amount'] = $revenue->service_amount;
+            $data['gst_amount'] = round((float) $revenue->service_amount * (float) $data['gst_percentage'] / 100, 2);
+            $data['total_amount'] = round((float) $revenue->service_amount + $data['gst_amount'], 2);
+            unset($data['contract_month']);
+            $revenue->update($data);
+        } else {
+            $revenue->update($this->calculatedData($data, $candidate));
+        }
 
         return redirect()->route('admin.revenues.index')->with('success', 'Revenue invoice updated successfully.');
     }
@@ -144,6 +157,7 @@ class RevenueController extends Controller
             'candidate_id' => ['nullable', 'required_if:invoice_type,fte', 'integer', 'exists:candidates,id'],
             'candidate_ids' => ['nullable', 'required_if:invoice_type,contract', 'array', 'min:1'],
             'candidate_ids.*' => ['integer', 'distinct', 'exists:candidates,id', Rule::unique('revenues', 'candidate_id')],
+            'contract_month' => ['nullable', 'required_if:invoice_type,contract', 'date_format:Y-m'],
             'invoice_number' => ['required', 'string', 'max:100',
                 Rule::unique('revenues', 'invoice_number')->ignore($revenue?->id)],
             'invoice_date' => 'required|date',
@@ -159,18 +173,29 @@ class RevenueController extends Controller
         ]);
     }
 
-    private function eligibleCandidates(array $ids, string $type)
+    private function eligibleCandidates(array $ids, string $type, ?string $contractMonth = null)
     {
+        if ($type === 'contract') {
+            $candidates = $this->contractReportsForMonth((string) $contractMonth)
+                ->whereIn('candidate_id', $ids)
+                ->pluck('candidate');
+            if ($candidates->count() !== count($ids)) {
+                throw ValidationException::withMessages(['candidate_ids' => 'One or more candidates are not available in the selected month Contract Report or are already invoiced.']);
+            }
+            if ($candidates->pluck('client_id')->unique()->count() !== 1) {
+                throw ValidationException::withMessages(['candidate_ids' => 'All selected candidates must belong to the same client.']);
+            }
+
+            return $candidates->sortBy(fn ($candidate) => array_search($candidate->id, $ids, true))->values();
+        }
+
         $query = Candidate::with(['clientRequirement.billing', 'client'])
             ->whereIn('id', $ids)
             ->whereDoesntHave('revenue');
 
-        $type === 'fte'
-            ? $query->where('level_of_interview_id', 20)->whereNotNull('onboarding_ctc')
-            : $query->where('status', true)->whereNotNull('client_requirement_id');
-        $query->whereHas('clientRequirement', fn ($requirement) => $this->requirementMode($requirement, $type === 'fte' ? 1 : 2)
-            ->whereHas('billing')
-            ->when($type === 'contract', fn ($query) => $query->whereNotNull('ctc')));
+        $query->where('level_of_interview_id', 20)
+            ->whereNotNull('onboarding_ctc')
+            ->whereHas('clientRequirement', fn ($requirement) => $this->requirementMode($requirement, 1)->whereHas('billing'));
 
         $candidates = $query->get();
         if ($candidates->count() !== count($ids)) {
@@ -190,9 +215,13 @@ class RevenueController extends Controller
         $isContract = array_key_exists('invoice_type', $data)
             ? $data['invoice_type'] === 'contract'
             : $this->candidateHasRequirementMode($candidate, 2);
-        $base = $isContract ? (float) $candidate->clientRequirement->ctc : (float) $candidate->onboarding_ctc;
+        $base = $isContract
+            ? (float) $candidate->getAttribute('contract_invoice_base')
+            : (float) $candidate->onboarding_ctc;
         $billing = (float) $candidate->clientRequirement?->billing?->value;
-        $service = round($base * $billing / 100, 2);
+        $service = $isContract
+            ? (float) $candidate->getAttribute('contract_invoice_service')
+            : round($base * $billing / 100, 2);
         $gst = round($service * (float) $data['gst_percentage'] / 100, 2);
         $data['candidate_id'] = $candidate->id;
         $data['client_id'] = $candidate->client_id;
@@ -203,9 +232,42 @@ class RevenueController extends Controller
         $data['service_amount'] = $service;
         $data['gst_amount'] = $gst;
         $data['total_amount'] = round($service + $gst, 2);
-        unset($data['candidate_ids'], $data['invoice_type']);
+        if ($isContract && isset($data['contract_month'])) {
+            $monthLabel = CarbonImmutable::createFromFormat('!Y-m', $data['contract_month'])->format('F Y');
+            $data['notes'] = trim(implode("\n", array_filter([$data['notes'] ?? null, 'Contract billing month: '.$monthLabel])));
+        }
+        unset($data['candidate_ids'], $data['invoice_type'], $data['contract_month']);
 
         return $data;
+    }
+
+    private function contractReportsForMonth(string $month)
+    {
+        $salaryMonth = CarbonImmutable::createFromFormat('!Y-m', $month)->startOfMonth()->toDateString();
+
+        return ContractReport::with(['candidate.clientRequirement.billing', 'candidate.client'])
+            ->whereDate('salary_month', $salaryMonth)
+            ->whereHas('candidate', fn ($candidate) => $candidate
+                ->where('status', true)
+                ->whereDoesntHave('revenue')
+                ->whereHas('clientRequirement', fn ($requirement) => $this->requirementMode($requirement, 2)
+                    ->whereHas('billing')))
+            ->get()
+            ->each(function (ContractReport $report) {
+                $requirement = $report->candidate->clientRequirement;
+                $base = $report->is_hourly
+                    ? (float) $requirement->ctc * (float) ($report->worked_hours ?? 0)
+                    : (float) $report->monthly_take_home;
+                $billing = (float) $requirement->billing?->value;
+                $service = $report->is_hourly
+                    ? round(round((float) $requirement->ctc * $billing / 100, 2) * (float) ($report->worked_hours ?? 0), 2)
+                    : round((float) $report->monthly_take_home * $billing / 100, 2);
+                $report->candidate->setAttribute('contract_invoice_base', round($base, 2));
+                $report->candidate->setAttribute('contract_invoice_service', $service);
+                $report->candidate->setAttribute('contract_report_id', $report->id);
+                $report->candidate->setAttribute('contract_is_hourly', (bool) $report->is_hourly);
+                $report->candidate->setAttribute('contract_worked_hours', (float) ($report->worked_hours ?? 0));
+            });
     }
 
     private function requirementMode($query, int $modeId)
