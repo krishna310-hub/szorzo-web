@@ -35,23 +35,22 @@
             <button type="button" class="btn btn-outline-primary" id="load_contract_month">Load Month</button>
         </div>
         @error('contract_month')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
-        <label class="form-label">Contract Candidates <span class="text-danger">*</span></label>
-        <select name="candidate_ids[]" id="candidate_ids" class="form-select" multiple
-            data-placeholder="Search and select contract candidates">
+        <label class="form-label">Contract Candidate <span class="text-danger">*</span></label>
+        <select name="contract_candidate_id" id="contract_candidate_id" class="form-select">
+            <option value="">Select contract candidate</option>
             @foreach($contractCandidates as $candidate)
                 <option value="{{ $candidate->id }}" data-client-id="{{ $candidate->client_id }}"
                     data-client="{{ $candidate->client?->client }}"
                     data-base="{{ $candidate->contract_invoice_base ?? 0 }}"
                     data-service="{{ $candidate->contract_invoice_service ?? 0 }}"
                     data-billing="{{ $candidate->clientRequirement?->billing?->value ?? 0 }}"
-                    @selected(old('invoice_type') === 'contract' && in_array($candidate->id, old('candidate_ids', [])))>
+                    @selected(old('contract_candidate_id') == $candidate->id)>
                     {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }} — {{ $candidate->clientRequirement?->billing?->value ?? 0 }}%{{ $candidate->contract_is_hourly ? ' — '.$candidate->contract_worked_hours.' hrs' : ' — Monthly' }}
                 </option>
             @endforeach
         </select>
-        <small class="text-muted">Select one or multiple candidates from the same client. One existing-format invoice is created per candidate.</small>
-        @error('candidate_ids')<div class="text-danger small">{{ $message }}</div>@enderror
-        @error('candidate_ids.*')<div class="text-danger small">{{ $message }}</div>@enderror
+        <small class="text-muted">Select one candidate from the loaded Contract Report month.</small>
+        @error('contract_candidate_id')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     @else
         <input type="hidden" name="candidate_id" value="{{ $revenue->candidate_id }}">
@@ -83,21 +82,7 @@ function calculateRevenue() {
 }
 $(function () {
     const fteSelect = document.getElementById('candidate_id');
-    const contractSelect = document.getElementById('candidate_ids');
-    function createCandidateChoices(select, placeholder) {
-        return select && typeof Choices !== 'undefined' ? new Choices(select, {
-            removeItemButton: true,
-            searchEnabled: true,
-            shouldSort: false,
-            duplicateItemsAllowed: false,
-            itemSelectText: '',
-            placeholder: true,
-            placeholderValue: placeholder,
-            noResultsText: 'No matching candidates found',
-            noChoicesText: 'No more candidates available'
-        }) : null;
-    }
-    const contractChoices = createCandidateChoices(contractSelect, 'Search and select contract candidates');
+    const contractSelect = document.getElementById('contract_candidate_id');
 
     function selectedType() { return $('input[name="invoice_type"]:checked').val() || 'fte'; }
     function toggleRevenueType() {
@@ -105,32 +90,25 @@ $(function () {
         $('#fte_candidate_field').toggleClass('d-none', contract);
         $('#contract_candidates_field').toggleClass('d-none', !contract);
         $('#candidate_id').prop('required', !contract).prop('disabled', contract);
-        $('#candidate_ids').prop('required', contract).prop('disabled', !contract);
+        $('#contract_candidate_id').prop('required', contract).prop('disabled', !contract);
         $('#contract_month').prop('required', contract).prop('disabled', !contract);
-        if (contractChoices) contract ? contractChoices.enable() : contractChoices.disable();
         $('#billing_percentage, #service_amount').prop('readonly', true);
         $('#base_amount_label').text(contract ? 'Billing Base Total (₹)' : 'Onboarding CTC (₹)');
         $('#base_amount_help').text(contract ? 'Total from the mapped client requirements.' : 'Taken from the selected FTE candidate.');
         updateCandidateSelection(contract ? contractSelect : fteSelect);
     }
     function updateCandidateSelection(select) {
-        const choices = select === contractSelect ? contractChoices : null;
-        const choiceValues = choices ? choices.getValue(true) : [];
-        const selectedValues = new Set((Array.isArray(choiceValues) ? choiceValues : [choiceValues]).map(String));
-        const options = choices
-            ? Array.from(select?.options || []).filter(option => selectedValues.has(String(option.value)))
-            : Array.from(select?.selectedOptions || []);
+        const option = select?.options[select.selectedIndex];
         const roundMoney = value => Math.round((value + Number.EPSILON) * 100) / 100;
         const gstRate = Number($('#gst_percentage').val() || 0);
-        const base = options.reduce((sum, option) => sum + Number(option.dataset.base || 0), 0);
-        const lineServices = options.map(option => option.dataset.service !== undefined
+        const base = Number(option?.dataset.base || 0);
+        const service = roundMoney(option?.dataset.service !== undefined
             ? Number(option.dataset.service || 0)
-            : roundMoney(Number(option.dataset.base || 0) * Number(option.dataset.billing || 0) / 100));
-        const service = roundMoney(lineServices.reduce((sum, amount) => sum + amount, 0));
-        const gst = roundMoney(lineServices.reduce((sum, amount) => sum + roundMoney(amount * gstRate / 100), 0));
-        $('#client_name').val(options[0]?.dataset.client || '');
+            : base * Number(option?.dataset.billing || 0) / 100);
+        const gst = roundMoney(service * gstRate / 100);
+        $('#client_name').val(option?.dataset.client || '');
         $('#onboarding_ctc').val(base ? base.toFixed(2) : '');
-        $('#billing_percentage').val(base ? (service * 100 / base).toFixed(2) : '');
+        $('#billing_percentage').val(option?.dataset.billing || '');
         $('#service_amount').val(service.toFixed(2));
         $('#gst_preview').val('₹' + gst.toFixed(2));
         $('#total_preview').val('₹' + roundMoney(service + gst).toFixed(2));
@@ -147,29 +125,7 @@ $(function () {
         window.location.href = url.toString();
     });
     $('#candidate_id').on('change', function () { updateCandidateSelection(fteSelect); });
-    $('#candidate_ids').on('change', function () { updateCandidateSelection(contractSelect); });
-    function preventMixedClients(select, choices, label) {
-        if (!select || !choices) return;
-        select.addEventListener('addItem', function (event) {
-            window.setTimeout(function () {
-                const values = choices.getValue(true);
-                const selectedValues = new Set((Array.isArray(values) ? values : [values]).map(String));
-                const selected = Array.from(select.options).filter(option => selectedValues.has(String(option.value)));
-                const clientIds = [...new Set(selected.map(option => option.dataset.clientId))];
-                if (clientIds.length > 1) {
-                    choices.removeActiveItemsByValue(String(event.detail.value));
-                    toastr.error('Select ' + label + ' candidates from the same client only.');
-                    window.setTimeout(function () { updateCandidateSelection(select); }, 0);
-                    return;
-                }
-                updateCandidateSelection(select);
-            }, 0);
-        });
-        select.addEventListener('removeItem', function () {
-            window.setTimeout(function () { updateCandidateSelection(select); }, 0);
-        });
-    }
-    preventMixedClients(contractSelect, contractChoices, 'contract');
+    $('#contract_candidate_id').on('change', function () { updateCandidateSelection(contractSelect); });
     $('.calc, #service_amount').on('input', function () {
         @if(!$editing)
         updateCandidateSelection(selectedType() === 'contract' ? contractSelect : fteSelect);

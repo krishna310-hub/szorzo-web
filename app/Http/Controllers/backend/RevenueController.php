@@ -75,20 +75,16 @@ class RevenueController extends Controller
     {
         $this->authorize('create', Revenue::class);
         $data = $this->validated($request);
-        $candidateIds = $data['invoice_type'] === 'contract'
-            ? array_values(array_unique(array_map('intval', $data['candidate_ids'])))
-            : [(int) $data['candidate_id']];
+        $candidateIds = [(int) ($data['invoice_type'] === 'contract'
+            ? $data['contract_candidate_id']
+            : $data['candidate_id'])];
         $candidates = $this->eligibleCandidates($candidateIds, $data['invoice_type'], $data['contract_month'] ?? null);
 
         DB::transaction(function () use ($data, $candidates) {
-            foreach ($candidates as $index => $candidate) {
-                $invoiceData = $this->calculatedData($data, $candidate);
-                $invoiceData['invoice_number'] = $this->invoiceNumberForSelection($data['invoice_number'], $index);
-                Revenue::create($invoiceData);
-            }
+            Revenue::create($this->calculatedData($data, $candidates->first()));
         });
 
-        return redirect()->route('admin.revenues.index')->with('success', $candidates->count().' revenue invoice(s) created successfully.');
+        return redirect()->route('admin.revenues.index')->with('success', 'Revenue invoice created successfully.');
     }
 
     public function show(Revenue $revenue)
@@ -113,7 +109,7 @@ class RevenueController extends Controller
         $this->authorize('edit', Revenue::class);
         $data = $this->validated($request, $revenue);
         $candidate = Candidate::with(['clientRequirement.billing', 'client'])->findOrFail($revenue->candidate_id);
-        unset($data['candidate_ids'], $data['invoice_type']);
+        unset($data['candidate_ids'], $data['contract_candidate_id'], $data['invoice_type']);
         if ($this->candidateHasRequirementMode($candidate, 2)) {
             $data['candidate_id'] = $candidate->id;
             $data['client_id'] = $candidate->client_id;
@@ -155,8 +151,7 @@ class RevenueController extends Controller
         return $request->validate([
             'invoice_type' => [$revenue ? 'nullable' : 'required', Rule::in(['fte', 'contract'])],
             'candidate_id' => ['nullable', 'required_if:invoice_type,fte', 'integer', 'exists:candidates,id'],
-            'candidate_ids' => ['nullable', 'required_if:invoice_type,contract', 'array', 'min:1'],
-            'candidate_ids.*' => ['integer', 'distinct', 'exists:candidates,id', Rule::unique('revenues', 'candidate_id')],
+            'contract_candidate_id' => ['nullable', 'required_if:invoice_type,contract', 'integer', 'exists:candidates,id', Rule::unique('revenues', 'candidate_id')],
             'contract_month' => ['nullable', 'required_if:invoice_type,contract', 'date_format:Y-m'],
             'invoice_number' => ['required', 'string', 'max:100',
                 Rule::unique('revenues', 'invoice_number')->ignore($revenue?->id)],
@@ -180,10 +175,7 @@ class RevenueController extends Controller
                 ->whereIn('candidate_id', $ids)
                 ->pluck('candidate');
             if ($candidates->count() !== count($ids)) {
-                throw ValidationException::withMessages(['candidate_ids' => 'One or more candidates are not available in the selected month Contract Report or are already invoiced.']);
-            }
-            if ($candidates->pluck('client_id')->unique()->count() !== 1) {
-                throw ValidationException::withMessages(['candidate_ids' => 'All selected candidates must belong to the same client.']);
+                throw ValidationException::withMessages(['contract_candidate_id' => 'The candidate is not available in the selected month Contract Report or is already invoiced.']);
             }
 
             return $candidates->sortBy(fn ($candidate) => array_search($candidate->id, $ids, true))->values();
@@ -199,10 +191,7 @@ class RevenueController extends Controller
 
         $candidates = $query->get();
         if ($candidates->count() !== count($ids)) {
-            throw ValidationException::withMessages(['candidate_ids' => 'One or more selected candidates are not eligible or are already invoiced.']);
-        }
-        if ($candidates->pluck('client_id')->unique()->count() !== 1) {
-            throw ValidationException::withMessages(['candidate_ids' => 'All selected candidates must belong to the same client.']);
+            throw ValidationException::withMessages(['candidate_id' => 'The selected FTE candidate is not eligible or is already invoiced.']);
         }
 
         return $candidates->sortBy(fn ($candidate) => array_search($candidate->id, $ids, true))->values();
@@ -236,7 +225,7 @@ class RevenueController extends Controller
             $monthLabel = CarbonImmutable::createFromFormat('!Y-m', $data['contract_month'])->format('F Y');
             $data['notes'] = trim(implode("\n", array_filter([$data['notes'] ?? null, 'Contract billing month: '.$monthLabel])));
         }
-        unset($data['candidate_ids'], $data['invoice_type'], $data['contract_month']);
+        unset($data['candidate_ids'], $data['contract_candidate_id'], $data['invoice_type'], $data['contract_month']);
 
         return $data;
     }
