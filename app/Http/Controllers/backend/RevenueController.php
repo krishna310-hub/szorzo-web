@@ -162,12 +162,12 @@ class RevenueController extends Controller
                 Rule::unique('revenues', 'invoice_number')->ignore($revenue?->id)],
             'invoice_date' => 'required|date',
             'universe_number' => 'nullable|string|max:100',
-            'client_name' => 'required|string|max:255',
+            'client_name' => [$revenue ? 'required' : 'nullable', 'string', 'max:255'],
             'client_address' => 'nullable|string|max:2000',
             'client_gst_number' => 'nullable|string|max:30',
             'onboarding_ctc' => 'nullable|numeric|min:0',
-            'billing_percentage' => 'required|numeric|min:0|max:100',
-            'service_amount' => 'required|numeric|min:0',
+            'billing_percentage' => [$revenue ? 'required' : 'nullable', 'numeric', 'min:0', 'max:100'],
+            'service_amount' => [$revenue ? 'required' : 'nullable', 'numeric', 'min:0'],
             'gst_percentage' => 'required|numeric|min:0|max:100',
             'notes' => 'nullable|string|max:2000',
         ]);
@@ -249,6 +249,8 @@ class RevenueController extends Controller
             ->whereDate('salary_month', $salaryMonth)
             ->whereHas('candidate', fn ($candidate) => $candidate
                 ->where('status', true)
+                ->whereNotNull('client_id')
+                ->whereHas('client')
                 ->whereDoesntHave('revenue')
                 ->whereHas('clientRequirement', fn ($requirement) => $this->requirementMode($requirement, 2)
                     ->whereHas('billing')))
