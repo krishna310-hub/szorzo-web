@@ -557,7 +557,7 @@ class CandidateController extends Controller
         $data = $request->validate([
             'recruiter_id' => 'required|exists:recruiters,id',
             'client_id' => 'required|exists:clients,id',
-            'client_requirement_id' => 'nullable',
+            'client_requirement_id' => 'required|exists:client_requirements,id',
             'job_role_id' => 'required|exists:job_roles,id',
             'mode_id' => 'required|exists:modes,id',
             'contract_from_date' => 'nullable|date',
@@ -616,22 +616,23 @@ class CandidateController extends Controller
             ]);
         }
 
-        // $requirementMatchesCandidate = ClientRequirement::whereKey($data['client_requirement_id'])
-        //     ->where('client_id', $data['client_id'])
-        //     ->where('job_role_id', $data['job_role_id'])
-        //     ->where(function ($query) use ($data) {
-        //         $query->whereJsonContains('mode_ids', (int) $data['mode_id'])
-        //             ->orWhere(function ($legacyQuery) use ($data) {
-        //                 $legacyQuery->whereNull('mode_ids')
-        //                     ->where('mode_id', $data['mode_id']);
-        //             });
-        //     })
-        //     ->exists();
-        // if (! $requirementMatchesCandidate) {
-        //     throw ValidationException::withMessages([
-        //         'client_requirement_id' => 'Select an active requirement matching the chosen client and job role.',
-        //     ]);
-        // }
+        $requirementMatchesCandidate = ClientRequirement::whereKey($data['client_requirement_id'])
+            ->where('client_id', $data['client_id'])
+            ->where('job_role_id', $data['job_role_id'])
+            ->where('status', true)
+            ->where(function ($query) use ($data) {
+                $query->whereJsonContains('mode_ids', (int) $data['mode_id'])
+                    ->orWhere(function ($legacyQuery) use ($data) {
+                        $legacyQuery->whereNull('mode_ids')
+                            ->where('mode_id', $data['mode_id']);
+                    });
+            })
+            ->exists();
+        if (! $requirementMatchesCandidate) {
+            throw ValidationException::withMessages([
+                'client_requirement_id' => 'Select an active requirement matching the chosen client and job role.',
+            ]);
+        }
 
         $isAssigned = ClientJobRole::where('client_id', $data['client_id'])
             ->where('job_role_id', $data['job_role_id'])
