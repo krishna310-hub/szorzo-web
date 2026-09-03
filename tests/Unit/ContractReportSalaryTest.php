@@ -76,6 +76,30 @@ class ContractReportSalaryTest extends TestCase
         $this->assertSame(33150.51, $invoice['total_amount']);
     }
 
+    public function test_revenue_form_recalculates_fresh_contract_payable_values(): void
+    {
+        $method = new ReflectionMethod(RevenueController::class, 'contractPayableSalary');
+        $monthly = new ContractReport;
+        $monthly->setRawAttributes([
+            'salary_month' => '2026-01-01',
+            'monthly_take_home' => 138958,
+            'is_hourly' => false,
+            'absent_days' => 0,
+            'payable_salary' => 0,
+        ], true);
+        $hourly = new ContractReport;
+        $hourly->setRawAttributes([
+            'salary_month' => '2026-09-01',
+            'is_hourly' => true,
+            'hourly_salary' => 400,
+            'worked_hours' => 160,
+            'payable_salary' => 0,
+        ], true);
+
+        $this->assertSame(138958.00, $method->invoke(new RevenueController, $monthly));
+        $this->assertSame(64000.00, $method->invoke(new RevenueController, $hourly));
+    }
+
     public function test_revenue_uses_each_candidates_explicitly_mapped_requirement(): void
     {
         $first = $this->reportWithRequirement(28.57, 400, true, 150);
@@ -106,8 +130,12 @@ class ContractReportSalaryTest extends TestCase
         $candidate->setRelation('clientRequirement', $requirement);
         $report = new ContractReport([
             'is_hourly' => $isHourly,
+            'hourly_salary' => $isHourly ? $requirementCtc : null,
             'worked_hours' => $workedHours,
             'monthly_take_home' => $monthlyTakeHome,
+            'payable_salary' => $isHourly
+                ? $requirementCtc * $workedHours
+                : $monthlyTakeHome,
         ]);
         $report->setRelation('candidate', $candidate);
 

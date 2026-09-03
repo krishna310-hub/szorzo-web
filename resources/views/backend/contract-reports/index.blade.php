@@ -95,7 +95,7 @@
                                             <td class="text-end">{{ $report->is_hourly ? '—' : '₹'.number_format($report->monthly_take_home, 2) }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->hourly_salary, 2) : '—' }}</td>
                                             <td class="text-end">{{ number_format($report->revenue_percentage, 2).'%' }}</td>
-                                            <td class="text-end">{{ '₹'.number_format((float) $report->hourly_salary * (float) $report->worked_hours, 2) }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->payable_salary, 2) : '—' }}</td>
                                             <td><input form="contract-report-{{ $report->id }}" type="number"
                                                     name="present_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->present_days }}"
@@ -115,9 +115,7 @@
                                                 @endif
                                             </td>
                                             @php
-                                                $revenueAmount = $report->is_hourly
-                                                    ? (float) $report->contract_revenue
-                                                    : (float) $report->payable_salary * (float) $report->revenue_percentage / 100;
+                                                $revenueAmount = (float) $report->contract_revenue;
                                             @endphp
                                             <td class="text-end fw-semibold text-success">
                                                 &#8377;{{ number_format((float) $report->payable_salary, 2) }}</td>

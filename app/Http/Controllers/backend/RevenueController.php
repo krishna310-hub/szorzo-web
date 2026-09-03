@@ -321,18 +321,32 @@ class RevenueController extends Controller
             ->get()
             ->each(function (ContractReport $report) {
                 $requirement = $report->candidate->clientRequirement;
-                // Match the Contract Report table exactly: its Total Revenue is
-                // payable salary (after attendance/hours) multiplied by billing %.
-                $base = (float) $report->payable_salary;
+                // Recalculate from the report inputs instead of trusting a stale
+                // stored payable_salary. This keeps create/store totals identical.
+                $base = $this->contractPayableSalary($report);
                 $billing = (float) $requirement->billing?->value;
                 $service = round($base * $billing / 100, 2);
                 $report->candidate->setAttribute('contract_invoice_base', round($base, 2));
                 $report->candidate->setAttribute('contract_invoice_service', $service);
                 $report->candidate->setAttribute('contract_report_id', $report->id);
                 $report->candidate->setAttribute('contract_is_hourly', (bool) $report->is_hourly);
+                $report->candidate->setAttribute('contract_hourly_salary', (float) ($report->hourly_salary ?? 0));
                 $report->candidate->setAttribute('contract_worked_hours', (float) ($report->worked_hours ?? 0));
                 $report->candidate->setAttribute('contract_billing_percentage', $billing);
             });
+    }
+
+    private function contractPayableSalary(ContractReport $report): float
+    {
+        if ($report->is_hourly) {
+            return round(max(0, (float) $report->hourly_salary * (float) ($report->worked_hours ?? 0)), 2);
+        }
+
+        $days = max(1, $report->salary_month->daysInMonth);
+        $salary = max(0, (float) $report->monthly_take_home);
+        $leaveDays = min($days, max(0, (int) $report->absent_days));
+
+        return round(max(0, $salary - (($salary / $days) * $leaveDays)), 2);
     }
 
     private function requirementMode($query, int|array $modeId)

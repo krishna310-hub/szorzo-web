@@ -258,16 +258,18 @@ class ContractReportController extends Controller
         $reports->each(function (ContractReport $report) {
             $candidate = $report->candidate;
             $requirement = $candidate?->clientRequirement;
-            $billingAmountPerHour = $report->is_hourly ? (float) ($requirement?->ctc ?? 0) : null;
-            // Billing percentage belongs to the matched client requirement and
-            // applies to both monthly and hourly contract candidates.
+            $billingAmountPerHour = $report->is_hourly ? (float) ($report->hourly_salary ?? 0) : null;
             $revenuePercentage = (float) ($requirement?->billing?->value ?? 0);
             $revenuePerHour = $report->is_hourly
-                ? round(($billingAmountPerHour * $revenuePercentage) / 100, 2)
+                ? round(((float) $report->hourly_salary * $revenuePercentage) / 100, 2)
                 : null;
-            $totalRevenue = $report->is_hourly
-                ? round($revenuePerHour * (float) ($report->worked_hours ?? 0), 2)
-                : round((float) ($report->payable_salary ?? $report->monthly_take_home) * $revenuePercentage / 100, 2);
+            // Both contract types use the same final rule: billing percentage
+            // applies to the candidate's actual payable salary. For hourly
+            // candidates payable salary is hourly rate multiplied by hours.
+            $totalRevenue = round(
+                (float) ($report->payable_salary ?? 0) * $revenuePercentage / 100,
+                2
+            );
 
             $report->setAttribute('billing_amount_per_hour', $billingAmountPerHour);
             $report->setAttribute('revenue_percentage', $revenuePercentage);

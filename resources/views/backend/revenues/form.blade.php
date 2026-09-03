@@ -82,8 +82,15 @@
                         <strong>{{ $candidate->candidate_name }}</strong>
                         <span>{{ $candidate->jobRole?->job_role ?? 'Candidate' }}</span>
                         <span>Salary: ₹{{ number_format((float) ($candidate->contract_invoice_base ?? 0), 2) }}</span>
+                        @if($candidate->contract_is_hourly ?? false)
+                            <span>Rate: ₹{{ number_format((float) ($candidate->contract_hourly_salary ?? 0), 2) }}/hr</span>
+                            <span>Hours: {{ number_format((float) ($candidate->contract_worked_hours ?? 0), 2) }}</span>
+                        @endif
                         <span>Billing: {{ number_format((float) ($candidate->contract_billing_percentage ?? 0), 2) }}%</span>
                         <span>Revenue: ₹{{ number_format((float) ($candidate->contract_invoice_service ?? 0), 2) }}</span>
+                        @if(($candidate->contract_is_hourly ?? false) && (float) ($candidate->contract_worked_hours ?? 0) <= 0)
+                            <span class="contract-hours-warning"><i class="ri-error-warning-line"></i> Enter worked hours in Contract Report to calculate this candidate.</span>
+                        @endif
                     </span>
                 </label>
             @endforeach
@@ -199,6 +206,7 @@
 .contract-candidate-option .form-check-input { flex: 0 0 auto; margin-top: 3px; }
 .contract-candidate-details { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 14px; width: 100%; color: #647086; }
 .contract-candidate-details strong { flex-basis: 100%; color: #20283a; }
+.contract-hours-warning { flex-basis: 100%; color: #d97706; font-weight: 600; }
 </style>
 @endpush
 
