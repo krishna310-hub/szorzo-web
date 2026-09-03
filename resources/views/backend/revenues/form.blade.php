@@ -8,21 +8,21 @@
         @error('invoice_type')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3" id="fte_candidate_field">
-        <label class="form-label">Offer Accepted Candidate <span class="text-danger">*</span></label>
-        <select name="candidate_id" id="candidate_id" class="form-select" required>
-            <option value="">Select candidate</option>
+        <label class="form-label">FTE Candidates <span class="text-danger">*</span></label>
+        <select name="candidate_ids[]" id="fte_candidate_ids" class="form-select" multiple data-placeholder="Search and select FTE candidates">
             @foreach($candidates as $candidate)
                 <option value="{{ $candidate->id }}"
-                    data-client="{{ $candidate->client?->client }}"
-                    data-ctc="{{ $candidate->onboarding_ctc }}"
+                    data-client-id="{{ $candidate->client_id }}" data-client="{{ $candidate->client?->client }}"
+                    data-base="{{ $candidate->onboarding_ctc }}"
                     data-billing="{{ $candidate->clientRequirement?->billing?->value }}"
-                    {{ old('candidate_id') == $candidate->id ? 'selected' : '' }}>
-                    {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }}
+                    @selected(old('invoice_type', 'fte') === 'fte' && in_array($candidate->id, old('candidate_ids', [])))>
+                    {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }} — {{ $candidate->clientRequirement?->billing?->value ?? 0 }}%
                 </option>
             @endforeach
         </select>
-        <small class="text-muted">Only onboarded candidates with an Onboarding CTC are listed.</small>
-        @error('candidate_id')<div class="text-danger small">{{ $message }}</div>@enderror
+        <small class="text-muted">Select one or multiple FTE candidates from the same client.</small>
+        @error('candidate_ids')<div class="text-danger small">{{ $message }}</div>@enderror
+        @error('candidate_ids.*')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3 d-none" id="contract_candidates_field">
         <label class="form-label">Contract Candidates <span class="text-danger">*</span></label>
@@ -33,7 +33,7 @@
                     data-client="{{ $candidate->client?->client }}"
                     data-base="{{ $candidate->clientRequirement?->ctc ?? 0 }}"
                     data-billing="{{ $candidate->clientRequirement?->billing?->value ?? 0 }}"
-                    @selected(in_array($candidate->id, old('candidate_ids', [])))>
+                    @selected(old('invoice_type') === 'contract' && in_array($candidate->id, old('candidate_ids', [])))>
                     {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }} — {{ $candidate->clientRequirement?->billing?->value ?? 0 }}%
                 </option>
             @endforeach
@@ -55,7 +55,7 @@
     <div class="col-md-4 mb-3"><label class="form-label" id="base_amount_label">Onboarding CTC (₹)</label><input type="number" step="0.01" min="0" name="onboarding_ctc" id="onboarding_ctc" class="form-control" readonly value="{{ old('onboarding_ctc', $revenue->onboarding_ctc ?? '') }}"><small class="text-muted" id="base_amount_help">Taken from the selected candidate.</small></div>
     <div class="col-md-4 mb-3"><label class="form-label">Billing Percentage <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" max="100" name="billing_percentage" id="billing_percentage" class="form-control calc" required value="{{ old('billing_percentage', $revenue->billing_percentage ?? '') }}"></div>
     <div class="col-md-4 mb-3"><label class="form-label">GST Percentage <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" max="100" name="gst_percentage" id="gst_percentage" class="form-control calc" required value="{{ old('gst_percentage', $revenue->gst_percentage ?? 18) }}"></div>
-    <div class="col-md-4 mb-3"><label class="form-label">Invoice Amount (₹) <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" name="service_amount" id="service_amount" class="form-control" required value="{{ old('service_amount', $revenue->service_amount ?? '') }}"><small class="text-muted">Editable; initially calculated from CTC and billing %.</small></div>
+    <div class="col-md-4 mb-3"><label class="form-label">Invoice Amount (₹) <span class="text-danger">*</span></label><input type="number" step="0.01" min="0" name="service_amount" id="service_amount" class="form-control" required value="{{ old('service_amount', $revenue->service_amount ?? '') }}"><small class="text-muted">Calculated from the selected candidates and mapped billing percentages.</small></div>
     <div class="col-md-4 mb-3"><label class="form-label">GST</label><input id="gst_preview" class="form-control" disabled></div>
     <div class="col-md-4 mb-3"><label class="form-label">Invoice Total</label><input id="total_preview" class="form-control fw-bold" disabled></div>
     <div class="col-12 mb-3"><label class="form-label">Notes</label><textarea name="notes" class="form-control" rows="2">{{ old('notes', $revenue->notes ?? '') }}</textarea></div>
@@ -71,66 +71,75 @@ function calculateRevenue() {
     $('#total_preview').val('₹' + (revenue + gst).toFixed(2));
 }
 $(function () {
+    const fteSelect = document.getElementById('fte_candidate_ids');
     const contractSelect = document.getElementById('candidate_ids');
-    const contractChoices = contractSelect && typeof Choices !== 'undefined'
-        ? new Choices(contractSelect, {
+    function createCandidateChoices(select, placeholder) {
+        return select && typeof Choices !== 'undefined' ? new Choices(select, {
             removeItemButton: true,
             searchEnabled: true,
             shouldSort: false,
             duplicateItemsAllowed: false,
             itemSelectText: '',
             placeholder: true,
-            placeholderValue: 'Search and select contract candidates',
+            placeholderValue: placeholder,
             noResultsText: 'No matching candidates found',
             noChoicesText: 'No more candidates available'
-        })
-        : null;
+        }) : null;
+    }
+    const fteChoices = createCandidateChoices(fteSelect, 'Search and select FTE candidates');
+    const contractChoices = createCandidateChoices(contractSelect, 'Search and select contract candidates');
 
     function selectedType() { return $('input[name="invoice_type"]:checked').val() || 'fte'; }
     function toggleRevenueType() {
         const contract = selectedType() === 'contract';
         $('#fte_candidate_field').toggleClass('d-none', contract);
         $('#contract_candidates_field').toggleClass('d-none', !contract);
-        $('#candidate_id').prop('required', !contract).prop('disabled', contract);
+        $('#fte_candidate_ids').prop('required', !contract).prop('disabled', contract);
         $('#candidate_ids').prop('required', contract).prop('disabled', !contract);
+        if (fteChoices) contract ? fteChoices.disable() : fteChoices.enable();
         if (contractChoices) contract ? contractChoices.enable() : contractChoices.disable();
-        $('#billing_percentage, #service_amount').prop('readonly', contract);
+        $('#billing_percentage, #service_amount').prop('readonly', true);
         $('#base_amount_label').text(contract ? 'Billing Base Total (₹)' : 'Onboarding CTC (₹)');
-        $('#base_amount_help').text(contract ? 'Total from the mapped client requirements.' : 'Taken from the selected candidate.');
-        if (contract) updateContractSelection(); else $('#candidate_id').trigger('change');
+        $('#base_amount_help').text(contract ? 'Total from the mapped client requirements.' : 'Total from the selected FTE candidates.');
+        updateCandidateSelection(contract ? contractSelect : fteSelect);
     }
-    function updateContractSelection() {
-        const options = Array.from(document.getElementById('candidate_ids').selectedOptions);
+    function updateCandidateSelection(select) {
+        const options = Array.from(select?.selectedOptions || []);
+        const roundMoney = value => Math.round((value + Number.EPSILON) * 100) / 100;
+        const gstRate = Number($('#gst_percentage').val() || 0);
         const base = options.reduce((sum, option) => sum + Number(option.dataset.base || 0), 0);
-        const service = options.reduce((sum, option) => sum + Number(option.dataset.base || 0) * Number(option.dataset.billing || 0) / 100, 0);
+        const lineServices = options.map(option => roundMoney(Number(option.dataset.base || 0) * Number(option.dataset.billing || 0) / 100));
+        const service = roundMoney(lineServices.reduce((sum, amount) => sum + amount, 0));
+        const gst = roundMoney(lineServices.reduce((sum, amount) => sum + roundMoney(amount * gstRate / 100), 0));
         $('#client_name').val(options[0]?.dataset.client || '');
         $('#onboarding_ctc').val(base ? base.toFixed(2) : '');
         $('#billing_percentage').val(base ? (service * 100 / base).toFixed(2) : '');
         $('#service_amount').val(service.toFixed(2));
-        calculateRevenue();
+        $('#gst_preview').val('₹' + gst.toFixed(2));
+        $('#total_preview').val('₹' + roundMoney(service + gst).toFixed(2));
     }
-    $('#candidate_id').on('change', function () {
-        const option = this.options[this.selectedIndex];
-        $('#client_name').val(option.dataset.client || '');
-        $('#onboarding_ctc').val(option.dataset.ctc || '');
-        $('#billing_percentage').val(option.dataset.billing || '');
-        $('#service_amount').val((Number(option.dataset.ctc || 0) * Number(option.dataset.billing || 0) / 100).toFixed(2));
-        calculateRevenue();
-    });
     $('.revenue-type').on('change', toggleRevenueType);
-    $('#candidate_ids').on('change', updateContractSelection);
-    if (contractSelect && contractChoices) {
-        contractSelect.addEventListener('addItem', function (event) {
-            const selected = Array.from(contractSelect.selectedOptions);
+    $('#fte_candidate_ids').on('change', function () { updateCandidateSelection(fteSelect); });
+    $('#candidate_ids').on('change', function () { updateCandidateSelection(contractSelect); });
+    function preventMixedClients(select, choices, label) {
+        if (!select || !choices) return;
+        select.addEventListener('addItem', function (event) {
+            const selected = Array.from(select.selectedOptions);
             const clientIds = [...new Set(selected.map(option => option.dataset.clientId))];
             if (clientIds.length > 1) {
-                contractChoices.removeActiveItemsByValue(String(event.detail.value));
-                toastr.error('Select contract candidates from the same client only.');
-                window.setTimeout(updateContractSelection, 0);
+                choices.removeActiveItemsByValue(String(event.detail.value));
+                toastr.error('Select ' + label + ' candidates from the same client only.');
+                window.setTimeout(function () { updateCandidateSelection(select); }, 0);
             }
         });
     }
+    preventMixedClients(fteSelect, fteChoices, 'FTE');
+    preventMixedClients(contractSelect, contractChoices, 'contract');
     $('.calc, #service_amount').on('input', function () {
+        @if(!$editing)
+        updateCandidateSelection(selectedType() === 'contract' ? contractSelect : fteSelect);
+        return;
+        @endif
         if (this.id === 'billing_percentage') {
             $('#service_amount').val((Number($('#onboarding_ctc').val() || 0) * Number($('#billing_percentage').val() || 0) / 100).toFixed(2));
         }

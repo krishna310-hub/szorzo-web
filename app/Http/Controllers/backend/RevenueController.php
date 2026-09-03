@@ -75,9 +75,7 @@ class RevenueController extends Controller
     {
         $this->authorize('create', Revenue::class);
         $data = $this->validated($request);
-        $candidateIds = $data['invoice_type'] === 'contract'
-            ? array_values(array_unique(array_map('intval', $data['candidate_ids'])))
-            : [(int) $data['candidate_id']];
+        $candidateIds = array_values(array_unique(array_map('intval', $data['candidate_ids'])));
         $candidates = $this->eligibleCandidates($candidateIds, $data['invoice_type']);
 
         DB::transaction(function () use ($data, $candidates) {
@@ -141,8 +139,8 @@ class RevenueController extends Controller
     {
         return $request->validate([
             'invoice_type' => [$revenue ? 'nullable' : 'required', Rule::in(['fte', 'contract'])],
-            'candidate_id' => ['nullable', 'required_if:invoice_type,fte', 'integer', 'exists:candidates,id'],
-            'candidate_ids' => ['nullable', 'required_if:invoice_type,contract', 'array', 'min:1'],
+            'candidate_id' => ['nullable', 'integer', 'exists:candidates,id'],
+            'candidate_ids' => [$revenue ? 'nullable' : 'required', 'array', 'min:1'],
             'candidate_ids.*' => ['integer', 'distinct', 'exists:candidates,id', Rule::unique('revenues', 'candidate_id')],
             'invoice_number' => ['required', 'string', 'max:100',
                 Rule::unique('revenues', 'invoice_number')->ignore($revenue?->id)],
@@ -185,7 +183,11 @@ class RevenueController extends Controller
 
     private function calculatedData(array $data, Candidate $candidate): array
     {
-        $isContract = $this->candidateHasRequirementMode($candidate, 2);
+        // Creation must follow the selected invoice type. On edit, where the
+        // type is not posted, derive it from the candidate's mapped requirement.
+        $isContract = array_key_exists('invoice_type', $data)
+            ? $data['invoice_type'] === 'contract'
+            : $this->candidateHasRequirementMode($candidate, 2);
         $base = $isContract ? (float) $candidate->clientRequirement->ctc : (float) $candidate->onboarding_ctc;
         $billing = (float) $candidate->clientRequirement?->billing?->value;
         $service = round($base * $billing / 100, 2);
