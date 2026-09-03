@@ -115,12 +115,12 @@
                                                 @endif
                                             </td>
                                             @php
-                                                $revenueAmount = (float) $report->payable_salary
-                                                    * (float) $report->revenue_percentage / 100;
-                                                $salaryAfterRevenue = (float) $report->payable_salary - $revenueAmount;
+                                                $revenueAmount = $report->is_hourly
+                                                    ? (float) $report->contract_revenue
+                                                    : (float) $report->payable_salary * (float) $report->revenue_percentage / 100;
                                             @endphp
                                             <td class="text-end fw-semibold text-success">
-                                                &#8377;{{ number_format($salaryAfterRevenue, 2) }}</td>
+                                                &#8377;{{ number_format((float) $report->payable_salary, 2) }}</td>
                                             <td class="text-end fw-semibold text-primary">
                                                 &#8377;{{ number_format($revenueAmount, 2) }}</td>
                                             <td>
@@ -151,10 +151,11 @@
                                 @if ($reports->count())
                                     @php
                                         $pageRevenue = $reports->sum(fn ($report) =>
-                                            (float) $report->payable_salary
-                                            * (float) $report->revenue_percentage / 100
+                                            $report->is_hourly
+                                                ? (float) $report->contract_revenue
+                                                : (float) $report->payable_salary * (float) $report->revenue_percentage / 100
                                         );
-                                        $pageSalary = (float) $reports->sum('payable_salary') - $pageRevenue;
+                                        $pageSalary = (float) $reports->sum('payable_salary');
                                     @endphp
                                     <tfoot class="table-light fw-semibold">
                                         <tr>
