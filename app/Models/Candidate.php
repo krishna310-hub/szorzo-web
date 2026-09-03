@@ -92,6 +92,13 @@ class Candidate extends Model
         return $this->hasOne(Revenue::class);
     }
 
+    public function revenues()
+    {
+        return $this->belongsToMany(Revenue::class, 'candidate_revenue')
+            ->withPivot(['contract_month', 'payable_salary', 'service_amount'])
+            ->withTimestamps();
+    }
+
     public function contractReports()
     {
         return $this->hasMany(ContractReport::class);

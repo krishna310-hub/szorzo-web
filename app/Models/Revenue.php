@@ -30,6 +30,26 @@ class Revenue extends Model
         return $this->belongsTo(Candidate::class);
     }
 
+    public function candidates()
+    {
+        return $this->belongsToMany(Candidate::class, 'candidate_revenue')
+            ->withPivot(['contract_month', 'payable_salary', 'service_amount'])
+            ->withTimestamps();
+    }
+
+    public function getCandidatesListAttribute()
+    {
+        if ($this->relationLoaded('candidates') && $this->candidates->isNotEmpty()) {
+            return $this->candidates;
+        }
+
+        if ($this->candidates()->exists()) {
+            return $this->candidates;
+        }
+
+        return $this->candidate ? collect([$this->candidate]) : collect();
+    }
+
     public function client()
     {
         return $this->belongsTo(Client::class);

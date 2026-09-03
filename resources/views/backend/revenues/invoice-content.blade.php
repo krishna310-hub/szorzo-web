@@ -122,12 +122,26 @@
         </tr>
         <tr class="service-row">
             <td>
-                <div class="service-heading">Recruitment Service Charges</div>
-                <table class="candidate-detail">
-                    <tr><td>Candidate Name</td><td>:</td><td>{{ $revenue->candidate->candidate_name }}</td></tr>
-                    <tr><td>Offered CTC</td><td>:</td><td>Rs {{ $offeredCtcDisplay }}/-</td></tr>
-                    <tr><td>Date of Joining</td><td>:</td><td>{{ $revenue->candidate->onboarding_date?->format('d-m-Y') ?? '-' }}</td></tr>
-                </table>
+                @if($revenue->candidates->count() > 1)
+                    <div class="service-heading">Contract Staffing Charges</div>
+                    @foreach($revenue->candidates as $cand)
+                        <table class="candidate-detail" style="margin-bottom: 6px; border-bottom: 1px dashed #ccc; padding-bottom: 4px;">
+                            <tr><td style="width: 140px;">Candidate Name</td><td style="width: 10px;">:</td><td><strong>{{ $cand->candidate_name }}</strong> ({{ $cand->jobRole?->job_role ?? '-' }})</td></tr>
+                            <tr><td>Payable Salary / CTC</td><td>:</td><td>Rs {{ number_format((float) ($cand->pivot->payable_salary ?? $cand->onboarding_ctc ?? $cand->take_home), 2) }}/-</td></tr>
+                            <tr><td>Date of Joining</td><td>:</td><td>{{ $cand->onboarding_date?->format('d-m-Y') ?? ($cand->contract_from_date?->format('d-m-Y') ?? '-') }}</td></tr>
+                        </table>
+                    @endforeach
+                @else
+                    @php
+                        $singleCand = $revenue->candidates->first() ?? $revenue->candidate;
+                    @endphp
+                    <div class="service-heading">Recruitment Service Charges</div>
+                    <table class="candidate-detail">
+                        <tr><td>Candidate Name</td><td>:</td><td>{{ $singleCand?->candidate_name ?? '-' }}</td></tr>
+                        <tr><td>Offered CTC</td><td>:</td><td>Rs {{ $offeredCtcDisplay }}/-</td></tr>
+                        <tr><td>Date of Joining</td><td>:</td><td>{{ $singleCand?->onboarding_date?->format('d-m-Y') ?? ($singleCand?->contract_from_date?->format('d-m-Y') ?? '-') }}</td></tr>
+                    </table>
+                @endif
             </td>
             <td class="amount-cell">{{ number_format((float) $revenue->service_amount, 2, '.', '') }}</td>
         </tr>
