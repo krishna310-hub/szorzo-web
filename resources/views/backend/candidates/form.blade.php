@@ -60,7 +60,7 @@
         @enderror
     </div>
     <div class="col-md-4">
-        <label for="client_requirement_id" class="form-label">Client Requirement </label>
+        <label for="client_requirement_id" class="form-label">Client Requirement <span class="text-danger">*</span></label>
         <select class="form-select" id="client_requirement_id" name="client_requirement_id" required>
             <option value="">Select client requirement</option>
             @foreach ($clientRequirements as $requirement)
