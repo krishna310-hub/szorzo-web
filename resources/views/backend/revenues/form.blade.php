@@ -8,21 +8,21 @@
         @error('invoice_type')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3" id="fte_candidate_field">
-        <label class="form-label">FTE Candidates <span class="text-danger">*</span></label>
-        <select name="candidate_ids[]" id="fte_candidate_ids" class="form-select" multiple data-placeholder="Search and select FTE candidates">
+        <label class="form-label">Offer Accepted Candidate <span class="text-danger">*</span></label>
+        <select name="candidate_id" id="candidate_id" class="form-select" required>
+            <option value="">Select candidate</option>
             @foreach($candidates as $candidate)
                 <option value="{{ $candidate->id }}"
-                    data-client-id="{{ $candidate->client_id }}" data-client="{{ $candidate->client?->client }}"
+                    data-client="{{ $candidate->client?->client }}"
                     data-base="{{ $candidate->onboarding_ctc }}"
                     data-billing="{{ $candidate->clientRequirement?->billing?->value }}"
-                    @selected(old('invoice_type', 'fte') === 'fte' && in_array($candidate->id, old('candidate_ids', [])))>
+                    @selected(old('candidate_id') == $candidate->id)>
                     {{ $candidate->candidate_name }} — {{ $candidate->client?->client ?? 'No client' }} — {{ $candidate->clientRequirement?->billing?->value ?? 0 }}%
                 </option>
             @endforeach
         </select>
-        <small class="text-muted">Select one or multiple FTE candidates from the same client.</small>
-        @error('candidate_ids')<div class="text-danger small">{{ $message }}</div>@enderror
-        @error('candidate_ids.*')<div class="text-danger small">{{ $message }}</div>@enderror
+        <small class="text-muted">Only one FTE candidate can be selected.</small>
+        @error('candidate_id')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3 d-none" id="contract_candidates_field">
         <label class="form-label">Contract Candidates <span class="text-danger">*</span></label>
@@ -71,7 +71,7 @@ function calculateRevenue() {
     $('#total_preview').val('₹' + (revenue + gst).toFixed(2));
 }
 $(function () {
-    const fteSelect = document.getElementById('fte_candidate_ids');
+    const fteSelect = document.getElementById('candidate_id');
     const contractSelect = document.getElementById('candidate_ids');
     function createCandidateChoices(select, placeholder) {
         return select && typeof Choices !== 'undefined' ? new Choices(select, {
@@ -86,7 +86,6 @@ $(function () {
             noChoicesText: 'No more candidates available'
         }) : null;
     }
-    const fteChoices = createCandidateChoices(fteSelect, 'Search and select FTE candidates');
     const contractChoices = createCandidateChoices(contractSelect, 'Search and select contract candidates');
 
     function selectedType() { return $('input[name="invoice_type"]:checked').val() || 'fte'; }
@@ -94,17 +93,16 @@ $(function () {
         const contract = selectedType() === 'contract';
         $('#fte_candidate_field').toggleClass('d-none', contract);
         $('#contract_candidates_field').toggleClass('d-none', !contract);
-        $('#fte_candidate_ids').prop('required', !contract).prop('disabled', contract);
+        $('#candidate_id').prop('required', !contract).prop('disabled', contract);
         $('#candidate_ids').prop('required', contract).prop('disabled', !contract);
-        if (fteChoices) contract ? fteChoices.disable() : fteChoices.enable();
         if (contractChoices) contract ? contractChoices.enable() : contractChoices.disable();
         $('#billing_percentage, #service_amount').prop('readonly', true);
         $('#base_amount_label').text(contract ? 'Billing Base Total (₹)' : 'Onboarding CTC (₹)');
-        $('#base_amount_help').text(contract ? 'Total from the mapped client requirements.' : 'Total from the selected FTE candidates.');
+        $('#base_amount_help').text(contract ? 'Total from the mapped client requirements.' : 'Taken from the selected FTE candidate.');
         updateCandidateSelection(contract ? contractSelect : fteSelect);
     }
     function updateCandidateSelection(select) {
-        const choices = select === fteSelect ? fteChoices : contractChoices;
+        const choices = select === contractSelect ? contractChoices : null;
         const choiceValues = choices ? choices.getValue(true) : [];
         const selectedValues = new Set((Array.isArray(choiceValues) ? choiceValues : [choiceValues]).map(String));
         const options = choices
@@ -124,7 +122,7 @@ $(function () {
         $('#total_preview').val('₹' + roundMoney(service + gst).toFixed(2));
     }
     $('.revenue-type').on('change', toggleRevenueType);
-    $('#fte_candidate_ids').on('change', function () { updateCandidateSelection(fteSelect); });
+    $('#candidate_id').on('change', function () { updateCandidateSelection(fteSelect); });
     $('#candidate_ids').on('change', function () { updateCandidateSelection(contractSelect); });
     function preventMixedClients(select, choices, label) {
         if (!select || !choices) return;
@@ -147,7 +145,6 @@ $(function () {
             window.setTimeout(function () { updateCandidateSelection(select); }, 0);
         });
     }
-    preventMixedClients(fteSelect, fteChoices, 'FTE');
     preventMixedClients(contractSelect, contractChoices, 'contract');
     $('.calc, #service_amount').on('input', function () {
         @if(!$editing)

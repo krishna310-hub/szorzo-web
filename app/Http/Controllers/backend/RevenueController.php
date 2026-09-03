@@ -75,7 +75,9 @@ class RevenueController extends Controller
     {
         $this->authorize('create', Revenue::class);
         $data = $this->validated($request);
-        $candidateIds = array_values(array_unique(array_map('intval', $data['candidate_ids'])));
+        $candidateIds = $data['invoice_type'] === 'contract'
+            ? array_values(array_unique(array_map('intval', $data['candidate_ids'])))
+            : [(int) $data['candidate_id']];
         $candidates = $this->eligibleCandidates($candidateIds, $data['invoice_type']);
 
         DB::transaction(function () use ($data, $candidates) {
@@ -139,8 +141,8 @@ class RevenueController extends Controller
     {
         return $request->validate([
             'invoice_type' => [$revenue ? 'nullable' : 'required', Rule::in(['fte', 'contract'])],
-            'candidate_id' => ['nullable', 'integer', 'exists:candidates,id'],
-            'candidate_ids' => [$revenue ? 'nullable' : 'required', 'array', 'min:1'],
+            'candidate_id' => ['nullable', 'required_if:invoice_type,fte', 'integer', 'exists:candidates,id'],
+            'candidate_ids' => ['nullable', 'required_if:invoice_type,contract', 'array', 'min:1'],
             'candidate_ids.*' => ['integer', 'distinct', 'exists:candidates,id', Rule::unique('revenues', 'candidate_id')],
             'invoice_number' => ['required', 'string', 'max:100',
                 Rule::unique('revenues', 'invoice_number')->ignore($revenue?->id)],
