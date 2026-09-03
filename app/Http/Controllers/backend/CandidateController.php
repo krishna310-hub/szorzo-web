@@ -557,7 +557,7 @@ class CandidateController extends Controller
         $data = $request->validate([
             'recruiter_id' => 'required|exists:recruiters,id',
             'client_id' => 'required|exists:clients,id',
-            'client_requirement_id' => 'required|exists:client_requirements,id',
+            'client_requirement_id' => 'nullable|exists:client_requirements,id',
             'job_role_id' => 'required|exists:job_roles,id',
             'mode_id' => 'required|exists:modes,id',
             'contract_from_date' => 'nullable|date',
@@ -619,7 +619,6 @@ class CandidateController extends Controller
         $requirementMatchesCandidate = ClientRequirement::whereKey($data['client_requirement_id'])
             ->where('client_id', $data['client_id'])
             ->where('job_role_id', $data['job_role_id'])
-            ->where('status', true)
             ->where(function ($query) use ($data) {
                 $query->whereJsonContains('mode_ids', (int) $data['mode_id'])
                     ->orWhere(function ($legacyQuery) use ($data) {
