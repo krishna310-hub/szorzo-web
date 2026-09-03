@@ -148,21 +148,20 @@
                                 </tbody>
                                 @if ($reports->count())
                                     @php
-                                        $pageRevenue = $reports->sum(fn ($report) =>
-                                            $report->is_hourly
-                                                ? (float) $report->contract_revenue
-                                                : (float) $report->payable_salary * (float) $report->revenue_percentage / 100
-                                        );
+                                        $pageRevenue = (float) $reports->sum('contract_revenue');
                                         $pageSalary = (float) $reports->sum('payable_salary');
+                                        $pageBillingPercentage = (float) $reports->sum('revenue_percentage');
                                     @endphp
                                     <tfoot class="table-light fw-semibold">
                                         <tr>
                                             <td colspan="3">Page total</td>
                                             <td class="text-end">
                                                 &#8377;{{ number_format($reports->where('is_hourly', false)->sum('monthly_take_home'), 2) }}</td>
-                                            <td class="text-end">—</td>
-                                            <td class="text-end">—</td>
-                                            <td class="text-end">—</td>
+                                            <td class="text-end">
+                                                &#8377;{{ number_format($reports->where('is_hourly', true)->sum('hourly_salary'), 2) }}</td>
+                                            <td class="text-end">{{ number_format($pageBillingPercentage, 2) }}%</td>
+                                            <td class="text-end">
+                                                &#8377;{{ number_format($reports->where('is_hourly', true)->sum('payable_salary'), 2) }}</td>
                                             <td class="text-center">{{ $reports->sum('present_days') }}</td>
                                             <td class="text-center">{{ $reports->sum('absent_days') }}</td>
                                             <td class="text-center">{{ number_format($reports->where('is_hourly', true)->sum('worked_hours'), 2) }}</td>

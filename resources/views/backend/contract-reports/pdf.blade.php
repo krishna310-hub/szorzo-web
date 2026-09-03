@@ -68,7 +68,9 @@
                 <tr>
                     <td colspan="5">Total ({{ $reports->count() }} candidates)</td>
                     <td class="num">INR {{ number_format($reports->where('is_hourly', false)->sum('monthly_take_home'), 2) }}</td>
-                    <td colspan="3" class="center">—</td>
+                    <td class="num">INR {{ number_format($reports->where('is_hourly', true)->sum('hourly_salary'), 2) }}</td>
+                    <td class="num">{{ number_format($reports->sum('revenue_percentage'), 2) }}%</td>
+                    <td class="num">INR {{ number_format($reports->where('is_hourly', true)->sum('payable_salary'), 2) }}</td>
                     <td class="center">{{ $reports->sum('present_days') }}</td>
                     <td class="center">{{ $reports->sum('absent_days') }}</td>
                     <td class="center">{{ number_format($reports->where('is_hourly', true)->sum('worked_hours'), 2) }}</td>
