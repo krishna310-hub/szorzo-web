@@ -3,8 +3,10 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\backend\ContractReportController;
+use App\Http\Controllers\backend\RevenueController;
 use App\Models\Billing;
 use App\Models\Candidate;
+use App\Models\Client;
 use App\Models\ClientRequirement;
 use App\Models\ContractReport;
 use Illuminate\Database\Eloquent\Collection;
@@ -39,6 +41,39 @@ class ContractReportSalaryTest extends TestCase
             'annual CTC is divided by twelve when take-home is missing' => [0, 1200000, 100000.00],
             'negative salary values cannot produce a negative report salary' => [-1, -120000, 0.00],
         ];
+    }
+
+    public function test_full_month_salary_is_not_reduced_by_the_billing_percentage(): void
+    {
+        $controller = new ContractReportController;
+        $salaryMethod = new ReflectionMethod($controller, 'payableSalary');
+
+        $payableSalary = $salaryMethod->invoke($controller, 138958.00, 0, 31);
+        $revenue = round($payableSalary * 15 / 100, 2);
+
+        $this->assertSame(138958.00, $payableSalary);
+        $this->assertSame(20843.70, $revenue);
+    }
+
+    public function test_contract_invoice_adds_each_selected_candidates_salary_and_revenue(): void
+    {
+        $client = new Client(['client' => 'Example Client']);
+        $client->id = 10;
+        $first = $this->invoiceCandidate($client, 138958.00, 15);
+        $second = $this->invoiceCandidate($client, 48333.00, 15);
+        $method = new ReflectionMethod(RevenueController::class, 'calculatedData');
+
+        $invoice = $method->invoke(new RevenueController, [
+            'invoice_type' => 'contract',
+            'contract_month' => '2026-09',
+            'gst_percentage' => 18,
+        ], collect([$first, $second]));
+
+        $this->assertSame(187291.00, $invoice['onboarding_ctc']);
+        $this->assertSame(15.0, $invoice['billing_percentage']);
+        $this->assertSame(28093.65, $invoice['service_amount']);
+        $this->assertSame(5056.86, $invoice['gst_amount']);
+        $this->assertSame(33150.51, $invoice['total_amount']);
     }
 
     public function test_revenue_uses_each_candidates_explicitly_mapped_requirement(): void
@@ -77,5 +112,23 @@ class ContractReportSalaryTest extends TestCase
         $report->setRelation('candidate', $candidate);
 
         return $report;
+    }
+
+    private function invoiceCandidate(Client $client, float $salary, float $billingPercentage): Candidate
+    {
+        $billing = new Billing(['value' => $billingPercentage]);
+        $requirement = new ClientRequirement(['mode_id' => 2]);
+        $requirement->setRelation('billing', $billing);
+        $candidate = new Candidate([
+            'candidate_name' => 'Candidate '.number_format($salary, 0, '.', ''),
+            'mode_id' => 2,
+            'client_id' => $client->id,
+        ]);
+        $candidate->setAttribute('contract_invoice_base', $salary);
+        $candidate->setAttribute('contract_invoice_service', round($salary * $billingPercentage / 100, 2));
+        $candidate->setRelation('clientRequirement', $requirement);
+        $candidate->setRelation('client', $client);
+
+        return $candidate;
     }
 }

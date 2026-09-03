@@ -93,7 +93,12 @@ class RevenueController extends Controller
             ? array_values(array_filter(array_map('intval', (array) ($data['candidate_ids'] ?? ($data['contract_candidate_id'] ? [$data['contract_candidate_id']] : [])))))
             : [(int) $data['candidate_id']];
 
-        $candidates = $this->eligibleCandidates($candidateIds, $data['invoice_type'], $data['contract_month'] ?? null);
+        $candidates = $this->eligibleCandidates(
+            $candidateIds,
+            $data['invoice_type'],
+            $data['contract_month'] ?? null,
+            isset($data['client_id']) ? (int) $data['client_id'] : null,
+        );
 
         DB::transaction(function () use ($data, $candidates) {
             $revenueData = $this->calculatedData($data, $candidates);
@@ -177,7 +182,7 @@ class RevenueController extends Controller
     {
         return $request->validate([
             'invoice_type' => [$revenue ? 'nullable' : 'required', Rule::in(['fte', 'contract'])],
-            'client_id' => 'nullable|integer|exists:clients,id',
+            'client_id' => ['nullable', 'required_if:invoice_type,contract', 'integer', 'exists:clients,id'],
             'candidate_id' => ['nullable', 'required_if:invoice_type,fte', 'integer', 'exists:candidates,id'],
             'candidate_ids' => ['nullable', 'required_if:invoice_type,contract', 'array', 'min:1'],
             'candidate_ids.*' => ['integer', 'distinct', 'exists:candidates,id'],
@@ -198,7 +203,12 @@ class RevenueController extends Controller
         ]);
     }
 
-    private function eligibleCandidates(array $ids, string $type, ?string $contractMonth = null)
+    private function eligibleCandidates(
+        array $ids,
+        string $type,
+        ?string $contractMonth = null,
+        ?int $selectedClientId = null,
+    )
     {
         if ($type === 'contract') {
             $candidates = $this->contractReportsForMonth((string) $contractMonth)
@@ -209,6 +219,9 @@ class RevenueController extends Controller
             }
             if ($candidates->pluck('client_id')->unique()->count() !== 1) {
                 throw ValidationException::withMessages(['candidate_ids' => 'All selected candidates must belong to the same client.']);
+            }
+            if ($selectedClientId === null || (int) $candidates->first()?->client_id !== $selectedClientId) {
+                throw ValidationException::withMessages(['client_id' => 'The selected candidates must belong to the chosen client.']);
             }
 
             return $candidates->sortBy(fn ($candidate) => array_search($candidate->id, $ids, true))->values();

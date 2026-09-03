@@ -86,7 +86,7 @@
             @endforeach
         </select>
         <div class="d-flex justify-content-between align-items-center mt-1">
-            <small class="text-muted"><i class="ri-information-line"></i> Hold <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac) to select multiple candidates for the chosen client.</small>
+            <small class="text-muted"><i class="ri-information-line"></i> Hold <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac) to select multiple candidates. <span id="contract_selection_summary"></span></small>
             <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" id="btn_select_all_candidates">Select All for this Client</button>
         </div>
         @error('candidate_ids')<div class="text-danger small">{{ $message }}</div>@enderror
@@ -217,7 +217,7 @@ $(function () {
         $('#base_amount_help').text(isContract ? 'Sum of selected candidates payable salaries.' : 'Taken from the selected FTE candidate.');
 
         if (isContract) {
-            filterContractCandidates();
+            filterContractCandidates(true);
         } else {
             updateFteCandidateSelection();
         }
@@ -238,7 +238,7 @@ $(function () {
         calculateRevenue();
     }
 
-    function filterContractCandidates(autoSelectAll = true) {
+    function filterContractCandidates(preserveSelection = false) {
         const selectedOption = contractClientSelect?.options[contractClientSelect.selectedIndex];
         const selectedClientId = selectedOption?.value;
         const clientName = selectedOption?.dataset.client || '';
@@ -260,9 +260,7 @@ $(function () {
             opt.disabled = !matches;
             if (matches) {
                 matchingOptions.push(opt);
-                if (autoSelectAll) {
-                    opt.selected = true;
-                }
+                opt.selected = preserveSelection && opt.selected;
             } else {
                 opt.selected = false;
             }
@@ -301,6 +299,11 @@ $(function () {
         $('#onboarding_ctc').val(sumBase ? sumBase.toFixed(2) : '0.00');
         $('#billing_percentage').val(effectiveBilling ? effectiveBilling.toFixed(2) : '0.00');
         $('#service_amount').val(sumService ? sumService.toFixed(2) : '0.00');
+        $('#contract_selection_summary').text(
+            contractCandidateSelect.selectedOptions.length
+                ? contractCandidateSelect.selectedOptions.length + ' candidate(s) selected.'
+                : 'No candidates selected.'
+        );
         calculateRevenue();
     }
 
@@ -320,7 +323,7 @@ $(function () {
     $('#candidate_id').on('change', updateFteCandidateSelection);
 
     $('#contract_client_id').on('change', function () {
-        filterContractCandidates(true);
+        filterContractCandidates(false);
     });
 
     $('#contract_candidate_ids').on('change', function () {
@@ -363,7 +366,7 @@ $(function () {
         toggleRevenueType();
         // If a client was pre-selected or only one client exists, filter immediately
         if (contractClientSelect && contractClientSelect.value) {
-            filterContractCandidates(false);
+            filterContractCandidates(true);
         }
     @endif
 });
