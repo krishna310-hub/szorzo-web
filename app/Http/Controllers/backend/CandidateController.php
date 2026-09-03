@@ -616,22 +616,22 @@ class CandidateController extends Controller
             ]);
         }
 
-        $requirementMatchesCandidate = ClientRequirement::whereKey($data['client_requirement_id'])
-            ->where('client_id', $data['client_id'])
-            ->where('job_role_id', $data['job_role_id'])
-            ->where(function ($query) use ($data) {
-                $query->whereJsonContains('mode_ids', (int) $data['mode_id'])
-                    ->orWhere(function ($legacyQuery) use ($data) {
-                        $legacyQuery->whereNull('mode_ids')
-                            ->where('mode_id', $data['mode_id']);
-                    });
-            })
-            ->exists();
-        if (! $requirementMatchesCandidate) {
-            throw ValidationException::withMessages([
-                'client_requirement_id' => 'Select an active requirement matching the chosen client and job role.',
-            ]);
-        }
+        // $requirementMatchesCandidate = ClientRequirement::whereKey($data['client_requirement_id'])
+        //     ->where('client_id', $data['client_id'])
+        //     ->where('job_role_id', $data['job_role_id'])
+        //     ->where(function ($query) use ($data) {
+        //         $query->whereJsonContains('mode_ids', (int) $data['mode_id'])
+        //             ->orWhere(function ($legacyQuery) use ($data) {
+        //                 $legacyQuery->whereNull('mode_ids')
+        //                     ->where('mode_id', $data['mode_id']);
+        //             });
+        //     })
+        //     ->exists();
+        // if (! $requirementMatchesCandidate) {
+        //     throw ValidationException::withMessages([
+        //         'client_requirement_id' => 'Select an active requirement matching the chosen client and job role.',
+        //     ]);
+        // }
 
         $isAssigned = ClientJobRole::where('client_id', $data['client_id'])
             ->where('job_role_id', $data['job_role_id'])
