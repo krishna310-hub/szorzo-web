@@ -60,6 +60,7 @@
         <div class="formula">Revenue calculation: INR {{ number_format($contractReport->billing_amount_per_hour, 2) }} billing/hour × {{ number_format($contractReport->revenue_percentage, 2) }}% = INR {{ number_format($contractReport->revenue_per_hour, 2) }}/hour × {{ number_format($contractReport->worked_hours, 2) }} hours = INR {{ number_format($contractReport->contract_revenue, 2) }}.</div>
     @else
         <div class="formula">Calculation: INR {{ number_format($contractReport->monthly_take_home, 2) }} / {{ $contractReport->salary_month->daysInMonth }} days × {{ $contractReport->present_days }} present days.</div>
+        <div class="formula">Revenue calculation: INR {{ number_format($contractReport->payable_salary, 2) }} × {{ number_format($contractReport->revenue_percentage, 2) }}% billing = INR {{ number_format($contractReport->contract_revenue, 2) }} revenue.</div>
     @endif
 </div>
 

@@ -267,7 +267,7 @@ class ContractReportController extends Controller
                 : null;
             $totalRevenue = $report->is_hourly
                 ? round($revenuePerHour * (float) ($report->worked_hours ?? 0), 2)
-                : round((float) $report->monthly_take_home * $revenuePercentage / 100, 2);
+                : round((float) ($report->payable_salary ?? $report->monthly_take_home) * $revenuePercentage / 100, 2);
 
             $report->setAttribute('billing_amount_per_hour', $billingAmountPerHour);
             $report->setAttribute('revenue_percentage', $revenuePercentage);
