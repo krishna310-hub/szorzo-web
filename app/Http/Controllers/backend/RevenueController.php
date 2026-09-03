@@ -196,7 +196,7 @@ class RevenueController extends Controller
             'client_address' => 'nullable|string|max:2000',
             'client_gst_number' => 'nullable|string|max:30',
             'onboarding_ctc' => 'nullable|numeric|min:0',
-            'billing_percentage' => [$revenue ? 'required' : 'nullable', 'numeric', 'min:0', 'max:100'],
+            'billing_percentage' => [$revenue ? 'required' : 'nullable', 'numeric', 'min:0', $revenue ? 'max:100' : 'max:10000'],
             'service_amount' => [$revenue ? 'required' : 'nullable', 'numeric', 'min:0'],
             'gst_percentage' => 'required|numeric|min:0|max:100',
             'notes' => 'nullable|string|max:2000',
@@ -258,8 +258,14 @@ class RevenueController extends Controller
         if ($isContract) {
             $base = (float) $candidateCollection->sum(fn ($c) => (float) ($c->getAttribute('contract_invoice_base') ?? $c->onboarding_ctc ?? 0));
             $service = (float) $candidateCollection->sum(fn ($c) => (float) ($c->getAttribute('contract_invoice_service') ?? 0));
-            $distinctBillings = $candidateCollection->map(fn ($c) => (float) ($c->clientRequirement?->billing?->value ?? 0))->unique();
-            $billing = $distinctBillings->count() === 1 ? $distinctBillings->first() : ($base > 0 ? round(($service / $base) * 100, 2) : 0);
+            // A contract invoice can contain multiple candidates. Display the
+            // combined billing percentages while keeping the invoice amount as
+            // the sum of every candidate's independently calculated revenue.
+            $billing = round($candidateCollection->sum(
+                fn ($c) => (float) ($c->getAttribute('contract_billing_percentage')
+                    ?? $c->clientRequirement?->billing?->value
+                    ?? 0)
+            ), 2);
         } else {
             $base = (float) $firstCandidate->onboarding_ctc;
             $billing = (float) $firstCandidate->clientRequirement?->billing?->value;

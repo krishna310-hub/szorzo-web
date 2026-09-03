@@ -70,7 +70,7 @@ class ContractReportSalaryTest extends TestCase
         ], collect([$first, $second]));
 
         $this->assertSame(187291.00, $invoice['onboarding_ctc']);
-        $this->assertSame(15.0, $invoice['billing_percentage']);
+        $this->assertSame(30.0, $invoice['billing_percentage']);
         $this->assertSame(28093.65, $invoice['service_amount']);
         $this->assertSame(5056.86, $invoice['gst_amount']);
         $this->assertSame(33150.51, $invoice['total_amount']);

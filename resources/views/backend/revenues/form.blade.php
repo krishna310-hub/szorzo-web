@@ -86,7 +86,7 @@
             @endforeach
         </select>
         <div class="d-flex justify-content-between align-items-center mt-1">
-            <small class="text-muted"><i class="ri-information-line"></i> Hold <strong>Ctrl</strong> (Windows) or <strong>Cmd</strong> (Mac) to select multiple candidates. <span id="contract_selection_summary"></span></small>
+            <small class="text-muted"><i class="ri-information-line"></i> Click candidates to select or deselect multiple entries. <span id="contract_selection_summary"></span></small>
             <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" id="btn_select_all_candidates">Select All for this Client</button>
         </div>
         @error('candidate_ids')<div class="text-danger small">{{ $message }}</div>@enderror
@@ -213,6 +213,7 @@ $(function () {
         $('#contract_candidate_ids').prop('required', isContract).prop('disabled', !isContract);
 
         $('#billing_percentage, #service_amount').prop('readonly', true);
+        $('#billing_percentage').attr('max', isContract ? 10000 : 100);
         $('#base_amount_label').text(isContract ? 'Contract Payable Salary (₹)' : 'Onboarding CTC (₹)');
         $('#base_amount_help').text(isContract ? 'Sum of selected candidates payable salaries.' : 'Taken from the selected FTE candidate.');
 
@@ -291,13 +292,10 @@ $(function () {
         sumBase = roundMoney(sumBase);
         sumService = roundMoney(sumService);
 
-        const uniqueBillings = [...new Set(billings)];
-        const effectiveBilling = uniqueBillings.length === 1
-            ? uniqueBillings[0]
-            : (sumBase > 0 ? (sumService * 100 / sumBase) : 0);
+        const combinedBilling = roundMoney(billings.reduce((total, billing) => total + billing, 0));
 
         $('#onboarding_ctc').val(sumBase ? sumBase.toFixed(2) : '0.00');
-        $('#billing_percentage').val(effectiveBilling ? effectiveBilling.toFixed(2) : '0.00');
+        $('#billing_percentage').val(combinedBilling ? combinedBilling.toFixed(2) : '0.00');
         $('#service_amount').val(sumService ? sumService.toFixed(2) : '0.00');
         $('#contract_selection_summary').text(
             contractCandidateSelect.selectedOptions.length
@@ -328,6 +326,16 @@ $(function () {
 
     $('#contract_candidate_ids').on('change', function () {
         updateContractCandidateSums();
+    });
+
+    // Native multiple selects normally require Ctrl/Cmd. Toggle each option
+    // with a normal click so selecting a second candidate keeps the first one.
+    $('#contract_candidate_ids').on('mousedown', 'option', function (event) {
+        event.preventDefault();
+        if (this.disabled) return;
+        this.selected = !this.selected;
+        contractCandidateSelect.focus();
+        $(contractCandidateSelect).trigger('change');
     });
 
     $('#btn_select_all_candidates').on('click', function () {
