@@ -61,7 +61,7 @@
     </div>
     <div class="col-md-4">
         <label for="client_requirement_id" class="form-label">Client Requirement </label>
-        <select class="form-select" id="client_requirement_id" name="client_requirement_id" required>
+        <select class="form-select" id="client_requirement_id" name="client_requirement_id">
             <option value="">Select client requirement</option>
             @foreach ($clientRequirements as $requirement)
                 <option value="{{ $requirement->id }}"
@@ -72,7 +72,7 @@
                 </option>
             @endforeach
         </select>
-        @error('client_requirement_id')<span class="text-danger small">{{ $message }}</span>@enderror
+        {{-- @error('client_requirement_id')<span class="text-danger small">{{ $message }}</span>@enderror --}}
     </div>
     <div class="col-md-4">
         <label for="mode_id" class="form-label">Mode <span class="text-danger">*</span></label>
