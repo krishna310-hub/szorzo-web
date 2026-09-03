@@ -26,7 +26,8 @@
     </div>
     <div class="col-md-6 mb-3 d-none" id="contract_candidates_field">
         <label class="form-label">Contract Candidates <span class="text-danger">*</span></label>
-        <select name="candidate_ids[]" id="candidate_ids" class="form-select" multiple size="6">
+        <select name="candidate_ids[]" id="candidate_ids" class="form-select" multiple
+            data-placeholder="Search and select contract candidates">
             @foreach($contractCandidates as $candidate)
                 <option value="{{ $candidate->id }}" data-client-id="{{ $candidate->client_id }}"
                     data-client="{{ $candidate->client?->client }}"
@@ -70,6 +71,21 @@ function calculateRevenue() {
     $('#total_preview').val('₹' + (revenue + gst).toFixed(2));
 }
 $(function () {
+    const contractSelect = document.getElementById('candidate_ids');
+    const contractChoices = contractSelect && typeof Choices !== 'undefined'
+        ? new Choices(contractSelect, {
+            removeItemButton: true,
+            searchEnabled: true,
+            shouldSort: false,
+            duplicateItemsAllowed: false,
+            itemSelectText: '',
+            placeholder: true,
+            placeholderValue: 'Search and select contract candidates',
+            noResultsText: 'No matching candidates found',
+            noChoicesText: 'No more candidates available'
+        })
+        : null;
+
     function selectedType() { return $('input[name="invoice_type"]:checked').val() || 'fte'; }
     function toggleRevenueType() {
         const contract = selectedType() === 'contract';
@@ -77,6 +93,7 @@ $(function () {
         $('#contract_candidates_field').toggleClass('d-none', !contract);
         $('#candidate_id').prop('required', !contract).prop('disabled', contract);
         $('#candidate_ids').prop('required', contract).prop('disabled', !contract);
+        if (contractChoices) contract ? contractChoices.enable() : contractChoices.disable();
         $('#billing_percentage, #service_amount').prop('readonly', contract);
         $('#base_amount_label').text(contract ? 'Billing Base Total (₹)' : 'Onboarding CTC (₹)');
         $('#base_amount_help').text(contract ? 'Total from the mapped client requirements.' : 'Taken from the selected candidate.');
@@ -84,14 +101,6 @@ $(function () {
     }
     function updateContractSelection() {
         const options = Array.from(document.getElementById('candidate_ids').selectedOptions);
-        const clientIds = [...new Set(options.map(option => option.dataset.clientId))];
-        if (clientIds.length > 1) {
-            const last = options[options.length - 1];
-            Array.from(document.getElementById('candidate_ids').options).forEach(option => {
-                option.selected = option === last;
-            });
-            return updateContractSelection();
-        }
         const base = options.reduce((sum, option) => sum + Number(option.dataset.base || 0), 0);
         const service = options.reduce((sum, option) => sum + Number(option.dataset.base || 0) * Number(option.dataset.billing || 0) / 100, 0);
         $('#client_name').val(options[0]?.dataset.client || '');
@@ -110,6 +119,17 @@ $(function () {
     });
     $('.revenue-type').on('change', toggleRevenueType);
     $('#candidate_ids').on('change', updateContractSelection);
+    if (contractSelect && contractChoices) {
+        contractSelect.addEventListener('addItem', function (event) {
+            const selected = Array.from(contractSelect.selectedOptions);
+            const clientIds = [...new Set(selected.map(option => option.dataset.clientId))];
+            if (clientIds.length > 1) {
+                contractChoices.removeActiveItemsByValue(String(event.detail.value));
+                toastr.error('Select contract candidates from the same client only.');
+                window.setTimeout(updateContractSelection, 0);
+            }
+        });
+    }
     $('.calc, #service_amount').on('input', function () {
         if (this.id === 'billing_percentage') {
             $('#service_amount').val((Number($('#onboarding_ctc').val() || 0) * Number($('#billing_percentage').val() || 0) / 100).toFixed(2));
