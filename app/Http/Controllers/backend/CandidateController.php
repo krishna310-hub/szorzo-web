@@ -557,7 +557,7 @@ class CandidateController extends Controller
         $data = $request->validate([
             'recruiter_id' => 'required|exists:recruiters,id',
             'client_id' => 'required|exists:clients,id',
-            'client_requirement_id' => 'nullable|exists:client_requirements,id',
+            'client_requirement_id' => 'nullable',
             'job_role_id' => 'required|exists:job_roles,id',
             'mode_id' => 'required|exists:modes,id',
             'contract_from_date' => 'nullable|date',
