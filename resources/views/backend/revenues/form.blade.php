@@ -93,8 +93,8 @@ $(function () {
         $('#contract_candidate_id').prop('required', contract).prop('disabled', !contract);
         $('#contract_month').prop('required', contract).prop('disabled', !contract);
         $('#billing_percentage, #service_amount').prop('readonly', true);
-        $('#base_amount_label').text(contract ? 'Billing Base Total (₹)' : 'Onboarding CTC (₹)');
-        $('#base_amount_help').text(contract ? 'Total from the mapped client requirements.' : 'Taken from the selected FTE candidate.');
+        $('#base_amount_label').text(contract ? 'Contract Payable Salary (₹)' : 'Onboarding CTC (₹)');
+        $('#base_amount_help').text(contract ? 'Taken from the selected month Contract Report.' : 'Taken from the selected FTE candidate.');
         updateCandidateSelection(contract ? contractSelect : fteSelect);
     }
     function updateCandidateSelection(select) {

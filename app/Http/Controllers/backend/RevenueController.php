@@ -232,27 +232,29 @@ class RevenueController extends Controller
 
     private function contractReportsForMonth(string $month)
     {
-        $salaryMonth = CarbonImmutable::createFromFormat('!Y-m', $month)->startOfMonth()->toDateString();
+        $selectedMonth = CarbonImmutable::createFromFormat('!Y-m', $month)->startOfMonth();
+        $salaryMonth = $selectedMonth->toDateString();
 
         return ContractReport::with(['candidate.clientRequirement.billing', 'candidate.client'])
             ->whereDate('salary_month', $salaryMonth)
             ->whereHas('candidate', fn ($candidate) => $candidate
                 ->where('status', true)
+                ->where('mode_id', 2)
                 ->whereNotNull('client_id')
                 ->whereHas('client')
+                ->whereDate('contract_from_date', '<=', $selectedMonth->endOfMonth()->toDateString())
+                ->whereDate('contract_to_date', '>=', $selectedMonth->toDateString())
                 ->whereDoesntHave('revenue')
                 ->whereHas('clientRequirement', fn ($requirement) => $this->requirementMode($requirement, 2)
                     ->whereHas('billing')))
             ->get()
             ->each(function (ContractReport $report) {
                 $requirement = $report->candidate->clientRequirement;
-                $base = $report->is_hourly
-                    ? (float) $requirement->ctc * (float) ($report->worked_hours ?? 0)
-                    : (float) $report->monthly_take_home;
+                // Match the Contract Report table exactly: its Total Revenue is
+                // payable salary (after attendance/hours) multiplied by billing %.
+                $base = (float) $report->payable_salary;
                 $billing = (float) $requirement->billing?->value;
-                $service = $report->is_hourly
-                    ? round(round((float) $requirement->ctc * $billing / 100, 2) * (float) ($report->worked_hours ?? 0), 2)
-                    : round((float) $report->monthly_take_home * $billing / 100, 2);
+                $service = round($base * $billing / 100, 2);
                 $report->candidate->setAttribute('contract_invoice_base', round($base, 2));
                 $report->candidate->setAttribute('contract_invoice_service', $service);
                 $report->candidate->setAttribute('contract_report_id', $report->id);
