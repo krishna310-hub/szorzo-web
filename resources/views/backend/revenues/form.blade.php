@@ -104,7 +104,12 @@ $(function () {
         updateCandidateSelection(contract ? contractSelect : fteSelect);
     }
     function updateCandidateSelection(select) {
-        const options = Array.from(select?.selectedOptions || []);
+        const choices = select === fteSelect ? fteChoices : contractChoices;
+        const choiceValues = choices ? choices.getValue(true) : [];
+        const selectedValues = new Set((Array.isArray(choiceValues) ? choiceValues : [choiceValues]).map(String));
+        const options = choices
+            ? Array.from(select?.options || []).filter(option => selectedValues.has(String(option.value)))
+            : Array.from(select?.selectedOptions || []);
         const roundMoney = value => Math.round((value + Number.EPSILON) * 100) / 100;
         const gstRate = Number($('#gst_percentage').val() || 0);
         const base = options.reduce((sum, option) => sum + Number(option.dataset.base || 0), 0);
@@ -124,13 +129,22 @@ $(function () {
     function preventMixedClients(select, choices, label) {
         if (!select || !choices) return;
         select.addEventListener('addItem', function (event) {
-            const selected = Array.from(select.selectedOptions);
-            const clientIds = [...new Set(selected.map(option => option.dataset.clientId))];
-            if (clientIds.length > 1) {
-                choices.removeActiveItemsByValue(String(event.detail.value));
-                toastr.error('Select ' + label + ' candidates from the same client only.');
-                window.setTimeout(function () { updateCandidateSelection(select); }, 0);
-            }
+            window.setTimeout(function () {
+                const values = choices.getValue(true);
+                const selectedValues = new Set((Array.isArray(values) ? values : [values]).map(String));
+                const selected = Array.from(select.options).filter(option => selectedValues.has(String(option.value)));
+                const clientIds = [...new Set(selected.map(option => option.dataset.clientId))];
+                if (clientIds.length > 1) {
+                    choices.removeActiveItemsByValue(String(event.detail.value));
+                    toastr.error('Select ' + label + ' candidates from the same client only.');
+                    window.setTimeout(function () { updateCandidateSelection(select); }, 0);
+                    return;
+                }
+                updateCandidateSelection(select);
+            }, 0);
+        });
+        select.addEventListener('removeItem', function () {
+            window.setTimeout(function () { updateCandidateSelection(select); }, 0);
         });
     }
     preventMixedClients(fteSelect, fteChoices, 'FTE');
