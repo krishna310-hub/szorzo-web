@@ -15,6 +15,7 @@
     <link rel="preload" href="{{ asset('admin/fonts/materialdesignicons-webfont9445.woff2') }}?v=7.2.96" as="font" type="font/woff2" crossorigin>
 
     @include('backend.layouts.css_master')
+    @stack('style')
 
 </head>
 

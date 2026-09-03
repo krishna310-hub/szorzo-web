@@ -72,7 +72,24 @@
     {{-- Contract Candidate Multiple Select --}}
     <div class="col-12 mb-3 d-none" id="contract_candidates_field">
         <label class="form-label fw-semibold">Contract Candidate(s) <span class="text-danger">*</span></label>
-        <select name="candidate_ids[]" id="contract_candidate_ids" class="form-select" multiple size="4">
+        <div id="contract_candidate_picker" class="contract-candidate-picker">
+            @foreach($contractCandidates as $candidate)
+                <label class="contract-candidate-option" data-client-id="{{ $candidate->client_id }}" data-candidate-id="{{ $candidate->id }}">
+                    <input type="checkbox" class="form-check-input contract-candidate-check"
+                        value="{{ $candidate->id }}"
+                        @checked(is_array(old('candidate_ids')) && in_array($candidate->id, old('candidate_ids')))>
+                    <span class="contract-candidate-details">
+                        <strong>{{ $candidate->candidate_name }}</strong>
+                        <span>{{ $candidate->jobRole?->job_role ?? 'Candidate' }}</span>
+                        <span>Salary: ₹{{ number_format((float) ($candidate->contract_invoice_base ?? 0), 2) }}</span>
+                        <span>Billing: {{ number_format((float) ($candidate->contract_billing_percentage ?? 0), 2) }}%</span>
+                        <span>Revenue: ₹{{ number_format((float) ($candidate->contract_invoice_service ?? 0), 2) }}</span>
+                    </span>
+                </label>
+            @endforeach
+            <div id="contract_candidates_empty" class="text-muted text-center py-3 d-none">No candidates available for this client.</div>
+        </div>
+        <select name="candidate_ids[]" id="contract_candidate_ids" class="d-none" multiple aria-hidden="true" tabindex="-1">
             @foreach($contractCandidates as $candidate)
                 <option value="{{ $candidate->id }}"
                     data-client-id="{{ $candidate->client_id }}"
@@ -86,7 +103,7 @@
             @endforeach
         </select>
         <div class="d-flex justify-content-between align-items-center mt-1">
-            <small class="text-muted"><i class="ri-information-line"></i> Click candidates to select or deselect multiple entries. <span id="contract_selection_summary"></span></small>
+            <small class="text-muted"><i class="ri-information-line"></i> Select one or more candidates. <span id="contract_selection_summary"></span></small>
             <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" id="btn_select_all_candidates">Select All for this Client</button>
         </div>
         @error('candidate_ids')<div class="text-danger small">{{ $message }}</div>@enderror
@@ -172,6 +189,19 @@
     </div>
 </div>
 
+@push('style')
+<style>
+.contract-candidate-picker { border: 1px solid #d8dce3; border-radius: .375rem; max-height: 260px; overflow-y: auto; padding: 8px; background: #fff; }
+.contract-candidate-option { display: flex; align-items: flex-start; gap: 12px; margin: 0 0 7px; padding: 11px 13px; border: 1px solid #e8eaf0; border-radius: 7px; cursor: pointer; transition: border-color .15s, background-color .15s, box-shadow .15s; }
+.contract-candidate-option:last-of-type { margin-bottom: 0; }
+.contract-candidate-option:hover { border-color: #9db9ef; background: #f8faff; }
+.contract-candidate-option.is-selected { border-color: #376fd0; background: #edf4ff; box-shadow: 0 0 0 1px rgba(55,111,208,.12); }
+.contract-candidate-option .form-check-input { flex: 0 0 auto; margin-top: 3px; }
+.contract-candidate-details { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 14px; width: 100%; color: #647086; }
+.contract-candidate-details strong { flex-basis: 100%; color: #20283a; }
+</style>
+@endpush
+
 <div class="text-end">
     <a href="{{ route('admin.revenues.index') }}" class="btn btn-light me-2">Cancel</a>
     <button class="btn btn-primary">{{ $editing ? 'Update Invoice' : 'Generate Invoice' }}</button>
@@ -192,6 +222,7 @@ $(function () {
     const fteCandidateSelect = document.getElementById('candidate_id');
     const contractClientSelect = document.getElementById('contract_client_id');
     const contractCandidateSelect = document.getElementById('contract_candidate_ids');
+    const contractCandidateRows = document.querySelectorAll('.contract-candidate-option');
 
     function selectedType() {
         return $('input[name="invoice_type"]:checked').val() || 'fte';
@@ -267,6 +298,19 @@ $(function () {
             }
         }
 
+        let visibleRows = 0;
+        contractCandidateRows.forEach(row => {
+            const matches = selectedClientId && String(row.dataset.clientId) === String(selectedClientId);
+            const checkbox = row.querySelector('.contract-candidate-check');
+            const option = [...contractCandidateSelect.options].find(opt => String(opt.value) === String(row.dataset.candidateId));
+            row.classList.toggle('d-none', !matches);
+            checkbox.disabled = !matches;
+            checkbox.checked = Boolean(matches && option?.selected);
+            row.classList.toggle('is-selected', checkbox.checked);
+            if (matches) visibleRows++;
+        });
+        $('#contract_candidates_empty').toggleClass('d-none', visibleRows > 0);
+
         updateContractCandidateSums();
     }
 
@@ -328,14 +372,11 @@ $(function () {
         updateContractCandidateSums();
     });
 
-    // Native multiple selects normally require Ctrl/Cmd. Toggle each option
-    // with a normal click so selecting a second candidate keeps the first one.
-    $('#contract_candidate_ids').on('mousedown', 'option', function (event) {
-        event.preventDefault();
-        if (this.disabled) return;
-        this.selected = !this.selected;
-        contractCandidateSelect.focus();
-        $(contractCandidateSelect).trigger('change');
+    $('.contract-candidate-check').on('change', function () {
+        const option = [...contractCandidateSelect.options].find(opt => String(opt.value) === String(this.value));
+        if (option) option.selected = this.checked;
+        $(this).closest('.contract-candidate-option').toggleClass('is-selected', this.checked);
+        updateContractCandidateSums();
     });
 
     $('#btn_select_all_candidates').on('click', function () {
@@ -350,6 +391,13 @@ $(function () {
                 opt.selected = true;
             }
         }
+        contractCandidateRows.forEach(row => {
+            if (String(row.dataset.clientId) === String(selectedClientId)) {
+                const checkbox = row.querySelector('.contract-candidate-check');
+                checkbox.checked = true;
+                row.classList.add('is-selected');
+            }
+        });
         updateContractCandidateSums();
     });
 
