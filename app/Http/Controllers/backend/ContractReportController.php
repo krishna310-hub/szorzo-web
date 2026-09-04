@@ -66,9 +66,8 @@ class ContractReportController extends Controller
                 ]
             );
 
-            if (! $report->wasRecentlyCreated) {
-                $this->syncReportSalary($report, $month->daysInMonth);
-            }
+            // Apply the configured revenue/salary split to new and existing rows.
+            $this->syncReportSalary($report, $month->daysInMonth);
 
             $created += $report->wasRecentlyCreated ? 1 : 0;
         }
@@ -103,19 +102,25 @@ class ContractReportController extends Controller
             ]);
         }
 
+        $contractReport->loadMissing('candidate.clientRequirement.billing');
+        $grossIntake = $contractReport->is_hourly
+            ? $this->hourlyPayableSalary(
+                (float) $contractReport->hourly_salary,
+                (float) $data['worked_hours'],
+            )
+            : $this->payableSalary(
+                (float) $contractReport->monthly_take_home,
+                $data['absent_days'],
+                $days
+            );
+
         $contractReport->update([
             ...$data,
             'worked_hours' => $contractReport->is_hourly ? round((float) $data['worked_hours'], 2) : null,
-            'payable_salary' => $contractReport->is_hourly
-                ? $this->hourlyPayableSalary(
-                    (float) $contractReport->hourly_salary,
-                    (float) $data['worked_hours'],
-                )
-                : $this->payableSalary(
-                    (float) $contractReport->monthly_take_home,
-                    $data['absent_days'],
-                    $days
-                ),
+            'payable_salary' => $this->salaryShare(
+                $grossIntake,
+                $this->revenuePercentage($contractReport)
+            ),
         ]);
 
         return back()->with('success', 'Monthly attendance and salary updated.');
@@ -206,15 +211,24 @@ class ContractReportController extends Controller
 
     private function syncReportSalary(ContractReport $report, int $daysInMonth): void
     {
-        if (! $report->relationLoaded('candidate')) {
-            $report->load('candidate');
-        }
+        $report->loadMissing('candidate.clientRequirement.billing');
 
         if (! $report->candidate) {
             return;
         }
 
         $monthlyTakeHome = $this->monthlyTakeHome($report->candidate);
+        $grossIntake = $report->candidate->is_hourly
+            ? $this->hourlyPayableSalary(
+                (float) $report->candidate->hourly_salary,
+                (float) ($report->worked_hours ?? 0),
+            )
+            : $this->payableSalary(
+                $monthlyTakeHome,
+                (int) $report->absent_days,
+                $daysInMonth
+            );
+
         $report->fill([
             'monthly_take_home' => $monthlyTakeHome,
             'is_hourly' => $report->candidate->is_hourly,
@@ -224,16 +238,10 @@ class ContractReportController extends Controller
             'worked_hours' => $report->candidate->is_hourly
                 ? ($report->worked_hours ?? 0)
                 : null,
-            'payable_salary' => $report->candidate->is_hourly
-                ? $this->hourlyPayableSalary(
-                    (float) $report->candidate->hourly_salary,
-                    (float) ($report->worked_hours ?? 0),
-                )
-                : $this->payableSalary(
-                    $monthlyTakeHome,
-                    (int) $report->absent_days,
-                    $daysInMonth
-                ),
+            'payable_salary' => $this->salaryShare(
+                $grossIntake,
+                $this->revenuePercentage($report)
+            ),
         ]);
 
         if ($report->isDirty(['monthly_take_home', 'is_hourly', 'hourly_salary', 'worked_hours', 'payable_salary'])) {
@@ -253,27 +261,50 @@ class ContractReportController extends Controller
         return round(max(0, $hourlySalary * $workedHours), 2);
     }
 
+    private function salaryShare(float $grossIntake, float $revenuePercentage): float
+    {
+        $revenuePercentage = min(100, max(0, $revenuePercentage));
+        $grossIntake = round(max(0, $grossIntake), 2);
+        $revenueShare = round($grossIntake * $revenuePercentage / 100, 2);
+
+        // Subtract the rounded revenue so salary + revenue always reconciles
+        // exactly to the displayed gross intake, including one-paise edge cases.
+        return round($grossIntake - $revenueShare, 2);
+    }
+
+    private function revenuePercentage(ContractReport $report): float
+    {
+        return (float) ($report->candidate?->clientRequirement?->billing?->value ?? 0);
+    }
+
     private function addRevenueMetrics($reports): void
     {
         $reports->each(function (ContractReport $report) {
             $candidate = $report->candidate;
             $requirement = $candidate?->clientRequirement;
             $billingAmountPerHour = $report->is_hourly ? (float) ($report->hourly_salary ?? 0) : null;
-            $revenuePercentage = (float) ($requirement?->billing?->value ?? 0);
+            $revenuePercentage = min(100, max(0, (float) ($requirement?->billing?->value ?? 0)));
+            $grossIntake = $report->is_hourly
+                ? $this->hourlyPayableSalary(
+                    (float) ($report->hourly_salary ?? 0),
+                    (float) ($report->worked_hours ?? 0)
+                )
+                : $this->payableSalary(
+                    (float) ($report->monthly_take_home ?? 0),
+                    (int) ($report->absent_days ?? 0),
+                    max(1, $report->salary_month->daysInMonth)
+                );
             $revenuePerHour = $report->is_hourly
                 ? round(((float) $report->hourly_salary * $revenuePercentage) / 100, 2)
                 : null;
-            // Both contract types use the same final rule: billing percentage
-            // applies to the candidate's actual payable salary. For hourly
-            // candidates payable salary is hourly rate multiplied by hours.
-            $totalRevenue = round(
-                (float) ($report->payable_salary ?? 0) * $revenuePercentage / 100,
-                2
-            );
+            // The configured billing percentage is the company's share of the
+            // gross intake. The complementary percentage is candidate salary.
+            $totalRevenue = round($grossIntake * $revenuePercentage / 100, 2);
 
             $report->setAttribute('billing_amount_per_hour', $billingAmountPerHour);
             $report->setAttribute('revenue_percentage', $revenuePercentage);
             $report->setAttribute('revenue_per_hour', $revenuePerHour);
+            $report->setAttribute('contract_intake', $grossIntake);
             $report->setAttribute('contract_revenue', $totalRevenue);
         });
     }

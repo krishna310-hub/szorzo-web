@@ -43,16 +43,18 @@ class ContractReportSalaryTest extends TestCase
         ];
     }
 
-    public function test_full_month_salary_is_not_reduced_by_the_billing_percentage(): void
+    public function test_salary_is_the_complement_of_the_revenue_percentage(): void
     {
         $controller = new ContractReportController;
-        $salaryMethod = new ReflectionMethod($controller, 'payableSalary');
+        $salaryMethod = new ReflectionMethod($controller, 'salaryShare');
 
-        $payableSalary = $salaryMethod->invoke($controller, 138958.00, 0, 31);
-        $revenue = round($payableSalary * 15 / 100, 2);
+        $payableSalary = $salaryMethod->invoke($controller, 8000.00, 35);
+        $revenue = round(8000.00 * 35 / 100, 2);
 
-        $this->assertSame(138958.00, $payableSalary);
-        $this->assertSame(20843.70, $revenue);
+        $this->assertSame(5200.00, $payableSalary);
+        $this->assertSame(2800.00, $revenue);
+        $this->assertSame(8000.00, $payableSalary + $revenue);
+        $this->assertSame(0.01, $salaryMethod->invoke($controller, 0.03, 50));
     }
 
     public function test_contract_invoice_adds_each_selected_candidates_salary_and_revenue(): void

@@ -50,7 +50,7 @@
                     <td class="num">{{ $report->is_hourly ? '—' : 'INR '.number_format($report->monthly_take_home, 2) }}</td>
                     <td class="num">{{ $report->is_hourly ? 'INR '.number_format($report->hourly_salary, 2) : '—' }}</td>
                     <td class="num">{{ number_format($report->revenue_percentage, 2).'%' }}</td>
-                    <td class="num">{{ $report->is_hourly ? 'INR '.number_format($report->revenue_per_hour, 2) : '—' }}</td>
+                    <td class="num">{{ $report->is_hourly ? 'INR '.number_format($report->contract_intake, 2) : '—' }}</td>
                     <td class="center">{{ $report->present_days }}</td>
                     <td class="center">{{ $report->absent_days }}</td>
                     <td class="center">{{ $report->is_hourly ? number_format($report->worked_hours, 2) : '—' }}</td>
@@ -70,7 +70,7 @@
                     <td class="num">INR {{ number_format($reports->where('is_hourly', false)->sum('monthly_take_home'), 2) }}</td>
                     <td class="num">INR {{ number_format($reports->where('is_hourly', true)->sum('hourly_salary'), 2) }}</td>
                     <td class="num">{{ number_format($reports->sum('revenue_percentage'), 2) }}%</td>
-                    <td class="num">INR {{ number_format($reports->where('is_hourly', true)->sum('payable_salary'), 2) }}</td>
+                    <td class="num">INR {{ number_format($reports->where('is_hourly', true)->sum('contract_intake'), 2) }}</td>
                     <td class="center">{{ $reports->sum('present_days') }}</td>
                     <td class="center">{{ $reports->sum('absent_days') }}</td>
                     <td class="center">{{ number_format($reports->where('is_hourly', true)->sum('worked_hours'), 2) }}</td>

@@ -51,16 +51,16 @@
     <table class="summary">
         <thead><tr><th>Description</th><th class="num">Present</th><th class="num">Leave Days</th><th class="num">Worked Hours</th><th class="num">Amount</th></tr></thead>
         <tbody>
-            <tr><td>{{ $contractReport->is_hourly ? 'Hourly contract salary (INR '.number_format($contractReport->hourly_salary, 2).'/hr)' : 'Monthly contract take-home' }}</td><td class="num">{{ $contractReport->present_days }}</td><td class="num">{{ $contractReport->absent_days }}</td><td class="num">{{ $contractReport->is_hourly ? number_format($contractReport->worked_hours, 2) : '—' }}</td><td class="num">INR {{ number_format($contractReport->is_hourly ? $contractReport->payable_salary : $contractReport->monthly_take_home, 2) }}</td></tr>
+            <tr><td>{{ $contractReport->is_hourly ? 'Hourly contract intake (INR '.number_format($contractReport->hourly_salary, 2).'/hr)' : 'Monthly contract intake' }}</td><td class="num">{{ $contractReport->present_days }}</td><td class="num">{{ $contractReport->absent_days }}</td><td class="num">{{ $contractReport->is_hourly ? number_format($contractReport->worked_hours, 2) : '—' }}</td><td class="num">INR {{ number_format($contractReport->contract_intake, 2) }}</td></tr>
             <tr class="total"><td colspan="4">Net Payable Amount</td><td class="num">INR {{ number_format($contractReport->payable_salary, 2) }}</td></tr>
         </tbody>
     </table>
     @if ($contractReport->is_hourly)
-        <div class="formula">Hourly calculation: INR {{ number_format($contractReport->hourly_salary, 2) }} × {{ number_format($contractReport->worked_hours, 2) }} worked hours.</div>
+        <div class="formula">Intake calculation: INR {{ number_format($contractReport->hourly_salary, 2) }} × {{ number_format($contractReport->worked_hours, 2) }} worked hours = INR {{ number_format($contractReport->contract_intake, 2) }}.</div>
         <div class="formula">Revenue calculation: INR {{ number_format($contractReport->billing_amount_per_hour, 2) }} billing/hour × {{ number_format($contractReport->revenue_percentage, 2) }}% = INR {{ number_format($contractReport->revenue_per_hour, 2) }}/hour × {{ number_format($contractReport->worked_hours, 2) }} hours = INR {{ number_format($contractReport->contract_revenue, 2) }}.</div>
     @else
         <div class="formula">Calculation: INR {{ number_format($contractReport->monthly_take_home, 2) }} / {{ $contractReport->salary_month->daysInMonth }} days × {{ $contractReport->present_days }} present days.</div>
-        <div class="formula">Revenue calculation: INR {{ number_format($contractReport->payable_salary, 2) }} × {{ number_format($contractReport->revenue_percentage, 2) }}% billing = INR {{ number_format($contractReport->contract_revenue, 2) }} revenue.</div>
+        <div class="formula">Revenue calculation: INR {{ number_format($contractReport->contract_intake, 2) }} × {{ number_format($contractReport->revenue_percentage, 2) }}% billing = INR {{ number_format($contractReport->contract_revenue, 2) }} revenue.</div>
     @endif
 </div>
 

@@ -95,7 +95,7 @@
                                             <td class="text-end">{{ $report->is_hourly ? '—' : '₹'.number_format($report->monthly_take_home, 2) }}</td>
                                             <td class="text-end">{{ $report->is_hourly ? '₹'.number_format($report->hourly_salary, 2) : '—' }}</td>
                                             <td class="text-end">{{ number_format($report->revenue_percentage, 2).'%' }}</td>
-                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->payable_salary, 2) : '—' }}</td>
+                                            <td class="text-end">{{ $report->is_hourly ? '₹'.number_format((float) $report->contract_intake, 2) : '—' }}</td>
                                             <td><input form="contract-report-{{ $report->id }}" type="number"
                                                     name="present_days" min="0" max="{{ $daysInMonth }}"
                                                     value="{{ $report->present_days }}"
@@ -161,7 +161,7 @@
                                                 &#8377;{{ number_format($reports->where('is_hourly', true)->sum('hourly_salary'), 2) }}</td>
                                             <td class="text-end">{{ number_format($pageBillingPercentage, 2) }}%</td>
                                             <td class="text-end">
-                                                &#8377;{{ number_format($reports->where('is_hourly', true)->sum('payable_salary'), 2) }}</td>
+                                                &#8377;{{ number_format($reports->where('is_hourly', true)->sum('contract_intake'), 2) }}</td>
                                             <td class="text-center">{{ $reports->sum('present_days') }}</td>
                                             <td class="text-center">{{ $reports->sum('absent_days') }}</td>
                                             <td class="text-center">{{ number_format($reports->where('is_hourly', true)->sum('worked_hours'), 2) }}</td>
