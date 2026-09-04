@@ -147,6 +147,53 @@ class ContractReportSalaryTest extends TestCase
         $this->assertSame(7840.00, $method->invoke($controller, $hourly));
     }
 
+    public function test_dashboard_onboarded_revenue_matches_the_june_external_fte_calculation(): void
+    {
+        $controller = new AdminController;
+        $method = new ReflectionMethod($controller, 'candidateRevenue');
+        $billing = new Billing(['value' => 8.33]);
+        $requirement = new ClientRequirement;
+        $requirement->setRelation('billing', $billing);
+        $externalClient = new Client(['client' => 'External Client']);
+
+        $externalRevenue = collect([1300000, 2100000, 1500000, 4600000, 2900000])
+            ->sum(function (int $ctc) use ($externalClient, $requirement, $method, $controller) {
+                $candidate = new Candidate([
+                    'mode_id' => 1,
+                    'level_of_interview_id' => 20,
+                    'onboarding_ctc' => $ctc,
+                ]);
+                $candidate->setRelation('client', $externalClient);
+                $candidate->setRelation('clientRequirement', $requirement);
+
+                return $method->invoke($controller, $candidate);
+            });
+
+        $internal = new Candidate([
+            'mode_id' => 1,
+            'level_of_interview_id' => 20,
+            'onboarding_ctc' => 360000,
+            'expected_ctc' => 350000,
+        ]);
+        $internal->setRelation('client', new Client(['client' => 'SZORZO Technologies Private Limited']));
+
+        $this->assertSame(1032920.0, $externalRevenue);
+        $this->assertSame(0.0, $method->invoke($controller, $internal));
+        $this->assertSame(1032920.0, $externalRevenue + $method->invoke($controller, $internal));
+    }
+
+    public function test_dashboard_does_not_mix_contract_revenue_into_onboarded_revenue(): void
+    {
+        $candidate = new Candidate([
+            'mode_id' => 2,
+            'level_of_interview_id' => 20,
+            'onboarding_ctc' => 1667500,
+        ]);
+        $method = new ReflectionMethod(AdminController::class, 'candidateRevenue');
+
+        $this->assertSame(0.0, $method->invoke(new AdminController, $candidate));
+    }
+
     private function reportWithRequirement(
         float $billingPercentage,
         float $requirementCtc,

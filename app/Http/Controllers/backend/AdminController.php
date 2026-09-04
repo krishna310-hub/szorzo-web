@@ -315,9 +315,11 @@ class AdminController extends Controller
 
         $revenueMonths = $months;
 
-        // Revenue is based on each candidate's onboarding CTC and client billing percentage.
+        // FTE revenue is based on each candidate's onboarding CTC and the billing
+        // percentage configured for their requirement. Contract revenue is shown
+        // separately from contract reports.
         $revenueOutcomes = (clone $chartCandidates)
-            ->with('client.billing')
+            ->with(['client.billing', 'clientRequirement.billing'])
             ->where(function ($query) use ($yearStart, $yearEnd) {
                 $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
                     $onboarded->where('level_of_interview_id', 20)
@@ -327,7 +329,7 @@ class AdminController extends Controller
                         ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                 });
             })
-            ->get(['client_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
+            ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
         $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate);
         $monthlyOutcomeRevenue = $revenueOutcomes
             ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
@@ -350,9 +352,9 @@ class AdminController extends Controller
             ->sum($candidateRevenue);
         $contractRevenue = $monthlyContractRevenue->sum();
         $totalOnboardingRevenue = (clone $onboardingCandidates)
-            ->with('client.billing')
+            ->with(['client.billing', 'clientRequirement.billing'])
             ->where('level_of_interview_id', 20)
-            ->get(['client_id', 'mode_id', 'take_home', 'onboarding_ctc'])
+            ->get(['client_id', 'client_requirement_id', 'mode_id', 'take_home', 'expected_ctc', 'onboarding_ctc'])
             ->sum($candidateRevenue);
 
         $targetMultiplier = $selectedRecruiterId
@@ -494,7 +496,7 @@ class AdminController extends Controller
         $onboarded = $levelCounts([20], 'onboarding_date');
         $joinerDeclined = $levelCounts([21], 'candidates.updated_at');
         $outcomes = $user->can('read', Revenue::class)
-            ? (clone $candidates)->with('client.billing')
+            ? (clone $candidates)->with(['client.billing', 'clientRequirement.billing'])
                 ->where(function ($query) use ($yearStart, $yearEnd) {
                     $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
                         $onboarded->where('level_of_interview_id', 20)
@@ -504,7 +506,7 @@ class AdminController extends Controller
                             ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                     });
                 })
-                ->get(['client_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
+                ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
                 ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
                     ? $candidate->updated_at->format('Y-m')
                     : $candidate->onboarding_date->format('Y-m'))
@@ -563,18 +565,28 @@ class AdminController extends Controller
 
     private function candidateRevenue(Candidate $candidate): float
     {
+        // Contract income has its own dashboard series and must not be counted
+        // again as an onboarding outcome.
+        if ((int) $candidate->mode_id === 2) {
+            return 0.0;
+        }
+
         $ctc = (int) $candidate->level_of_interview_id === 21
             ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
             : $candidate->onboarding_ctc;
 
-        // Contract candidates may only have their monthly take-home recorded.
-        // Annualize it so their revenue is not silently calculated as zero.
-        if ((int) $candidate->mode_id === 2 && (float) $ctc <= 0) {
-            $ctc = (float) $candidate->take_home * 12;
+        // Internal SZORZO hires are not client placements and therefore do not
+        // contribute to dashboard onboarding revenue.
+        if (str_contains(mb_strtolower((string) $candidate->client?->client), 'szorzo')) {
+            return 0.0;
         }
 
+        $billingPercentage = $candidate->clientRequirement?->billing?->value
+            ?? $candidate->client?->billing?->value
+            ?? 0;
+
         return round(
-            (float) $ctc * (float) ($candidate->client?->billing?->value ?? 0) / 100,
+            max(0, (float) $ctc) * min(100, max(0, (float) $billingPercentage)) / 100,
             2
         );
     }
