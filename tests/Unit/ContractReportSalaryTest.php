@@ -57,6 +57,15 @@ class ContractReportSalaryTest extends TestCase
         $this->assertSame(0.01, $salaryMethod->invoke($controller, 0.03, 50));
     }
 
+    public function test_monthly_total_salary_keeps_the_full_monthly_amount_while_hourly_keeps_the_revenue_split(): void
+    {
+        $controller = new ContractReportController;
+        $method = new ReflectionMethod($controller, 'totalSalary');
+
+        $this->assertSame(138958.00, $method->invoke($controller, 138958, 15, false));
+        $this->assertSame(54400.00, $method->invoke($controller, 64000, 15, true));
+    }
+
     public function test_contract_invoice_adds_each_selected_candidates_salary_and_revenue(): void
     {
         $client = new Client(['client' => 'Example Client']);

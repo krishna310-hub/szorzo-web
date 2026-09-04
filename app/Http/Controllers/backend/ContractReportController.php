@@ -117,9 +117,10 @@ class ContractReportController extends Controller
         $contractReport->update([
             ...$data,
             'worked_hours' => $contractReport->is_hourly ? round((float) $data['worked_hours'], 2) : null,
-            'payable_salary' => $this->salaryShare(
+            'payable_salary' => $this->totalSalary(
                 $grossIntake,
-                $this->revenuePercentage($contractReport)
+                $this->revenuePercentage($contractReport),
+                (bool) $contractReport->is_hourly,
             ),
         ]);
 
@@ -232,9 +233,10 @@ class ContractReportController extends Controller
             'worked_hours' => $report->candidate->is_hourly
                 ? ($report->worked_hours ?? 0)
                 : null,
-            'payable_salary' => $this->salaryShare(
+            'payable_salary' => $this->totalSalary(
                 $grossIntake,
-                $this->revenuePercentage($report)
+                $this->revenuePercentage($report),
+                (bool) $report->candidate->is_hourly,
             ),
         ]);
 
@@ -264,6 +266,13 @@ class ContractReportController extends Controller
         // Subtract the rounded revenue so salary + revenue always reconciles
         // exactly to the displayed gross intake, including one-paise edge cases.
         return round($grossIntake - $revenueShare, 2);
+    }
+
+    private function totalSalary(float $grossIntake, float $revenuePercentage, bool $isHourly): float
+    {
+        return $isHourly
+            ? $this->salaryShare($grossIntake, $revenuePercentage)
+            : round(max(0, $grossIntake), 2);
     }
 
     private function revenuePercentage(ContractReport $report): float
