@@ -200,13 +200,7 @@ class ContractReportController extends Controller
 
     private function monthlyTakeHome(Candidate $candidate): float
     {
-        $monthlyTakeHome = (float) $candidate->take_home;
-
-        if ($monthlyTakeHome <= 0) {
-            $monthlyTakeHome = (float) $candidate->onboarding_ctc / 12;
-        }
-
-        return round(max(0, $monthlyTakeHome), 2);
+        return round(max(0, (float) $candidate->onboarding_ctc / 12), 2);
     }
 
     private function syncReportSalary(ContractReport $report, int $daysInMonth): void

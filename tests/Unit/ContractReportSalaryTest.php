@@ -17,7 +17,7 @@ use ReflectionMethod;
 class ContractReportSalaryTest extends TestCase
 {
     #[DataProvider('monthlySalaryCases')]
-    public function test_monthly_salary_uses_take_home_without_applying_client_billing(
+    public function test_monthly_salary_uses_onboarding_ctc_divided_by_twelve(
         float $takeHome,
         float $annualCtc,
         float $expected,
@@ -37,7 +37,7 @@ class ContractReportSalaryTest extends TestCase
     public static function monthlySalaryCases(): array
     {
         return [
-            'take-home is the monthly salary' => [48333, 580000, 48333.00],
+            'take-home is ignored' => [48333, 525600, 43800.00],
             'annual CTC is divided by twelve when take-home is missing' => [0, 1200000, 100000.00],
             'negative salary values cannot produce a negative report salary' => [-1, -120000, 0.00],
         ];
