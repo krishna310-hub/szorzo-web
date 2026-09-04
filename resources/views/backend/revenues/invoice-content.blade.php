@@ -1,3 +1,11 @@
+@php
+    $invoiceCandidates = $revenue->candidates->isNotEmpty()
+        ? $revenue->candidates
+        : collect(array_filter([$revenue->candidate]));
+    $isContractInvoice = $invoiceCandidates->count() > 1
+        || $invoiceCandidates->contains(fn ($candidate) => filled($candidate->pivot?->contract_month));
+@endphp
+
 <style>
     @page { size: A4 portrait; margin: 0; }
     .invoice-page, .invoice-page * { box-sizing: content-box !important; }
@@ -46,7 +54,12 @@
     .from-lines td:last-child { width: 50%; }
     .description-head th { height: 6.7mm; padding-top: 3mm; text-align: center; font-size: 11.5pt; line-height: 1; font-weight: 700; background: #fff; }
     .service-row td { height: 20.5mm; padding: .6mm 1.3mm; font-size: 10pt; }
+    .service-row.contract-service td { height: 45mm; }
     .service-heading { font-weight: 700; margin-bottom: 2.3mm; }
+    .contract-candidate-label { margin-top: 5.1mm; }
+    .contract-candidate-list { margin: 5.2mm 0 0 8mm; padding-left: 5mm; }
+    .contract-candidate-list li { margin-bottom: 1.4mm; padding-left: 1.5mm; }
+    .timesheet-note { margin-top: 5.8mm; }
     .candidate-detail { width: 100%; border: 0 !important; }
     .candidate-detail td { height: auto !important; padding: 0 !important; border: 0 !important; line-height: 1.2; }
     .candidate-detail td:first-child { width: 36%; white-space: nowrap; }
@@ -120,17 +133,17 @@
             <th>DESCRIPTION</th>
             <th>AMOUNT IN RUPEES</th>
         </tr>
-        <tr class="service-row">
+        <tr class="service-row{{ $isContractInvoice ? ' contract-service' : '' }}">
             <td>
-                @if($revenue->candidates->count() > 1)
-                    <div class="service-heading">Contract Staffing Charges</div>
-                    @foreach($revenue->candidates as $cand)
-                        <table class="candidate-detail" style="margin-bottom: 6px; border-bottom: 1px dashed #ccc; padding-bottom: 4px;">
-                            <tr><td style="width: 140px;">Candidate Name</td><td style="width: 10px;">:</td><td><strong>{{ $cand->candidate_name }}</strong> ({{ $cand->jobRole?->job_role ?? '-' }})</td></tr>
-                            <tr><td>Payable Salary / CTC</td><td>:</td><td>Rs {{ number_format((float) ($cand->pivot->payable_salary ?? $cand->onboarding_ctc ?? $cand->take_home), 2) }}/-</td></tr>
-                            <tr><td>Date of Joining</td><td>:</td><td>{{ $cand->onboarding_date?->format('d-m-Y') ?? ($cand->contract_from_date?->format('d-m-Y') ?? '-') }}</td></tr>
-                        </table>
-                    @endforeach
+                @if($isContractInvoice)
+                    <div class="service-heading">Talent Deployment &amp;<br>Payroll Management Service Charges</div>
+                    <div class="contract-candidate-label">Our Deployed Candidate Names</div>
+                    <ol class="contract-candidate-list">
+                        @foreach($invoiceCandidates as $cand)
+                            <li>{{ $cand->candidate_name }}</li>
+                        @endforeach
+                    </ol>
+                    <div class="timesheet-note">Timesheets attached</div>
                 @else
                     @php
                         $singleCand = $revenue->candidates->first() ?? $revenue->candidate;
@@ -174,6 +187,10 @@
     <div class="signature">
         <div class="signature-heading">For SZORZO Technologies Private Limited,</div>
         <div class="signature-name">Kannan PC</div>
-        <div class="signature-role">Director: Administration</div>
+        @if($isContractInvoice)
+            <div class="signature-role">Director<br>Administration &amp; Finance</div>
+        @else
+            <div class="signature-role">Director: Administration</div>
+        @endif
     </div>
 </div>
