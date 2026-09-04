@@ -582,7 +582,7 @@ class AdminController extends Controller
     private function contractRevenueByMonth($candidates, CarbonImmutable $yearStart, CarbonImmutable $yearEnd)
     {
         $reports = ContractReport::query()
-            ->with('candidate:id,client_id,job_role_id,take_home,onboarding_ctc,is_hourly,hourly_salary')
+            ->with('candidate.clientRequirement.billing')
             ->whereBetween('salary_month', [$yearStart->toDateString(), $yearEnd->toDateString()])
             ->whereIn('candidate_id', (clone $candidates)->select('candidates.id'))
             ->whereHas('candidate', fn ($query) => $query
@@ -592,53 +592,38 @@ class AdminController extends Controller
                 ->whereColumn('candidates.contract_to_date', '>=', 'contract_reports.salary_month'))
             ->get();
 
-        $clientIds = $reports->pluck('candidate.client_id')->filter()->unique();
-        $jobRoleIds = $reports->pluck('candidate.job_role_id')->filter()->unique();
-        $requirements = ClientRequirement::query()
-            ->with('billing:id,value')
-            ->whereIn('client_id', $clientIds)
-            ->whereIn('job_role_id', $jobRoleIds)
-            ->orderBy('id')
-            ->get()
-            ->keyBy(fn (ClientRequirement $requirement) => $requirement->client_id.':'.$requirement->job_role_id);
-
         return $reports
             ->groupBy(fn (ContractReport $report) => $report->salary_month->format('Y-m'))
-            ->map(function ($monthlyReports) use ($requirements) {
-                return round($monthlyReports->sum(function (ContractReport $report) use ($requirements) {
-                    $candidate = $report->candidate;
-                    $requirement = $candidate
-                        ? $requirements->get($candidate->client_id.':'.$candidate->job_role_id)
-                        : null;
-                    $revenuePercentage = (float) ($requirement?->billing?->value ?? 0);
-                    $workedHours = (float) ($report->worked_hours ?? 0);
+            ->map(fn ($monthlyReports) => round(
+                $monthlyReports->sum(fn (ContractReport $report) => $this->contractReportRevenue($report)),
+                2
+            ));
+    }
 
-                    if ($candidate?->is_hourly) {
-                        $payableSalary = round(
-                            max(0, (float) $candidate->hourly_salary * $workedHours),
-                            2
-                        );
-                    } else {
-                        $monthlyTakeHome = (float) ($candidate?->take_home ?? 0);
+    private function contractReportRevenue(ContractReport $report): float
+    {
+        $candidate = $report->candidate;
+        $revenuePercentage = min(100, max(
+            0,
+            (float) ($candidate?->clientRequirement?->billing?->value ?? 0)
+        ));
 
-                        if ($monthlyTakeHome <= 0) {
-                            $monthlyTakeHome = (float) ($candidate?->onboarding_ctc ?? 0) / 12;
-                        }
+        if ($report->is_hourly) {
+            $grossIntake = round(max(
+                0,
+                (float) ($candidate?->hourly_salary ?? 0) * (float) ($report->worked_hours ?? 0)
+            ), 2);
+        } else {
+            $monthlySalary = round(max(0, (float) ($candidate?->onboarding_ctc ?? 0) / 12), 2);
+            $daysInMonth = $report->salary_month->daysInMonth;
+            $leaveDays = min($daysInMonth, max(0, (int) $report->absent_days));
+            $grossIntake = round(max(
+                0,
+                $monthlySalary - (($monthlySalary / $daysInMonth) * $leaveDays)
+            ), 2);
+        }
 
-                        $daysInMonth = $report->salary_month->daysInMonth;
-                        $leaveDays = min($daysInMonth, max(0, (int) $report->absent_days));
-                        $payableSalary = round(
-                            max(
-                                0,
-                                $monthlyTakeHome - (($monthlyTakeHome / $daysInMonth) * $leaveDays)
-                            ),
-                            2
-                        );
-                    }
-
-                    return $payableSalary * $revenuePercentage / 100;
-                }), 2);
-            });
+        return round($grossIntake * $revenuePercentage / 100, 2);
     }
 
     private function monthlyTargetAnalytics(

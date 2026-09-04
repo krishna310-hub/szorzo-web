@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Http\Controllers\backend\AdminController;
 use App\Http\Controllers\backend\ContractReportController;
 use App\Http\Controllers\backend\RevenueController;
 use App\Models\Billing;
@@ -125,6 +126,25 @@ class ContractReportSalaryTest extends TestCase
         $this->assertSame(35.0, $second->revenue_percentage);
         $this->assertSame(22400.0, $second->contract_revenue);
         $this->assertSame(7249.95, $monthly->contract_revenue);
+    }
+
+    public function test_dashboard_uses_the_contract_report_revenue_calculation(): void
+    {
+        $monthly = $this->reportWithRequirement(15, 0, false, 0, 48333);
+        $monthly->salary_month = '2026-07-01';
+        $monthly->absent_days = 0;
+        $monthly->candidate->onboarding_ctc = 1667496;
+        $monthly->candidate->take_home = 48333;
+
+        $hourly = $this->reportWithRequirement(35, 400, true, 56);
+        $hourly->salary_month = '2026-07-01';
+        $hourly->candidate->hourly_salary = 400;
+
+        $method = new ReflectionMethod(AdminController::class, 'contractReportRevenue');
+        $controller = new AdminController;
+
+        $this->assertSame(20843.70, $method->invoke($controller, $monthly));
+        $this->assertSame(7840.00, $method->invoke($controller, $hourly));
     }
 
     private function reportWithRequirement(
