@@ -212,6 +212,24 @@ class ContractReportSalaryTest extends TestCase
         $this->assertSame(60000.0, $method->invoke(new AdminController, $candidate));
     }
 
+    public function test_dashboard_calculates_offer_declined_revenue_from_requirement_ctc_when_candidate_ctc_is_zero(): void
+    {
+        $billing = new Billing(['value' => 8.33]);
+        $requirement = new ClientRequirement(['ctc' => 1200000]);
+        $requirement->setRelation('billing', $billing);
+        $candidate = new Candidate([
+            'mode_id' => 1,
+            'level_of_interview_id' => 22,
+            'expected_ctc' => 0,
+            'onboarding_ctc' => 0,
+        ]);
+        $candidate->setRelation('client', new Client(['client' => 'External Client']));
+        $candidate->setRelation('clientRequirement', $requirement);
+        $method = new ReflectionMethod(AdminController::class, 'candidateRevenue');
+
+        $this->assertSame(99960.0, $method->invoke(new AdminController, $candidate));
+    }
+
     private function reportWithRequirement(
         float $billingPercentage,
         float $requirementCtc,

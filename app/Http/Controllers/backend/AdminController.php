@@ -586,7 +586,9 @@ class AdminController extends Controller
         }
 
         $ctc = in_array((int) $candidate->level_of_interview_id, $declinedLevelIds, true)
-            ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
+            ? ($candidate->onboarding_ctc
+                ?: $candidate->expected_ctc
+                ?: $candidate->clientRequirement?->ctc)
             : $candidate->onboarding_ctc;
 
         // Internal SZORZO hires are not client placements and therefore do not
