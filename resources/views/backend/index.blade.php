@@ -1971,7 +1971,7 @@
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                     <div>
                                         <h5 class="section-title mb-1">Revenue Outcomes</h5>
-                                        <p class="text-muted small mb-0">Onboarded, joiner-declined, and contract revenue for <span class="selected-chart-year">{{ $chartYearLabel }}</span></p>
+                                        <p class="text-muted small mb-0">Onboarded, joiner-declined, offer-declined, and contract revenue for <span class="selected-chart-year">{{ $chartYearLabel }}</span></p>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2">
                                         <span id="onboardedRevenueBadge" class="badge bg-success-subtle text-success" style="font-size: 1rem; padding: 0.5rem 0.75rem;">Onboarded: &#8377;{{ number_format($onboardedRevenue, 2) }}</span>

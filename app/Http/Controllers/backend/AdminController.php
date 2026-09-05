@@ -325,21 +325,21 @@ class AdminController extends Controller
                     $onboarded->where('level_of_interview_id', 20)
                         ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
                 })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
-                    $declined->where('level_of_interview_id', 21)
+                    $declined->whereIn('level_of_interview_id', [21, 22])
                         ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                 });
             })
             ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
         $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate);
         $monthlyOutcomeRevenue = $revenueOutcomes
-            ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
+            ->groupBy(fn ($candidate) => in_array((int) $candidate->level_of_interview_id, [21, 22], true)
                 ? $candidate->updated_at->format('Y-m')
                 : $candidate->onboarding_date->format('Y-m'));
         $monthlyOnboardedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
             ->where('level_of_interview_id', 20)
             ->sum($candidateRevenue));
         $monthlyDeclinedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
-            ->where('level_of_interview_id', 21)
+            ->whereIn('level_of_interview_id', [21, 22])
             ->sum($candidateRevenue));
         $monthlyContractRevenue = $this->contractRevenueByMonth(
             $chartCandidates,
@@ -348,7 +348,7 @@ class AdminController extends Controller
         );
         $onboardedRevenue = $revenueOutcomes->where('level_of_interview_id', 20)
             ->sum($candidateRevenue);
-        $declinedRevenue = $revenueOutcomes->where('level_of_interview_id', 21)
+        $declinedRevenue = $revenueOutcomes->whereIn('level_of_interview_id', [21, 22])
             ->sum($candidateRevenue);
         $contractRevenue = $monthlyContractRevenue->sum();
         $totalOnboardingRevenue = (clone $onboardingCandidates)
@@ -502,12 +502,12 @@ class AdminController extends Controller
                         $onboarded->where('level_of_interview_id', 20)
                             ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
                     })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
-                        $declined->where('level_of_interview_id', 21)
+                        $declined->whereIn('level_of_interview_id', [21, 22])
                             ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                     });
                 })
                 ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
-                ->groupBy(fn ($candidate) => (int) $candidate->level_of_interview_id === 21
+                ->groupBy(fn ($candidate) => in_array((int) $candidate->level_of_interview_id, [21, 22], true)
                     ? $candidate->updated_at->format('Y-m')
                     : $candidate->onboarding_date->format('Y-m'))
             : collect();
@@ -538,7 +538,7 @@ class AdminController extends Controller
         }
         $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate);
         $monthlyOnboardedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 20)->sum($candidateRevenue));
-        $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 21)->sum($candidateRevenue));
+        $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->whereIn('level_of_interview_id', [21, 22])->sum($candidateRevenue));
         $monthlyContractRevenue = $user->can('read', Revenue::class)
             ? $this->contractRevenueByMonth($candidates, $yearStart, $yearEnd)
             : collect();
@@ -571,7 +571,7 @@ class AdminController extends Controller
             return 0.0;
         }
 
-        $ctc = (int) $candidate->level_of_interview_id === 21
+        $ctc = in_array((int) $candidate->level_of_interview_id, [21, 22], true)
             ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
             : $candidate->onboarding_ctc;
 
