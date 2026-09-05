@@ -212,10 +212,13 @@ class ContractReportSalaryTest extends TestCase
         $this->assertSame(60000.0, $method->invoke(new AdminController, $candidate));
     }
 
-    public function test_dashboard_calculates_offer_declined_revenue_from_requirement_ctc_when_candidate_ctc_is_zero(): void
+    public function test_dashboard_uses_requirement_revenue_when_declined_candidate_ctc_is_zero(): void
     {
         $billing = new Billing(['value' => 8.33]);
-        $requirement = new ClientRequirement(['ctc' => 1200000]);
+        $requirement = new ClientRequirement([
+            'ctc' => 2400000,
+            'revenue_amount' => 99960,
+        ]);
         $requirement->setRelation('billing', $billing);
         $candidate = new Candidate([
             'mode_id' => 1,

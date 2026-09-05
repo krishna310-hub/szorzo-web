@@ -585,16 +585,21 @@ class AdminController extends Controller
             return 0.0;
         }
 
-        $ctc = in_array((int) $candidate->level_of_interview_id, $declinedLevelIds, true)
-            ? ($candidate->onboarding_ctc
-                ?: $candidate->expected_ctc
-                ?: $candidate->clientRequirement?->ctc)
+        $isDeclined = in_array((int) $candidate->level_of_interview_id, $declinedLevelIds, true);
+        $ctc = $isDeclined
+            ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
             : $candidate->onboarding_ctc;
 
         // Internal SZORZO hires are not client placements and therefore do not
         // contribute to dashboard onboarding revenue.
         if (str_contains(mb_strtolower((string) $candidate->client?->client), 'szorzo')) {
             return 0.0;
+        }
+
+        // If a declined candidate has no recorded CTC, the requirement's
+        // pre-calculated revenue is the authoritative lost-revenue amount.
+        if ($isDeclined && (float) $ctc <= 0) {
+            return round(max(0, (float) $candidate->clientRequirement?->revenue_amount), 2);
         }
 
         $billingPercentage = $candidate->clientRequirement?->billing?->value

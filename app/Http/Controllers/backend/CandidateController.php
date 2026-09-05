@@ -159,9 +159,11 @@ class CandidateController extends Controller
     {
         $this->authorize('edit', Candidate::class);
 
+        $candidate = $this->visibleCandidates()->findOrFail($id);
+
         return view('backend.candidates.edit', array_merge(
-            ['candidate' => $this->visibleCandidates()->findOrFail($id)],
-            $this->formData()
+            ['candidate' => $candidate],
+            $this->formData($candidate)
         ));
     }
 
@@ -488,7 +490,7 @@ class CandidateController extends Controller
         return back()->with('success', count($validRows).' candidate row(s) imported successfully.');
     }
 
-    private function formData(): array
+    private function formData(?Candidate $candidate = null): array
     {
         $isRecruiter = $this->accessLevel() === 'recruiter';
         $linkedRecruiter = $isRecruiter
@@ -501,9 +503,13 @@ class CandidateController extends Controller
             'linkedRecruiter' => $linkedRecruiter,
             'clients' => Client::where('status', true)->orderBy('client')->get(),
             'clientRequirements' => ClientRequirement::with(['billing:id,value', 'jobRole:id,job_role'])
-                ->where('status', true)
+                ->where(function ($query) use ($candidate) {
+                    $query->where('status', true)
+                        ->when($candidate?->client_requirement_id, fn ($query, $requirementId) => $query
+                            ->orWhereKey($requirementId));
+                })
                 ->orderBy('id')
-                ->get(['id', 'client_id', 'job_role_id', 'billing_id', 'mode_id', 'mode_ids', 'position_level']),
+                ->get(['id', 'client_id', 'job_role_id', 'billing_id', 'mode_id', 'mode_ids', 'position_level', 'status']),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
             'modes' => Mode::where('status', true)->orderBy('mode')->get(),
             'clientJobRoleMap' => ClientJobRole::where('status', true)
@@ -619,7 +625,11 @@ class CandidateController extends Controller
         $requirementMatchesCandidate = ClientRequirement::whereKey($data['client_requirement_id'])
             ->where('client_id', $data['client_id'])
             ->where('job_role_id', $data['job_role_id'])
-            ->where('status', true)
+            ->where(function ($query) use ($candidate) {
+                $query->where('status', true)
+                    ->when($candidate?->client_requirement_id, fn ($query, $requirementId) => $query
+                        ->orWhereKey($requirementId));
+            })
             ->where(function ($query) use ($data) {
                 $query->whereJsonContains('mode_ids', (int) $data['mode_id'])
                     ->orWhere(function ($legacyQuery) use ($data) {

@@ -68,7 +68,7 @@
                     data-client="{{ $requirement->client_id }}" data-role="{{ $requirement->job_role_id }}"
                     data-modes='@json($requirement->mode_ids ?: array_filter([$requirement->mode_id]))'
                     @selected((string) old('client_requirement_id', $candidate->client_requirement_id ?? '') === (string) $requirement->id)>
-                    #{{ $requirement->id }} · {{ $requirement->jobRole?->job_role ?? 'No role' }} · Billing {{ $requirement->billing?->value ?? 0 }}%{{ $requirement->position_level ? ' · '.$requirement->position_level : '' }}
+                    #{{ $requirement->id }} · {{ $requirement->jobRole?->job_role ?? 'No role' }} · Billing {{ $requirement->billing?->value ?? 0 }}%{{ $requirement->position_level ? ' · '.$requirement->position_level : '' }}{{ ! $requirement->status ? ' · Inactive' : '' }}
                 </option>
             @endforeach
         </select>
