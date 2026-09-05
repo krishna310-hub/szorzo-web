@@ -506,7 +506,7 @@ class CandidateController extends Controller
                 ->where(function ($query) use ($candidate) {
                     $query->where('status', true)
                         ->when($candidate?->client_requirement_id, fn ($query, $requirementId) => $query
-                            ->orWhereKey($requirementId));
+                            ->orWhere('id', $requirementId));
                 })
                 ->orderBy('id')
                 ->get(['id', 'client_id', 'job_role_id', 'billing_id', 'mode_id', 'mode_ids', 'position_level', 'status']),
@@ -628,7 +628,7 @@ class CandidateController extends Controller
             ->where(function ($query) use ($candidate) {
                 $query->where('status', true)
                     ->when($candidate?->client_requirement_id, fn ($query, $requirementId) => $query
-                        ->orWhereKey($requirementId));
+                        ->orWhere('id', $requirementId));
             })
             ->where(function ($query) use ($data) {
                 $query->whereJsonContains('mode_ids', (int) $data['mode_id'])
