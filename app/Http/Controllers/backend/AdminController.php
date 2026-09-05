@@ -190,6 +190,8 @@ class AdminController extends Controller
             ->withCount(['candidates' => $candidateLevelScope])
             ->orderBy('sort_order')
             ->get();
+        $offerDeclinedLevelIds = $this->levelIdsByName($candidateLevels, 'Offer Declined', [22]);
+        $declinedLevelIds = collect([21])->merge($offerDeclinedLevelIds)->unique()->values()->all();
 
         // Onboarding outcomes must follow the actual onboarding date, not the
         // date on which the candidate record was created.
@@ -302,7 +304,7 @@ class AdminController extends Controller
         // advance to onboarding. Declined offers have no onboarding date, so
         // their status update date is the available outcome date.
         $monthlyOfferAccepted = $monthlyCandidateLevelCounts([30, 20], 'onboarding_date');
-        $monthlyOfferDeclined = $monthlyCandidateLevelCounts([22], 'candidates.updated_at');
+        $monthlyOfferDeclined = $monthlyCandidateLevelCounts($offerDeclinedLevelIds, 'candidates.updated_at');
         $monthlyOnboarded = $monthlyCandidateLevelCounts([20], 'onboarding_date');
         $monthlyJoinerDeclined = $monthlyCandidateLevelCounts([21], 'candidates.updated_at');
         $monthlyJoiningDetails = $joiningMonths->map(fn ($month) => [
@@ -320,26 +322,26 @@ class AdminController extends Controller
         // separately from contract reports.
         $revenueOutcomes = (clone $chartCandidates)
             ->with(['client.billing', 'clientRequirement.billing'])
-            ->where(function ($query) use ($yearStart, $yearEnd) {
+            ->where(function ($query) use ($yearStart, $yearEnd, $declinedLevelIds) {
                 $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
                     $onboarded->where('level_of_interview_id', 20)
                         ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
-                })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
-                    $declined->whereIn('level_of_interview_id', [21, 22])
+                })->orWhere(function ($declined) use ($yearStart, $yearEnd, $declinedLevelIds) {
+                    $declined->whereIn('level_of_interview_id', $declinedLevelIds)
                         ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                 });
             })
             ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at']);
-        $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate);
+        $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate, $declinedLevelIds);
         $monthlyOutcomeRevenue = $revenueOutcomes
-            ->groupBy(fn ($candidate) => in_array((int) $candidate->level_of_interview_id, [21, 22], true)
+            ->groupBy(fn ($candidate) => in_array((int) $candidate->level_of_interview_id, $declinedLevelIds, true)
                 ? $candidate->updated_at->format('Y-m')
                 : $candidate->onboarding_date->format('Y-m'));
         $monthlyOnboardedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
             ->where('level_of_interview_id', 20)
             ->sum($candidateRevenue));
         $monthlyDeclinedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
-            ->whereIn('level_of_interview_id', [21, 22])
+            ->whereIn('level_of_interview_id', $declinedLevelIds)
             ->sum($candidateRevenue));
         $monthlyContractRevenue = $this->contractRevenueByMonth(
             $chartCandidates,
@@ -348,7 +350,7 @@ class AdminController extends Controller
         );
         $onboardedRevenue = $revenueOutcomes->where('level_of_interview_id', 20)
             ->sum($candidateRevenue);
-        $declinedRevenue = $revenueOutcomes->whereIn('level_of_interview_id', [21, 22])
+        $declinedRevenue = $revenueOutcomes->whereIn('level_of_interview_id', $declinedLevelIds)
             ->sum($candidateRevenue);
         $contractRevenue = $monthlyContractRevenue->sum();
         $totalOnboardingRevenue = (clone $onboardingCandidates)
@@ -469,6 +471,9 @@ class AdminController extends Controller
         $yearStart = CarbonImmutable::create($year, 4, 1)->startOfDay();
         $yearEnd = $yearStart->addYear()->subDay()->endOfDay();
         $months = collect(range(0, 11))->map(fn ($offset) => $yearStart->addMonths($offset));
+        $levelNames = InterviewLevel::pluck('level', 'id');
+        $offerDeclinedLevelIds = $this->levelIdsByName($levelNames, 'Offer Declined', [22]);
+        $declinedLevelIds = collect([21])->merge($offerDeclinedLevelIds)->unique()->values()->all();
         $candidates = Candidate::visibleTo($user)
             ->when($data['recruiter_id'] ?? null, fn ($query, $id) => $query->where('recruiter_id', $id))
             ->when($data['client_id'] ?? null, fn ($query, $id) => $query->where('client_id', $id));
@@ -492,26 +497,25 @@ class AdminController extends Controller
         };
 
         $offerAccepted = $levelCounts([30, 20], 'onboarding_date');
-        $offerDeclined = $levelCounts([22], 'candidates.updated_at');
+        $offerDeclined = $levelCounts($offerDeclinedLevelIds, 'candidates.updated_at');
         $onboarded = $levelCounts([20], 'onboarding_date');
         $joinerDeclined = $levelCounts([21], 'candidates.updated_at');
         $outcomes = $user->can('read', Revenue::class)
             ? (clone $candidates)->with(['client.billing', 'clientRequirement.billing'])
-                ->where(function ($query) use ($yearStart, $yearEnd) {
+                ->where(function ($query) use ($yearStart, $yearEnd, $declinedLevelIds) {
                     $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
                         $onboarded->where('level_of_interview_id', 20)
                             ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
-                    })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
-                        $declined->whereIn('level_of_interview_id', [21, 22])
+                    })->orWhere(function ($declined) use ($yearStart, $yearEnd, $declinedLevelIds) {
+                        $declined->whereIn('level_of_interview_id', $declinedLevelIds)
                             ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
                     });
                 })
                 ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.updated_at'])
-                ->groupBy(fn ($candidate) => in_array((int) $candidate->level_of_interview_id, [21, 22], true)
+                ->groupBy(fn ($candidate) => in_array((int) $candidate->level_of_interview_id, $declinedLevelIds, true)
                     ? $candidate->updated_at->format('Y-m')
                     : $candidate->onboarding_date->format('Y-m'))
             : collect();
-        $levelNames = InterviewLevel::pluck('level', 'id');
         $pipelineCounts = (clone $candidates)
             ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
             ->selectRaw('level_of_interview_id, COUNT(*) as total')
@@ -536,9 +540,9 @@ class AdminController extends Controller
                 $pipelineCounts[$levelNames[$levelId]] = (int) ($onboardingPipelineCounts[$levelId] ?? 0);
             }
         }
-        $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate);
+        $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate, $declinedLevelIds);
         $monthlyOnboardedRevenue = $outcomes->map(fn ($rows) => $rows->where('level_of_interview_id', 20)->sum($candidateRevenue));
-        $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->whereIn('level_of_interview_id', [21, 22])->sum($candidateRevenue));
+        $monthlyDeclinedRevenue = $outcomes->map(fn ($rows) => $rows->whereIn('level_of_interview_id', $declinedLevelIds)->sum($candidateRevenue));
         $monthlyContractRevenue = $user->can('read', Revenue::class)
             ? $this->contractRevenueByMonth($candidates, $yearStart, $yearEnd)
             : collect();
@@ -563,7 +567,7 @@ class AdminController extends Controller
         ]);
     }
 
-    private function candidateRevenue(Candidate $candidate): float
+    private function candidateRevenue(Candidate $candidate, array $declinedLevelIds = [21, 22]): float
     {
         // Contract income has its own dashboard series and must not be counted
         // again as an onboarding outcome.
@@ -571,7 +575,7 @@ class AdminController extends Controller
             return 0.0;
         }
 
-        $ctc = in_array((int) $candidate->level_of_interview_id, [21, 22], true)
+        $ctc = in_array((int) $candidate->level_of_interview_id, $declinedLevelIds, true)
             ? ($candidate->onboarding_ctc ?: $candidate->expected_ctc)
             : $candidate->onboarding_ctc;
 
@@ -589,6 +593,16 @@ class AdminController extends Controller
             max(0, (float) $ctc) * min(100, max(0, (float) $billingPercentage)) / 100,
             2
         );
+    }
+
+    private function levelIdsByName($levels, string $name, array $fallbackIds = []): array
+    {
+        $normalize = fn ($value) => mb_strtolower(trim((string) preg_replace('/\s+/u', ' ', (string) $value)));
+        $ids = collect($levels)
+            ->filter(fn ($level, $id) => $normalize(is_object($level) ? $level->level : $level) === $normalize($name))
+            ->map(fn ($level, $id) => (int) (is_object($level) ? $level->id : $id));
+
+        return $ids->merge($fallbackIds)->unique()->values()->all();
     }
 
     private function contractRevenueByMonth($candidates, CarbonImmutable $yearStart, CarbonImmutable $yearEnd)
