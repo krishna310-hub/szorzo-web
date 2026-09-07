@@ -388,9 +388,11 @@ class AdminController extends Controller
         });
 
         return view('backend.index', [
-            'scopeLabel' => $isRecruiter
-                ? 'My recruitment pipeline'
-                : ($isDeliveryLead ? 'My delivery lead recruitment pipeline' : 'Talent Aquisition overview'),
+            'scopeLabel' => (int) $user->role_id === 4
+                ? 'Customer Experience and Operations'
+                : ($isRecruiter
+                    ? 'My recruitment pipeline'
+                    : ($isDeliveryLead ? 'My delivery lead recruitment pipeline' : 'Talent Aquisition overview')),
             'isSuperAdminDashboard' => $isSuperAdmin,
             'isDeliveryLeadDashboard' => $isDeliveryLead,
             'isRecruiterDashboard' => $isPersonalDashboard,
