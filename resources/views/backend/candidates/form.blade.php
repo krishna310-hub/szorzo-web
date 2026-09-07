@@ -79,19 +79,19 @@
         <select class="form-select" id="mode_id" name="mode_id" required>
             <option value="">Select mode</option>
             @foreach ($modes as $mode)
-                <option value="{{ $mode->id }}" @selected((string) old('mode_id', $candidate->mode_id ?? '') === (string) $mode->id)>{{ $mode->mode }}</option>
+                <option value="{{ $mode->id }}" data-mode="{{ strtolower(trim($mode->mode)) }}" @selected((string) old('mode_id', $candidate->mode_id ?? '') === (string) $mode->id)>{{ $mode->mode }}</option>
             @endforeach
         </select>
         @error('mode_id')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4 contract-date-field">
-        <label for="contract_from_date" class="form-label">Contract From Date</label>
+        <label for="contract_from_date" class="form-label">From Date</label>
         <input type="date" class="form-control" id="contract_from_date" name="contract_from_date"
             value="{{ old('contract_from_date', isset($candidate) && $candidate->contract_from_date ? $candidate->contract_from_date->format('Y-m-d') : '') }}">
         @error('contract_from_date')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
     <div class="col-md-4 contract-date-field">
-        <label for="contract_to_date" class="form-label">Contract To Date</label>
+        <label for="contract_to_date" class="form-label">To Date</label>
         <input type="date" class="form-control" id="contract_to_date" name="contract_to_date"
             value="{{ old('contract_to_date', isset($candidate) && $candidate->contract_to_date ? $candidate->contract_to_date->format('Y-m-d') : '') }}">
         @error('contract_to_date')<span class="text-danger small">{{ $message }}</span>@enderror
@@ -416,20 +416,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const hourlySalaryField = document.querySelector('.contract-hourly-salary-field');
     const isHourly = document.getElementById('is_hourly');
     const hourlySalary = document.getElementById('hourly_salary');
+    const contractFromDate = document.getElementById('contract_from_date');
+    const contractToDate = document.getElementById('contract_to_date');
+    function selectedModeName() {
+        return mode.selectedOptions[0]?.dataset.mode || '';
+    }
     function toggleContractDates() {
-        const isContract = mode.value === '2';
-        contractDateFields.forEach(field => field.classList.toggle('d-none', !isContract));
+        const modeName = selectedModeName();
+        const usesContractDates = modeName === 'contract' || modeName === 'c2h';
+        const isContract = modeName === 'contract';
+        contractDateFields.forEach(field => field.classList.toggle('d-none', !usesContractDates));
         contractHourlyField.classList.toggle('d-none', !isContract);
+        if (!usesContractDates) {
+            contractFromDate.value = '';
+            contractToDate.value = '';
+        }
         if (!isContract) isHourly.checked = false;
         toggleHourlySalary();
     }
     function toggleHourlySalary() {
-        const showHourlySalary = mode.value === '2' && isHourly.checked;
+        const showHourlySalary = selectedModeName() === 'contract' && isHourly.checked;
         hourlySalaryField.classList.toggle('d-none', !showHourlySalary);
         if (!showHourlySalary) hourlySalary.value = '';
     }
+    function syncContractDateRange() {
+        contractToDate.min = contractFromDate.value;
+    }
     mode.addEventListener('change', toggleContractDates);
     isHourly.addEventListener('change', toggleHourlySalary);
+    contractFromDate.addEventListener('change', syncContractDateRange);
+    syncContractDateRange();
     toggleContractDates();
 });
 </script>

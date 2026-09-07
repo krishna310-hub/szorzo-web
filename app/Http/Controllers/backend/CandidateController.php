@@ -458,7 +458,7 @@ class CandidateController extends Controller
             if ($validator->fails()) {
                 $errors[] = 'Row '.$number.': '.implode(', ', $validator->errors()->all());
             } else {
-                if ((int) $data['mode_id'] !== 2) {
+                if (! in_array(strtolower(trim((string) $mode)), ['contract', 'c2h'], true)) {
                     $data['contract_from_date'] = null;
                     $data['contract_to_date'] = null;
                 }
@@ -607,9 +607,16 @@ class CandidateController extends Controller
             'onboarding_ctc.integer' => 'Onboarding CTC must be entered as a whole amount (e.g. 750000).',
         ]);
 
-        if ((int) $data['mode_id'] !== 2) {
+        $selectedModeName = strtolower(trim((string) Mode::find($data['mode_id'])?->mode));
+        $usesContractDates = in_array($selectedModeName, ['contract', 'c2h'], true);
+        $isContract = $selectedModeName === 'contract';
+
+        if (! $usesContractDates) {
             $data['contract_from_date'] = null;
             $data['contract_to_date'] = null;
+        }
+
+        if (! $isContract) {
             $data['is_hourly'] = false;
             $data['hourly_salary'] = null;
         } elseif (! $data['is_hourly']) {
