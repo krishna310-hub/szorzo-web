@@ -1210,7 +1210,9 @@
                             </div>
                         @else
                             <p class="mb-0 text-white-50">
-                                A live view of requirements, applicants and interviews available to your role.
+                                {{ $isCxOperationsDashboard
+                                    ? 'A live view of customer experience, operations, and key performance metrics available to your role.'
+                                    : 'A live view of requirements, applicants and interviews available to your role.' }}
                             </p>
                         @endif
 

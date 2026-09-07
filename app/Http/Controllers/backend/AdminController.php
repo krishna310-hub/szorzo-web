@@ -95,6 +95,7 @@ class AdminController extends Controller
         $isSuperAdmin = $accessLevel === 'super-admin';
         $isDeliveryLead = in_array($accessLevel, ['delivery-lead', 'recruiter-dl'], true);
         $isRecruiter = $accessLevel === 'recruiter';
+        $isCxOperations = (int) $user->role_id === 4;
         $isPersonalDashboard = $isRecruiter;
         $linkedRecruiter = $isRecruiter
             ? Recruiter::whereRaw('LOWER(email) = ?', [mb_strtolower($user->email)])->first()
@@ -388,7 +389,7 @@ class AdminController extends Controller
         });
 
         return view('backend.index', [
-            'scopeLabel' => (int) $user->role_id === 4
+            'scopeLabel' => $isCxOperations
                 ? 'Customer Experience and Operations'
                 : ($isRecruiter
                     ? 'My recruitment pipeline'
@@ -396,6 +397,7 @@ class AdminController extends Controller
             'isSuperAdminDashboard' => $isSuperAdmin,
             'isDeliveryLeadDashboard' => $isDeliveryLead,
             'isRecruiterDashboard' => $isPersonalDashboard,
+            'isCxOperationsDashboard' => $isCxOperations,
             'showClientFilter' => true,
             'recruiterLinked' => ! $isRecruiter || (bool) $linkedRecruiterId,
             'linkedRecruiter' => $linkedRecruiter,
