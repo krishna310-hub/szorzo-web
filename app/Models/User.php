@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
@@ -63,5 +64,14 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class,'role_id');
+    }
+
+    public function attendances() { return $this->hasMany(Attendance::class); }
+    public function leaveRequests() { return $this->hasMany(LeaveRequest::class); }
+
+    public function scopeEligibleForAttendance(Builder $query): Builder
+    {
+        return $query->where('is_active', 1)
+            ->whereHas('role', fn (Builder $role) => $role->where('access_level', '!=', 'super_admin'));
     }
 }

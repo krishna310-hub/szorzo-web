@@ -282,6 +282,16 @@
                 </li>
                 @endcan
 
+                @if(auth()->user()->can('read', \App\Models\Attendance::class) || auth()->user()->can('read', \App\Models\LeaveRequest::class))
+                    <li class="menu-title"><i class="ri-more-fill"></i><span>Attendance & Leave</span></li>
+                    @can('read', \App\Models\Attendance::class)
+                    <li class="nav-item"><a class="nav-link menu-link {{ request()->is('admin/attendance*') ? 'active' : '' }}" href="{{ route('admin.attendance.dashboard') }}"><i class="ri-calendar-check-line"></i><span>Attendance</span></a></li>
+                    @endcan
+                    @can('read', \App\Models\LeaveRequest::class)
+                    <li class="nav-item"><a class="nav-link menu-link {{ request()->is('admin/leaves*') ? 'active' : '' }}" href="{{ route('admin.leaves.index') }}"><i class="ri-calendar-event-line"></i><span>Leave Requests</span></a></li>
+                    @endcan
+                @endif
+
                 @can('read', \App\Models\Report::class)
                     <li class="nav-item">
                         <a href="{{ route('admin.reports.index') }}"

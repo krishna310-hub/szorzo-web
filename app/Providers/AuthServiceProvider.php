@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Billing;
+use App\Models\Attendance;
+use App\Models\LeaveRequest;
 use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\ClientJobRole;
@@ -20,6 +22,8 @@ use App\Models\Recruiter;
 use App\Models\Report;
 use App\Models\Target;
 use App\Policies\BillingPolicy;
+use App\Policies\AttendancePolicy;
+use App\Policies\LeaveRequestPolicy;
 use App\Policies\CandidatePolicy;
 use App\Policies\ClientJobRolePolicy;
 use App\Policies\ClientPolicy;
@@ -74,6 +78,8 @@ class AuthServiceProvider extends ServiceProvider
         Target::class => TargetPolicy::class,
         Report::class => ReportPolicy::class,
         ContractReport::class => ContractReportPolicy::class,
+        Attendance::class => AttendancePolicy::class,
+        LeaveRequest::class => LeaveRequestPolicy::class,
     ];
 
     /**

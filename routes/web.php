@@ -27,6 +27,8 @@ use App\Http\Controllers\backend\ReportController;
 use App\Http\Controllers\backend\RevenueController;
 use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\backend\TargetController;
+use App\Http\Controllers\backend\AttendanceController;
+use App\Http\Controllers\backend\LeaveController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -90,6 +92,22 @@ Route::controller(EmployeeController::class)->prefix('employee-onboarding')->nam
 });
 
 Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->group(function () {
+    Route::prefix('attendance')->name('attendance.')->controller(AttendanceController::class)->group(function () {
+        Route::get('/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{attendance}', 'update')->name('update');
+        Route::get('/monthly/view', 'monthly')->name('monthly');
+        Route::get('/reports/view', 'report')->name('report');
+        Route::get('/reports/export/{format}', 'export')->name('export');
+    });
+    Route::prefix('leaves')->name('leaves.')->controller(LeaveController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{leave}/review', 'review')->name('review');
+        Route::get('/{leave}/attachment', 'attachment')->name('attachment');
+    });
     // Maintenance Mode
     Route::get('/lock-screen', [AdminController::class, 'lock'])->name('lock.screen');
     Route::post('/lock-screen', [AdminController::class, 'unlock'])->name('lock.screen.unlock');

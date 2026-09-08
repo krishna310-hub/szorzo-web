@@ -129,6 +129,15 @@ class PermissionsSeeder extends Seeder
             ['name' => 'Create',    'page' => 'revenue'],
             ['name' => 'Edit',      'page' => 'revenue'],
             ['name' => 'Download',  'page' => 'revenue'],
+
+            ['name' => 'Read',      'page' => 'attendance'],
+            ['name' => 'Create',    'page' => 'attendance'],
+            ['name' => 'Edit',      'page' => 'attendance'],
+            ['name' => 'Export',    'page' => 'attendance'],
+
+            ['name' => 'Read',      'page' => 'leave'],
+            ['name' => 'Create',    'page' => 'leave'],
+            ['name' => 'Approve',   'page' => 'leave'],
         ];
 
         foreach ($permissions as $permission) {
