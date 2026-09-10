@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'SZORZO India\'s #1 GCC Launchpad | Global AI Partner')
+@section('meta_description', 'SZORZO is India\'s leading GCC launchpad and global business transformation partner specializing in GCC setup, AI solutions, engineering services, market expansion, talent consolidation, and technology-driven business growth.')
 @section('content')
     @include('frontend.includes.banner')
     <!-- About Us Section Start -->

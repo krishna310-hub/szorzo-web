@@ -11,13 +11,28 @@
 
     <!-- SEO -->
     <meta name="description"
-        content="SZORZO is India's leading GCC launchpad and global business transformation partner specializing in GCC setup, AI solutions, engineering services, market expansion, talent consolidation, and technology-driven business growth.">
+        content="@yield('meta_description', 'SZORZO is India\'s leading GCC launchpad and global business transformation partner specializing in GCC setup, AI solutions, engineering services, market expansion, talent consolidation, and technology-driven business growth.')">
 
     <meta name="keywords"
-        content="SZORZO, GCC launchpad, Global Capability Center, AI partner, business transformation, engineering services, market expansion, talent mapping, India GCC, digital transformation, enterprise solutions">
+        content="@yield('meta_keywords', 'SZORZO, GCC launchpad, Global Capability Center, AI partner, business transformation, engineering services, market expansion, talent mapping, India GCC, digital transformation, enterprise solutions')">
 
-    <meta name="author" content="Awaiken">
+    <meta name="author" content="SZORZO">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="canonical" href="@yield('canonical', url()->current())">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('title', 'SZORZO India\'s #1 GCC Launchpad | Global AI Partner')">
+    <meta property="og:description" content="@yield('meta_description', 'SZORZO is India\'s leading GCC launchpad and global business transformation partner specializing in GCC setup, AI solutions, engineering services, market expansion, talent consolidation, and technology-driven business growth.')">
+    <meta property="og:image" content="{{ asset('frontend/images/rhino-logo.png') }}">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url()->current() }}">
+    <meta name="twitter:title" content="@yield('title', 'SZORZO India\'s #1 GCC Launchpad | Global AI Partner')">
+    <meta name="twitter:description" content="@yield('meta_description', 'SZORZO is India\'s leading GCC launchpad and global business transformation partner specializing in GCC setup, AI solutions, engineering services, market expansion, talent consolidation, and technology-driven business growth.')">
+    <meta name="twitter:image" content="{{ asset('frontend/images/rhino-logo.png') }}">
 
     <meta name="google-site-verification" content="r4xkT9w636WL8NAo0laLro4E6liBlqDzniSN0mjOYSI" />
     <!-- Google tag (gtag.js) -->
@@ -34,9 +49,61 @@
     </script>
 
     <!-- Page Title -->
-    <title>
-        SZORZO India's #1 GCC Launchpad | Global AI Partner
-    </title>
+    <title>@yield('title', 'SZORZO India\'s #1 GCC Launchpad | Global AI Partner')</title>
+
+    <!-- Structured Data (JSON-LD) for Sitelinks, Organization & WebSite -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": "{{ url('/') }}/#organization",
+                "name": "SZORZO",
+                "url": "{{ url('/') }}",
+                "logo": "{{ asset('frontend/images/rhino-logo.webp') }}",
+                "description": "SZORZO is India's leading GCC launchpad and global business transformation partner specializing in GCC setup, AI solutions, engineering services, and digital transformation.",
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "Customer Support",
+                    "url": "{{ route('contact') }}"
+                }
+            },
+            {
+                "@type": "WebSite",
+                "@id": "{{ url('/') }}/#website",
+                "url": "{{ url('/') }}",
+                "name": "SZORZO",
+                "description": "SZORZO India's #1 GCC Launchpad | Global AI Partner",
+                "publisher": {
+                    "@id": "{{ url('/') }}/#organization"
+                }
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": [
+                    "About Us",
+                    "Contact Us",
+                    "SZORZO AI",
+                    "Enterprise Services",
+                    "IT Services",
+                    "Telecom Services",
+                    "Careers"
+                ],
+                "url": [
+                    "{{ route('about.us') }}",
+                    "{{ route('contact') }}",
+                    "{{ route('szorzo.ai') }}",
+                    "{{ route('enterprice.formation') }}",
+                    "{{ route('it.infrastructure') }}",
+                    "{{ route('telecom.services') }}",
+                    "{{ route('careers') }}"
+                ]
+            }
+        ]
+    }
+    </script>
+    @yield('structured_data')
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" sizes="200x200" href="{{ asset('frontend/images/rhino-logo.png') }}">

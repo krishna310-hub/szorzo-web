@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Contact Us | SZORZO - Connect with GCC & AI Experts')
+@section('meta_description', 'Get in touch with SZORZO experts for Global Capability Center (GCC) setup, AI solutions, IT infrastructure, and enterprise transformation services.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-contact-us-bg">

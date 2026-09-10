@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Careers at SZORZO | Join Our Innovation Team')
+@section('meta_description', 'Explore open careers and opportunities at SZORZO. Be part of our mission building Global Capability Centers and cutting-edge enterprise AI solutions.')
 @section('content')
 
 <!-- Page Header Start -->

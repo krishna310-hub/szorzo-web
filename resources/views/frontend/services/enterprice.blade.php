@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Enterprise Formation & GCC Services | SZORZO')
+@section('meta_description', 'End-to-end enterprise formation and GCC setup services in India. Scale operations, optimize structure, and accelerate growth with SZORZO.')
 @section('content')
 <!-- Page Header Start -->
     <div class="page-header-ef-bg">

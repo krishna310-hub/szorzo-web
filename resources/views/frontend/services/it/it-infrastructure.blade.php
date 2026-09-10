@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'IT Infrastructure Services - Design, Build & Maintain | SZORZO')
+@section('meta_description', 'Comprehensive IT infrastructure solutions: data center design, cloud computing, cybersecurity, and maintenance services by SZORZO.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-it-infrastructure-bg">

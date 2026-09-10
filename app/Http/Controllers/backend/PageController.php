@@ -332,16 +332,41 @@ class PageController extends Controller
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><urlset></urlset>');
         $xml->addAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
 
-        $url = $xml->addChild('url');
-        $url->addChild('loc', url('/'));
-        $url->addChild('lastmod', now()->toAtomString());
-        $url->addChild('priority', '1.00');
+        $staticRoutes = [
+            ['url' => url('/'), 'priority' => '1.00', 'changefreq' => 'weekly'],
+            ['url' => route('about.us'), 'priority' => '0.90', 'changefreq' => 'monthly'],
+            ['url' => route('contact'), 'priority' => '0.90', 'changefreq' => 'monthly'],
+            ['url' => route('szorzo.ai'), 'priority' => '0.90', 'changefreq' => 'weekly'],
+            ['url' => route('careers'), 'priority' => '0.80', 'changefreq' => 'weekly'],
+            ['url' => route('telecom.services'), 'priority' => '0.80', 'changefreq' => 'monthly'],
+            ['url' => route('enterprice.formation'), 'priority' => '0.80', 'changefreq' => 'monthly'],
+            ['url' => route('marketing.service'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('org.capacity.ass'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('opt.infra.off'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('enterprise.learning.solution'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('strategic.advisory'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('it.infrastructure'), 'priority' => '0.80', 'changefreq' => 'monthly'],
+            ['url' => route('data.center.design'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('data.center.managed.service'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('cyber.security'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('certificate.compliance'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+            ['url' => route('hardware.software'), 'priority' => '0.70', 'changefreq' => 'monthly'],
+        ];
+
+        foreach ($staticRoutes as $item) {
+            $url = $xml->addChild('url');
+            $url->addChild('loc', $item['url']);
+            $url->addChild('lastmod', now()->toAtomString());
+            $url->addChild('changefreq', $item['changefreq']);
+            $url->addChild('priority', $item['priority']);
+        }
 
         foreach ($pages as $page) {
             $url = $xml->addChild('url');
             $url->addChild('loc', url($page->url_slug));
-            $url->addChild('lastmod', $page->updated_at->toAtomString());
-            $url->addChild('priority', '0.80');
+            $url->addChild('lastmod', $page->updated_at ? $page->updated_at->toAtomString() : now()->toAtomString());
+            $url->addChild('changefreq', 'monthly');
+            $url->addChild('priority', '0.60');
         }
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
@@ -350,6 +375,7 @@ class PageController extends Controller
         $dom->loadXML($xml->asXML());
 
         $dom->save(base_path('sitemap.xml'));
+        $dom->save(public_path('sitemap.xml'));
     }
 
     public function deleteAll()

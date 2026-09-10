@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'SZORZO AI | Enterprise Artificial Intelligence Solutions & Strategy')
+@section('meta_description', 'From AI confusion to AI clarity. A practical 3-stage engagement that helps your leadership team understand, prioritize, and implement AI with measurable outcomes.')
 @section('content')
     <div class="page-header-szorzo-ai-bg">
         <div class="container">

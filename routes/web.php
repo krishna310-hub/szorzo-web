@@ -354,5 +354,32 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
 
 });
 
+// SEO: Sitemap and Robots
+Route::get('/sitemap.xml', function () {
+    $path = public_path('sitemap.xml');
+    if (!file_exists($path)) {
+        $path = base_path('sitemap.xml');
+    }
+    if (file_exists($path)) {
+        return response(file_get_contents($path), 200, [
+            'Content-Type' => 'application/xml',
+        ]);
+    }
+    abort(404);
+});
+
+Route::get('/robots.txt', function () {
+    $path = public_path('robots.txt');
+    if (!file_exists($path)) {
+        $path = base_path('robots.txt');
+    }
+    if (file_exists($path)) {
+        return response(file_get_contents($path), 200, [
+            'Content-Type' => 'text/plain',
+        ]);
+    }
+    abort(404);
+});
+
 // Landing Pages
 Route::get('{slug}', [HomeController::class, 'landing'])->name('landing');

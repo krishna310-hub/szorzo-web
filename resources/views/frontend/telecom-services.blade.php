@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Telecom Services | SZORZO - Connectivity & Network Solutions')
+@section('meta_description', 'Explore comprehensive telecom engineering, infrastructure management, and next-generation connectivity solutions powered by SZORZO.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-telecom-service-bg">

@@ -9,8 +9,8 @@ class SitemapRobotsController extends Controller
 {
     public function index()
     {
-        $robotsExists = file_exists(public_path('robots.txt'));
-        $sitemapExists = file_exists(public_path('sitemap.xml'));
+        $robotsExists = file_exists(public_path('robots.txt')) || file_exists(base_path('robots.txt'));
+        $sitemapExists = file_exists(public_path('sitemap.xml')) || file_exists(base_path('sitemap.xml'));
 
         return view('backend.sitemap.index', compact('robotsExists', 'sitemapExists'));
     }
@@ -23,7 +23,8 @@ class SitemapRobotsController extends Controller
     
         $file = $request->file('robots_file');
     
-        $file->move(base_path(), 'robots.txt');
+        $file->move(public_path(), 'robots.txt');
+        @copy(public_path('robots.txt'), base_path('robots.txt'));
     
         return redirect()->back()
                          ->with('success', 'robots.txt uploaded successfully.');
@@ -31,7 +32,10 @@ class SitemapRobotsController extends Controller
 
     public function downloadSitemap()
     {
-        $filePath = base_path('sitemap.xml');
+        $filePath = public_path('sitemap.xml');
+        if (!file_exists($filePath)) {
+            $filePath = base_path('sitemap.xml');
+        }
 
         if (!file_exists($filePath)) {
             return redirect()->back()->with('error', 'sitemap.xml file not found.');
@@ -45,6 +49,9 @@ class SitemapRobotsController extends Controller
     public function downloadRobots()
     {
         $filePath = public_path('robots.txt');
+        if (!file_exists($filePath)) {
+            $filePath = base_path('robots.txt');
+        }
 
         if (!file_exists($filePath)) {
             return redirect()->back()->with('error', 'robots.txt file not found.');

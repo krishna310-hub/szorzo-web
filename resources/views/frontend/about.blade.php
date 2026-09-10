@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'About Us | SZORZO - India\'s Leading GCC Launchpad & AI Partner')
+@section('meta_description', 'SZORZO is a global business transformation and engineering services partner, enabling businesses to expand, innovate, and thrive with GCC setup, AI solutions, and market entry in India.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-about-us-bg">

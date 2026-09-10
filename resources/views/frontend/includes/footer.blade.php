@@ -52,10 +52,12 @@
                         <div class="footer-links">
                             <h3>quick link</h3>
                             <ul>
-                                <li><a href="{{ route('index') }}">GCC Services</a></li>
+                                <li><a href="{{ route('about.us') }}">About Us</a></li>
+                                <li><a href="{{ route('contact') }}">Contact Us</a></li>
                                 <li><a href="{{ route('szorzo.ai') }}">SZORZO AI</a></li>
+                                <li><a href="{{ route('index') }}">GCC Services</a></li>
                                 <li><a href="{{ route('telecom.services') }}">Telecom Services</a></li>
-                                {{-- <li><a href="{{ route('contact') }}">Contact Us</a></li> --}}
+                                <li><a href="{{ route('careers') }}">Careers</a></li>
                                 <li><a href="{{ route('about.us') }}#industries">Industries</a></li>
                             </ul>
                         </div>

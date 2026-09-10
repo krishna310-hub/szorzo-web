@@ -229,12 +229,22 @@
                         </li>
 
                         <!-- ABOUT US -->
-                        <li class="menu-item-has-children">
+                        <li>
                             <a
                                 href="{{ route('about.us') }}"
                                 style="font-size: large; color: white; font-weight: bold;"
                             >
                                 ABOUT US
+                            </a>
+                        </li>
+
+                        <!-- CONTACT US -->
+                        <li>
+                            <a
+                                href="{{ route('contact') }}"
+                                style="font-size: large; color: white; font-weight: bold;"
+                            >
+                                CONTACT US
                             </a>
                         </li>
 
