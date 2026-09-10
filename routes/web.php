@@ -29,6 +29,7 @@ use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\backend\TargetController;
 use App\Http\Controllers\backend\AttendanceController;
 use App\Http\Controllers\backend\LeaveController;
+use App\Http\Controllers\backend\PayslipController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -119,6 +120,13 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/profile', 'profile')->name('profile');
         Route::post('/upload-profile-image', 'uploadProfile')->name('upload.profile');
         Route::post('/profile/change-password', 'changePassword')->middleware('throttle:6,1')->name('profile.change-password');
+    });
+
+    // Payslips
+    Route::prefix('payslip')->name('payslip.')->controller(PayslipController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/download', 'download')->name('download');
+        Route::get('/preview', 'preview')->name('preview');
     });
 
     // Roles

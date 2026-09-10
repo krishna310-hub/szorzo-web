@@ -570,6 +570,80 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+
+    @unless($publicEmployeeForm ?? false)
+    <div class="col-12 mt-4">
+        <h4 class="mt-4 mb-2 text-primary">Salary & Compensation (For Payslip)</h4>
+        <p class="text-muted fs-12 mb-3">Leave blank to use standard default breakdown (Monthly Gross: 38,050 INR, Basic: 50%, HRA: 20%, Medical: 30%, PF: 1,800, PT: 200).</p>
+    </div>
+    <div class="col-md-4">
+        <label for="monthly_gross" class="form-label">Monthly Gross CTC (INR)</label>
+        <input type="number" step="0.01" class="form-control" id="monthly_gross" name="monthly_gross" placeholder="e.g. 38050"
+            value="{{ old('monthly_gross', $employee->monthly_gross ?? '') }}">
+        @error('monthly_gross')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4">
+        <label for="basic_salary" class="form-label">Basic Salary (Full)</label>
+        <input type="number" step="0.01" class="form-control" id="basic_salary" name="basic_salary" placeholder="Auto: 50% of gross"
+            value="{{ old('basic_salary', $employee->basic_salary ?? '') }}">
+        @error('basic_salary')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4">
+        <label for="hra" class="form-label">HRA (Full)</label>
+        <input type="number" step="0.01" class="form-control" id="hra" name="hra" placeholder="Auto: 20% of gross"
+            value="{{ old('hra', $employee->hra ?? '') }}">
+        @error('hra')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 mt-3">
+        <label for="medical_allowance" class="form-label">Medical Allowance (Full)</label>
+        <input type="number" step="0.01" class="form-control" id="medical_allowance" name="medical_allowance" placeholder="Auto: 30% of gross"
+            value="{{ old('medical_allowance', $employee->medical_allowance ?? '') }}">
+        @error('medical_allowance')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 mt-3">
+        <label for="conveyance" class="form-label">Conveyance (Full)</label>
+        <input type="number" step="0.01" class="form-control" id="conveyance" name="conveyance" placeholder="Default: 0"
+            value="{{ old('conveyance', $employee->conveyance ?? '') }}">
+        @error('conveyance')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 mt-3">
+        <label for="special_allowance" class="form-label">Special Allowance (Full)</label>
+        <input type="number" step="0.01" class="form-control" id="special_allowance" name="special_allowance" placeholder="Default: 0"
+            value="{{ old('special_allowance', $employee->special_allowance ?? '') }}">
+        @error('special_allowance')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-3 mt-3">
+        <label for="pf_deduction" class="form-label">PF Deduction (Actual)</label>
+        <input type="number" step="0.01" class="form-control" id="pf_deduction" name="pf_deduction" placeholder="Default: 1800"
+            value="{{ old('pf_deduction', $employee->pf_deduction ?? '') }}">
+        @error('pf_deduction')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-3 mt-3">
+        <label for="pt_deduction" class="form-label">Professional Tax (Actual)</label>
+        <input type="number" step="0.01" class="form-control" id="pt_deduction" name="pt_deduction" placeholder="Default: 200"
+            value="{{ old('pt_deduction', $employee->pt_deduction ?? '') }}">
+        @error('pt_deduction')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-3 mt-3">
+        <label for="esi_deduction" class="form-label">ESI Deduction (Actual)</label>
+        <input type="number" step="0.01" class="form-control" id="esi_deduction" name="esi_deduction" placeholder="Default: 0"
+            value="{{ old('esi_deduction', $employee->esi_deduction ?? '') }}">
+        @error('esi_deduction')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-3 mt-3">
+        <label for="income_tax" class="form-label">Income Tax (TDS)</label>
+        <input type="number" step="0.01" class="form-control" id="income_tax" name="income_tax" placeholder="Default: 0"
+            value="{{ old('income_tax', $employee->income_tax ?? '') }}">
+        @error('income_tax')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-12 mt-3">
+        <label for="salary_remarks" class="form-label">Payslip Remarks</label>
+        <input type="text" class="form-control" id="salary_remarks" name="salary_remarks" placeholder="Default: NA"
+            value="{{ old('salary_remarks', $employee->salary_remarks ?? '') }}">
+        @error('salary_remarks')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    @endunless
+
     @if($publicEmployeeForm ?? false)
         <input type="hidden" name="status" value="0">
     @else

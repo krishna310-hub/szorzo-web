@@ -74,4 +74,12 @@ class User extends Authenticatable
         return $query->where('is_active', 1)
             ->whereHas('role', fn (Builder $role) => $role->where('access_level', '!=', 'super_admin'));
     }
+
+    public function linkedEmployee(): ?Employee
+    {
+        return Employee::where(function ($query) {
+            $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($this->email)])
+                ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($this->email)]);
+        })->first();
+    }
 }

@@ -23,22 +23,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (Schema::hasTable('settings')) {
+        try {
+            if (Schema::hasTable('settings')) {
 
-            $settings = Setting::pluck('value', 'key')->toArray();
+                $settings = Setting::pluck('value', 'key')->toArray();
 
-            View::share('settings', $settings);
+                View::share('settings', $settings);
 
-            Config::set('mail.default', $settings['mail_mailer'] ?? 'smtp');
+                Config::set('mail.default', $settings['mail_mailer'] ?? 'smtp');
 
-            Config::set('mail.mailers.smtp.host', $settings['smtp_host'] ?? '');
-            Config::set('mail.mailers.smtp.port', $settings['smtp_port'] ?? 587);
-            Config::set('mail.mailers.smtp.encryption', $settings['smtp_encryption'] ?? 'tls');
-            Config::set('mail.mailers.smtp.username', $settings['smtp_user'] ?? '');
-            Config::set('mail.mailers.smtp.password', $settings['smtp_pass'] ?? '');
+                Config::set('mail.mailers.smtp.host', $settings['smtp_host'] ?? '');
+                Config::set('mail.mailers.smtp.port', $settings['smtp_port'] ?? 587);
+                Config::set('mail.mailers.smtp.encryption', $settings['smtp_encryption'] ?? 'tls');
+                Config::set('mail.mailers.smtp.username', $settings['smtp_user'] ?? '');
+                Config::set('mail.mailers.smtp.password', $settings['smtp_pass'] ?? '');
 
-            Config::set('mail.from.address', $settings['mail_from_address'] ?? '');
-            Config::set('mail.from.name', $settings['mail_from_name'] ?? '');
+                Config::set('mail.from.address', $settings['mail_from_address'] ?? '');
+                Config::set('mail.from.name', $settings['mail_from_name'] ?? '');
+            }
+        } catch (\Throwable $e) {
+            // Gracefully ignore DB connection failure if database is offline or in CLI
         }
     }
 }

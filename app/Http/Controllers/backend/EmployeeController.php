@@ -114,10 +114,22 @@ class EmployeeController extends Controller
             'offer_letter' => 'prohibited',
             'intent_letter' => 'prohibited',
             'official_mail' => 'prohibited',
+            'monthly_gross' => 'prohibited',
+            'basic_salary' => 'prohibited',
+            'hra' => 'prohibited',
         ]);
         $request->merge(['status' => 0]);
         $data = $this->validatedData($request);
-        unset($data['client_id'], $data['date_of_joining'], $data['mode_id'], $data['offer_letter'], $data['intent_letter'], $data['official_mail']);
+        unset(
+            $data['client_id'], $data['date_of_joining'], $data['mode_id'],
+            $data['offer_letter'], $data['intent_letter'], $data['official_mail'],
+            $data['monthly_gross'], $data['basic_salary'], $data['hra'],
+            $data['conveyance'], $data['medical_allowance'], $data['special_allowance'],
+            $data['overtime_amount'], $data['lta'], $data['arrears'],
+            $data['pf_deduction'], $data['esi_deduction'], $data['pt_deduction'],
+            $data['income_tax'], $data['salary_advance'], $data['fines'],
+            $data['labour_welfare_fund'], $data['other_deductions'], $data['salary_remarks']
+        );
         $data['status'] = false;
         $data['employee_no'] = $this->generateEmployeeNumber();
 
@@ -312,6 +324,26 @@ class EmployeeController extends Controller
             'passion' => 'nullable|string|max:1000',
             'awards_appreciation' => 'nullable|string|max:1000',
             'status' => 'required|boolean',
+
+            // Salary & Compensation (For Payslip)
+            'monthly_gross' => 'nullable|numeric|min:0',
+            'basic_salary' => 'nullable|numeric|min:0',
+            'hra' => 'nullable|numeric|min:0',
+            'conveyance' => 'nullable|numeric|min:0',
+            'medical_allowance' => 'nullable|numeric|min:0',
+            'special_allowance' => 'nullable|numeric|min:0',
+            'overtime_amount' => 'nullable|numeric|min:0',
+            'lta' => 'nullable|numeric|min:0',
+            'arrears' => 'nullable|numeric|min:0',
+            'pf_deduction' => 'nullable|numeric|min:0',
+            'esi_deduction' => 'nullable|numeric|min:0',
+            'pt_deduction' => 'nullable|numeric|min:0',
+            'income_tax' => 'nullable|numeric|min:0',
+            'salary_advance' => 'nullable|numeric|min:0',
+            'fines' => 'nullable|numeric|min:0',
+            'labour_welfare_fund' => 'nullable|numeric|min:0',
+            'other_deductions' => 'nullable|numeric|min:0',
+            'salary_remarks' => 'nullable|string|max:255',
         ]);
 
         if (! $requiresContractDates) {
