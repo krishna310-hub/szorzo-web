@@ -54,7 +54,7 @@
     <!-- Structured Data (JSON-LD) for Sitelinks, Organization & WebSite -->
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
+        "@@context": "https://schema.org",
         "@graph": [
             {
                 "@type": "Organization",
