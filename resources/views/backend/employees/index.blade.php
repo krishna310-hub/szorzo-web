@@ -263,17 +263,32 @@
                 });
             });
 
+            // Auto-check verify checkbox when admin selects a file to upload
+            $(document).on('change', '.checklist-file-upload', function() {
+                if (this.files && this.files.length > 0) {
+                    var row = $(this).closest('tr');
+                    var checkbox = row.find('.checklist-checkbox');
+                    if (!checkbox.is(':checked')) {
+                        checkbox.prop('checked', true).trigger('change');
+                    }
+                }
+            });
+
             // Submit checklist form
             $('#checklist-verify-form').on('submit', function(e) {
                 e.preventDefault();
                 var form = $(this);
                 var saveBtn = $('#save-checklist-btn');
-                saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Saving...');
+                saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Saving & Uploading...');
+
+                var formData = new FormData(form[0]);
 
                 $.ajax({
                     url: form.attr('action'),
                     type: 'POST',
-                    data: form.serialize(),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function(res) {
                         if (res.status) {
                             toastr.success(res.message);

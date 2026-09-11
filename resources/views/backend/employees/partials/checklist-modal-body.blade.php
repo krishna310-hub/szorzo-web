@@ -91,9 +91,9 @@
                         <td>
                             @if($isUploaded)
                                 @if(!empty($item['files']))
-                                    <div class="d-flex flex-wrap gap-1">
+                                    <div class="d-flex flex-wrap gap-1 mb-1">
                                         @foreach($item['files'] as $file)
-                                            <a href="{{ $file['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2 d-inline-flex align-items-center gap-1" style="font-size: 12px;" title="{{ $file['name'] }}">
+                                            <a href="{{ $file['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2 d-inline-flex align-items-center gap-1" style="font-size: 11px;" title="{{ $file['name'] }}">
                                                 <i class="bx bx-file"></i>
                                                 <span>{{ $file['label'] ?? 'Document ' . $loop->iteration }}</span>
                                                 <i class="ri-external-link-line" style="font-size: 10px;"></i>
@@ -103,10 +103,27 @@
                                 @elseif($key === 'personal_details')
                                     <span class="badge bg-success-subtle text-success"><i class="bx bx-check me-1"></i>Details Provided</span>
                                 @else
-                                    <span class="badge bg-success-subtle text-success"><i class="bx bx-check me-1"></i>Uploaded</span>
+                                    <span class="badge bg-success-subtle text-success mb-1"><i class="bx bx-check me-1"></i>Uploaded</span>
                                 @endif
                             @else
-                                <span class="badge bg-light text-muted border"><i class="bx bx-x me-1"></i>Not Uploaded</span>
+                                <div class="mb-1"><span class="badge bg-light text-muted border"><i class="bx bx-x me-1"></i>Not Uploaded</span></div>
+                            @endif
+
+                            @if($key !== 'personal_details')
+                                <div class="mt-1 pt-1 border-top">
+                                    @if($item['type'] === 'document_array')
+                                        <input type="file" class="form-control form-control-sm checklist-file-upload" name="{{ $key }}[]" multiple accept=".pdf,.jpg,.jpeg,.png" style="font-size: 11px;">
+                                    @elseif($item['type'] === 'image')
+                                        <input type="file" class="form-control form-control-sm checklist-file-upload" name="employee_image" accept="image/*" style="font-size: 11px;">
+                                    @elseif($key === 'pan_card')
+                                        <input type="file" class="form-control form-control-sm checklist-file-upload" name="pan_card_file" accept=".pdf,.jpg,.jpeg,.png" style="font-size: 11px;">
+                                    @elseif($key === 'aadhaar_card')
+                                        <input type="file" class="form-control form-control-sm checklist-file-upload" name="aadhaar_file" accept=".pdf,.jpg,.jpeg,.png" style="font-size: 11px;">
+                                    @elseif($key === 'educational_certificates')
+                                        <input type="file" class="form-control form-control-sm checklist-file-upload" name="educational_certificates[]" multiple accept=".pdf,.jpg,.jpeg,.png" style="font-size: 11px;">
+                                    @endif
+                                    <span class="text-muted" style="font-size: 10px;"><i class="bx bx-cloud-upload me-1"></i>Admin upload</span>
+                                </div>
                             @endif
                         </td>
                         <td class="text-center">

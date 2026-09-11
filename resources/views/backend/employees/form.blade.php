@@ -33,7 +33,7 @@
             </div>
         </div>
     </div>
-    @endif
+    @unless($publicEmployeeForm ?? false)
     <div class="col-md-4">
         <label for="employee_image" class="form-label">Employee Image
             @if(!empty($employee->employee_image))
@@ -47,6 +47,7 @@
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>
+    @endunless
     <div class="col-md-4">
         <label for="dob" class="form-label">Date of Birth</label>
         <input type="date" class="form-control" id="dob" name="dob"
@@ -331,14 +332,14 @@
         @error('passport_validity_date')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
-    </div>
+    @unless($publicEmployeeForm ?? false)
     <div class="col-12 mt-5">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <h4 class="mb-1 text-primary">Document Checklist &amp; Uploads</h4>
+                <h4 class="mb-1 text-primary">Document Checklist &amp; Uploads (Admin Only)</h4>
                 <p class="text-muted mb-3">Accepted formats: PDF, JPG, JPEG, PNG (maximum 5 MB each). Checklist covers all 9 required verification documents.</p>
             </div>
-            @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @if(!empty($employee))
                 <input type="hidden" name="has_checklist_form" value="1">
             @endif
         </div>
@@ -628,6 +629,7 @@
             </div>
         </div>
     @endif
+    @endunless
     <div class="col-12 mt-5">
         <h4 class="mt-4 mb-3 text-primary">Family Information</h4>
     </div>

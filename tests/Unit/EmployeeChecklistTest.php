@@ -190,5 +190,20 @@ class EmployeeChecklistTest extends TestCase
         $this->assertTrue($empEdu->profile_completion['items']['educational_certificates']['is_uploaded']);
         $this->assertCount(2, $empEdu->profile_completion['items']['educational_certificates']['files']);
     }
+
+    public function test_admin_only_document_checklist_fields(): void
+    {
+        // Check that all document fields are mapped to Employee checklist
+        $docKeys = array_keys(Employee::CHECKLIST_ITEMS);
+        $this->assertContains('previous_company_offer_letters', $docKeys);
+        $this->assertContains('relieving_letters', $docKeys);
+        $this->assertContains('pay_slips', $docKeys);
+        $this->assertContains('bank_statements', $docKeys);
+        $this->assertContains('educational_certificates', $docKeys);
+        $this->assertContains('pan_card', $docKeys);
+        $this->assertContains('aadhaar_card', $docKeys);
+        $this->assertContains('photograph', $docKeys);
+        $this->assertContains('passbook_cheques', $docKeys);
+    }
 }
 

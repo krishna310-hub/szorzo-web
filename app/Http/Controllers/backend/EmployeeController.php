@@ -153,6 +153,20 @@ class EmployeeController extends Controller
             'monthly_gross' => 'prohibited',
             'basic_salary' => 'prohibited',
             'hra' => 'prohibited',
+            'previous_company_offer_letters' => 'prohibited',
+            'relieving_letters' => 'prohibited',
+            'pay_slips' => 'prohibited',
+            'bank_statements' => 'prohibited',
+            'passbook_cheques' => 'prohibited',
+            'educational_certificates' => 'prohibited',
+            'pan_card_file' => 'prohibited',
+            'aadhaar_file' => 'prohibited',
+            'twelfth_marksheet' => 'prohibited',
+            'tenth_marksheet' => 'prohibited',
+            'degree_certificate' => 'prohibited',
+            'document_checklist' => 'prohibited',
+            'checklist' => 'prohibited',
+            'employee_image' => 'prohibited',
         ]);
         $request->merge(['status' => 0]);
         $data = $this->validatedData($request);
@@ -164,19 +178,15 @@ class EmployeeController extends Controller
             $data['overtime_amount'], $data['lta'], $data['arrears'],
             $data['pf_deduction'], $data['esi_deduction'], $data['pt_deduction'],
             $data['income_tax'], $data['salary_advance'], $data['fines'],
-            $data['labour_welfare_fund'], $data['other_deductions'], $data['salary_remarks']
+            $data['labour_welfare_fund'], $data['other_deductions'], $data['salary_remarks'],
+            $data['previous_company_offer_letters'], $data['relieving_letters'],
+            $data['pay_slips'], $data['bank_statements'], $data['passbook_cheques'],
+            $data['educational_certificates'], $data['pan_card_file'], $data['aadhaar_file'],
+            $data['twelfth_marksheet'], $data['tenth_marksheet'], $data['degree_certificate'],
+            $data['document_checklist'], $data['checklist'], $data['employee_image']
         );
         $data['status'] = false;
         $data['employee_no'] = $this->generateEmployeeNumber();
-
-        if ($request->hasFile('employee_image')) {
-            $image = $request->file('employee_image');
-            $imageName = Str::uuid().'.'.$image->getClientOriginalExtension();
-            File::ensureDirectoryExists(public_path('uploads/employees'));
-            $image->move(public_path('uploads/employees'), $imageName);
-            $data['employee_image'] = $imageName;
-        }
-        $this->storeDocuments($request, $data, null, ['offer_letter', 'intent_letter']);
 
         DB::transaction(function () use ($token, $data) {
             $link = EmployeeOnboardingLink::where('token', $token)->whereNull('used_at')->lockForUpdate()->firstOrFail();
@@ -288,17 +298,35 @@ class EmployeeController extends Controller
     public function verifyChecklist(Request $request, $id)
     {
         $this->authorize('edit', Employee::class);
+        abort_unless(auth()->user() && (auth()->user()->isSuperAdmin() || auth()->user()->can('edit', Employee::class)), 403, 'Unauthorized. Only administrators can upload documents and verify checklist.');
         $employee = Employee::findOrFail($id);
 
+        $data = [];
+
+        if ($request->hasFile('employee_image')) {
+            $image = $request->file('employee_image');
+            $imageName = Str::uuid().'.'.$image->getClientOriginalExtension();
+            File::ensureDirectoryExists(public_path('uploads/employees'));
+            $image->move(public_path('uploads/employees'), $imageName);
+            if ($employee->employee_image && file_exists(public_path('uploads/employees/'.$employee->employee_image))) {
+                File::delete(public_path('uploads/employees/'.$employee->employee_image));
+            }
+            $data['employee_image'] = $imageName;
+        }
+
+        $this->storeDocuments($request, $data, $employee);
+
         $checklist = $this->parseChecklistInput($request, $employee);
-        $employee->update(['document_checklist' => $checklist]);
+        $data['document_checklist'] = $checklist;
+
+        $employee->update($data);
 
         $freshEmployee = $employee->fresh();
         $completion = $freshEmployee->profile_completion;
 
         return response()->json([
             'status' => true,
-            'message' => 'Checklist updated. Profile is now ' . $completion['ratio_text'] . ' (' . $completion['percentage'] . '%).',
+            'message' => 'Documents and checklist updated. Profile is now ' . $completion['ratio_text'] . ' (' . $completion['percentage'] . '%).',
             'completion' => $completion,
             'avatar_url' => $freshEmployee->avatar_url,
             'progress_color' => $freshEmployee->progress_color,
