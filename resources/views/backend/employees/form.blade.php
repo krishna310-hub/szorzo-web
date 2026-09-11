@@ -33,6 +33,7 @@
             </div>
         </div>
     </div>
+    @endif
     @unless($publicEmployeeForm ?? false)
     <div class="col-md-4">
         <label for="employee_image" class="form-label">Employee Image
@@ -332,6 +333,7 @@
         @error('passport_validity_date')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
+    </div>
     @unless($publicEmployeeForm ?? false)
     <div class="col-12 mt-5">
         <div class="d-flex align-items-center justify-content-between">
