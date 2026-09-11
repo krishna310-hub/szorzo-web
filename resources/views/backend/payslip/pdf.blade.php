@@ -202,13 +202,13 @@
             <tr>
                 <td class="label-col-1">Employee No:</td>
                 <td class="val-col-1">{{ $employee_no }}</td>
-                <td class="label-col-2">OT Hours</td>
+                <td class="label-col-2">{{ !empty($is_hourly) ? 'Worked Hours:' : 'OT Hours:' }}</td>
                 <td class="val-col-2">{{ $ot_hours }}</td>
             </tr>
             <tr>
                 <td class="label-col-1">Name:</td>
                 <td class="val-col-1">{{ $name }}</td>
-                <td class="label-col-2">LOP:</td>
+                <td class="label-col-2">{{ !empty($is_hourly) ? 'Leave Days:' : 'LOP:' }}</td>
                 <td class="val-col-2">{{ \App\Services\PayslipService::formatDays($lop) }}</td>
             </tr>
             <tr>
@@ -230,7 +230,7 @@
                 <td class="val-col-2">{{ $pf_uan }}</td>
             </tr>
             <tr>
-                <td class="label-col-1">Effective Work Days:</td>
+                <td class="label-col-1">{{ !empty($is_hourly) ? 'Present Days:' : 'Effective Work Days:' }}</td>
                 <td class="val-col-1">{{ \App\Services\PayslipService::formatDays($effective_work_days) }}</td>
                 <td class="label-col-2">ESI No:</td>
                 <td class="val-col-2">{{ $esi_no }}</td>

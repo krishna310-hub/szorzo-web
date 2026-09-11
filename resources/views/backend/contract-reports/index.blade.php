@@ -133,6 +133,11 @@
                                                             href="{{ route('admin.contract-reports.invoice', $report) }}"
                                                             title="Download individual invoice"><i
                                                                 class="ri-file-pdf-2-line"></i></a>
+                                                        <a
+                                                            class="btn btn-sm btn-info"
+                                                            href="{{ route('admin.payslip.index', ['candidate_id' => $report->candidate_id, 'month' => $month->format('n'), 'year' => $month->format('Y')]) }}"
+                                                            title="Generate Payslip" target="_blank"><i
+                                                                class="ri-file-list-3-line"></i></a>
                                                     </div>
                                                 @endcan
                                             </td>

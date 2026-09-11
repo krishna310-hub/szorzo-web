@@ -44,13 +44,30 @@
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ route('admin.payslip.index') }}" id="payslipFilterForm" class="row g-3 align-items-end">
+                        <input type="hidden" name="candidate_id" id="hiddenCandidateId" value="{{ $selected_candidate_id }}">
                         <input type="hidden" name="employee_id" id="hiddenEmployeeId" value="{{ $selected_employee_id }}">
                         <input type="hidden" name="user_id" id="hiddenUserId" value="{{ $selected_user_id }}">
 
                         <!-- Member Selection -->
                         <div class="col-lg-4 col-md-6">
-                            <label class="form-label fw-semibold">Select Member / Employee</label>
+                            <label class="form-label fw-semibold">Select Member / Candidate / Employee</label>
                             <select id="targetSelector" class="form-select">
+                                <optgroup label="Contract Candidates (Contract Report)">
+                                    @foreach($all_candidates as $cand)
+                                        <option value="cand_{{ $cand->id }}"
+                                            data-type="candidate"
+                                            data-id="{{ $cand->id }}"
+                                            data-mode="{{ $cand->mode?->mode ?: 'Contract' }}"
+                                            data-mode-label="{{ $cand->mode?->mode ?: 'Contract' }}"
+                                            data-is-hourly="{{ $cand->is_hourly ? '1' : '0' }}"
+                                            data-hourly-salary="{{ $cand->hourly_salary }}"
+                                            data-contract-from="{{ $cand->contract_from_date ? $cand->contract_from_date->format('Y-m-d') : '' }}"
+                                            data-contract-to="{{ $cand->contract_to_date ? $cand->contract_to_date->format('Y-m-d') : '' }}"
+                                            @selected($selected_candidate_id == $cand->id)>
+                                            [Contract] {{ $cand->candidate_name }} ({{ $cand->client?->client ?: 'Client' }}) - {{ $cand->is_hourly ? 'Hourly ₹'.number_format((float)$cand->hourly_salary, 2) : 'Monthly ₹'.number_format((float)($cand->onboarding_ctc/12), 2) }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
                                 <optgroup label="Employee Module (All Members)">
                                     @foreach($all_employees as $emp)
                                         <option value="emp_{{ $emp->id }}"
@@ -58,9 +75,11 @@
                                             data-id="{{ $emp->id }}"
                                             data-mode="{{ $emp->employment_mode }}"
                                             data-mode-label="{{ $emp->mode?->mode ?: $emp->employment_mode }}"
+                                            data-is-hourly="0"
+                                            data-hourly-salary="0"
                                             data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
                                             data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
-                                            @selected($selected_employee_id == $emp->id)>
+                                            @selected(!$selected_candidate_id && $selected_employee_id == $emp->id)>
                                             [{{ $emp->employment_mode }}] {{ $emp->employee_name }} ({{ $emp->employee_no ?: 'SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT) }})
                                         </option>
                                     @endforeach
@@ -72,9 +91,11 @@
                                             data-id="{{ $u->id }}"
                                             data-mode="FTE"
                                             data-mode-label="Full Time"
+                                            data-is-hourly="0"
+                                            data-hourly-salary="0"
                                             data-contract-from=""
                                             data-contract-to=""
-                                            @selected(!$selected_employee_id && $selected_user_id == $u->id)>
+                                            @selected(!$selected_candidate_id && !$selected_employee_id && $selected_user_id == $u->id)>
                                             [User] {{ $u->name }} ({{ $u->role?->name ?: 'Staff' }})
                                         </option>
                                     @endforeach
@@ -126,6 +147,18 @@
                             </select>
                         </div>
 
+                        @if(!empty($is_hourly))
+                            <div class="col-lg-2 col-md-3">
+                                <label class="form-label fw-semibold">Worked Hours</label>
+                                <input type="number" step="0.25" min="0" name="worked_hours" class="form-control" value="{{ $worked_hours }}" placeholder="e.g. 20.00">
+                            </div>
+                        @elseif(!empty($is_contract_like))
+                            <div class="col-lg-2 col-md-3">
+                                <label class="form-label fw-semibold">Leave Days (LOP)</label>
+                                <input type="number" step="0.5" min="0" max="{{ $days_in_month }}" name="absent_days" class="form-control" value="{{ $absent_days }}" placeholder="e.g. 7">
+                            </div>
+                        @endif
+
                         <!-- Action Buttons -->
                         <div class="col-lg-auto col-md-auto d-flex flex-wrap gap-2 ms-auto">
                             <button type="submit" class="btn btn-primary">
@@ -149,11 +182,18 @@
                 <div class="card-body">
                     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                         <h6 class="fs-14 mb-0 fw-bold text-muted text-uppercase">
-                            <i class="ri-calendar-check-line align-middle me-1"></i> Attendance Integration Summary ({{ $period_subtitle }})
+                            <i class="ri-calendar-check-line align-middle me-1"></i> Calculation &amp; Attendance Summary ({{ $period_subtitle }})
                         </h6>
-                        <span class="fs-13 text-muted">
-                            Mode: <strong class="text-dark">{{ $mode_label }}</strong> | Period: <strong class="text-dark">{{ $from_date_display }} to {{ $to_date_display }}</strong>
-                        </span>
+                        <div class="d-flex align-items-center gap-2">
+                            @if(!empty($contract_report_synced))
+                                <span class="badge bg-success-subtle text-success border border-success px-2 py-1 fs-12">
+                                    <i class="ri-check-double-line me-1"></i> Synced with Contract Report
+                                </span>
+                            @endif
+                            <span class="fs-13 text-muted">
+                                Mode: <strong class="text-dark">{{ $mode_label }}</strong> | Period: <strong class="text-dark">{{ $from_date_display }} to {{ $to_date_display }}</strong>
+                            </span>
+                        </div>
                     </div>
                     <div class="row g-3 text-center">
                         <div class="col-6 col-md-2">
@@ -165,31 +205,31 @@
                         <div class="col-6 col-md-2">
                             <div class="p-2 border rounded bg-white">
                                 <span class="fs-11 text-success text-uppercase d-block">Present Days</span>
-                                <span class="fs-16 fw-bold text-success">{{ $attendance_stats['present'] }}</span>
+                                <span class="fs-16 fw-bold text-success">{{ \App\Services\PayslipService::formatDays($present_days) }}</span>
                             </div>
                         </div>
                         <div class="col-6 col-md-2">
                             <div class="p-2 border rounded bg-white">
-                                <span class="fs-11 text-warning text-uppercase d-block">Half Days (0.5)</span>
-                                <span class="fs-16 fw-bold text-warning">{{ $attendance_stats['half_day'] }}</span>
+                                <span class="fs-11 text-danger text-uppercase d-block">{{ !empty($is_hourly) ? 'Worked Hours' : 'Leave Days (LOP)' }}</span>
+                                <span class="fs-16 fw-bold text-danger">{{ !empty($is_hourly) ? number_format($worked_hours, 2) . ' hrs' : \App\Services\PayslipService::formatDays($lop) }}</span>
                             </div>
                         </div>
                         <div class="col-6 col-md-2">
                             <div class="p-2 border rounded bg-white">
-                                <span class="fs-11 text-info text-uppercase d-block">Leaves / Offs</span>
-                                <span class="fs-16 fw-bold text-info">{{ $attendance_stats['on_leave'] + $attendance_stats['holiday'] + $attendance_stats['week_off'] }}</span>
+                                <span class="fs-11 text-info text-uppercase d-block">{{ !empty($is_hourly) ? 'Hourly Billing Intake' : 'Monthly Base Intake' }}</span>
+                                <span class="fs-16 fw-bold text-info">₹{{ number_format((float) $contract_intake, 2) }}</span>
                             </div>
                         </div>
                         <div class="col-6 col-md-2">
                             <div class="p-2 border rounded bg-white">
-                                <span class="fs-11 text-danger text-uppercase d-block">Loss of Pay (LOP)</span>
-                                <span class="fs-16 fw-bold text-danger">{{ \App\Services\PayslipService::formatDays($lop) }}</span>
+                                <span class="fs-11 text-warning text-uppercase d-block">{{ !empty($is_hourly) ? 'Billing Margin (' . number_format($revenue_percentage, 1) . '%)' : 'Leave Deduction' }}</span>
+                                <span class="fs-16 fw-bold text-warning">₹{{ number_format((float) (!empty($is_hourly) ? $contract_revenue : $leave_deduction), 2) }}</span>
                             </div>
                         </div>
                         <div class="col-6 col-md-2">
                             <div class="p-2 border rounded bg-white border-primary">
-                                <span class="fs-11 text-primary text-uppercase d-block fw-semibold">Effective Work Days</span>
-                                <span class="fs-16 fw-bold text-primary">{{ \App\Services\PayslipService::formatDays($effective_work_days) }}</span>
+                                <span class="fs-11 text-primary text-uppercase d-block fw-semibold">Net Payable Salary</span>
+                                <span class="fs-16 fw-bold text-primary">₹{{ number_format((float) $net_pay, 2) }}</span>
                             </div>
                         </div>
                     </div>
@@ -236,13 +276,13 @@
                                     <tr>
                                         <td style="width: 22%; border: 1px solid #000; padding: 6px 10px;">Employee No:</td>
                                         <td style="width: 30%; border: 1px solid #000; padding: 6px 10px;">{{ $employee_no }}</td>
-                                        <td style="width: 20%; border: 1px solid #000; padding: 6px 10px;">OT Hours</td>
+                                        <td style="width: 20%; border: 1px solid #000; padding: 6px 10px;">{{ !empty($is_hourly) ? 'Worked Hours:' : 'OT Hours:' }}</td>
                                         <td style="width: 28%; border: 1px solid #000; padding: 6px 10px;">{{ $ot_hours }}</td>
                                     </tr>
                                     <tr>
                                         <td style="border: 1px solid #000; padding: 6px 10px;">Name:</td>
                                         <td style="border: 1px solid #000; padding: 6px 10px;">{{ $name }}</td>
-                                        <td style="border: 1px solid #000; padding: 6px 10px;">LOP:</td>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">{{ !empty($is_hourly) ? 'Leave Days:' : 'LOP:' }}</td>
                                         <td style="border: 1px solid #000; padding: 6px 10px;">{{ \App\Services\PayslipService::formatDays($lop) }}</td>
                                     </tr>
                                     <tr>
@@ -264,7 +304,7 @@
                                         <td style="border: 1px solid #000; padding: 6px 10px;">{{ $pf_uan }}</td>
                                     </tr>
                                     <tr>
-                                        <td style="border: 1px solid #000; padding: 6px 10px;">Effective Work Days:</td>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">{{ !empty($is_hourly) ? 'Present Days:' : 'Effective Work Days:' }}</td>
                                         <td style="border: 1px solid #000; padding: 6px 10px;">{{ \App\Services\PayslipService::formatDays($effective_work_days) }}</td>
                                         <td style="border: 1px solid #000; padding: 6px 10px;">ESI No:</td>
                                         <td style="border: 1px solid #000; padding: 6px 10px;">{{ $esi_no }}</td>
@@ -390,6 +430,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const targetSelector = document.getElementById('targetSelector');
+        const hiddenCandidateId = document.getElementById('hiddenCandidateId');
         const hiddenEmployeeId = document.getElementById('hiddenEmployeeId');
         const hiddenUserId = document.getElementById('hiddenUserId');
         const periodTypeMonth = document.getElementById('periodTypeMonth');
@@ -429,12 +470,23 @@
                 const type = opt.getAttribute('data-type');
                 const id = opt.getAttribute('data-id');
                 const mode = opt.getAttribute('data-mode');
+                const isHourly = opt.getAttribute('data-is-hourly');
                 const contractFrom = opt.getAttribute('data-contract-from');
                 const contractTo = opt.getAttribute('data-contract-to');
 
-                if (type === 'employee') {
-                    hiddenEmployeeId.value = id;
-                    hiddenUserId.value = '';
+                if (type === 'candidate') {
+                    if (hiddenCandidateId) hiddenCandidateId.value = id;
+                    if (hiddenEmployeeId) hiddenEmployeeId.value = '';
+                    if (hiddenUserId) hiddenUserId.value = '';
+
+                    if (contractFrom && contractTo) {
+                        if (fromDateInput) fromDateInput.value = contractFrom;
+                        if (toDateInput) toDateInput.value = contractTo;
+                    }
+                } else if (type === 'employee') {
+                    if (hiddenEmployeeId) hiddenEmployeeId.value = id;
+                    if (hiddenCandidateId) hiddenCandidateId.value = '';
+                    if (hiddenUserId) hiddenUserId.value = '';
 
                     // For Contract or C2H: switch to date-to-date range mode
                     if (mode === 'Contract' || mode === 'C2H') {
@@ -448,8 +500,14 @@
                         }
                     }
                 } else {
-                    hiddenUserId.value = id;
-                    hiddenEmployeeId.value = '';
+                    if (hiddenUserId) hiddenUserId.value = id;
+                    if (hiddenCandidateId) hiddenCandidateId.value = '';
+                    if (hiddenEmployeeId) hiddenEmployeeId.value = '';
+                }
+
+                // Submit form to refresh payslip for selected member
+                if (this.form) {
+                    this.form.submit();
                 }
             });
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Candidate;
 use App\Models\Employee;
 use App\Models\User;
 use App\Services\PayslipService;
@@ -29,6 +30,11 @@ class PayslipController extends Controller
 
         $payslipData = $this->payslipService->getPayslipData($target, $month, $year, $request->all());
 
+        $allCandidates = Candidate::with(['mode', 'client', 'jobRole', 'clientRequirement.billing'])
+            ->where('status', true)
+            ->orderBy('candidate_name')
+            ->get();
+
         $allEmployees = Employee::with(['mode', 'client'])
             ->where('status', 1)
             ->orderBy('employee_name')
@@ -41,9 +47,11 @@ class PayslipController extends Controller
 
         return view('backend.payslip.index', array_merge($payslipData, [
             'can_manage_all' => true,
+            'all_candidates' => $allCandidates,
             'all_employees' => $allEmployees,
             'all_users' => $allUsers,
             'target' => $target,
+            'selected_candidate_id' => $target instanceof Candidate ? $target->id : null,
             'selected_employee_id' => $target instanceof Employee ? $target->id : null,
             'selected_user_id' => $target instanceof User ? $target->id : null,
         ]));
@@ -101,10 +109,18 @@ class PayslipController extends Controller
     }
 
     /**
-     * Resolve the target Employee or User based on request inputs.
+     * Resolve the target Employee, Candidate, or User based on request inputs.
      */
-    protected function resolveTarget(Request $request): Employee|User
+    protected function resolveTarget(Request $request): Employee|User|Candidate
     {
+        if ($request->filled('candidate_id')) {
+            $candidate = Candidate::with(['mode', 'client', 'jobRole', 'clientRequirement.billing', 'recruiter'])
+                ->find($request->input('candidate_id'));
+            if ($candidate) {
+                return $candidate;
+            }
+        }
+
         if ($request->filled('employee_id')) {
             $employee = Employee::with(['mode', 'client'])->find($request->input('employee_id'));
             if ($employee) {
@@ -119,7 +135,16 @@ class PayslipController extends Controller
             }
         }
 
-        // Default to first active employee in Employee module
+        // Default to first active candidate or employee
+        $firstCandidate = Candidate::with(['mode', 'client', 'jobRole', 'clientRequirement.billing'])
+            ->where('status', true)
+            ->orderBy('candidate_name')
+            ->first();
+
+        if ($firstCandidate) {
+            return $firstCandidate;
+        }
+
         $firstEmployee = Employee::with(['mode', 'client'])
             ->where('status', 1)
             ->orderBy('employee_name')
@@ -155,4 +180,3 @@ class PayslipController extends Controller
         return 'Payslip_' . $empIdentifier . '_' . $from . '_to_' . $to . '.pdf';
     }
 }
-
