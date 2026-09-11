@@ -35,6 +35,7 @@ class EmployeeController extends Controller
         'pay_slips',
         'bank_statements',
         'passbook_cheques',
+        'educational_certificates',
     ];
 
     public function index(Request $request)
@@ -43,6 +44,35 @@ class EmployeeController extends Controller
         if ($request->ajax()) {
             return DataTables::of(Employee::orderBy('employee_no', 'asc')->get())
                 ->addIndexColumn()
+                ->editColumn('employee_name', function ($row) {
+                    $completion = $row->profile_completion;
+                    $percent = $completion['percentage'];
+                    $color = $row->progress_color;
+                    $avatar = e($row->avatar_url);
+                    $name = e($row->employee_name);
+                    $ratio = e($completion['ratio_text']);
+                    $empId = $row->id;
+
+                    $badgeClass = $percent >= 80 ? 'bg-success-subtle text-success border-success' : ($percent >= 40 ? 'bg-warning-subtle text-warning border-warning' : 'bg-danger-subtle text-danger border-danger');
+
+                    return '
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-progress-container avatar-emp-'.$empId.'" data-employee-id="'.$empId.'" title="Profile Completion: '.$percent.'%">
+                            <div class="avatar-circle-ring" style="background: conic-gradient('.$color.' 0% '.$percent.'%, #e9ebec '.$percent.'% 100%);">
+                                <img src="'.$avatar.'" alt="'.$name.'" class="avatar-circle-img">
+                            </div>
+                            <span class="avatar-percent-pill">'.$percent.'%</span>
+                        </div>
+                        <div>
+                            <div class="fw-semibold text-dark">'.$name.'</div>
+                            <button type="button" class="btn btn-sm p-0 border-0 bg-transparent open-checklist-modal text-start" data-id="'.$empId.'" data-name="'.$name.'">
+                                <span class="badge border '.$badgeClass.' py-1 px-2" style="font-size: 11px; cursor: pointer;" title="Click to view & verify checklist">
+                                    <i class="bx bx-check-circle me-1"></i>'.$ratio.' ('.$percent.'%)
+                                </span>
+                            </button>
+                        </div>
+                    </div>';
+                })
                 ->editColumn('date_of_joining', fn ($row) => $row->date_of_joining?->format('d-m-Y') ?? '-')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
@@ -56,6 +86,9 @@ class EmployeeController extends Controller
                     if (auth()->user()->isSuperAdmin()) {
                         $buttons .= '<a href="'.route('admin.payslip.index', ['employee_id' => $row->id]).'" class="text-success fs-4 me-1" title="Generate Payslip"><i class="bx bx-receipt"></i></a>';
                     }
+                    if (auth()->user()->can('edit', Employee::class) || auth()->user()->isSuperAdmin()) {
+                        $buttons .= '<button type="button" class="btn btn-link text-primary fs-4 p-0 me-1 open-checklist-modal" data-id="'.$row->id.'" data-name="'.e($row->employee_name).'" title="Verify Checklist ('.$row->profile_completion['ratio_text'].')"><i class="bx bx-check-shield"></i></button>';
+                    }
                     if (auth()->user()->can('edit', Employee::class)) {
                         $buttons .= '<a href="'.route('admin.employees.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }
@@ -65,7 +98,7 @@ class EmployeeController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['employee_name', 'status', 'action'])
                 ->make(true);
         }
 
@@ -218,9 +251,58 @@ class EmployeeController extends Controller
 
         $this->storeDocuments($request, $data, $employee);
 
+        if ($request->has('checklist') || $request->has('has_checklist_form')) {
+            $data['document_checklist'] = $this->parseChecklistInput($request, $employee);
+        }
+
         $employee->update($data);
 
         return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully.');
+    }
+
+    public function checklist(Request $request, $id)
+    {
+        $this->authorize('read', Employee::class);
+        $employee = Employee::findOrFail($id);
+        $completion = $employee->profile_completion;
+
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => true,
+                'employee' => [
+                    'id' => $employee->id,
+                    'name' => $employee->employee_name,
+                    'employee_no' => $employee->employee_no,
+                    'designation' => $employee->designation,
+                    'avatar_url' => $employee->avatar_url,
+                    'progress_color' => $employee->progress_color,
+                ],
+                'completion' => $completion,
+                'html' => view('backend.employees.partials.checklist-modal-body', compact('employee', 'completion'))->render(),
+            ]);
+        }
+
+        return redirect()->route('admin.employees.edit', $employee->id);
+    }
+
+    public function verifyChecklist(Request $request, $id)
+    {
+        $this->authorize('edit', Employee::class);
+        $employee = Employee::findOrFail($id);
+
+        $checklist = $this->parseChecklistInput($request, $employee);
+        $employee->update(['document_checklist' => $checklist]);
+
+        $freshEmployee = $employee->fresh();
+        $completion = $freshEmployee->profile_completion;
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Checklist updated. Profile is now ' . $completion['ratio_text'] . ' (' . $completion['percentage'] . '%).',
+            'completion' => $completion,
+            'avatar_url' => $freshEmployee->avatar_url,
+            'progress_color' => $freshEmployee->progress_color,
+        ]);
     }
 
     public function destroy($id)
@@ -300,6 +382,11 @@ class EmployeeController extends Controller
             'twelfth_marksheet' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'tenth_marksheet' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'degree_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'educational_certificates' => 'nullable|array',
+            'educational_certificates.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'document_checklist' => 'nullable|array',
+            'checklist' => 'nullable|array',
+            'notes' => 'nullable|array',
 
             // Family Information
             'fathers_name' => 'nullable|string|max:255',
@@ -449,5 +536,43 @@ class EmployeeController extends Controller
                 File::delete(public_path('uploads/employees/documents/'.$fileName));
             }
         }
+    }
+
+    private function parseChecklistInput(Request $request, ?Employee $employee = null): array
+    {
+        $checklistInput = $request->input('checklist', []);
+        $notesInput = $request->input('notes', []);
+        $currentChecklist = is_array($employee?->document_checklist)
+            ? $employee->document_checklist
+            : (json_decode((string) ($employee?->document_checklist ?? '[]'), true) ?: []);
+
+        $updatedChecklist = [];
+        $userId = auth()->id();
+        $userName = auth()->user()?->name ?? 'Admin';
+        $now = now()->format('d-m-Y H:i');
+
+        foreach (Employee::CHECKLIST_ITEMS as $key => $config) {
+            $isVerified = !empty($checklistInput[$key]);
+            $existing = $currentChecklist[$key] ?? [];
+
+            $wasVerified = is_array($existing)
+                ? !empty($existing['verified'])
+                : ($existing === true || $existing === 1 || $existing === '1');
+
+            $verifiedAt = $isVerified ? ($wasVerified ? ($existing['verified_at'] ?? $now) : $now) : null;
+            $verifiedBy = $isVerified ? ($wasVerified ? ($existing['verified_by'] ?? $userId) : $userId) : null;
+            $verifiedByName = $isVerified ? ($wasVerified ? ($existing['verified_by_name'] ?? $userName) : $userName) : null;
+            $note = array_key_exists($key, $notesInput) ? $notesInput[$key] : (is_array($existing) ? ($existing['notes'] ?? null) : null);
+
+            $updatedChecklist[$key] = [
+                'verified' => $isVerified,
+                'verified_at' => $verifiedAt,
+                'verified_by' => $verifiedBy,
+                'verified_by_name' => $verifiedByName,
+                'notes' => $note,
+            ];
+        }
+
+        return $updatedChecklist;
     }
 }

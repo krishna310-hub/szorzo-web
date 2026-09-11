@@ -54,7 +54,105 @@
             </div>
         </div>
     </div>
+
+    <!-- Document Checklist & Verification Modal -->
+    <div class="modal fade" id="employeeChecklistModal" tabindex="-1" aria-labelledby="employeeChecklistModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-light py-3">
+                    <h5 class="modal-title d-flex align-items-center gap-2" id="employeeChecklistModalLabel">
+                        <i class="bx bx-check-shield text-primary fs-4"></i>
+                        <span>Employee Document Checklist &amp; Verification</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="checklist-verify-form" method="POST">
+                    @csrf
+                    <div class="modal-body p-4" id="checklist-modal-content">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading checklist &amp; documents...</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light py-2">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="save-checklist-btn">
+                            <i class="bx bx-save me-1"></i>Save Verification
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('style')
+<style>
+.avatar-progress-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+}
+.avatar-circle-ring {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.avatar-circle-ring:hover {
+    transform: scale(1.06);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.avatar-circle-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #ffffff;
+    border: 1.5px solid #ffffff;
+}
+.avatar-percent-pill {
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 8px;
+    background: #212529;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.avatar-lg-ring {
+    width: 72px;
+    height: 72px;
+}
+.avatar-lg-ring .avatar-circle-ring {
+    padding: 4px;
+}
+.table-success-subtle {
+    background-color: rgba(10, 179, 156, 0.06) !important;
+}
+.table-warning-subtle {
+    background-color: rgba(247, 184, 75, 0.06) !important;
+}
+</style>
+@endpush
+
 @section('script')
     <script>
         $(document).ready(function() {
@@ -105,6 +203,95 @@
                     }
                 ]
             });
+
+            // Checklist modal trigger
+            $(document).on('click', '.open-checklist-modal', function() {
+                var empId = $(this).data('id');
+                var empName = $(this).data('name') || 'Employee';
+                var modal = $('#employeeChecklistModal');
+                var form = $('#checklist-verify-form');
+                var content = $('#checklist-modal-content');
+
+                form.attr('action', '{{ url('admin/masters/employees') }}/' + empId + '/verify-checklist');
+                content.html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2 text-muted">Loading checklist &amp; documents for ' + empName + '...</p></div>');
+                modal.modal('show');
+
+                $.ajax({
+                    url: '{{ url('admin/masters/employees') }}/' + empId + '/checklist',
+                    type: 'GET',
+                    success: function(res) {
+                        if (res.status && res.html) {
+                            content.html(res.html);
+                        } else {
+                            content.html('<div class="alert alert-danger">Could not load checklist data.</div>');
+                        }
+                    },
+                    error: function(xhr) {
+                        content.html('<div class="alert alert-danger">Failed to load checklist: ' + (xhr.responseJSON?.message || 'Server error') + '</div>');
+                    }
+                });
+            });
+
+            // Checklist checkbox toggle in modal
+            $(document).on('change', '.checklist-checkbox', function() {
+                var isChecked = $(this).is(':checked');
+                var label = $(this).siblings('.checklist-label');
+                var row = $(this).closest('tr');
+
+                if (isChecked) {
+                    label.text('Verified').removeClass('text-muted').addClass('text-success');
+                    row.removeClass('table-warning-subtle').addClass('table-success-subtle');
+                } else {
+                    label.text('Pending').removeClass('text-success').addClass('text-muted');
+                    row.removeClass('table-success-subtle');
+                    if (row.data('uploaded') === 1 || row.data('uploaded') === '1') {
+                        row.addClass('table-warning-subtle');
+                    }
+                }
+            });
+
+            // Verify all uploaded button
+            $(document).on('click', '.verify-all-uploaded-btn', function() {
+                $('#checklist-modal-content tbody tr').each(function() {
+                    var row = $(this);
+                    if (row.data('uploaded') === 1 || row.data('uploaded') === '1') {
+                        var checkbox = row.find('.checklist-checkbox');
+                        if (!checkbox.is(':checked')) {
+                            checkbox.prop('checked', true).trigger('change');
+                        }
+                    }
+                });
+            });
+
+            // Submit checklist form
+            $('#checklist-verify-form').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var saveBtn = $('#save-checklist-btn');
+                saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Saving...');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(res) {
+                        if (res.status) {
+                            toastr.success(res.message);
+                            $('#employeeChecklistModal').modal('hide');
+                            table.ajax.reload(null, false);
+                        } else {
+                            toastr.error(res.message || 'Failed to save verification.');
+                        }
+                    },
+                    error: function(xhr) {
+                        toastr.error(xhr.responseJSON?.message || 'Error occurred while saving verification.');
+                    },
+                    always: function() {
+                        saveBtn.prop('disabled', false).html('<i class="bx bx-save me-1"></i>Save Verification');
+                    }
+                });
+            });
+
             $(document).on('click', '.delete-record', function() {
                 if (!confirm('Are you sure you want to delete this employee?')) return;
                 $.ajax({

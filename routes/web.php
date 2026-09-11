@@ -270,6 +270,8 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::get('/', 'index')->name('index');
             Route::post('/generate-link', 'generateLink')->name('generate-link');
             Route::post('/{id}/activate', 'activate')->name('activate');
+            Route::get('/{id}/checklist', 'checklist')->name('checklist');
+            Route::post('/{id}/verify-checklist', 'verifyChecklist')->name('verify-checklist');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');

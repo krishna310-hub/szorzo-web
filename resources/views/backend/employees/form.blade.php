@@ -185,40 +185,6 @@
         </div>
     @endforeach
     @endunless
-    <div class="col-12 mt-4">
-        <h5 class="text-primary mb-3">Previous Employment &amp; Bank Documents</h5>
-    </div>
-    @php
-        $multipleDocumentFields = [
-            'previous_company_offer_letters' => "Previous Company's Offer Letter (All Companies)",
-            'relieving_letters' => 'Relieving Letter (All Companies)',
-            'pay_slips' => "3 Months' Pay Slips",
-            'bank_statements' => 'Bank Statements for the Past 3 Months',
-            'passbook_cheques' => 'Passbook Front Page / Cancelled Cheque (Photocopy)',
-        ];
-    @endphp
-    @foreach($multipleDocumentFields as $field => $label)
-        <div class="col-md-6 mt-3 repeatable-document" data-field="{{ $field }}">
-            <label class="form-label">{{ $label }}</label>
-            @if(!empty($employee->{$field}))
-                <div class="mb-2 existing-documents">
-                    @foreach($employee->{$field} as $document)
-                        <div class="d-flex align-items-center gap-2 mb-1 existing-document">
-                            <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank">View document {{ $loop->iteration }}</a>
-                            <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document" data-file="{{ $document }}">Remove</button>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-            <div class="document-inputs">
-                <div class="input-group mb-2 document-input-row">
-                    <input type="file" class="form-control" name="{{ $field }}[]" accept=".pdf,.jpg,.jpeg,.png">
-                </div>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
-            @error($field.'.*')<div class="text-danger small">{{ $message }}</div>@enderror
-        </div>
-    @endforeach
     <div class="col-md-4 mt-3">
         <label for="employee_uan_pf_number" class="form-label">UAN / PF Number</label>
         <input type="text" class="form-control" id="employee_uan_pf_number" name="employee_uan_pf_number" placeholder="Enter UAN/PF number"
@@ -367,57 +333,301 @@
         @enderror
     </div>
     <div class="col-12 mt-5">
-        <h4 class="mt-4 mb-3 text-primary">Documents</h4>
-        <p class="text-muted mb-3">Accepted formats: PDF, JPG, JPEG, PNG (maximum 5 MB each).</p>
-    </div>
-    @foreach([
-        'pan_card_file' => 'PAN Card File',
-        'aadhaar_file' => 'Aadhaar File',
-        'twelfth_marksheet' => '12th Marksheet',
-        'tenth_marksheet' => '10th Marksheet',
-        'degree_certificate' => 'Degree Certificate',
-    ] as $field => $label)
-        <div class="col-md-4 {{ $loop->index >= 3 ? 'mt-3' : '' }}">
-            <label for="{{ $field }}" class="form-label">{{ $label }}
-                @if(!empty($employee->{$field}))
-                    <a href="{{ asset('uploads/employees/documents/'.$employee->{$field}) }}" target="_blank" class="ms-2">View</a>
-                @endif
-            </label>
-            <input type="file" class="form-control" id="{{ $field }}" name="{{ $field }}" accept=".pdf,.jpg,.jpeg,.png">
-            @error($field)<span class="text-danger small">{{ $message }}</span>@enderror
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h4 class="mb-1 text-primary">Document Checklist &amp; Uploads</h4>
+                <p class="text-muted mb-3">Accepted formats: PDF, JPG, JPEG, PNG (maximum 5 MB each). Checklist covers all 9 required verification documents.</p>
+            </div>
+            @if(!empty($employee) && !($publicEmployeeForm ?? false))
+                <input type="hidden" name="has_checklist_form" value="1">
+            @endif
         </div>
-    @endforeach
+    </div>
+
     @php
-        $multipleDocumentFields = [
-            'previous_company_offer_letters' => "Previous Company's Offer Letter (All Companies)",
-            'relieving_letters' => 'Relieving Letter (All Companies)',
-            'pay_slips' => "3 Months' Pay Slips",
-            'bank_statements' => 'Bank Statements for the Past 3 Months',
-            'passbook_cheques' => 'Passbook Front Page / Cancelled Cheque (Photocopy)',
-        ];
+        $checklistRaw = !empty($employee) && is_array($employee->document_checklist)
+            ? $employee->document_checklist
+            : (!empty($employee) ? (json_decode((string) ($employee->document_checklist ?? '[]'), true) ?: []) : []);
     @endphp
-    @foreach($multipleDocumentFields as $field => $label)
-        <div class="col-md-4 mt-3 repeatable-document" data-field="{{ $field }}">
-            <label class="form-label">{{ $label }}</label>
-            @if(!empty($employee->{$field}))
-                <div class="mb-2 existing-documents">
-                    @foreach($employee->{$field} as $document)
-                        <div class="d-flex align-items-center gap-2 mb-1 existing-document">
-                            <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank">View document {{ $loop->iteration }}</a>
-                            <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document" data-file="{{ $document }}">Remove</button>
-                        </div>
-                    @endforeach
+
+    <!-- 1. Previous Company's Offer Letter -->
+    <div class="col-md-6 mt-3 repeatable-document" data-field="previous_company_offer_letters">
+        <label class="form-label fw-semibold">1. Previous Company's Offer Letter (All Companies)</label>
+        @if(!empty($employee->previous_company_offer_letters))
+            <div class="mb-2 existing-documents">
+                @foreach($employee->previous_company_offer_letters as $document)
+                    <div class="d-flex align-items-center gap-2 mb-1 existing-document">
+                        <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 12px;"><i class="bx bx-file me-1"></i>View Document {{ $loop->iteration }}</a>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document py-0 px-2" data-file="{{ $document }}" style="font-size: 11px;">Remove</button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+        <div class="document-inputs">
+            <div class="input-group mb-2 document-input-row">
+                <input type="file" class="form-control" name="previous_company_offer_letters[]" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
+        @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @php($isVer = !empty($checklistRaw['previous_company_offer_letters']['verified']) || ($checklistRaw['previous_company_offer_letters'] ?? false) === true)
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="checklist[previous_company_offer_letters]" value="1" id="form_chk_prev_offer" {{ $isVer ? 'checked' : '' }}>
+                <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_prev_offer">{{ $isVer ? 'Verified' : 'Verify this document' }}</label>
+            </div>
+        @endif
+        @error('previous_company_offer_letters.*')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+
+    <!-- 2. Relieving Letter -->
+    <div class="col-md-6 mt-3 repeatable-document" data-field="relieving_letters">
+        <label class="form-label fw-semibold">2. Relieving Letter (All Companies)</label>
+        @if(!empty($employee->relieving_letters))
+            <div class="mb-2 existing-documents">
+                @foreach($employee->relieving_letters as $document)
+                    <div class="d-flex align-items-center gap-2 mb-1 existing-document">
+                        <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 12px;"><i class="bx bx-file me-1"></i>View Document {{ $loop->iteration }}</a>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document py-0 px-2" data-file="{{ $document }}" style="font-size: 11px;">Remove</button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+        <div class="document-inputs">
+            <div class="input-group mb-2 document-input-row">
+                <input type="file" class="form-control" name="relieving_letters[]" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
+        @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @php($isVer = !empty($checklistRaw['relieving_letters']['verified']) || ($checklistRaw['relieving_letters'] ?? false) === true)
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="checklist[relieving_letters]" value="1" id="form_chk_relieving" {{ $isVer ? 'checked' : '' }}>
+                <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_relieving">{{ $isVer ? 'Verified' : 'Verify this document' }}</label>
+            </div>
+        @endif
+        @error('relieving_letters.*')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+
+    <!-- 3. 3 Months' Pay Slips -->
+    <div class="col-md-6 mt-3 repeatable-document" data-field="pay_slips">
+        <label class="form-label fw-semibold">3. 3 Months’ Pay Slips</label>
+        @if(!empty($employee->pay_slips))
+            <div class="mb-2 existing-documents">
+                @foreach($employee->pay_slips as $document)
+                    <div class="d-flex align-items-center gap-2 mb-1 existing-document">
+                        <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 12px;"><i class="bx bx-file me-1"></i>View Pay Slip {{ $loop->iteration }}</a>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document py-0 px-2" data-file="{{ $document }}" style="font-size: 11px;">Remove</button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+        <div class="document-inputs">
+            <div class="input-group mb-2 document-input-row">
+                <input type="file" class="form-control" name="pay_slips[]" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
+        @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @php($isVer = !empty($checklistRaw['pay_slips']['verified']) || ($checklistRaw['pay_slips'] ?? false) === true)
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="checklist[pay_slips]" value="1" id="form_chk_payslips" {{ $isVer ? 'checked' : '' }}>
+                <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_payslips">{{ $isVer ? 'Verified' : 'Verify this document' }}</label>
+            </div>
+        @endif
+        @error('pay_slips.*')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+
+    <!-- 4. Bank Statements for past 3 months -->
+    <div class="col-md-6 mt-3 repeatable-document" data-field="bank_statements">
+        <label class="form-label fw-semibold">4. Bank Statements for the Past 3 Months</label>
+        @if(!empty($employee->bank_statements))
+            <div class="mb-2 existing-documents">
+                @foreach($employee->bank_statements as $document)
+                    <div class="d-flex align-items-center gap-2 mb-1 existing-document">
+                        <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 12px;"><i class="bx bx-file me-1"></i>View Statement {{ $loop->iteration }}</a>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document py-0 px-2" data-file="{{ $document }}" style="font-size: 11px;">Remove</button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+        <div class="document-inputs">
+            <div class="input-group mb-2 document-input-row">
+                <input type="file" class="form-control" name="bank_statements[]" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
+        @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @php($isVer = !empty($checklistRaw['bank_statements']['verified']) || ($checklistRaw['bank_statements'] ?? false) === true)
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="checklist[bank_statements]" value="1" id="form_chk_bank_stmt" {{ $isVer ? 'checked' : '' }}>
+                <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_bank_stmt">{{ $isVer ? 'Verified' : 'Verify this document' }}</label>
+            </div>
+        @endif
+        @error('bank_statements.*')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+
+    <!-- 5. Educational Certificates (10th, 12th, Degree & Additional) -->
+    <div class="col-12 mt-4">
+        <h6 class="text-dark fw-bold mb-2">5. All Educational Certificates</h6>
+    </div>
+    <div class="col-md-4 mt-2">
+        <label for="tenth_marksheet" class="form-label">10th Marksheet
+            @if(!empty($employee->tenth_marksheet))
+                <a href="{{ asset('uploads/employees/documents/'.$employee->tenth_marksheet) }}" target="_blank" class="ms-2">View</a>
+            @endif
+        </label>
+        <input type="file" class="form-control" id="tenth_marksheet" name="tenth_marksheet" accept=".pdf,.jpg,.jpeg,.png">
+        @error('tenth_marksheet')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 mt-2">
+        <label for="twelfth_marksheet" class="form-label">12th Marksheet
+            @if(!empty($employee->twelfth_marksheet))
+                <a href="{{ asset('uploads/employees/documents/'.$employee->twelfth_marksheet) }}" target="_blank" class="ms-2">View</a>
+            @endif
+        </label>
+        <input type="file" class="form-control" id="twelfth_marksheet" name="twelfth_marksheet" accept=".pdf,.jpg,.jpeg,.png">
+        @error('twelfth_marksheet')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-4 mt-2">
+        <label for="degree_certificate" class="form-label">Degree Certificate
+            @if(!empty($employee->degree_certificate))
+                <a href="{{ asset('uploads/employees/documents/'.$employee->degree_certificate) }}" target="_blank" class="ms-2">View</a>
+            @endif
+        </label>
+        <input type="file" class="form-control" id="degree_certificate" name="degree_certificate" accept=".pdf,.jpg,.jpeg,.png">
+        @error('degree_certificate')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+    <div class="col-md-12 mt-2 repeatable-document" data-field="educational_certificates">
+        <label class="form-label">Additional Educational Certificates (PG, Diplomas, Marksheets)</label>
+        @if(!empty($employee->educational_certificates))
+            <div class="mb-2 existing-documents">
+                @foreach($employee->educational_certificates as $document)
+                    <div class="d-flex align-items-center gap-2 mb-1 existing-document">
+                        <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 12px;"><i class="bx bx-file me-1"></i>View Certificate {{ $loop->iteration }}</a>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document py-0 px-2" data-file="{{ $document }}" style="font-size: 11px;">Remove</button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+        <div class="document-inputs">
+            <div class="input-group mb-2 document-input-row">
+                <input type="file" class="form-control" name="educational_certificates[]" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
+        @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @php($isVer = !empty($checklistRaw['educational_certificates']['verified']) || ($checklistRaw['educational_certificates'] ?? false) === true)
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="checklist[educational_certificates]" value="1" id="form_chk_edu" {{ $isVer ? 'checked' : '' }}>
+                <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_edu">{{ $isVer ? 'Verified' : 'Verify all educational certificates' }}</label>
+            </div>
+        @endif
+        @error('educational_certificates.*')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+
+    <!-- 6. Pan Card Copy -->
+    <div class="col-md-6 mt-3">
+        <label for="pan_card_file" class="form-label fw-semibold">6. PAN Card Copy
+            @if(!empty($employee->pan_card_file))
+                <a href="{{ asset('uploads/employees/documents/'.$employee->pan_card_file) }}" target="_blank" class="ms-2">View Document</a>
+            @endif
+        </label>
+        <input type="file" class="form-control" id="pan_card_file" name="pan_card_file" accept=".pdf,.jpg,.jpeg,.png">
+        @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @php($isVer = !empty($checklistRaw['pan_card']['verified']) || ($checklistRaw['pan_card'] ?? false) === true)
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="checklist[pan_card]" value="1" id="form_chk_pan" {{ $isVer ? 'checked' : '' }}>
+                <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_pan">{{ $isVer ? 'Verified' : 'Verify PAN Card' }}</label>
+            </div>
+        @endif
+        @error('pan_card_file')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+
+    <!-- 7. Aadhaar Card Copy -->
+    <div class="col-md-6 mt-3">
+        <label for="aadhaar_file" class="form-label fw-semibold">7. Aadhaar Card Copy
+            @if(!empty($employee->aadhaar_file))
+                <a href="{{ asset('uploads/employees/documents/'.$employee->aadhaar_file) }}" target="_blank" class="ms-2">View Document</a>
+            @endif
+        </label>
+        <input type="file" class="form-control" id="aadhaar_file" name="aadhaar_file" accept=".pdf,.jpg,.jpeg,.png">
+        @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @php($isVer = !empty($checklistRaw['aadhaar_card']['verified']) || ($checklistRaw['aadhaar_card'] ?? false) === true)
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="checklist[aadhaar_card]" value="1" id="form_chk_aadhaar" {{ $isVer ? 'checked' : '' }}>
+                <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_aadhaar">{{ $isVer ? 'Verified' : 'Verify Aadhaar Card' }}</label>
+            </div>
+        @endif
+        @error('aadhaar_file')<span class="text-danger small">{{ $message }}</span>@enderror
+    </div>
+
+    <!-- 8. Passport Size Photograph Note (Uploaded in Personal Information) -->
+    <div class="col-md-6 mt-3">
+        <label class="form-label fw-semibold">8. Passport Size Photograph</label>
+        <div class="p-2 border rounded bg-light d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+                @if(!empty($employee->employee_image))
+                    <img src="{{ asset('uploads/employees/'.$employee->employee_image) }}" alt="Photo" class="rounded" style="width: 38px; height: 38px; object-fit: cover;">
+                    <span class="small text-success fw-semibold"><i class="bx bx-check-circle me-1"></i>Photograph uploaded above</span>
+                @else
+                    <span class="small text-muted"><i class="bx bx-info-circle me-1"></i>Upload under Personal Information &gt; Employee Image</span>
+                @endif
+            </div>
+            @if(!empty($employee) && !($publicEmployeeForm ?? false))
+                @php($isVer = !empty($checklistRaw['photograph']['verified']) || ($checklistRaw['photograph'] ?? false) === true)
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="checklist[photograph]" value="1" id="form_chk_photo" {{ $isVer ? 'checked' : '' }}>
+                    <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_photo">{{ $isVer ? 'Verified' : 'Verify Photo' }}</label>
                 </div>
             @endif
-            <div class="document-inputs">
-                <div class="input-group mb-2 document-input-row">
-                    <input type="file" class="form-control" name="{{ $field }}[]" accept=".pdf,.jpg,.jpeg,.png">
+        </div>
+    </div>
+
+    <!-- 9. Passbook FrontPage / Cancelled Cheque (Photocopy) -->
+    <div class="col-md-6 mt-3 repeatable-document" data-field="passbook_cheques">
+        <label class="form-label fw-semibold">9. Passbook FrontPage / Cancelled Cheque (Photocopy)</label>
+        @if(!empty($employee->passbook_cheques))
+            <div class="mb-2 existing-documents">
+                @foreach($employee->passbook_cheques as $document)
+                    <div class="d-flex align-items-center gap-2 mb-1 existing-document">
+                        <a href="{{ asset('uploads/employees/documents/'.$document) }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 12px;"><i class="bx bx-file me-1"></i>View Document {{ $loop->iteration }}</a>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-existing-document py-0 px-2" data-file="{{ $document }}" style="font-size: 11px;">Remove</button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+        <div class="document-inputs">
+            <div class="input-group mb-2 document-input-row">
+                <input type="file" class="form-control" name="passbook_cheques[]" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
+        @if(!empty($employee) && !($publicEmployeeForm ?? false))
+            @php($isVer = !empty($checklistRaw['passbook_cheques']['verified']) || ($checklistRaw['passbook_cheques'] ?? false) === true)
+            <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" name="checklist[passbook_cheques]" value="1" id="form_chk_passbook" {{ $isVer ? 'checked' : '' }}>
+                <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_passbook">{{ $isVer ? 'Verified' : 'Verify this document' }}</label>
+            </div>
+        @endif
+        @error('passbook_cheques.*')<div class="text-danger small">{{ $message }}</div>@enderror
+    </div>
+
+    <!-- 10. Profile Information Verification (For Admin Edit Mode) -->
+    @if(!empty($employee) && !($publicEmployeeForm ?? false))
+        @php($isVer = !empty($checklistRaw['personal_details']['verified']) || ($checklistRaw['personal_details'] ?? false) === true)
+        <div class="col-12 mt-3">
+            <div class="p-3 border rounded bg-light-subtle d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-0 fw-bold">10. Personal &amp; Profile Details</h6>
+                    <small class="text-muted">Name, contact info, permanent/residential address, and family details</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="checklist[personal_details]" value="1" id="form_chk_personal" {{ $isVer ? 'checked' : '' }}>
+                    <label class="form-check-label small fw-semibold {{ $isVer ? 'text-success' : 'text-muted' }}" for="form_chk_personal">{{ $isVer ? 'Verified' : 'Verify Personal Details' }}</label>
                 </div>
             </div>
-            <button type="button" class="btn btn-sm btn-outline-primary add-document">+ Add more</button>
-            @error($field.'.*')<div class="text-danger small">{{ $message }}</div>@enderror
         </div>
-    @endforeach
+    @endif
     <div class="col-12 mt-5">
         <h4 class="mt-4 mb-3 text-primary">Family Information</h4>
     </div>
