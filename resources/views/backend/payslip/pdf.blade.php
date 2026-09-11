@@ -192,7 +192,7 @@
                         No 81/1, 82/2, 1st Floor, Clayworks Shankara Campus,<br>
                         Doddakallasandra, Kanakapura Road, Bangalore - 560062
                     </div>
-                    <div class="payslip-title">Payslip for the month of {{ $month_name }} {{ $year }}</div>
+                    <div class="payslip-title">{{ $period_title }}</div>
                 </td>
             </tr>
         </table>
@@ -234,6 +234,18 @@
                 <td class="val-col-1">{{ \App\Services\PayslipService::formatDays($effective_work_days) }}</td>
                 <td class="label-col-2">ESI No:</td>
                 <td class="val-col-2">{{ $esi_no }}</td>
+            </tr>
+            <tr>
+                <td class="label-col-1">Employment Mode:</td>
+                <td class="val-col-1 bold-text">{{ $mode_label }}</td>
+                <td class="label-col-2">Client / Project:</td>
+                <td class="val-col-2">{{ $client_name ?: 'SZORZO In-House' }}</td>
+            </tr>
+            <tr>
+                <td class="label-col-1">Pay Period:</td>
+                <td class="val-col-1">{{ $from_date_display }} to {{ $to_date_display }}</td>
+                <td class="label-col-2">Period Days:</td>
+                <td class="val-col-2">{{ $period_days }} Days</td>
             </tr>
         </table>
 
@@ -317,7 +329,7 @@
 
         <!-- Net Pay Box -->
         <div class="net-pay-box">
-            Net Pay for the month: {{ \App\Services\PayslipService::formatAmount($net_pay) }}
+            Net Pay for the period: {{ \App\Services\PayslipService::formatAmount($net_pay) }}
         </div>
 
         <!-- Remarks Box -->

@@ -290,6 +290,9 @@
                     @can('read', \App\Models\LeaveRequest::class)
                     <li class="nav-item"><a class="nav-link menu-link {{ request()->is('admin/leaves*') ? 'active' : '' }}" href="{{ route('admin.leaves.index') }}"><i class="ri-calendar-event-line"></i><span>Leave Requests</span></a></li>
                     @endcan
+                    @if(auth()->user()->isSuperAdmin())
+                    <li class="nav-item"><a class="nav-link menu-link {{ request()->is('admin/payslip*') ? 'active' : '' }}" href="{{ route('admin.payslip.index') }}"><i class="ri-file-text-line"></i><span>Payslips</span></a></li>
+                    @endif
                 @endif
 
                 @can('read', \App\Models\Report::class)

@@ -22,25 +22,93 @@
             </div>
 
             <!-- Filter & Action Card -->
-            <div class="card">
+            <!-- Filter & Action Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="card-title mb-0">Generate Payslip</h5>
+                            <small class="text-muted">Select an employee from Employee Module or a system user, with monthly or date-to-date cycle.</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge {{ $mode === 'Contract' ? 'bg-warning-subtle text-warning border border-warning' : ($mode === 'C2H' ? 'bg-info-subtle text-info border border-info' : 'bg-primary-subtle text-primary border border-primary') }} px-2 py-1 fs-12 fw-semibold">
+                                <i class="ri-shield-user-line me-1"></i> Mode: {{ $mode_label }}
+                            </span>
+                            @if(!empty($client_name))
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary px-2 py-1 fs-12">
+                                    <i class="ri-building-line me-1"></i> Client: {{ $client_name }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
                 <div class="card-body">
-                    <form method="GET" action="{{ route('admin.payslip.index') }}" class="row g-3 align-items-end">
-                        @if($can_manage_all)
-                            <div class="col-lg-3 col-md-4">
-                                <label class="form-label fw-semibold">Select Employee</label>
-                                <select name="user_id" class="form-select">
-                                    @foreach($all_users as $u)
-                                        <option value="{{ $u->id }}" @selected($target_user->id == $u->id)>
-                                            {{ $u->name }} ({{ $u->email }})
+                    <form method="GET" action="{{ route('admin.payslip.index') }}" id="payslipFilterForm" class="row g-3 align-items-end">
+                        <input type="hidden" name="employee_id" id="hiddenEmployeeId" value="{{ $selected_employee_id }}">
+                        <input type="hidden" name="user_id" id="hiddenUserId" value="{{ $selected_user_id }}">
+
+                        <!-- Member Selection -->
+                        <div class="col-lg-4 col-md-6">
+                            <label class="form-label fw-semibold">Select Member / Employee</label>
+                            <select id="targetSelector" class="form-select">
+                                <optgroup label="Employee Module (All Members)">
+                                    @foreach($all_employees as $emp)
+                                        <option value="emp_{{ $emp->id }}"
+                                            data-type="employee"
+                                            data-id="{{ $emp->id }}"
+                                            data-mode="{{ $emp->employment_mode }}"
+                                            data-mode-label="{{ $emp->mode?->mode ?: $emp->employment_mode }}"
+                                            data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
+                                            data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
+                                            @selected($selected_employee_id == $emp->id)>
+                                            [{{ $emp->employment_mode }}] {{ $emp->employee_name }} ({{ $emp->employee_no ?: 'SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT) }})
                                         </option>
                                     @endforeach
-                                </select>
-                            </div>
-                        @endif
+                                </optgroup>
+                                <optgroup label="System Users (users table)">
+                                    @foreach($all_users as $u)
+                                        <option value="usr_{{ $u->id }}"
+                                            data-type="user"
+                                            data-id="{{ $u->id }}"
+                                            data-mode="FTE"
+                                            data-mode-label="Full Time"
+                                            data-contract-from=""
+                                            data-contract-to=""
+                                            @selected(!$selected_employee_id && $selected_user_id == $u->id)>
+                                            [User] {{ $u->name }} ({{ $u->role?->name ?: 'Staff' }})
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            </select>
+                        </div>
 
-                        <div class="col-lg-2 col-md-3">
+                        <!-- Period Type Radio / Switch -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label fw-semibold d-block">Period Type</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="period_type" id="periodTypeMonth" value="monthly" @checked($is_full_calendar_month && empty(request('from_date')))>
+                                <label class="btn btn-outline-primary" for="periodTypeMonth"><i class="ri-calendar-line me-1"></i> Monthly (FTE)</label>
+
+                                <input type="radio" class="btn-check" name="period_type" id="periodTypeRange" value="range" @checked(!$is_full_calendar_month || !empty(request('from_date')))>
+                                <label class="btn btn-outline-primary" for="periodTypeRange"><i class="ri-calendar-2-line me-1"></i> Date to Date</label>
+                            </div>
+                        </div>
+
+                        <!-- Date to Date Inputs -->
+                        <div class="col-lg-2 col-md-3 period-range-container" style="{{ ($is_full_calendar_month && empty(request('from_date'))) ? 'display: none;' : '' }}">
+                            <label class="form-label fw-semibold">From Date</label>
+                            <input type="date" name="from_date" id="fromDateInput" class="form-control" value="{{ $from_date }}">
+                        </div>
+
+                        <div class="col-lg-2 col-md-3 period-range-container" style="{{ ($is_full_calendar_month && empty(request('from_date'))) ? 'display: none;' : '' }}">
+                            <label class="form-label fw-semibold">To Date</label>
+                            <input type="date" name="to_date" id="toDateInput" class="form-control" value="{{ $to_date }}">
+                        </div>
+
+                        <!-- Monthly Inputs -->
+                        <div class="col-lg-2 col-md-3 period-month-container" style="{{ (!$is_full_calendar_month && !empty(request('from_date'))) ? 'display: none;' : '' }}">
                             <label class="form-label fw-semibold">Month</label>
-                            <select name="month" class="form-select">
+                            <select name="month" id="monthInput" class="form-select">
                                 @for($m = 1; $m <= 12; $m++)
                                     <option value="{{ $m }}" @selected($month == $m)>
                                         {{ date('F', mktime(0, 0, 0, $m, 1)) }}
@@ -49,25 +117,26 @@
                             </select>
                         </div>
 
-                        <div class="col-lg-2 col-md-3">
+                        <div class="col-lg-2 col-md-3 period-month-container" style="{{ (!$is_full_calendar_month && !empty(request('from_date'))) ? 'display: none;' : '' }}">
                             <label class="form-label fw-semibold">Year</label>
-                            <select name="year" class="form-select">
+                            <select name="year" id="yearInput" class="form-select">
                                 @for($y = date('Y') + 1; $y >= 2024; $y--)
                                     <option value="{{ $y }}" @selected($year == $y)>{{ $y }}</option>
                                 @endfor
                             </select>
                         </div>
 
-                        <div class="col-lg-auto col-md-auto d-flex gap-2">
+                        <!-- Action Buttons -->
+                        <div class="col-lg-auto col-md-auto d-flex flex-wrap gap-2 ms-auto">
                             <button type="submit" class="btn btn-primary">
                                 <i class="ri-filter-3-line align-bottom me-1"></i> View Payslip
                             </button>
 
-                            <a href="{{ route('admin.payslip.download', request()->query()) }}" class="btn btn-success">
+                            <a href="{{ route('admin.payslip.download', request()->query()) }}" id="btnDownloadPdf" class="btn btn-success">
                                 <i class="ri-download-2-line align-bottom me-1"></i> Download PDF
                             </a>
 
-                            <a href="{{ route('admin.payslip.preview', request()->query()) }}" target="_blank" class="btn btn-outline-secondary">
+                            <a href="{{ route('admin.payslip.preview', request()->query()) }}" id="btnPrintPreview" target="_blank" class="btn btn-outline-secondary">
                                 <i class="ri-printer-line align-bottom me-1"></i> Print / Preview
                             </a>
                         </div>
@@ -78,14 +147,19 @@
             <!-- Attendance & Leave Breakdown Badges -->
             <div class="card border-0 shadow-sm bg-light-subtle mb-4">
                 <div class="card-body">
-                    <h6 class="fs-14 mb-3 fw-bold text-muted text-uppercase">
-                        <i class="ri-calendar-check-line align-middle me-1"></i> Attendance Integration Summary ({{ $full_month_name }} {{ $year }})
-                    </h6>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                        <h6 class="fs-14 mb-0 fw-bold text-muted text-uppercase">
+                            <i class="ri-calendar-check-line align-middle me-1"></i> Attendance Integration Summary ({{ $period_subtitle }})
+                        </h6>
+                        <span class="fs-13 text-muted">
+                            Mode: <strong class="text-dark">{{ $mode_label }}</strong> | Period: <strong class="text-dark">{{ $from_date_display }} to {{ $to_date_display }}</strong>
+                        </span>
+                    </div>
                     <div class="row g-3 text-center">
                         <div class="col-6 col-md-2">
                             <div class="p-2 border rounded bg-white">
-                                <span class="fs-11 text-muted text-uppercase d-block">Days in Month</span>
-                                <span class="fs-16 fw-bold text-dark">{{ $days_in_month }}</span>
+                                <span class="fs-11 text-muted text-uppercase d-block">Period Days</span>
+                                <span class="fs-16 fw-bold text-dark">{{ $period_days }}</span>
                             </div>
                         </div>
                         <div class="col-6 col-md-2">
@@ -127,7 +201,7 @@
                 <div class="col-lg-10 col-xl-9">
                     <div class="card shadow">
                         <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">Payslip Preview: {{ $month_name }} {{ $year }}</h5>
+                            <h5 class="card-title mb-0">{{ $period_title }}</h5>
                             <span class="badge bg-success-subtle text-success fs-12">Net Pay: INR {{ number_format($net_pay, 0) }}</span>
                         </div>
                         <div class="card-body p-4 bg-white">
@@ -152,7 +226,7 @@
                                                 No 81/1, 82/2, 1st Floor, Clayworks Shankara Campus,<br>
                                                 Doddakallasandra, Kanakapura Road, Bangalore - 560062
                                             </div>
-                                            <div style="font-size: 15px; font-weight: bold; margin-top: 6px;">Payslip for the month of {{ $month_name }} {{ $year }}</div>
+                                            <div style="font-size: 15px; font-weight: bold; margin-top: 6px;">{{ $period_title }}</div>
                                         </td>
                                     </tr>
                                 </table>
@@ -194,6 +268,18 @@
                                         <td style="border: 1px solid #000; padding: 6px 10px;">{{ \App\Services\PayslipService::formatDays($effective_work_days) }}</td>
                                         <td style="border: 1px solid #000; padding: 6px 10px;">ESI No:</td>
                                         <td style="border: 1px solid #000; padding: 6px 10px;">{{ $esi_no }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">Employment Mode:</td>
+                                        <td style="border: 1px solid #000; padding: 6px 10px; font-weight: bold;">{{ $mode_label }}</td>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">Client / Project:</td>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">{{ $client_name ?: 'SZORZO In-House' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">Pay Period:</td>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">{{ $from_date_display }} to {{ $to_date_display }}</td>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">Period Days:</td>
+                                        <td style="border: 1px solid #000; padding: 6px 10px;">{{ $period_days }} Days</td>
                                     </tr>
                                 </table>
 
@@ -277,7 +363,7 @@
 
                                 <!-- Net Pay Box -->
                                 <div style="border: 1px solid #000; border-top: none; padding: 16px 10px; font-size: 14px; font-weight: normal;">
-                                    Net Pay for the month: <strong class="fs-15 text-dark ms-1">{{ \App\Services\PayslipService::formatAmount($net_pay) }}</strong>
+                                    Net Pay for the period: <strong class="fs-15 text-dark ms-1">{{ \App\Services\PayslipService::formatAmount($net_pay) }}</strong>
                                 </div>
 
                                 <!-- Remarks Box -->
@@ -299,3 +385,74 @@
     </div>
 </div>
 @endsection
+
+@push('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const targetSelector = document.getElementById('targetSelector');
+        const hiddenEmployeeId = document.getElementById('hiddenEmployeeId');
+        const hiddenUserId = document.getElementById('hiddenUserId');
+        const periodTypeMonth = document.getElementById('periodTypeMonth');
+        const periodTypeRange = document.getElementById('periodTypeRange');
+        const fromDateInput = document.getElementById('fromDateInput');
+        const toDateInput = document.getElementById('toDateInput');
+        const rangeContainers = document.querySelectorAll('.period-range-container');
+        const monthContainers = document.querySelectorAll('.period-month-container');
+
+        function togglePeriodDisplay(type) {
+            if (type === 'range') {
+                rangeContainers.forEach(el => el.style.display = '');
+                monthContainers.forEach(el => el.style.display = 'none');
+            } else {
+                rangeContainers.forEach(el => el.style.display = 'none');
+                monthContainers.forEach(el => el.style.display = '');
+            }
+        }
+
+        if (periodTypeMonth) {
+            periodTypeMonth.addEventListener('change', function () {
+                if (this.checked) togglePeriodDisplay('monthly');
+            });
+        }
+
+        if (periodTypeRange) {
+            periodTypeRange.addEventListener('change', function () {
+                if (this.checked) togglePeriodDisplay('range');
+            });
+        }
+
+        if (targetSelector) {
+            targetSelector.addEventListener('change', function () {
+                const opt = this.options[this.selectedIndex];
+                if (!opt) return;
+
+                const type = opt.getAttribute('data-type');
+                const id = opt.getAttribute('data-id');
+                const mode = opt.getAttribute('data-mode');
+                const contractFrom = opt.getAttribute('data-contract-from');
+                const contractTo = opt.getAttribute('data-contract-to');
+
+                if (type === 'employee') {
+                    hiddenEmployeeId.value = id;
+                    hiddenUserId.value = '';
+
+                    // For Contract or C2H: switch to date-to-date range mode
+                    if (mode === 'Contract' || mode === 'C2H') {
+                        if (periodTypeRange) {
+                            periodTypeRange.checked = true;
+                            togglePeriodDisplay('range');
+                        }
+                        if (contractFrom && contractTo) {
+                            if (fromDateInput) fromDateInput.value = contractFrom;
+                            if (toDateInput) toDateInput.value = contractTo;
+                        }
+                    }
+                } else {
+                    hiddenUserId.value = id;
+                    hiddenEmployeeId.value = '';
+                }
+            });
+        }
+    });
+</script>
+@endpush

@@ -52,14 +52,21 @@ class User extends Authenticatable
         ];
     }
 
-    public function isSuperAdmin()
-	{
-		if ($this->role) {
-			if ($this->role->access_level == 'super_admin') {
-				return true;
-			}
-		}
-	}
+    public function isSuperAdmin(): bool
+    {
+        if ($this->role) {
+            $level = str_replace('_', '-', strtolower((string) $this->role->access_level));
+            if (in_array($level, ['super-admin', 'admin'], true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->isSuperAdmin();
+    }
 
     public function role()
     {

@@ -11,34 +11,137 @@ use Carbon\CarbonImmutable;
 class PayslipService
 {
     /**
-     * Generate complete payslip data for a user for a specified month & year.
+     * Generate complete payslip data for an Employee or User.
+     *
+     * Supports:
+     * - Target as Employee or User
+     * - Date-to-Date period (from_date to to_date) for Contract & C2H
+     * - Monthly period (month & year) for FTE (Full Time Employees)
+     * - Attendance & LOP integration
+     * - Comprehensive earnings, deductions, and demographic details
      */
-    public function getPayslipData(User $user, int $month, int $year, array $overrides = []): array
+    public function getPayslipData(Employee|User $target, ?int $month = null, ?int $year = null, array $overrides = []): array
     {
-        $start = CarbonImmutable::create($year, $month, 1);
-        $daysInMonth = $start->daysInMonth;
-        $monthName = $start->format('M');
-        $fullMonthName = $start->format('F');
-
-        // Retrieve linked employee record if available
+        // 1. Resolve Target Models (Employee & User)
         $employee = null;
-        try {
-            $employee = Employee::where(function ($query) use ($user) {
-                $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($user->email)])
-                    ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($user->email)]);
-            })->first();
-        } catch (\Throwable $e) {
-            $employee = null;
+        $user = null;
+
+        if ($target instanceof Employee) {
+            try {
+                $employee = $target->loadMissing(['mode', 'client']);
+            } catch (\Throwable $e) {
+                $employee = $target;
+            }
+            try {
+                $user = $employee->linkedUser();
+            } catch (\Throwable $e) {
+                $user = null;
+            }
+        } elseif ($target instanceof User) {
+            try {
+                $user = $target->loadMissing('role');
+            } catch (\Throwable $e) {
+                $user = $target;
+            }
+            try {
+                $employee = $user->linkedEmployee();
+                if ($employee) {
+                    $employee = $employee->loadMissing(['mode', 'client']);
+                }
+            } catch (\Throwable $e) {
+                $employee = null;
+            }
         }
 
-        // Attendance stats for this user in this month
+        // 2. Resolve Employment Mode (FTE, Contract, C2H)
+        $mode = $employee ? $employee->employment_mode : 'FTE';
+        $modeObj = $employee && $employee->relationLoaded('mode') ? $employee->getRelation('mode') : null;
+        $modeLabel = $modeObj?->mode ?: ($mode === 'FTE' ? 'Full Time' : $mode);
+
+        $clientObj = $employee && $employee->relationLoaded('client') ? $employee->getRelation('client') : null;
+        if (!$clientObj && $employee) {
+            try {
+                $clientObj = $employee->client;
+            } catch (\Throwable $e) {
+                $clientObj = null;
+            }
+        }
+        $clientName = $clientObj?->client ?: null;
+
+        // 3. Resolve Date Period (from_date and to_date)
+        $fromDateInput = $overrides['from_date'] ?? null;
+        $toDateInput = $overrides['to_date'] ?? null;
+
+        if (!empty($fromDateInput) && !empty($toDateInput)) {
+            try {
+                $fromDate = CarbonImmutable::parse($fromDateInput)->startOfDay();
+                $toDate = CarbonImmutable::parse($toDateInput)->endOfDay();
+                if ($toDate->lt($fromDate)) {
+                    [$fromDate, $toDate] = [$toDate->startOfDay(), $fromDate->endOfDay()];
+                }
+            } catch (\Throwable $e) {
+                $fromDate = null;
+                $toDate = null;
+            }
+        } else {
+            $fromDate = null;
+            $toDate = null;
+        }
+
+        if (!$fromDate || !$toDate) {
+            $resolvedMonth = $month ?: (now()->day < 5 ? now()->subMonth()->month : now()->month);
+            $resolvedYear = $year ?: (now()->day < 5 ? now()->subMonth()->year : now()->year);
+
+            $contractFrom = null;
+            $contractTo = null;
+            try {
+                $contractFrom = $employee?->contract_from_date;
+                $contractTo = $employee?->contract_to_date;
+            } catch (\Throwable $e) {
+                $contractFrom = null;
+                $contractTo = null;
+            }
+
+            if ($employee && in_array($mode, ['Contract', 'C2H'], true) && $contractFrom && $contractTo && empty($overrides['force_month'])) {
+                $fromDate = CarbonImmutable::parse($contractFrom)->startOfDay();
+                $toDate = CarbonImmutable::parse($contractTo)->endOfDay();
+                $resolvedMonth = $fromDate->month;
+                $resolvedYear = $fromDate->year;
+            } else {
+                $startMonth = CarbonImmutable::create($resolvedYear, $resolvedMonth, 1)->startOfDay();
+                $fromDate = $startMonth;
+                $toDate = $startMonth->endOfMonth()->endOfDay();
+            }
+        } else {
+            $resolvedMonth = $fromDate->month;
+            $resolvedYear = $fromDate->year;
+        }
+
+        $periodDays = (int) $fromDate->startOfDay()->diffInDays($toDate->startOfDay()) + 1;
+        $daysInMonth = $fromDate->daysInMonth;
+        $monthName = $fromDate->format('M');
+        $fullMonthName = $fromDate->format('F');
+
+        $isFullCalendarMonth = ($fromDate->day === 1 && $toDate->day === $daysInMonth && $fromDate->isSameMonth($toDate));
+
+        if ($isFullCalendarMonth) {
+            $periodTitle = 'Payslip for the month of ' . $fromDate->format('F Y');
+            $periodSubtitle = $fromDate->format('F Y');
+        } else {
+            $periodTitle = 'Payslip for the period ' . $fromDate->format('d-M-Y') . ' to ' . $toDate->format('d-M-Y');
+            $periodSubtitle = $fromDate->format('d/m/Y') . ' - ' . $toDate->format('d/m/Y');
+        }
+
+        // 4. Attendance Integration (if User account linked)
         $attendances = collect();
-        try {
-            $attendances = Attendance::where('user_id', $user->id)
-                ->whereBetween('attendance_date', [$start->toDateString(), $start->endOfMonth()->toDateString()])
-                ->get();
-        } catch (\Throwable $e) {
-            $attendances = collect();
+        if ($user) {
+            try {
+                $attendances = Attendance::where('user_id', $user->id)
+                    ->whereBetween('attendance_date', [$fromDate->toDateString(), $toDate->toDateString()])
+                    ->get();
+            } catch (\Throwable $e) {
+                $attendances = collect();
+            }
         }
 
         $presentCount = $attendances->where('status', 'present')->count();
@@ -52,34 +155,47 @@ class PayslipService
         $unpaidLeaveCount = 0;
         $leaveRequestIds = $attendances->where('status', 'on_leave')->pluck('leave_request_id')->filter()->unique();
         if ($leaveRequestIds->isNotEmpty()) {
-            $unpaidLeaveCount = LeaveRequest::whereIn('id', $leaveRequestIds)
-                ->where('leave_type', 'Unpaid Leave')
-                ->count();
+            try {
+                $unpaidLeaveCount = LeaveRequest::whereIn('id', $leaveRequestIds)
+                    ->where('leave_type', 'Unpaid Leave')
+                    ->count();
+            } catch (\Throwable $e) {
+                $unpaidLeaveCount = 0;
+            }
         }
 
-        // LOP (Loss of Pay):
-        // 1 full day for each absent, 0.5 day for each half-day, 1 day for unpaid leave
+        // LOP (Loss of Pay)
         $autoLop = $absentCount + ($halfDayCount * 0.5) + $unpaidLeaveCount;
 
-        // If attendance was not marked at all yet for this user/month, default to 0 (or allow override)
-        if ($attendances->isEmpty() && !isset($overrides['lop'])) {
+        if (isset($overrides['lop']) && is_numeric($overrides['lop'])) {
+            $lop = (float) $overrides['lop'];
+        } elseif ($attendances->isEmpty()) {
             $lop = 0.0;
         } else {
-            $lop = isset($overrides['lop']) && is_numeric($overrides['lop'])
-                ? (float) $overrides['lop']
-                : (float) $autoLop;
+            $lop = (float) $autoLop;
         }
 
-        $effectiveWorkDays = max(0, $daysInMonth - $lop);
+        $effectiveWorkDays = max(0.0, (float) ($periodDays - $lop));
+        if (isset($overrides['effective_work_days']) && is_numeric($overrides['effective_work_days'])) {
+            $effectiveWorkDays = (float) $overrides['effective_work_days'];
+        }
 
         $otHours = isset($overrides['ot_hours']) && is_numeric($overrides['ot_hours'])
             ? (float) $overrides['ot_hours']
             : 0.0;
 
-        // Ratio of effective work days to total days in the month
-        $ratio = $daysInMonth > 0 ? ($effectiveWorkDays / $daysInMonth) : 1;
+        // 5. Pro-Rata Salary Calculations
+        if ($isFullCalendarMonth) {
+            $ratio = $daysInMonth > 0 ? ($effectiveWorkDays / $daysInMonth) : 1.0;
+        } else {
+            $denominator = max(1, $daysInMonth);
+            $ratio = min(1.0, max(0.0, $effectiveWorkDays / $denominator));
+            if (($overrides['calculation_basis'] ?? '') === 'period' || $periodDays > 31) {
+                $ratio = $periodDays > 0 ? ($effectiveWorkDays / $periodDays) : 1.0;
+            }
+        }
 
-        // Salary structure: from employee attributes or standard 38,050 INR breakdown
+        // Salary structure: from employee attributes or default 38,050 INR breakdown
         $monthlyGross = (float) ($employee->monthly_gross ?? 38050);
         if ($monthlyGross <= 0) {
             $monthlyGross = 38050;
@@ -121,30 +237,48 @@ class PayslipService
 
         $netPay = max(0, $totalEarningsActual - $totalDeductionsActual);
 
-        // Identity and demographic fields
-        $employeeNo = $employee?->employee_no ?: ('SZ' . str_pad((string) $user->id, 3, '0', STR_PAD_LEFT));
-        $employeeName = $employee?->employee_name ?: $user->name;
+        // 6. Identity and Demographic Information
+        $fallbackId = $employee?->id ?? ($user?->id ?? 1);
+        $employeeNo = $employee?->employee_no ?: ('SZ' . str_pad((string) $fallbackId, 3, '0', STR_PAD_LEFT));
+        $employeeName = $employee?->employee_name ?: ($user?->name ?: 'Employee');
         $fatherName = $employee?->fathers_name ?: 'Padmanabha';
         $gender = $employee?->gender ? strtoupper(substr($employee->gender, 0, 1)) : 'F';
-        $designation = $employee?->designation ?: ($user->role?->name ?: 'Senior Recruiter');
+        $designation = $employee?->designation ?: ($user?->role?->name ?: 'Senior Recruiter');
         $pfNo = $employee?->bank_uan_pf_number ?: ($employee?->employee_uan_pf_number ?: 'BGMRD36445920000010003');
         $pfUan = $employee?->employee_uan_pf_number ?: '102311451956';
         $esiNo = $employee?->employee_esi_number ?: 'NA';
         $location = 'Bangalore';
         $remarks = $employee?->salary_remarks ?: 'NA';
 
-        // Logo base64 encode for reliable DomPDF embedding
-        $logoPath = public_path('frontend/images/rhino-logo.png');
+        // 7. Logo Base64 for DomPDF embedding
         $logoBase64 = null;
-        if (file_exists($logoPath)) {
-            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        try {
+            $logoPath = function_exists('public_path') ? public_path('frontend/images/rhino-logo.png') : null;
+            if ($logoPath && file_exists($logoPath)) {
+                $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            }
+        } catch (\Throwable $e) {
+            $logoBase64 = null;
         }
 
         return [
+            'target_type' => $target instanceof Employee ? 'employee' : 'user',
+            'target_id' => $target->id,
             'user' => $user,
             'employee' => $employee,
-            'month' => $month,
-            'year' => $year,
+            'mode' => $mode,
+            'mode_label' => $modeLabel,
+            'client_name' => $clientName,
+            'from_date' => $fromDate->toDateString(),
+            'to_date' => $toDate->toDateString(),
+            'from_date_display' => $fromDate->format('d-M-Y'),
+            'to_date_display' => $toDate->format('d-M-Y'),
+            'period_days' => $periodDays,
+            'is_full_calendar_month' => $isFullCalendarMonth,
+            'period_title' => $periodTitle,
+            'period_subtitle' => $periodSubtitle,
+            'month' => $resolvedMonth,
+            'year' => $resolvedYear,
             'month_name' => $monthName,
             'full_month_name' => $fullMonthName,
             'days_in_month' => $daysInMonth,

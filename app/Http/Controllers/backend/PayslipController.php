@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\User;
 use App\Services\PayslipService;
@@ -18,40 +17,35 @@ class PayslipController extends Controller
     ) {}
 
     /**
-     * Display the payslip view & download page.
+     * Display the payslip view & download page (Admin Only).
      */
     public function index(Request $request)
     {
-        $currentUser = Auth::user();
-        $canManageAll = $currentUser->isSuperAdmin()
-            || $currentUser->can('read', Attendance::class)
-            || $currentUser->can('read', Employee::class);
+        $this->ensureAdminAccess();
 
-        // Resolve target user
-        $targetUser = $currentUser;
-        if ($canManageAll && $request->filled('user_id')) {
-            $foundUser = User::find($request->input('user_id'));
-            if ($foundUser) {
-                $targetUser = $foundUser;
-            }
-        }
+        $target = $this->resolveTarget($request);
+        $month = $this->resolveMonth($request);
+        $year = $this->resolveYear($request);
 
-        $defaultMonth = now()->day < 5 ? now()->subMonth()->month : now()->month;
-        $defaultYear = now()->day < 5 ? now()->subMonth()->year : now()->year;
+        $payslipData = $this->payslipService->getPayslipData($target, $month, $year, $request->all());
 
-        $month = (int) $request->input('month', $defaultMonth);
-        $year = (int) $request->input('year', $defaultYear);
+        $allEmployees = Employee::with(['mode', 'client'])
+            ->where('status', 1)
+            ->orderBy('employee_name')
+            ->get();
 
-        $payslipData = $this->payslipService->getPayslipData($targetUser, $month, $year, $request->all());
-
-        $allUsers = $canManageAll
-            ? User::where('is_active', 1)->orderBy('name')->get(['id', 'name', 'email'])
-            : collect([$currentUser]);
+        $allUsers = User::with('role')
+            ->where('is_active', 1)
+            ->orderBy('name')
+            ->get();
 
         return view('backend.payslip.index', array_merge($payslipData, [
-            'can_manage_all' => $canManageAll,
+            'can_manage_all' => true,
+            'all_employees' => $allEmployees,
             'all_users' => $allUsers,
-            'target_user' => $targetUser,
+            'target' => $target,
+            'selected_employee_id' => $target instanceof Employee ? $target->id : null,
+            'selected_user_id' => $target instanceof User ? $target->id : null,
         ]));
     }
 
@@ -60,33 +54,18 @@ class PayslipController extends Controller
      */
     public function download(Request $request)
     {
-        $currentUser = Auth::user();
-        $canManageAll = $currentUser->isSuperAdmin()
-            || $currentUser->can('read', Attendance::class)
-            || $currentUser->can('read', Employee::class);
+        $this->ensureAdminAccess();
 
-        $targetUser = $currentUser;
-        if ($canManageAll && $request->filled('user_id')) {
-            $foundUser = User::find($request->input('user_id'));
-            if ($foundUser) {
-                $targetUser = $foundUser;
-            }
-        }
+        $target = $this->resolveTarget($request);
+        $month = $this->resolveMonth($request);
+        $year = $this->resolveYear($request);
 
-        $defaultMonth = now()->day < 5 ? now()->subMonth()->month : now()->month;
-        $defaultYear = now()->day < 5 ? now()->subMonth()->year : now()->year;
-
-        $month = (int) $request->input('month', $defaultMonth);
-        $year = (int) $request->input('year', $defaultYear);
-
-        $data = $this->payslipService->getPayslipData($targetUser, $month, $year, $request->all());
+        $data = $this->payslipService->getPayslipData($target, $month, $year, $request->all());
 
         $pdf = Pdf::loadView('backend.payslip.pdf', $data)
             ->setPaper('a4', 'portrait');
 
-        $filename = 'Payslip_' . ($data['employee_no'] ?: 'SZ') . '_' . $data['month_name'] . '_' . $data['year'] . '.pdf';
-
-        return $pdf->download($filename);
+        return $pdf->download($this->resolveFilename($data));
     }
 
     /**
@@ -94,30 +73,86 @@ class PayslipController extends Controller
      */
     public function preview(Request $request)
     {
-        $currentUser = Auth::user();
-        $canManageAll = $currentUser->isSuperAdmin()
-            || $currentUser->can('read', Attendance::class)
-            || $currentUser->can('read', Employee::class);
+        $this->ensureAdminAccess();
 
-        $targetUser = $currentUser;
-        if ($canManageAll && $request->filled('user_id')) {
-            $foundUser = User::find($request->input('user_id'));
-            if ($foundUser) {
-                $targetUser = $foundUser;
-            }
-        }
+        $target = $this->resolveTarget($request);
+        $month = $this->resolveMonth($request);
+        $year = $this->resolveYear($request);
 
-        $month = (int) $request->input('month', now()->month);
-        $year = (int) $request->input('year', now()->year);
-
-        $data = $this->payslipService->getPayslipData($targetUser, $month, $year, $request->all());
+        $data = $this->payslipService->getPayslipData($target, $month, $year, $request->all());
 
         $pdf = Pdf::loadView('backend.payslip.pdf', $data)
             ->setPaper('a4', 'portrait');
 
-        $filename = 'Payslip_' . ($data['employee_no'] ?: 'SZ') . '_' . $data['month_name'] . '_' . $data['year'] . '.pdf';
+        return $pdf->stream($this->resolveFilename($data));
+    }
 
-        return $pdf->stream($filename);
+    /**
+     * Ensure the authenticated user is an administrator.
+     */
+    protected function ensureAdminAccess(): void
+    {
+        $currentUser = Auth::user();
+        abort_unless(
+            $currentUser && $currentUser->isSuperAdmin(),
+            403,
+            'Unauthorized access. Payslips are restricted to administrators only.'
+        );
+    }
+
+    /**
+     * Resolve the target Employee or User based on request inputs.
+     */
+    protected function resolveTarget(Request $request): Employee|User
+    {
+        if ($request->filled('employee_id')) {
+            $employee = Employee::with(['mode', 'client'])->find($request->input('employee_id'));
+            if ($employee) {
+                return $employee;
+            }
+        }
+
+        if ($request->filled('user_id')) {
+            $user = User::with('role')->find($request->input('user_id'));
+            if ($user) {
+                return $user;
+            }
+        }
+
+        // Default to first active employee in Employee module
+        $firstEmployee = Employee::with(['mode', 'client'])
+            ->where('status', 1)
+            ->orderBy('employee_name')
+            ->first();
+
+        if ($firstEmployee) {
+            return $firstEmployee;
+        }
+
+        return Auth::user();
+    }
+
+    protected function resolveMonth(Request $request): int
+    {
+        $defaultMonth = now()->day < 5 ? now()->subMonth()->month : now()->month;
+        return (int) $request->input('month', $defaultMonth);
+    }
+
+    protected function resolveYear(Request $request): int
+    {
+        $defaultYear = now()->day < 5 ? now()->subMonth()->year : now()->year;
+        return (int) $request->input('year', $defaultYear);
+    }
+
+    protected function resolveFilename(array $data): string
+    {
+        $empIdentifier = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($data['employee_no'] ?: 'SZ'));
+        if (!empty($data['is_full_calendar_month'])) {
+            return 'Payslip_' . $empIdentifier . '_' . $data['month_name'] . '_' . $data['year'] . '.pdf';
+        }
+        $from = str_replace('-', '', (string) $data['from_date']);
+        $to = str_replace('-', '', (string) $data['to_date']);
+        return 'Payslip_' . $empIdentifier . '_' . $from . '_to_' . $to . '.pdf';
     }
 }
 

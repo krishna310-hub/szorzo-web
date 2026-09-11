@@ -53,6 +53,9 @@ class EmployeeController extends Controller
                     if (! $row->status && $this->canManagePublicOnboarding()) {
                         $buttons .= '<button type="button" data-route="'.route('admin.employees.activate', $row->id).'" class="btn btn-sm btn-success me-2 activate-record">Activate</button>';
                     }
+                    if (auth()->user()->isSuperAdmin()) {
+                        $buttons .= '<a href="'.route('admin.payslip.index', ['employee_id' => $row->id]).'" class="text-success fs-4 me-1" title="Generate Payslip"><i class="bx bx-receipt"></i></a>';
+                    }
                     if (auth()->user()->can('edit', Employee::class)) {
                         $buttons .= '<a href="'.route('admin.employees.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     }

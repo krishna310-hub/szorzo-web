@@ -130,4 +130,57 @@ class Employee extends Model
     {
         return $this->belongsTo(Mode::class);
     }
+
+    public function linkedUser(): ?User
+    {
+        $emails = array_filter([
+            mb_strtolower((string) $this->official_mail),
+            mb_strtolower((string) $this->personal_mail),
+        ]);
+
+        if (empty($emails)) {
+            return null;
+        }
+
+        return User::where(function ($query) use ($emails) {
+            foreach ($emails as $email) {
+                $query->orWhereRaw('LOWER(email) = ?', [$email]);
+            }
+        })->first();
+    }
+
+    public function getEmploymentModeAttribute(): string
+    {
+        $modeObj = $this->relationLoaded('mode') ? $this->getRelation('mode') : null;
+        if (!$modeObj) {
+            try {
+                $modeObj = $this->mode;
+            } catch (\Throwable $e) {
+                $modeObj = null;
+            }
+        }
+        $raw = strtolower(trim((string) ($modeObj?->mode ?? 'Full Time')));
+        if (str_contains($raw, 'c2h') || str_contains($raw, 'hire')) {
+            return 'C2H';
+        }
+        if (str_contains($raw, 'contract')) {
+            return 'Contract';
+        }
+        return 'FTE';
+    }
+
+    public function isContract(): bool
+    {
+        return $this->employment_mode === 'Contract';
+    }
+
+    public function isC2H(): bool
+    {
+        return $this->employment_mode === 'C2H';
+    }
+
+    public function isFTE(): bool
+    {
+        return $this->employment_mode === 'FTE';
+    }
 }
