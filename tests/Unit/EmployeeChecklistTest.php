@@ -205,5 +205,32 @@ class EmployeeChecklistTest extends TestCase
         $this->assertContains('photograph', $docKeys);
         $this->assertContains('passbook_cheques', $docKeys);
     }
+
+    public function test_checklist_modal_body_contains_responsive_card_elements(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $partialPath = $baseDir . '/resources/views/backend/employees/partials/checklist-modal-body.blade.php';
+        $this->assertFileExists($partialPath);
+        $content = file_get_contents($partialPath);
+
+        $this->assertStringContainsString('checklist-table', $content);
+        $this->assertStringContainsString('checklist-row', $content);
+        $this->assertStringContainsString('checklist-mobile-label', $content);
+        $this->assertStringContainsString('checklist-card-section', $content);
+        $this->assertStringContainsString('checklist-checkbox', $content);
+        $this->assertStringContainsString('name="checklist[{{ $key }}]"', $content);
+        $this->assertStringContainsString('name="notes[{{ $key }}]"', $content);
+
+        // Verify index view has scrollable modal and scroll-to-top button
+        $indexPath = $baseDir . '/resources/views/backend/employees/index.blade.php';
+        $this->assertFileExists($indexPath);
+        $indexContent = file_get_contents($indexPath);
+
+        $this->assertStringContainsString('modal-dialog-scrollable', $indexContent);
+        $this->assertStringContainsString('checklistScrollTopBtn', $indexContent);
+        $this->assertStringContainsString('checklist-verify-form', $indexContent);
+    }
 }
+
+
 

@@ -57,9 +57,9 @@
         </div>
     </div>
 
-    <!-- 10 Point Checklist Table -->
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle mb-0">
+    <!-- 10 Point Checklist Table & Responsive Cards -->
+    <div class="table-responsive-md">
+        <table class="table table-bordered table-hover align-middle mb-0 checklist-table">
             <thead class="table-light">
                 <tr>
                     <th style="width: 50px;" class="text-center">#</th>
@@ -77,18 +77,35 @@
                         $rowClass = $isVerified ? 'table-success-subtle' : ($isUploaded ? 'table-warning-subtle' : '');
                     @endphp
                     <tr class="checklist-row {{ $rowClass }}" data-key="{{ $key }}" data-uploaded="{{ $isUploaded ? '1' : '0' }}">
-                        <td class="text-center fw-bold text-muted">{{ $item['number'] }}</td>
-                        <td>
-                            <div class="fw-semibold text-dark">{{ $item['label'] }}</div>
+                        <td class="text-center fw-bold text-muted d-none d-md-table-cell checklist-col-num">{{ $item['number'] }}</td>
+                        <td class="checklist-col-doc">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill d-md-none fw-bold px-2 py-1">#{{ $item['number'] }}</span>
+                                    <div class="fw-semibold text-dark fs-6">{{ $item['label'] }}</div>
+                                </div>
+                                <div class="d-md-none checklist-mobile-status">
+                                    @if($isVerified)
+                                        <span class="badge bg-success-subtle text-success"><i class="bx bx-check me-1"></i>Verified</span>
+                                    @elseif($isUploaded)
+                                        <span class="badge bg-warning-subtle text-warning"><i class="bx bx-time-five me-1"></i>Uploaded</span>
+                                    @else
+                                        <span class="badge bg-light text-muted border">Pending</span>
+                                    @endif
+                                </div>
+                            </div>
                             @if($key === 'personal_details')
-                                <small class="text-muted">Basic profile, contact and address information</small>
+                                <small class="text-muted d-block mt-1">Basic profile, contact and address information</small>
                             @elseif($key === 'photograph')
-                                <small class="text-muted">Passport size photo for profile & ID</small>
+                                <small class="text-muted d-block mt-1">Passport size photo for profile &amp; ID</small>
                             @elseif($key === 'educational_certificates')
-                                <small class="text-muted">10th, 12th, Degree, Post-Graduation certificates</small>
+                                <small class="text-muted d-block mt-1">10th, 12th, Degree, Post-Graduation certificates</small>
                             @endif
                         </td>
-                        <td>
+                        <td class="checklist-col-files checklist-card-section">
+                            <div class="checklist-mobile-label">
+                                <i class="bx bx-file"></i><span>Uploaded Document(s)</span>
+                            </div>
                             @if($isUploaded)
                                 @if(!empty($item['files']))
                                     <div class="d-flex flex-wrap gap-1 mb-1">
@@ -126,7 +143,10 @@
                                 </div>
                             @endif
                         </td>
-                        <td class="text-center">
+                        <td class="text-md-center checklist-col-verify checklist-card-section">
+                            <div class="checklist-mobile-label">
+                                <i class="bx bx-check-shield"></i><span>Manual Verification</span>
+                            </div>
                             <div class="form-check form-switch d-inline-block">
                                 <input class="form-check-input checklist-checkbox" type="checkbox"
                                        id="chk_verify_{{ $key }}"
@@ -147,7 +167,10 @@
                                 </div>
                             @endif
                         </td>
-                        <td>
+                        <td class="checklist-col-notes checklist-card-section">
+                            <div class="checklist-mobile-label">
+                                <i class="bx bx-notepad"></i><span>Notes / Remarks</span>
+                            </div>
                             <input type="text" class="form-control form-control-sm checklist-notes-input"
                                    name="notes[{{ $key }}]"
                                    value="{{ $item['notes'] ?? '' }}"
