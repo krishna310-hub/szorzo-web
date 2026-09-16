@@ -34,9 +34,14 @@ class PayslipController extends Controller
             ->orderBy('employee_name')
             ->get();
 
+        $internalEmployees = $allEmployees->filter(fn ($emp) => $emp->isInternal())->values();
+        $externalEmployees = $allEmployees->filter(fn ($emp) => $emp->isExternal())->values();
+
         return view('backend.payslip.index', array_merge($payslipData, [
             'can_manage_all' => true,
             'all_employees' => $allEmployees,
+            'internal_employees' => $internalEmployees,
+            'external_employees' => $externalEmployees,
             'target' => $target,
             'selected_employee_id' => $target instanceof Employee ? $target->id : null,
         ]));

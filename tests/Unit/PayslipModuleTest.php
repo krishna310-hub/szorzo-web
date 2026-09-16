@@ -442,11 +442,15 @@ class PayslipModuleTest extends TestCase
         $this->assertStringNotContainsString('hiddenUserId', $viewContent);
 
         // Verify that only employee module list is present
+        // Verify that the dropdown splits employees into Internal Users and External Users
+        $this->assertStringContainsString('optgroup label="Internal Users - Szorzo employees"', $viewContent);
+        $this->assertStringContainsString('optgroup label="External Users - Contract Employees"', $viewContent);
         $this->assertStringContainsString('Select Employee', $viewContent);
         $this->assertStringContainsString('name="employee_id"', $viewContent);
         $this->assertStringContainsString('$all_employees', $viewContent);
 
         // Verify controller only resolves Employee
+        // Verify controller passes both internal and external employee collections
         $controllerPath = $baseDir . '/app/Http/Controllers/backend/PayslipController.php';
         $this->assertFileExists($controllerPath);
         $controllerContent = file_get_contents($controllerPath);
@@ -454,5 +458,40 @@ class PayslipModuleTest extends TestCase
         $this->assertStringContainsString('resolveTarget(Request $request): Employee', $controllerContent);
         $this->assertStringNotContainsString('\'all_candidates\' => $allCandidates', $controllerContent);
         $this->assertStringNotContainsString('\'all_users\' => $allUsers', $controllerContent);
+        $this->assertStringContainsString('\'internal_employees\' => $internalEmployees', $controllerContent);
+        $this->assertStringContainsString('\'external_employees\' => $externalEmployees', $controllerContent);
+    }
+
+    public function test_employee_internal_and_external_categorization(): void
+    {
+        $contractMode = new Mode(['mode' => 'Contract']);
+        $c2hMode = new Mode(['mode' => 'C2H']);
+        $fteMode = new Mode(['mode' => 'Full Time']);
+
+        // Internal FTE Employee
+        $internalEmp = new Employee(['employee_name' => 'Internal Staff']);
+        $internalEmp->setRelation('mode', $fteMode);
+        $this->assertTrue($internalEmp->isInternal());
+        $this->assertFalse($internalEmp->isExternal());
+        $this->assertSame('Internal Users - Szorzo employees', $internalEmp->user_category);
+
+        // External Contract Employee
+        $externalContract = new Employee(['employee_name' => 'Contract Staff']);
+        $externalContract->setRelation('mode', $contractMode);
+        $this->assertTrue($externalContract->isExternal());
+        $this->assertFalse($externalContract->isInternal());
+        $this->assertSame('External Users - Contract Employees', $externalContract->user_category);
+
+        // External C2H Employee
+        $externalC2h = new Employee(['employee_name' => 'C2H Staff']);
+        $externalC2h->setRelation('mode', $c2hMode);
+        $this->assertTrue($externalC2h->isExternal());
+        $this->assertFalse($externalC2h->isInternal());
+        $this->assertSame('External Users - Contract Employees', $externalC2h->user_category);
+
+        // Employee with client assignment is external
+        $clientEmp = new Employee(['employee_name' => 'Client Staff', 'client_id' => 99]);
+        $this->assertTrue($clientEmp->isExternal());
+        $this->assertFalse($clientEmp->isInternal());
     }
 }

@@ -157,6 +157,7 @@ class Employee extends Model
     {
         $modeObj = $this->relationLoaded('mode') ? $this->getRelation('mode') : null;
         if (!$modeObj) {
+        if (!$modeObj && !empty($this->mode_id) && static::getConnectionResolver()) {
             try {
                 $modeObj = $this->mode;
             } catch (\Throwable $e) {
@@ -186,6 +187,63 @@ class Employee extends Model
     public function isFTE(): bool
     {
         return $this->employment_mode === 'FTE';
+    }
+
+    /**
+     * Check if employee is an External User (Contract or C2H employee).
+     */
+    public function isExternal(): bool
+    {
+        return !empty($this->client_id) || $this->isContract() || $this->isC2H();
+    }
+
+    /**
+     * Check if employee is an Internal User (Szorzo full-time employee).
+     */
+    public function isInternal(): bool
+    {
+        return !$this->isExternal();
+    }
+
+    /**
+     * Human-readable user category for internal vs external employee grouping.
+     */
+    public function getUserCategoryAttribute(): string
+    {
+        return $this->isExternal() ? 'External Users - Contract Employees' : 'Internal Users - Szorzo employees';
+    }
+
+    /**
+     * Scope query to Internal Users (Szorzo full-time employees).
+     */
+    public function scopeInternal($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('client_id')
+              ->where(function ($sq) {
+                  $sq->whereNull('mode_id')
+                     ->orWhereDoesntHave('mode', function ($mq) {
+                         $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
+                            ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
+                            ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
+                     });
+              });
+        });
+    }
+
+    /**
+     * Scope query to External Users (Contract and C2H employees).
+     */
+    public function scopeExternal($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNotNull('client_id')
+              ->orWhereHas('mode', function ($mq) {
+                  $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
+                     ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
+                     ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
+              });
+        });
     }
 
     public const CHECKLIST_ITEMS = [

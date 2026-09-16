@@ -31,6 +31,15 @@
                             <small class="text-muted">Select an employee from Employee Module or a system user, with monthly or date-to-date cycle.</small>
                         </div>
                         <div class="d-flex align-items-center gap-2">
+                            @if($target instanceof \App\Models\Employee && $target->isExternal())
+                                <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1 fs-12 fw-semibold">
+                                    <i class="ri-user-shared-line me-1"></i> External Users - Contract Employees
+                                </span>
+                            @else
+                                <span class="badge bg-primary-subtle text-primary border border-primary px-2 py-1 fs-12 fw-semibold">
+                                    <i class="ri-user-star-line me-1"></i> Internal Users - Szorzo employees
+                                </span>
+                            @endif
                             <span class="badge {{ $mode === 'Contract' ? 'bg-warning-subtle text-warning border border-warning' : ($mode === 'C2H' ? 'bg-info-subtle text-info border border-info' : 'bg-primary-subtle text-primary border border-primary') }} px-2 py-1 fs-12 fw-semibold">
                                 <i class="ri-shield-user-line me-1"></i> Mode: {{ $mode_label }}
                             </span>
@@ -47,6 +56,7 @@
                         <input type="hidden" name="employee_id" id="hiddenEmployeeId" value="{{ $selected_employee_id }}">
 
                         <!-- Employee Selection (Employee Module Only) -->
+                        <!-- Employee Selection (Split: Internal Users vs External Users) -->
                         <div class="col-lg-4 col-md-6">
                             <label class="form-label fw-semibold">Select Employee</label>
                             <select id="targetSelector" name="employee_id" class="form-select">
@@ -71,6 +81,78 @@
                                 @empty
                                     <option value="">No employees found in Employee Module</option>
                                 @endforelse
+                                @if(isset($internal_employees) && $internal_employees->isNotEmpty())
+                                    <optgroup label="Internal Users - Szorzo employees">
+                                        @foreach($internal_employees as $emp)
+                                            @php
+                                                $empMode = $emp->employment_mode ?: 'FTE';
+                                                $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                                            @endphp
+                                            <option value="{{ $emp->id }}"
+                                                data-type="employee"
+                                                data-id="{{ $emp->id }}"
+                                                data-category="internal"
+                                                data-mode="{{ $empMode }}"
+                                                data-mode-label="{{ $emp->mode?->mode ?: $empMode }}"
+                                                data-is-hourly="0"
+                                                data-hourly-salary="0"
+                                                data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
+                                                data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
+                                                @selected($selected_employee_id == $emp->id)>
+                                                [Internal] {{ $emp->employee_name }} ({{ $empCode }}) - {{ $emp->designation ?: 'Szorzo Team' }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+
+                                @if(isset($external_employees) && $external_employees->isNotEmpty())
+                                    <optgroup label="External Users - Contract Employees">
+                                        @foreach($external_employees as $emp)
+                                            @php
+                                                $empMode = $emp->employment_mode ?: ($emp->mode?->mode ?: 'Contract');
+                                                $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                                                $clientStr = $emp->client?->client ? ' (' . $emp->client->client . ')' : '';
+                                            @endphp
+                                            <option value="{{ $emp->id }}"
+                                                data-type="employee"
+                                                data-id="{{ $emp->id }}"
+                                                data-category="external"
+                                                data-mode="{{ $empMode }}"
+                                                data-mode-label="{{ $emp->mode?->mode ?: $empMode }}"
+                                                data-is-hourly="0"
+                                                data-hourly-salary="0"
+                                                data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
+                                                data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
+                                                @selected($selected_employee_id == $emp->id)>
+                                                [{{ $empMode }}] {{ $emp->employee_name }} ({{ $empCode }}){{ $clientStr }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+
+                                @if((!isset($internal_employees) || $internal_employees->isEmpty()) && (!isset($external_employees) || $external_employees->isEmpty()))
+                                    @forelse($all_employees as $emp)
+                                        @php
+                                            $empMode = $emp->employment_mode ?: ($emp->mode?->mode ?: 'FTE');
+                                            $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                                            $clientStr = $emp->client?->client ? ' (' . $emp->client->client . ')' : '';
+                                        @endphp
+                                        <option value="{{ $emp->id }}"
+                                            data-type="employee"
+                                            data-id="{{ $emp->id }}"
+                                            data-mode="{{ $empMode }}"
+                                            data-mode-label="{{ $emp->mode?->mode ?: $empMode }}"
+                                            data-is-hourly="0"
+                                            data-hourly-salary="0"
+                                            data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
+                                            data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
+                                            @selected($selected_employee_id == $emp->id)>
+                                            [{{ $empMode }}] {{ $emp->employee_name }} ({{ $empCode }}){{ $clientStr }}
+                                        </option>
+                                    @empty
+                                        <option value="">No employees found in Employee Module</option>
+                                    @endforelse
+                                @endif
                             </select>
                         </div>
 
