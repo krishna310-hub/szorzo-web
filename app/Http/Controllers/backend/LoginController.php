@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function index(){
     /**
      * Display login form for the specified portal: mgmt, rinos, or sales.
      */
@@ -73,13 +72,14 @@ class LoginController extends Controller
         }
 
         if($user->id != 1){
-        if ($user->id != 1) {
-            if ($user->role->status != 1) {
-                return back()->with([
-                    'error' => 'Your role is inactive. Please contact the administrator.'
-                ])->withErrors([
-                    'email' => 'Your role is inactive. Please contact the administrator.'
-                ])->onlyInput('email');
+            if ($user->id != 1) {
+                if ($user->role->status != 1) {
+                    return back()->with([
+                        'error' => 'Your role is inactive. Please contact the administrator.'
+                    ])->withErrors([
+                        'email' => 'Your role is inactive. Please contact the administrator.'
+                    ])->onlyInput('email');
+                }
             }
         }
 
