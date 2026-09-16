@@ -475,6 +475,15 @@ class PayslipModuleTest extends TestCase
         $this->assertFalse($internalEmp->isExternal());
         $this->assertSame('Internal Users - Szorzo employees', $internalEmp->user_category);
 
+        // Internal FTE Employee with SZORZO client assignment
+        $szorzoClient = new Client(['client' => 'SZORZO Technologies Private Limited']);
+        $internalSzorzoEmp = new Employee(['employee_name' => 'Triveni Panduranga', 'client_id' => 1]);
+        $internalSzorzoEmp->setRelation('mode', $fteMode);
+        $internalSzorzoEmp->setRelation('client', $szorzoClient);
+        $this->assertTrue($internalSzorzoEmp->isInternal());
+        $this->assertFalse($internalSzorzoEmp->isExternal());
+        $this->assertSame('Internal Users - Szorzo employees', $internalSzorzoEmp->user_category);
+
         // External Contract Employee
         $externalContract = new Employee(['employee_name' => 'Contract Staff']);
         $externalContract->setRelation('mode', $contractMode);
@@ -490,6 +499,16 @@ class PayslipModuleTest extends TestCase
         $this->assertSame('External Users - Contract Employees', $externalC2h->user_category);
 
         // Employee with client assignment is external
+        // Employee with external client is external
+        $exyteClient = new Client(['client' => 'Exyte Design & Engineering Services India Private Limited']);
+        $externalClientEmp = new Employee(['employee_name' => 'Apannagary Sowmya', 'client_id' => 2]);
+        $externalClientEmp->setRelation('mode', $contractMode);
+        $externalClientEmp->setRelation('client', $exyteClient);
+        $this->assertTrue($externalClientEmp->isExternal());
+        $this->assertFalse($externalClientEmp->isInternal());
+        $this->assertSame('External Users - Contract Employees', $externalClientEmp->user_category);
+
+        // Employee with unresolvable client ID defaults to external in standalone tests
         $clientEmp = new Employee(['employee_name' => 'Client Staff', 'client_id' => 99]);
         $this->assertTrue($clientEmp->isExternal());
         $this->assertFalse($clientEmp->isInternal());

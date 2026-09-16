@@ -189,11 +189,37 @@ class Employee extends Model
     }
 
     /**
-     * Check if employee is an External User (Contract or C2H employee).
+     * Check if employee is an External User (Contract, C2H, or external client employee).
      */
     public function isExternal(): bool
     {
-        return !empty($this->client_id) || $this->isContract() || $this->isC2H();
+        if ($this->isContract() || $this->isC2H()) {
+            return true;
+        }
+
+        $clientObj = $this->relationLoaded('client') ? $this->getRelation('client') : null;
+        if (!$clientObj && !empty($this->client_id) && static::getConnectionResolver()) {
+            try {
+                $clientObj = $this->client;
+            } catch (\Throwable $e) {
+                $clientObj = null;
+            }
+        }
+
+        if ($clientObj) {
+            $clientName = strtolower(trim((string) ($clientObj->client ?? '')));
+            if (!empty($clientName) && !str_contains($clientName, 'szorzo')) {
+                return true;
+            }
+            return false;
+        }
+
+        if (!empty($this->client_id)) {
+            // In standalone contexts or unit tests without client relation loaded, fallback to external
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -218,30 +244,35 @@ class Employee extends Model
     public function scopeInternal($query)
     {
         return $query->where(function ($q) {
-            $q->whereNull('client_id')
-              ->where(function ($sq) {
-                  $sq->whereNull('mode_id')
-                     ->orWhereDoesntHave('mode', function ($mq) {
-                         $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
-                            ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
-                            ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
-                     });
-              });
+            $q->where(function ($sq) {
+                $sq->whereNull('mode_id')
+                   ->orWhereDoesntHave('mode', function ($mq) {
+                       $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
+                          ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
+                          ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
+                   });
+            })->where(function ($sq) {
+                $sq->whereNull('client_id')
+                   ->orWhereHas('client', function ($cq) {
+                       $cq->whereRaw('LOWER(client) LIKE ?', ['%szorzo%']);
+                   });
+            });
         });
     }
 
     /**
-     * Scope query to External Users (Contract and C2H employees).
+     * Scope query to External Users (Contract and C2H employees, or deputed to external client).
      */
     public function scopeExternal($query)
     {
         return $query->where(function ($q) {
-            $q->whereNotNull('client_id')
-              ->orWhereHas('mode', function ($mq) {
-                  $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
-                     ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
-                     ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
-              });
+            $q->whereHas('mode', function ($mq) {
+                $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
+                   ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
+                   ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
+            })->orWhereHas('client', function ($cq) {
+                $cq->whereRaw('LOWER(client) NOT LIKE ?', ['%szorzo%']);
+            });
         });
     }
 

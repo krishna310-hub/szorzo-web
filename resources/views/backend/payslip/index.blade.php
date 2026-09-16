@@ -86,6 +86,7 @@
                                         @foreach($internal_employees as $emp)
                                             @php
                                                 $empMode = $emp->employment_mode ?: 'FTE';
+                                                $empMode = $emp->employment_mode ?: ($emp->mode?->mode ?: 'FTE');
                                                 $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
                                             @endphp
                                             <option value="{{ $emp->id }}"
@@ -100,6 +101,7 @@
                                                 data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
                                                 @selected($selected_employee_id == $emp->id)>
                                                 [Internal] {{ $emp->employee_name }} ({{ $empCode }}) - {{ $emp->designation ?: 'Szorzo Team' }}
+                                                [{{ $empMode }}] {{ $emp->employee_name }} ({{ $empCode }})
                                             </option>
                                         @endforeach
                                     </optgroup>
@@ -152,6 +154,8 @@
                                     @empty
                                         <option value="">No employees found in Employee Module</option>
                                     @endforelse
+                                @if((!isset($internal_employees) || $internal_employees->isEmpty()) && (!isset($external_employees) || $external_employees->isEmpty()) && (!isset($all_employees) || $all_employees->isEmpty()))
+                                    <option value="">No employees found in Employee Module</option>
                                 @endif
                             </select>
                         </div>
