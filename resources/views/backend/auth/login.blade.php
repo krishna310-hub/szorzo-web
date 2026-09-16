@@ -408,7 +408,7 @@
                         </div>
 
                         <div class="mt-4 pt-2">
-                            <button class="btn btn-animated w-100" type="submit">Sign In to Dashboard</button>
+                            {{-- <button class="btn btn-animated w-100" type="submit">Sign In to Dashboard</button> --}}
                             <button class="btn btn-animated w-100" type="submit">Sign In to {{ $portalTitle ?? 'Dashboard' }}</button>
                         </div>
 
