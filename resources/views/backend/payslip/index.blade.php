@@ -44,62 +44,33 @@
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ route('admin.payslip.index') }}" id="payslipFilterForm" class="row g-3 align-items-end">
-                        <input type="hidden" name="candidate_id" id="hiddenCandidateId" value="{{ $selected_candidate_id }}">
                         <input type="hidden" name="employee_id" id="hiddenEmployeeId" value="{{ $selected_employee_id }}">
-                        <input type="hidden" name="user_id" id="hiddenUserId" value="{{ $selected_user_id }}">
 
-                        <!-- Member Selection -->
+                        <!-- Employee Selection (Employee Module Only) -->
                         <div class="col-lg-4 col-md-6">
-                            <label class="form-label fw-semibold">Select Member / Candidate / Employee</label>
-                            <select id="targetSelector" class="form-select">
-                                <optgroup label="Contract Candidates (Contract Report)">
-                                    @foreach($all_candidates as $cand)
-                                        <option value="cand_{{ $cand->id }}"
-                                            data-type="candidate"
-                                            data-id="{{ $cand->id }}"
-                                            data-mode="{{ $cand->mode?->mode ?: 'Contract' }}"
-                                            data-mode-label="{{ $cand->mode?->mode ?: 'Contract' }}"
-                                            data-is-hourly="{{ $cand->is_hourly ? '1' : '0' }}"
-                                            data-hourly-salary="{{ $cand->hourly_salary }}"
-                                            data-contract-from="{{ $cand->contract_from_date ? $cand->contract_from_date->format('Y-m-d') : '' }}"
-                                            data-contract-to="{{ $cand->contract_to_date ? $cand->contract_to_date->format('Y-m-d') : '' }}"
-                                            @selected($selected_candidate_id == $cand->id)>
-                                            [Contract] {{ $cand->candidate_name }} ({{ $cand->client?->client ?: 'Client' }}) - {{ $cand->is_hourly ? 'Hourly ₹'.number_format((float)$cand->hourly_salary, 2) : 'Monthly ₹'.number_format((float)($cand->onboarding_ctc/12), 2) }}
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                                <optgroup label="Employee Module (All Members)">
-                                    @foreach($all_employees as $emp)
-                                        <option value="emp_{{ $emp->id }}"
-                                            data-type="employee"
-                                            data-id="{{ $emp->id }}"
-                                            data-mode="{{ $emp->employment_mode }}"
-                                            data-mode-label="{{ $emp->mode?->mode ?: $emp->employment_mode }}"
-                                            data-is-hourly="0"
-                                            data-hourly-salary="0"
-                                            data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
-                                            data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
-                                            @selected(!$selected_candidate_id && $selected_employee_id == $emp->id)>
-                                            [{{ $emp->employment_mode }}] {{ $emp->employee_name }} ({{ $emp->employee_no ?: 'SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT) }})
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                                <optgroup label="System Users (users table)">
-                                    @foreach($all_users as $u)
-                                        <option value="usr_{{ $u->id }}"
-                                            data-type="user"
-                                            data-id="{{ $u->id }}"
-                                            data-mode="FTE"
-                                            data-mode-label="Full Time"
-                                            data-is-hourly="0"
-                                            data-hourly-salary="0"
-                                            data-contract-from=""
-                                            data-contract-to=""
-                                            @selected(!$selected_candidate_id && !$selected_employee_id && $selected_user_id == $u->id)>
-                                            [User] {{ $u->name }} ({{ $u->role?->name ?: 'Staff' }})
-                                        </option>
-                                    @endforeach
-                                </optgroup>
+                            <label class="form-label fw-semibold">Select Employee</label>
+                            <select id="targetSelector" name="employee_id" class="form-select">
+                                @forelse($all_employees as $emp)
+                                    @php
+                                        $empMode = $emp->employment_mode ?: ($emp->mode?->mode ?: 'FTE');
+                                        $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                                        $clientStr = $emp->client?->client ? ' (' . $emp->client->client . ')' : '';
+                                    @endphp
+                                    <option value="{{ $emp->id }}"
+                                        data-type="employee"
+                                        data-id="{{ $emp->id }}"
+                                        data-mode="{{ $empMode }}"
+                                        data-mode-label="{{ $emp->mode?->mode ?: $empMode }}"
+                                        data-is-hourly="0"
+                                        data-hourly-salary="0"
+                                        data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
+                                        data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
+                                        @selected($selected_employee_id == $emp->id)>
+                                        [{{ $empMode }}] {{ $emp->employee_name }} ({{ $empCode }}){{ $clientStr }}
+                                    </option>
+                                @empty
+                                    <option value="">No employees found in Employee Module</option>
+                                @endforelse
                             </select>
                         </div>
 
@@ -165,11 +136,19 @@
                                 <i class="ri-filter-3-line align-bottom me-1"></i> View Payslip
                             </button>
 
-                            <a href="{{ route('admin.payslip.download', request()->query()) }}" id="btnDownloadPdf" class="btn btn-success">
+                            @php
+                                $payslipQueryParams = array_merge(request()->query(), [
+                                    'employee_id' => $selected_employee_id,
+                                    'month' => $month,
+                                    'year' => $year,
+                                ]);
+                                unset($payslipQueryParams['candidate_id'], $payslipQueryParams['user_id']);
+                            @endphp
+                            <a href="{{ route('admin.payslip.download', $payslipQueryParams) }}" id="btnDownloadPdf" class="btn btn-success">
                                 <i class="ri-download-2-line align-bottom me-1"></i> Download PDF
                             </a>
 
-                            <a href="{{ route('admin.payslip.preview', request()->query()) }}" id="btnPrintPreview" target="_blank" class="btn btn-outline-secondary">
+                            <a href="{{ route('admin.payslip.preview', $payslipQueryParams) }}" id="btnPrintPreview" target="_blank" class="btn btn-outline-secondary">
                                 <i class="ri-printer-line align-bottom me-1"></i> Print / Preview
                             </a>
                         </div>
@@ -430,9 +409,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const targetSelector = document.getElementById('targetSelector');
-        const hiddenCandidateId = document.getElementById('hiddenCandidateId');
         const hiddenEmployeeId = document.getElementById('hiddenEmployeeId');
-        const hiddenUserId = document.getElementById('hiddenUserId');
         const periodTypeMonth = document.getElementById('periodTypeMonth');
         const periodTypeRange = document.getElementById('periodTypeRange');
         const fromDateInput = document.getElementById('fromDateInput');
@@ -467,45 +444,26 @@
                 const opt = this.options[this.selectedIndex];
                 if (!opt) return;
 
-                const type = opt.getAttribute('data-type');
-                const id = opt.getAttribute('data-id');
+                const id = opt.getAttribute('data-id') || this.value;
                 const mode = opt.getAttribute('data-mode');
-                const isHourly = opt.getAttribute('data-is-hourly');
                 const contractFrom = opt.getAttribute('data-contract-from');
                 const contractTo = opt.getAttribute('data-contract-to');
 
-                if (type === 'candidate') {
-                    if (hiddenCandidateId) hiddenCandidateId.value = id;
-                    if (hiddenEmployeeId) hiddenEmployeeId.value = '';
-                    if (hiddenUserId) hiddenUserId.value = '';
+                if (hiddenEmployeeId) hiddenEmployeeId.value = id;
 
+                // For Contract or C2H: switch to date-to-date range mode if contract dates are available
+                if (mode === 'Contract' || mode === 'C2H') {
+                    if (periodTypeRange) {
+                        periodTypeRange.checked = true;
+                        togglePeriodDisplay('range');
+                    }
                     if (contractFrom && contractTo) {
                         if (fromDateInput) fromDateInput.value = contractFrom;
                         if (toDateInput) toDateInput.value = contractTo;
                     }
-                } else if (type === 'employee') {
-                    if (hiddenEmployeeId) hiddenEmployeeId.value = id;
-                    if (hiddenCandidateId) hiddenCandidateId.value = '';
-                    if (hiddenUserId) hiddenUserId.value = '';
-
-                    // For Contract or C2H: switch to date-to-date range mode
-                    if (mode === 'Contract' || mode === 'C2H') {
-                        if (periodTypeRange) {
-                            periodTypeRange.checked = true;
-                            togglePeriodDisplay('range');
-                        }
-                        if (contractFrom && contractTo) {
-                            if (fromDateInput) fromDateInput.value = contractFrom;
-                            if (toDateInput) toDateInput.value = contractTo;
-                        }
-                    }
-                } else {
-                    if (hiddenUserId) hiddenUserId.value = id;
-                    if (hiddenCandidateId) hiddenCandidateId.value = '';
-                    if (hiddenEmployeeId) hiddenEmployeeId.value = '';
                 }
 
-                // Submit form to refresh payslip for selected member
+                // Submit form to refresh payslip for selected employee
                 if (this.form) {
                     this.form.submit();
                 }

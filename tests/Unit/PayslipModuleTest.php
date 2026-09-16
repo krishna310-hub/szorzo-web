@@ -427,4 +427,32 @@ class PayslipModuleTest extends TestCase
         $this->assertSame(2800.0, $hourly['revenue_share']);
         $this->assertSame(5200.0, $hourly['payable_salary']);
     }
+
+    public function test_payslip_view_and_controller_lists_only_employee_module_members(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $viewPath = $baseDir . '/resources/views/backend/payslip/index.blade.php';
+        $this->assertFileExists($viewPath);
+        $viewContent = file_get_contents($viewPath);
+
+        // Verify that candidates and system users optgroups and hidden inputs have been removed
+        $this->assertStringNotContainsString('optgroup label="Contract Candidates', $viewContent);
+        $this->assertStringNotContainsString('optgroup label="System Users', $viewContent);
+        $this->assertStringNotContainsString('hiddenCandidateId', $viewContent);
+        $this->assertStringNotContainsString('hiddenUserId', $viewContent);
+
+        // Verify that only employee module list is present
+        $this->assertStringContainsString('Select Employee', $viewContent);
+        $this->assertStringContainsString('name="employee_id"', $viewContent);
+        $this->assertStringContainsString('$all_employees', $viewContent);
+
+        // Verify controller only resolves Employee
+        $controllerPath = $baseDir . '/app/Http/Controllers/backend/PayslipController.php';
+        $this->assertFileExists($controllerPath);
+        $controllerContent = file_get_contents($controllerPath);
+
+        $this->assertStringContainsString('resolveTarget(Request $request): Employee', $controllerContent);
+        $this->assertStringNotContainsString('\'all_candidates\' => $allCandidates', $controllerContent);
+        $this->assertStringNotContainsString('\'all_users\' => $allUsers', $controllerContent);
+    }
 }
