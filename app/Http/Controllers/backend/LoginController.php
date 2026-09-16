@@ -20,7 +20,6 @@ class LoginController extends Controller
 
         $portalData = self::getPortalConfig($portal);
         $sliders = [];
-        return view('backend.auth.login', compact('sliders'));
 
         return view('backend.auth.login', array_merge($portalData, compact('sliders')));
     }

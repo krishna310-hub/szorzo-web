@@ -320,9 +320,6 @@
 
             <!-- Right Column: Login Form -->
             <div class="col-lg-6 form-container">
-                <div class="mb-5">
-                    <h2 class="fw-bold text-dark mb-2">Sign In 👋</h2>
-                    <p class="text-muted fs-15">Please enter your credentials to access your account.</p>
                 <div class="mb-4">
                     @php
                         $portalKey = $portal ?? 'mgmt';
@@ -337,6 +334,13 @@
                             default => 'ri-shield-keyhole-line',
                         };
                     @endphp
+                    <div class="d-inline-flex align-items-center gap-1 mb-2">
+                        <span class="badge {{ $portalBadgeClass }} px-3 py-2 fs-12 fw-semibold">
+                            <i class="{{ $portalIcon }} me-1"></i> {{ $portalBadge ?? 'Management Portal' }}
+                        </span>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-1">{{ $portalTitle ?? 'Sign In' }} 👋</h2>
+                    <p class="text-muted fs-14 mb-0">{{ $portalSubtitle ?? 'Please enter your credentials to access your account.' }}</p>
                 </div>
 
                 @if (session('error'))
@@ -355,7 +359,6 @@
                 @endif
 
                 <div>
-                    <form method="POST" action="{{ route('login.check') }}">
                     <form method="POST" action="{{ $portalAction ?? route('login.check') }}">
                         @csrf
                         <input type="hidden" name="portal" value="{{ $portalKey }}">
@@ -401,7 +404,6 @@
                         </div>
 
                         <div class="mt-4 pt-2">
-                            {{-- <button class="btn btn-animated w-100" type="submit">Sign In to Dashboard</button> --}}
                             <button class="btn btn-animated w-100" type="submit">Sign In to {{ $portalTitle ?? 'Dashboard' }}</button>
                         </div>
 
