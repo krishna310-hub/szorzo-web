@@ -77,15 +77,12 @@
             0% {
                 transform: translate(0, 0) scale(1);
             }
-
             33% {
                 transform: translate(40px, -50px) scale(1.1);
             }
-
             66% {
                 transform: translate(-30px, 30px) scale(0.9);
             }
-
             100% {
                 transform: translate(0, 0) scale(1);
             }
@@ -186,17 +183,9 @@
         }
 
         @keyframes floatImg {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-15px);
-            }
-
-            100% {
-                transform: translateY(0px);
-            }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
         }
 
         .text-content {
@@ -334,137 +323,138 @@
                 <div class="mb-5">
                     <h2 class="fw-bold text-dark mb-2">Sign In 👋</h2>
                     <p class="text-muted fs-15">Please enter your credentials to access your account.</p>
-
-                    @if (session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-start mb-4"
-                            role="alert">
-                            <i class="ri-error-warning-line fs-18 me-2 mt-1 flex-shrink-0"></i>
-                            <div class="flex-grow-1">{!! session('error') !!}</div>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                aria-label="Close"></button>
-                        </div>
-                    @endif
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show d-flex align-items-start mb-4"
-                            role="alert">
-                            <i class="ri-checkbox-circle-line fs-18 me-2 mt-1 flex-shrink-0"></i>
-                            <div class="flex-grow-1">{{ session('success') }}</div>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                aria-label="Close"></button>
-                        </div>
-                    @endif
-
-                    <div>
-                        <form method="POST" action="{{ route('login.check') }}">
-                            <form method="POST" action="{{ $portalAction ?? route('login.check') }}">
-                                @csrf
-                                <input type="hidden" name="portal" value="{{ $portalKey }}">
-
-                                <div class="mb-4">
-                                    <label for="username" class="form-label fw-semibold text-dark">Email Address</label>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                        name="email" id="username" placeholder="name@example.com"
-                                        value="{{ old('email') }}" required autofocus>
-                                    @error('email')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <label class="form-label fw-semibold text-dark mb-0"
-                                            for="password">Password</label>
-                                    </div>
-                                    <div class="input-group">
-                                        <input type="password" id="password"
-                                            class="form-control border-end-0 @error('password') is-invalid @enderror"
-                                            name="password" placeholder="Enter your password" required>
-                                        <span class="input-group-text toggle-password" id="password-addon"
-                                            style="cursor: pointer;">
-                                            <i toggle="#password"
-                                                class="ri-eye-fill align-middle fs-18 toggle-password"></i>
-                                        </span>
-                                        @error('password')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div class="form-check mb-4 mt-2">
-                                    <input class="form-check-input" type="checkbox" name="remember"
-                                        id="auth-remember-check" {{ old('remember') ? 'checked' : '' }}>
-                                    <label class="form-check-label text-muted fs-14" for="auth-remember-check">
-                                        Remember me on this device
-                                    </label>
-                                </div>
-
-                                <div class="mt-4 pt-2">
-                                    {{-- <button class="btn btn-animated w-100" type="submit">Sign In to Dashboard</button> --}}
-                                    <button class="btn btn-animated w-100" type="submit">Sign In to
-                                        {{ $portalTitle ?? 'Dashboard' }}</button>
-                                </div>
-
-                                <div class="mt-4 pt-2 text-center">
-                                    <small class="text-muted d-block mb-1">Looking for a different portal?</small>
-                                    <div
-                                        class="d-flex justify-content-center align-items-center gap-2 flex-wrap fs-13">
-                                        @if ($portalKey !== 'mgmt')
-                                            <a href="{{ route('login.mgmt') }}"
-                                                class="text-decoration-none text-danger fw-semibold">Management
-                                                Login</a>
-                                        @endif
-                                        @if ($portalKey !== 'rinos')
-                                            @if ($portalKey !== 'mgmt')
-                                                <span class="text-muted">•</span>
-                                            @endif
-                                            <a href="{{ route('login.rinos') }}"
-                                                class="text-decoration-none text-info fw-semibold">Recruiters Login</a>
-                                        @endif
-                                        @if ($portalKey !== 'sales')
-                                            <span class="text-muted">•</span>
-                                            <a href="{{ route('login.sales') }}"
-                                                class="text-decoration-none text-success fw-semibold">Sales Login</a>
-                                        @endif
-                                    </div>
-                                </div>
-                            </form>
-                    </div>
+                <div class="mb-4">
+                    @php
+                        $portalKey = $portal ?? 'mgmt';
+                        $portalBadgeClass = match($portalKey) {
+                            'rinos' => 'bg-info-subtle text-info border border-info',
+                            'sales' => 'bg-success-subtle text-success border border-success',
+                            default => 'bg-danger-subtle text-danger border border-danger',
+                        };
+                        $portalIcon = match($portalKey) {
+                            'rinos' => 'ri-user-search-line',
+                            'sales' => 'ri-funds-line',
+                            default => 'ri-shield-keyhole-line',
+                        };
+                    @endphp
                 </div>
 
+                @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-start mb-4" role="alert">
+                        <i class="ri-error-warning-line fs-18 me-2 mt-1 flex-shrink-0"></i>
+                        <div class="flex-grow-1">{!! session('error') !!}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-start mb-4" role="alert">
+                        <i class="ri-checkbox-circle-line fs-18 me-2 mt-1 flex-shrink-0"></i>
+                        <div class="flex-grow-1">{{ session('success') }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                <div>
+                    <form method="POST" action="{{ route('login.check') }}">
+                    <form method="POST" action="{{ $portalAction ?? route('login.check') }}">
+                        @csrf
+                        <input type="hidden" name="portal" value="{{ $portalKey }}">
+
+                        <div class="mb-4">
+                            <label for="username" class="form-label fw-semibold text-dark">Email Address</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                name="email" id="username" placeholder="name@example.com" value="{{ old('email') }}"
+                                required autofocus>
+                            @error('email')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold text-dark mb-0" for="password">Password</label>
+                            </div>
+                            <div class="input-group">
+                                <input type="password" id="password"
+                                    class="form-control border-end-0 @error('password') is-invalid @enderror"
+                                    name="password" placeholder="Enter your password" required>
+                                <span class="input-group-text toggle-password" id="password-addon"
+                                    style="cursor: pointer;">
+                                    <i toggle="#password" class="ri-eye-fill align-middle fs-18 toggle-password"></i>
+                                </span>
+                                @error('password')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4 mt-2">
+                            <input class="form-check-input" type="checkbox" name="remember" id="auth-remember-check"
+                                {{ old('remember') ? 'checked' : '' }}>
+                            <label class="form-check-label text-muted fs-14" for="auth-remember-check">
+                                Remember me on this device
+                            </label>
+                        </div>
+
+                        <div class="mt-4 pt-2">
+                            {{-- <button class="btn btn-animated w-100" type="submit">Sign In to Dashboard</button> --}}
+                            <button class="btn btn-animated w-100" type="submit">Sign In to {{ $portalTitle ?? 'Dashboard' }}</button>
+                        </div>
+
+                        <div class="mt-4 pt-2 text-center">
+                            <small class="text-muted d-block mb-1">Looking for a different portal?</small>
+                            <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap fs-13">
+                                @if($portalKey !== 'mgmt')
+                                    <a href="{{ route('login.mgmt') }}" class="text-decoration-none text-danger fw-semibold">Management Login</a>
+                                @endif
+                                @if($portalKey !== 'rinos')
+                                    @if($portalKey !== 'mgmt') <span class="text-muted">•</span> @endif
+                                    <a href="{{ route('login.rinos') }}" class="text-decoration-none text-info fw-semibold">Recruiters Login</a>
+                                @endif
+                                @if($portalKey !== 'sales')
+                                    <span class="text-muted">•</span>
+                                    <a href="{{ route('login.sales') }}" class="text-decoration-none text-success fw-semibold">Sales Login</a>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <div class="footer-credits">
-                <p class="mb-0">©
-                    <script>
-                        document.write(new Date().getFullYear())
-                    </script> <strong>Szorzo</strong>. All rights reserved.
-                </p>
-            </div>
         </div>
 
-        @include('backend.layouts.js_master')
-        <script src="{{ asset('vendor/flasher/flasher.min.js') }}"></script>
+        <div class="footer-credits">
+            <p class="mb-0">©
+                <script>
+                    document.write(new Date().getFullYear())
+                </script> <strong>Szorzo</strong>. All rights reserved.
+            </p>
+        </div>
+    </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const togglePassword = document.querySelector('.toggle-password');
-                const passwordInput = document.getElementById('password');
+    @include('backend.layouts.js_master')
+    <script src="{{ asset('vendor/flasher/flasher.min.js') }}"></script>
 
-                if (togglePassword && passwordInput) {
-                    togglePassword.addEventListener('click', function() {
-                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                        passwordInput.setAttribute('type', type);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.querySelector('.toggle-password');
+            const passwordInput = document.getElementById('password');
 
-                        this.classList.toggle('ri-eye-fill');
-                        this.classList.toggle('ri-eye-off-fill');
-                    });
-                }
-            });
-        </script>
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+
+                    this.classList.toggle('ri-eye-fill');
+                    this.classList.toggle('ri-eye-off-fill');
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
