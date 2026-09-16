@@ -156,7 +156,6 @@ class Employee extends Model
     public function getEmploymentModeAttribute(): string
     {
         $modeObj = $this->relationLoaded('mode') ? $this->getRelation('mode') : null;
-        if (!$modeObj) {
         if (!$modeObj && !empty($this->mode_id) && static::getConnectionResolver()) {
             try {
                 $modeObj = $this->mode;
