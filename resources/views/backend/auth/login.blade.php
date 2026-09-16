@@ -5,6 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <title>@yield('title', 'Login | SZORZO')</title>
+    <title>{{ $portalTitle ?? 'Login' }} | SZORZO</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
@@ -322,11 +323,49 @@
                 <div class="mb-5">
                     <h2 class="fw-bold text-dark mb-2">Sign In 👋</h2>
                     <p class="text-muted fs-15">Please enter your credentials to access your account.</p>
+                <div class="mb-4">
+                    @php
+                        $portalKey = $portal ?? 'mgmt';
+                        $portalBadgeClass = match($portalKey) {
+                            'rinos' => 'bg-info-subtle text-info border border-info',
+                            'sales' => 'bg-success-subtle text-success border border-success',
+                            default => 'bg-danger-subtle text-danger border border-danger',
+                        };
+                        $portalIcon = match($portalKey) {
+                            'rinos' => 'ri-user-search-line',
+                            'sales' => 'ri-funds-line',
+                            default => 'ri-shield-keyhole-line',
+                        };
+                    @endphp
+                    <div class="d-inline-flex align-items-center gap-1 mb-2">
+                        <span class="badge {{ $portalBadgeClass }} px-3 py-2 fs-12 fw-semibold">
+                            <i class="{{ $portalIcon }} me-1"></i> {{ $portalBadge ?? 'Management Portal' }}
+                        </span>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-1">{{ $portalTitle ?? 'Sign In' }} 👋</h2>
+                    <p class="text-muted fs-14 mb-0">{{ $portalSubtitle ?? 'Please enter your credentials to access your account.' }}</p>
                 </div>
+
+                @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-start mb-4" role="alert">
+                        <i class="ri-error-warning-line fs-18 me-2 mt-1 flex-shrink-0"></i>
+                        <div class="flex-grow-1">{!! session('error') !!}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-start mb-4" role="alert">
+                        <i class="ri-checkbox-circle-line fs-18 me-2 mt-1 flex-shrink-0"></i>
+                        <div class="flex-grow-1">{{ session('success') }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
 
                 <div>
                     <form method="POST" action="{{ route('login.check') }}">
+                    <form method="POST" action="{{ $portalAction ?? route('login.check') }}">
                         @csrf
+                        <input type="hidden" name="portal" value="{{ $portalKey }}">
 
                         <div class="mb-4">
                             <label for="username" class="form-label fw-semibold text-dark">Email Address</label>
@@ -370,6 +409,24 @@
 
                         <div class="mt-4 pt-2">
                             <button class="btn btn-animated w-100" type="submit">Sign In to Dashboard</button>
+                            <button class="btn btn-animated w-100" type="submit">Sign In to {{ $portalTitle ?? 'Dashboard' }}</button>
+                        </div>
+
+                        <div class="mt-4 pt-2 text-center">
+                            <small class="text-muted d-block mb-1">Looking for a different portal?</small>
+                            <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap fs-13">
+                                @if($portalKey !== 'mgmt')
+                                    <a href="{{ route('login.mgmt') }}" class="text-decoration-none text-danger fw-semibold">Management Login</a>
+                                @endif
+                                @if($portalKey !== 'rinos')
+                                    @if($portalKey !== 'mgmt') <span class="text-muted">•</span> @endif
+                                    <a href="{{ route('login.rinos') }}" class="text-decoration-none text-info fw-semibold">Recruiters Login</a>
+                                @endif
+                                @if($portalKey !== 'sales')
+                                    <span class="text-muted">•</span>
+                                    <a href="{{ route('login.sales') }}" class="text-decoration-none text-success fw-semibold">Sales Login</a>
+                                @endif
+                            </div>
                         </div>
                     </form>
                 </div>

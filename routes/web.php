@@ -83,6 +83,20 @@ Route::group(['controller' => HomeController::class], function () {
 Route::group(['controller' => LoginController::class], function () {
     Route::get('/mgmt/login', 'index')->name('login');
     Route::get('/rinos/login', 'index')->name('login');
+    // Management Portal (Management / Super Admin / Subadmin)
+    Route::get('/mgmt/login', 'indexMgmt')->name('login.mgmt');
+    Route::post('/mgmt/login', 'login')->name('login.mgmt.check');
+
+    // Recruiters Portal (Rinos)
+    Route::get('/rinos/login', 'indexRinos')->name('login.rinos');
+    Route::post('/rinos/login', 'login')->name('login.rinos.check');
+
+    // Sales Portal
+    Route::get('/sales/login', 'indexSales')->name('login.sales');
+    Route::post('/sales/login', 'login')->name('login.sales.check');
+
+    // Compatibility and Fallback Routes
+    Route::get('/login', fn () => redirect()->route('login.mgmt'))->name('login');
     Route::post('/check-login', 'login')->name('login.check');
     Route::post('/logout', 'logout')->name('logout');
 });
