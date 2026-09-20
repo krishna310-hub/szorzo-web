@@ -124,6 +124,10 @@ class LoginController extends Controller
         session(['locked' => false]);
         session()->flash('success', 'Login Successfully!');
 
+        if ($user->role_id == 4) {
+            return redirect()->intended(route('admin.sales-dashboard.index'));
+        }
+        
         return redirect()->intended('admin/dashboard');
     }
 

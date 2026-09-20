@@ -214,6 +214,13 @@
                     </li>
                 @endcan
 
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ request()->is('admin/sales-dashboard') ? 'active' : '' }}"
+                        href="{{ route('admin.sales-dashboard.index') }}">
+                        <i class="ri-dashboard-fill"></i> <span data-key="t-sales-dashboards">Sales Dashboard</span>
+                    </a>
+                </li>
+
                 {{-- @can('read', \App\Models\ContactEnquiry::class)
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/enquiries*') ? 'active' : '' }}"
@@ -437,6 +444,39 @@
                     </li>
                 @endif
 
+                <li class="menu-title"><i class="ri-more-fill"></i> <span>Master Management</span></li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarMasterManagement" data-bs-toggle="collapse"
+                        role="button" aria-expanded="{{ request()->is('admin/master-management*') ? 'true' : 'false' }}"
+                        aria-controls="sidebarMasterManagement">
+                        <i class="ri-database-2-fill"></i> <span>Master Management</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ request()->is('admin/master-management*') ? 'show' : '' }}"
+                        id="sidebarMasterManagement">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="{{ route('admin.client-profiles.index') }}"
+                                    class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
+                                    Client Profiles </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.lead-generations.index') }}"
+                                    class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
+                                    Lead Generations </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.business-intelligences.index') }}"
+                                    class="nav-link {{ request()->is('admin/master-management/business-intelligences*') ? 'active' : '' }}">
+                                    Business Intelligence </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.services-offered.index') }}"
+                                    class="nav-link {{ request()->is('admin/master-management/services-offered*') ? 'active' : '' }}">
+                                    Services Offered </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
                 @if (auth()->user()->can('read', \App\Models\User::class) || auth()->user()->can('read', \App\Models\Role::class))
                     <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-settings">Roles &
                             Permission</span></li>

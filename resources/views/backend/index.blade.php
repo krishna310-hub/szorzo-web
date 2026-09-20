@@ -1163,7 +1163,14 @@
                 <div class="dashboard-hero p-4 p-lg-5 mb-4">
                     <div class="position-relative" style="z-index:1">
                         <div class="scope-pill mb-3"><i class="ri-shield-user-line"></i>{{ $scopeLabel }}</div>
-                        <h2 class="fw-bold text-white mb-2">Welcome back, {{ auth()->user()->name }}</h2>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h2 class="fw-bold text-white mb-0">Welcome back, {{ auth()->user()->name }}</h2>
+                            @if (auth()->user()->role_id == 1)
+                                <a href="{{ route('admin.sales-dashboard.index') }}" class="btn btn-light rounded-pill shadow-sm text-danger fw-bold px-4">
+                                    <i class="ri-dashboard-fill me-1"></i> Switch to Sales Dashboard
+                                </a>
+                            @endif
+                        </div>
 
                         @if (auth()->user()->role_id == 1 && $birthdayEmployees->isNotEmpty())
                             <div class="birthday-reminder-card mb-4">

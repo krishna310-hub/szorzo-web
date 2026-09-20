@@ -376,6 +376,60 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::delete('/enquiry/delete/{id}',[ContactController::class,'delete'])->name('enquiry.delete');
     Route::post('/enquiry/status',[ContactController::class,'changeStatus'])->name('enquiry.status');
 
+    // Sales Dashboard
+    Route::get('/sales-dashboard', [\App\Http\Controllers\backend\SalesDashboardController::class, 'index'])->name('sales-dashboard.index');
+
+    // Master Management
+    Route::prefix('master-management')->group(function () {
+        Route::prefix('client-profiles')->name('client-profiles.')->controller(\App\Http\Controllers\backend\ClientProfileController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+            Route::post('/{id}/convert', 'convertToClient')->name('convert');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/import-template', 'importTemplate')->name('import-template');
+            Route::post('/import', 'import')->name('import');
+        });
+
+        Route::prefix('lead-generations')->name('lead-generations.')->controller(\App\Http\Controllers\backend\LeadGenerationController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/import-template', 'importTemplate')->name('import-template');
+            Route::post('/import', 'import')->name('import');
+        });
+
+        Route::prefix('business-intelligences')->name('business-intelligences.')->controller(\App\Http\Controllers\backend\BusinessIntelligenceController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/import-template', 'importTemplate')->name('import-template');
+            Route::post('/import', 'import')->name('import');
+        });
+
+        Route::prefix('services-offered')->name('services-offered.')->controller(\App\Http\Controllers\backend\ServiceOfferedController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/import-template', 'importTemplate')->name('import-template');
+            Route::post('/import', 'import')->name('import');
+        });
+    });
 });
 
 // SEO: Sitemap and Robots
