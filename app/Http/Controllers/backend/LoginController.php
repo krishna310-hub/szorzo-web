@@ -252,7 +252,6 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
 
         $redirectRoute = match ($portal) {
             'rinos' => 'login.rinos',
