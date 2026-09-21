@@ -14,7 +14,7 @@
         @include('backend.partials.import-feedback')
         <div class="table-responsive">
         <table id="datatable" class="table table-bordered nowrap w-100"><thead><tr>
-            <th>S.No</th><th>Title</th><th>Lead Owner</th><th>Status</th><th>Action</th>
+            <th>S.No</th><th>Account Name</th><th>Account Owner</th><th>Status</th><th>Action</th>
         </tr></thead><tbody></tbody></table>
     </div></div>
 </div></div></div></div></div></div>
@@ -52,8 +52,8 @@ $(document).ready(function () {
         ajax: { url: '{{ route('admin.lead-generations.index') }}', type: 'GET' },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'title', name: 'title' },
-            { data: 'lead_owner', name: 'lead_owner' },
+            { data: 'account_name', name: 'account_name' },
+            { data: 'account_owner', name: 'account_owner' },
             { data: 'status', name: 'status', orderable: false, searchable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ]

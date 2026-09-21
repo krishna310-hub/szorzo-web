@@ -138,6 +138,26 @@ class PermissionsSeeder extends Seeder
             ['name' => 'Read',      'page' => 'leave'],
             ['name' => 'Create',    'page' => 'leave'],
             ['name' => 'Approve',   'page' => 'leave'],
+
+            ['name' => 'Read',      'page' => 'client_profile'],
+            ['name' => 'Create',    'page' => 'client_profile'],
+            ['name' => 'Edit',      'page' => 'client_profile'],
+            ['name' => 'Delete',    'page' => 'client_profile'],
+
+            ['name' => 'Read',      'page' => 'lead_generation'],
+            ['name' => 'Create',    'page' => 'lead_generation'],
+            ['name' => 'Edit',      'page' => 'lead_generation'],
+            ['name' => 'Delete',    'page' => 'lead_generation'],
+
+            ['name' => 'Read',      'page' => 'business_intelligence'],
+            ['name' => 'Create',    'page' => 'business_intelligence'],
+            ['name' => 'Edit',      'page' => 'business_intelligence'],
+            ['name' => 'Delete',    'page' => 'business_intelligence'],
+
+            ['name' => 'Read',      'page' => 'service_offered'],
+            ['name' => 'Create',    'page' => 'service_offered'],
+            ['name' => 'Edit',      'page' => 'service_offered'],
+            ['name' => 'Delete',    'page' => 'service_offered'],
         ];
 
         foreach ($permissions as $permission) {

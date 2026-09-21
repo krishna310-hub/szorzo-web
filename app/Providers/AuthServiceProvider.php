@@ -45,6 +45,10 @@ use App\Policies\ReportPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\TargetPolicy;
 use App\Policies\UserPolicy;
+use App\Policies\ClientProfilePolicy;
+use App\Policies\LeadGenerationPolicy;
+use App\Policies\BusinessIntelligencePolicy;
+use App\Policies\ServiceOfferedPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -80,6 +84,10 @@ class AuthServiceProvider extends ServiceProvider
         ContractReport::class => ContractReportPolicy::class,
         Attendance::class => AttendancePolicy::class,
         LeaveRequest::class => LeaveRequestPolicy::class,
+        \App\Models\ClientProfile::class => ClientProfilePolicy::class,
+        \App\Models\LeadGeneration::class => LeadGenerationPolicy::class,
+        \App\Models\BusinessIntelligence::class => BusinessIntelligencePolicy::class,
+        \App\Models\ServiceOffered::class => ServiceOfferedPolicy::class,
     ];
 
     /**
@@ -105,5 +113,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::Resource('Candidate', 'App\Policies\CandidatePolicy');
         Gate::Resource('Division', 'App\Policies\DivisionPolicy');
         Gate::Resource('Billing','App\Policies\BillingPolicy');
+        Gate::Resource('ClientProfile', 'App\Policies\ClientProfilePolicy');
+        Gate::Resource('LeadGeneration', 'App\Policies\LeadGenerationPolicy');
+        Gate::Resource('BusinessIntelligence', 'App\Policies\BusinessIntelligencePolicy');
+        Gate::Resource('ServiceOffered', 'App\Policies\ServiceOfferedPolicy');
     }
 }

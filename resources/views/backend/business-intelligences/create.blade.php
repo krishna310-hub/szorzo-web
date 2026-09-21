@@ -7,7 +7,10 @@
         <form action="{{ route('admin.business-intelligences.store') }}" method="POST">
             @csrf
             @include('backend.business-intelligences.form')
-            <div class="mt-4"><button type="submit" class="btn btn-primary">Save</button></div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="{{ route('admin.business-intelligences.index') }}" class="btn btn-secondary ms-2">Back</a>
+            </div>
         </form>
     </div>
 </div></div></div></div></div></div>

@@ -12,7 +12,7 @@ class BusinessIntelligenceController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            return DataTables::of($model::latest())
+            return DataTables::of(BusinessIntelligence::latest())
                 ->addIndexColumn()
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
@@ -37,30 +37,30 @@ class BusinessIntelligenceController extends Controller
 
     public function store(Request $request)
     {
-        $model::create($this->validatedData($request));
+        BusinessIntelligence::create($this->validatedData($request));
         return redirect()->route('admin.business-intelligences.index')->with('success', 'Record created successfully.');
     }
 
     public function edit($id)
     {
         return view('backend.business-intelligences.edit', [
-            'model' => $model::findOrFail($id)
+            'model' => BusinessIntelligence::findOrFail($id)
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        $model::findOrFail($id)->update($this->validatedData($request));
+        BusinessIntelligence::findOrFail($id)->update($this->validatedData($request));
         return redirect()->route('admin.business-intelligences.index')->with('success', 'Record updated successfully.');
     }
 
     public function destroy($id)
     {
-        $model::findOrFail($id)->delete();
+        BusinessIntelligence::findOrFail($id)->delete();
         return response()->json(['status' => true, 'message' => 'Record deleted successfully.']);
     }
 
-        public function export()
+    public function export()
     {
         $data = \App\Models\BusinessIntelligence::all()->map(function ($row) {
             return collect($row->toArray())->only(['id', 'status', 'created_at'])->merge([
@@ -68,22 +68,34 @@ class BusinessIntelligenceController extends Controller
             ])->values()->toArray();
         });
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
-  0 => 'Category',
-  1 => 'Metric Name',
-  2 => 'Description',
-  3 => 'Value Type',
-  4 => 'Status',
+  0 => 'Contact ID',
+  1 => 'Account ID',
+  2 => 'Account Name',
+  3 => 'Contact Name',
+  4 => 'Designation',
+  5 => 'Department',
+  6 => 'Mobile Number',
+  7 => 'Alternate Contact',
+  8 => 'Email ID',
+  9 => 'Contact Type',
+  10 => 'Status',
 ), $data->toArray()), 'BusinessIntelligence-export.xlsx');
     }
 
     public function importTemplate()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
-  0 => 'Category',
-  1 => 'Metric Name',
-  2 => 'Description',
-  3 => 'Value Type',
-  4 => 'Status',
+  0 => 'Contact ID',
+  1 => 'Account ID',
+  2 => 'Account Name',
+  3 => 'Contact Name',
+  4 => 'Designation',
+  5 => 'Department',
+  6 => 'Mobile Number',
+  7 => 'Alternate Contact',
+  8 => 'Email ID',
+  9 => 'Contact Type',
+  10 => 'Status',
 ), []), 'BusinessIntelligence-template.xlsx');
     }
 
@@ -97,10 +109,16 @@ class BusinessIntelligenceController extends Controller
         $validRows = [];
         foreach ($rows as $row) {
             $validRows[] = [
-                'category' => $row['category'] ?? null,
-                'metric_name' => $row['metric_name'] ?? '',
-                'description' => $row['description'] ?? null,
-                'value_type' => $row['value_type'] ?? null,
+                'contact_id' => $row['contact_id'] ?? null,
+                'account_id' => $row['account_id'] ?? null,
+                'account_name' => $row['account_name'] ?? '',
+                'contact_name' => $row['contact_name'] ?? '',
+                'designation' => $row['designation'] ?? null,
+                'department' => $row['department'] ?? null,
+                'mobile_number' => $row['mobile_number'] ?? null,
+                'alternate_contact' => $row['alternate_contact'] ?? null,
+                'email_id' => $row['email_id'] ?? null,
+                'contact_type' => $row['contact_type'] ?? null,
                 'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0,
             ];
         }
@@ -115,11 +133,19 @@ class BusinessIntelligenceController extends Controller
     private function validatedData(Request $request)
     {
         return $request->validate([
-            'category' => 'nullable|string|max:255',
-            'metric_name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'value_type' => 'nullable|string|max:255',
-            'display_order' => 'nullable|integer',
+            'contact_id' => 'nullable|string|max:255',
+            'account_id' => 'nullable|string|max:255',
+            'account_name' => 'required|string|max:255',
+            'contact_name' => 'required|string|max:255',
+            'designation' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
+            'mobile_number' => 'nullable|string|max:255',
+            'alternate_contact' => 'nullable|string|max:255',
+            'email_id' => 'nullable|email|max:255',
+            'contact_type' => 'nullable|string|max:255',
+            'last_contacted_date' => 'nullable|date',
+            'next_follow_up_date' => 'nullable|date',
+            'contact_notes' => 'nullable|string',
             'status' => 'required|boolean',
         ]);
     }

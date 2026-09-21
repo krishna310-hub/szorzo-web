@@ -87,7 +87,7 @@ class ClientProfileController extends Controller
         return response()->json(['status' => true, 'message' => 'Client profile converted to Main Client successfully.']);
     }
 
-        public function export()
+    public function export()
     {
         $data = \App\Models\ClientProfile::all()->map(function ($row) {
             return collect($row->toArray())->only(['id', 'status', 'created_at'])->merge([
@@ -95,32 +95,38 @@ class ClientProfileController extends Controller
             ])->values()->toArray();
         });
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
-  0 => 'Account Source',
-  1 => 'Account Name',
-  2 => 'Industry',
-  3 => 'Sub Industry',
-  4 => 'Website URL',
-  5 => 'Country',
-  6 => 'Region',
-  7 => 'State',
-  8 => 'City',
-  9 => 'Status',
+  0 => 'Account ID',
+  1 => 'Client ID',
+  2 => 'Service ID',
+  3 => 'Legal Entity Name',
+  4 => 'Account Name (Display)',
+  5 => 'Industry',
+  6 => 'Sub Industry',
+  7 => 'Website URL',
+  8 => 'Country',
+  9 => 'Region',
+  10 => 'State',
+  11 => 'City',
+  12 => 'Status',
 ), $data->toArray()), 'ClientProfile-export.xlsx');
     }
 
     public function importTemplate()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
-  0 => 'Account Source',
-  1 => 'Account Name',
-  2 => 'Industry',
-  3 => 'Sub Industry',
-  4 => 'Website URL',
-  5 => 'Country',
-  6 => 'Region',
-  7 => 'State',
-  8 => 'City',
-  9 => 'Status',
+  0 => 'Account ID',
+  1 => 'Client ID',
+  2 => 'Service ID',
+  3 => 'Legal Entity Name',
+  4 => 'Account Name (Display)',
+  5 => 'Industry',
+  6 => 'Sub Industry',
+  7 => 'Website URL',
+  8 => 'Country',
+  9 => 'Region',
+  10 => 'State',
+  11 => 'City',
+  12 => 'Status',
 ), []), 'ClientProfile-template.xlsx');
     }
 
@@ -134,8 +140,11 @@ class ClientProfileController extends Controller
         $validRows = [];
         foreach ($rows as $row) {
             $validRows[] = [
-                'account_source' => $row['account_source'] ?? null,
-                'account_name' => $row['account_name'] ?? '',
+                'account_id' => $row['account_id'] ?? null,
+                'client_id' => $row['client_id'] ?? null,
+                'service_id' => $row['service_id'] ?? null,
+                'legal_entity_name' => $row['legal_entity_name'] ?? null,
+                'account_name' => $row['account_name_display'] ?? $row['account_name'] ?? '',
                 'industry' => $row['industry'] ?? null,
                 'sub_industry' => $row['sub_industry'] ?? null,
                 'website_url' => $row['website_url'] ?? null,
@@ -157,7 +166,10 @@ class ClientProfileController extends Controller
     private function validatedData(Request $request)
     {
         return $request->validate([
-            'account_source' => 'nullable|string|max:255',
+            'account_id' => 'nullable|string|max:255',
+            'client_id' => 'nullable|string|max:255',
+            'service_id' => 'nullable|string|max:255',
+            'legal_entity_name' => 'nullable|string|max:255',
             'account_name' => 'required|string|max:255',
             'industry' => 'nullable|string|max:255',
             'sub_industry' => 'nullable|string|max:255',
@@ -171,9 +183,17 @@ class ClientProfileController extends Controller
             'ownership_type' => 'nullable|string|max:255',
             'registration_id' => 'nullable|string|max:255',
             'gstin' => 'nullable|string|max:255',
+            'account_source' => 'nullable|string|max:255',
+            'customer_domain' => 'nullable|string|max:255',
             'account_owner' => 'nullable|string|max:255',
             'relationship_manager' => 'nullable|string|max:255',
             'customer_since' => 'nullable|string|max:255',
+            'account_created_date' => 'nullable|date',
+            'last_updated_date' => 'nullable|date',
+            'relationship_status' => 'nullable|string|max:255',
+            'primary_contact_name_designation' => 'nullable|string|max:255',
+            'primary_email' => 'nullable|email|max:255',
+            'primary_contact_number' => 'nullable|string|max:255',
             'status' => 'required|boolean',
         ]);
     }

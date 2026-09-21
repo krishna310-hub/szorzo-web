@@ -8,7 +8,10 @@
             @csrf
             @method('PUT')
             @include('backend.lead-generations.form')
-            <div class="mt-4"><button type="submit" class="btn btn-primary">Update</button></div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Update</button>
+                <a href="{{ route('admin.lead-generations.index') }}" class="btn btn-secondary ms-2">Back</a>
+            </div>
         </form>
     </div>
 </div></div></div></div></div></div>

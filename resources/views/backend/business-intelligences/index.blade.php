@@ -14,7 +14,7 @@
         @include('backend.partials.import-feedback')
         <div class="table-responsive">
         <table id="datatable" class="table table-bordered nowrap w-100"><thead><tr>
-            <th>S.No</th><th>Metric Name</th><th>Category</th><th>Status</th><th>Action</th>
+            <th>S.No</th><th>Account Name</th><th>Contact Name</th><th>Status</th><th>Action</th>
         </tr></thead><tbody></tbody></table>
     </div></div>
 </div></div></div></div></div></div>
@@ -52,8 +52,8 @@ $(document).ready(function () {
         ajax: { url: '{{ route('admin.business-intelligences.index') }}', type: 'GET' },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'metric_name', name: 'metric_name' },
-            { data: 'category', name: 'category' },
+            { data: 'account_name', name: 'account_name' },
+            { data: 'contact_name', name: 'contact_name' },
             { data: 'status', name: 'status', orderable: false, searchable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ]

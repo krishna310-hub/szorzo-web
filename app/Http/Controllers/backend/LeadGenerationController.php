@@ -12,7 +12,7 @@ class LeadGenerationController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            return DataTables::of($model::latest())
+            return DataTables::of(LeadGeneration::latest())
                 ->addIndexColumn()
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
@@ -37,30 +37,30 @@ class LeadGenerationController extends Controller
 
     public function store(Request $request)
     {
-        $model::create($this->validatedData($request));
+        LeadGeneration::create($this->validatedData($request));
         return redirect()->route('admin.lead-generations.index')->with('success', 'Record created successfully.');
     }
 
     public function edit($id)
     {
         return view('backend.lead-generations.edit', [
-            'model' => $model::findOrFail($id)
+            'model' => LeadGeneration::findOrFail($id)
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        $model::findOrFail($id)->update($this->validatedData($request));
+        LeadGeneration::findOrFail($id)->update($this->validatedData($request));
         return redirect()->route('admin.lead-generations.index')->with('success', 'Record updated successfully.');
     }
 
     public function destroy($id)
     {
-        $model::findOrFail($id)->delete();
+        LeadGeneration::findOrFail($id)->delete();
         return response()->json(['status' => true, 'message' => 'Record deleted successfully.']);
     }
 
-        public function export()
+    public function export()
     {
         $data = \App\Models\LeadGeneration::all()->map(function ($row) {
             return collect($row->toArray())->only(['id', 'status', 'created_at'])->merge([
@@ -68,20 +68,34 @@ class LeadGenerationController extends Controller
             ])->values()->toArray();
         });
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
-  0 => 'Title',
-  1 => 'Lead Source',
-  2 => 'Lead Owner',
-  3 => 'Status',
+  0 => 'Account ID',
+  1 => 'Account/Lead Source',
+  2 => 'Account Name (Display)',
+  3 => 'Industry',
+  4 => 'Sub Industry',
+  5 => 'Website URL',
+  6 => 'Country',
+  7 => 'Region',
+  8 => 'State',
+  9 => 'City',
+  10 => 'Status',
 ), $data->toArray()), 'LeadGeneration-export.xlsx');
     }
 
     public function importTemplate()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
-  0 => 'Title',
-  1 => 'Lead Source',
-  2 => 'Lead Owner',
-  3 => 'Status',
+  0 => 'Account ID',
+  1 => 'Account/Lead Source',
+  2 => 'Account Name (Display)',
+  3 => 'Industry',
+  4 => 'Sub Industry',
+  5 => 'Website URL',
+  6 => 'Country',
+  7 => 'Region',
+  8 => 'State',
+  9 => 'City',
+  10 => 'Status',
 ), []), 'LeadGeneration-template.xlsx');
     }
 
@@ -95,9 +109,16 @@ class LeadGenerationController extends Controller
         $validRows = [];
         foreach ($rows as $row) {
             $validRows[] = [
-                'title' => $row['title'] ?? '',
-                'lead_source' => $row['lead_source'] ?? null,
-                'lead_owner' => $row['lead_owner'] ?? null,
+                'account_id' => $row['account_id'] ?? null,
+                'account_source' => $row['account_lead_source'] ?? null,
+                'account_name' => $row['account_name_display'] ?? $row['account_name'] ?? '',
+                'industry' => $row['industry'] ?? null,
+                'sub_industry' => $row['sub_industry'] ?? null,
+                'website_url' => $row['website_url'] ?? null,
+                'country_of_origin' => $row['country'] ?? null,
+                'region' => $row['region'] ?? null,
+                'state' => $row['state'] ?? null,
+                'city' => $row['city'] ?? null,
                 'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0,
             ];
         }
@@ -112,16 +133,26 @@ class LeadGenerationController extends Controller
     private function validatedData(Request $request)
     {
         return $request->validate([
-            'title' => 'required|string|max:255',
-            'lead_source' => 'nullable|string|max:255',
-            'lead_owner' => 'nullable|string|max:255',
+            'account_id' => 'nullable|string|max:255',
+            'account_source' => 'nullable|string|max:255',
+            'account_name' => 'required|string|max:255',
+            'industry' => 'nullable|string|max:255',
+            'sub_industry' => 'nullable|string|max:255',
+            'website_url' => 'nullable|url|max:255',
+            'country_of_origin' => 'nullable|string|max:255',
+            'region' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'registered_address' => 'nullable|string',
+            'pin_code' => 'nullable|string|max:20',
+            'ownership_type' => 'nullable|string|max:255',
+            'registration_id' => 'nullable|string|max:255',
+            'gstin' => 'nullable|string|max:255',
+            'account_owner' => 'nullable|string|max:255',
             'relationship_manager' => 'nullable|string|max:255',
-            'contact_info' => 'nullable|string',
-            'client_profile_id' => 'nullable|exists:client_profiles,id',
-            'service_id' => 'nullable|exists:service_offereds,id',
-            'lead_date' => 'nullable|date',
-            'follow_up_date' => 'nullable|date|after_or_equal:lead_date',
-            'notes' => 'nullable|string',
+            'customer_since' => 'nullable|string|max:255',
+            'account_created_date' => 'nullable|date',
+            'last_updated_date' => 'nullable|date',
             'status' => 'required|boolean',
         ]);
     }

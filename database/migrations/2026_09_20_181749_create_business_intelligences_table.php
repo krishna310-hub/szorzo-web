@@ -13,11 +13,19 @@ return new class extends Migration
     {
         Schema::create('business_intelligences', function (Blueprint $table) {
             $table->id();
-            $table->string('category')->nullable();
-            $table->string('metric_name');
-            $table->text('description')->nullable();
-            $table->string('value_type')->nullable();
-            $table->integer('display_order')->default(0);
+            $table->string('contact_id')->nullable();
+            $table->string('account_id')->nullable();
+            $table->string('account_name');
+            $table->string('contact_name');
+            $table->string('designation')->nullable();
+            $table->string('department')->nullable();
+            $table->string('mobile_number')->nullable();
+            $table->string('alternate_contact')->nullable();
+            $table->string('email_id')->nullable();
+            $table->string('contact_type')->nullable();
+            $table->date('last_contacted_date')->nullable();
+            $table->date('next_follow_up_date')->nullable();
+            $table->text('contact_notes')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();
