@@ -12,7 +12,6 @@ class ServiceOfferedController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            return DataTables::of($model::latest())
             return DataTables::of(ServiceOffered::latest())
                 ->addIndexColumn()
                 ->editColumn('status', fn ($row) => $row->status
@@ -38,34 +37,33 @@ class ServiceOfferedController extends Controller
 
     public function store(Request $request)
     {
-        $model::create($this->validatedData($request));
         ServiceOffered::create($this->validatedData($request));
+
         return redirect()->route('admin.services-offered.index')->with('success', 'Record created successfully.');
     }
 
     public function edit($id)
     {
         return view('backend.services-offered.edit', [
-            'model' => $model::findOrFail($id)
             'model' => ServiceOffered::findOrFail($id)
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        $model::findOrFail($id)->update($this->validatedData($request));
         ServiceOffered::findOrFail($id)->update($this->validatedData($request));
+
         return redirect()->route('admin.services-offered.index')->with('success', 'Record updated successfully.');
     }
 
     public function destroy($id)
     {
-        $model::findOrFail($id)->delete();
         ServiceOffered::findOrFail($id)->delete();
+
         return response()->json(['status' => true, 'message' => 'Record deleted successfully.']);
     }
 
-        public function export()
+    public function export()
     {
         $data = \App\Models\ServiceOffered::all()->map(function ($row) {
             return collect($row->toArray())->only(['id', 'status', 'created_at'])->merge([
