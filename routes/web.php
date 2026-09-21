@@ -432,6 +432,10 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     });
 });
 
+// AJAX Routes
+Route::get('/ajax/states', [\App\Http\Controllers\AjaxController::class, 'getStates'])->name('ajax.states');
+Route::get('/ajax/cities', [\App\Http\Controllers\AjaxController::class, 'getCities'])->name('ajax.cities');
+
 // SEO: Sitemap and Robots
 Route::get('/sitemap.xml', function () {
     $path = public_path('sitemap.xml');
