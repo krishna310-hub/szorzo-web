@@ -13,6 +13,7 @@ class ServiceOfferedController extends Controller
     {
         if ($request->ajax()) {
             return DataTables::of($model::latest())
+            return DataTables::of(ServiceOffered::latest())
                 ->addIndexColumn()
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
@@ -38,6 +39,7 @@ class ServiceOfferedController extends Controller
     public function store(Request $request)
     {
         $model::create($this->validatedData($request));
+        ServiceOffered::create($this->validatedData($request));
         return redirect()->route('admin.services-offered.index')->with('success', 'Record created successfully.');
     }
 
@@ -45,18 +47,21 @@ class ServiceOfferedController extends Controller
     {
         return view('backend.services-offered.edit', [
             'model' => $model::findOrFail($id)
+            'model' => ServiceOffered::findOrFail($id)
         ]);
     }
 
     public function update(Request $request, $id)
     {
         $model::findOrFail($id)->update($this->validatedData($request));
+        ServiceOffered::findOrFail($id)->update($this->validatedData($request));
         return redirect()->route('admin.services-offered.index')->with('success', 'Record updated successfully.');
     }
 
     public function destroy($id)
     {
         $model::findOrFail($id)->delete();
+        ServiceOffered::findOrFail($id)->delete();
         return response()->json(['status' => true, 'message' => 'Record deleted successfully.']);
     }
 
