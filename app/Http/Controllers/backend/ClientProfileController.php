@@ -90,44 +90,131 @@ class ClientProfileController extends Controller
     public function export()
     {
         $data = \App\Models\ClientProfile::all()->map(function ($row) {
-            return collect($row->toArray())->only(['id', 'status', 'created_at'])->merge([
-                'status' => $row->status ? 'Active' : 'Inactive'
-            ])->values()->toArray();
+            return [
+                $row->account_id,
+                $row->client_id,
+                $row->service_id ? \App\Models\ServiceOffered::find($row->service_id)?->service_name : null,
+                $row->legal_entity_name,
+                $row->account_name,
+                $row->industry,
+                $row->sub_industry,
+                $row->website_url,
+                $row->country_of_origin,
+                $row->region,
+                $row->state,
+                $row->city,
+                $row->pin_code,
+                $row->registered_address,
+                $row->ownership_type,
+                $row->registration_id,
+                $row->gstin,
+                $row->account_source,
+                $row->customer_domain,
+                $row->account_owner,
+                $row->relationship_manager,
+                $row->customer_since ? \Carbon\Carbon::parse($row->customer_since)->format("Y-m-d") : null,
+                $row->account_created_date ? \Carbon\Carbon::parse($row->account_created_date)->format("Y-m-d") : null,
+                $row->last_updated_date ? \Carbon\Carbon::parse($row->last_updated_date)->format("Y-m-d") : null,
+                $row->relationship_status,
+                $row->primary_contact_name_designation,
+                $row->primary_email,
+                $row->primary_contact_number,
+                $row->status ? "Active" : "Inactive"
+            ];
         });
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
+        
+        $dropdowns = [
+            'Industry' => \App\Models\Division::where("status", 1)->pluck("name")->toArray() ?: ["-- No Data --"],
+            'Service' => \App\Models\ServiceOffered::where("status", 1)->pluck("service_name")->toArray() ?: ["-- No Data --"],
+            'Country of Origin' => \App\Models\Country::pluck("name")->toArray() ?: ["-- No Data --"],
+            'State' => \App\Models\State::pluck("name")->toArray() ?: ["-- No Data --"],
+            'City' => \App\Models\City::pluck("name")->toArray() ?: ["-- No Data --"],
+            'Status' => ["Active", "Inactive"],
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(
+            array (
   0 => 'Account ID',
   1 => 'Client ID',
-  2 => 'Service ID',
+  2 => 'Service',
   3 => 'Legal Entity Name',
   4 => 'Account Name (Display)',
   5 => 'Industry',
   6 => 'Sub Industry',
   7 => 'Website URL',
-  8 => 'Country',
+  8 => 'Country of Origin',
   9 => 'Region',
   10 => 'State',
   11 => 'City',
-  12 => 'Status',
-), $data->toArray()), 'ClientProfile-export.xlsx');
+  12 => 'PIN Code',
+  13 => 'Registered Address',
+  14 => 'Ownership Type',
+  15 => 'Registration / Entity ID',
+  16 => 'GSTIN / Tax ID',
+  17 => 'Account / Lead Source',
+  18 => 'Customer Domain',
+  19 => 'Account Owner',
+  20 => 'Relationship Manager',
+  21 => 'Customer Since',
+  22 => 'Account Created Date',
+  23 => 'Last Updated Date',
+  24 => 'Relationship Status',
+  25 => 'Primary Contact Name & Designation',
+  26 => 'Primary Email',
+  27 => 'Primary Contact Number',
+  28 => 'Status',
+),
+            $data->toArray(),
+            $dropdowns
+        ), 'ClientProfiles-export.xlsx');
     }
 
     public function importTemplate()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
+        $dropdowns = [
+            'Industry' => \App\Models\Division::where("status", 1)->pluck("name")->toArray() ?: ["-- No Data --"],
+            'Service' => \App\Models\ServiceOffered::where("status", 1)->pluck("service_name")->toArray() ?: ["-- No Data --"],
+            'Country of Origin' => \App\Models\Country::pluck("name")->toArray() ?: ["-- No Data --"],
+            'State' => \App\Models\State::pluck("name")->toArray() ?: ["-- No Data --"],
+            'City' => \App\Models\City::pluck("name")->toArray() ?: ["-- No Data --"],
+            'Status' => ["Active", "Inactive"],
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(
+            array (
   0 => 'Account ID',
   1 => 'Client ID',
-  2 => 'Service ID',
+  2 => 'Service',
   3 => 'Legal Entity Name',
   4 => 'Account Name (Display)',
   5 => 'Industry',
   6 => 'Sub Industry',
   7 => 'Website URL',
-  8 => 'Country',
+  8 => 'Country of Origin',
   9 => 'Region',
   10 => 'State',
   11 => 'City',
-  12 => 'Status',
-), []), 'ClientProfile-template.xlsx');
+  12 => 'PIN Code',
+  13 => 'Registered Address',
+  14 => 'Ownership Type',
+  15 => 'Registration / Entity ID',
+  16 => 'GSTIN / Tax ID',
+  17 => 'Account / Lead Source',
+  18 => 'Customer Domain',
+  19 => 'Account Owner',
+  20 => 'Relationship Manager',
+  21 => 'Customer Since',
+  22 => 'Account Created Date',
+  23 => 'Last Updated Date',
+  24 => 'Relationship Status',
+  25 => 'Primary Contact Name & Designation',
+  26 => 'Primary Email',
+  27 => 'Primary Contact Number',
+  28 => 'Status',
+),
+            [],
+            $dropdowns
+        ), 'ClientProfiles-template.xlsx');
     }
 
     public function import(Request $request)
@@ -142,17 +229,33 @@ class ClientProfileController extends Controller
             $validRows[] = [
                 'account_id' => $row['account_id'] ?? null,
                 'client_id' => $row['client_id'] ?? null,
-                'service_id' => $row['service_id'] ?? null,
+                'service_id' => $row['service'] ? \App\Models\ServiceOffered::where('service_name', $row['service'])->value('id') : null,
                 'legal_entity_name' => $row['legal_entity_name'] ?? null,
-                'account_name' => $row['account_name_display'] ?? $row['account_name'] ?? '',
+                'account_name' => $row['account_name_display'] ?? null,
                 'industry' => $row['industry'] ?? null,
                 'sub_industry' => $row['sub_industry'] ?? null,
                 'website_url' => $row['website_url'] ?? null,
-                'country_of_origin' => $row['country'] ?? null,
+                'country_of_origin' => $row['country_of_origin'] ?? null,
                 'region' => $row['region'] ?? null,
                 'state' => $row['state'] ?? null,
                 'city' => $row['city'] ?? null,
-                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0,
+                'pin_code' => $row['pin_code'] ?? null,
+                'registered_address' => $row['registered_address'] ?? null,
+                'ownership_type' => $row['ownership_type'] ?? null,
+                'registration_id' => $row['registration_entity_id'] ?? null,
+                'gstin' => $row['gstin_tax_id'] ?? null,
+                'account_source' => $row['account_lead_source'] ?? null,
+                'customer_domain' => $row['customer_domain'] ?? null,
+                'account_owner' => $row['account_owner'] ?? null,
+                'relationship_manager' => $row['relationship_manager'] ?? null,
+                'customer_since' => $row['customer_since'] ?? null,
+                'account_created_date' => !empty($row['account_created_date']) ? \Carbon\Carbon::parse($row['account_created_date'])->format('Y-m-d') : null,
+                'last_updated_date' => !empty($row['last_updated_date']) ? \Carbon\Carbon::parse($row['last_updated_date'])->format('Y-m-d') : null,
+                'relationship_status' => $row['relationship_status'] ?? null,
+                'primary_contact_name_designation' => $row['primary_contact_name_designation'] ?? null,
+                'primary_email' => $row['primary_email'] ?? null,
+                'primary_contact_number' => $row['primary_contact_number'] ?? null,
+                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0
             ];
         }
         

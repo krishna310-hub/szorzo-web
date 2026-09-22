@@ -63,11 +63,30 @@ class BusinessIntelligenceController extends Controller
     public function export()
     {
         $data = \App\Models\BusinessIntelligence::all()->map(function ($row) {
-            return collect($row->toArray())->only(['id', 'status', 'created_at'])->merge([
-                'status' => $row->status ? 'Active' : 'Inactive'
-            ])->values()->toArray();
+            return [
+                $row->contact_id,
+                $row->account_id,
+                $row->account_name,
+                $row->contact_name,
+                $row->designation,
+                $row->department,
+                $row->mobile_number,
+                $row->alternate_contact,
+                $row->email_id,
+                $row->contact_type,
+                $row->last_contacted_date ? \Carbon\Carbon::parse($row->last_contacted_date)->format("Y-m-d") : null,
+                $row->next_follow_up_date ? \Carbon\Carbon::parse($row->next_follow_up_date)->format("Y-m-d") : null,
+                $row->contact_notes,
+                $row->status ? "Active" : "Inactive"
+            ];
         });
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
+        
+        $dropdowns = [
+            'Status' => ["Active", "Inactive"],
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(
+            array (
   0 => 'Contact ID',
   1 => 'Account ID',
   2 => 'Account Name',
@@ -78,13 +97,24 @@ class BusinessIntelligenceController extends Controller
   7 => 'Alternate Contact',
   8 => 'Email ID',
   9 => 'Contact Type',
-  10 => 'Status',
-), $data->toArray()), 'BusinessIntelligence-export.xlsx');
+  10 => 'Last Contacted Date',
+  11 => 'Next Follow-up Date',
+  12 => 'Contact Notes',
+  13 => 'Status',
+),
+            $data->toArray(),
+            $dropdowns
+        ), 'BusinessIntelligence-export.xlsx');
     }
 
     public function importTemplate()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
+        $dropdowns = [
+            'Status' => ["Active", "Inactive"],
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(
+            array (
   0 => 'Contact ID',
   1 => 'Account ID',
   2 => 'Account Name',
@@ -95,8 +125,14 @@ class BusinessIntelligenceController extends Controller
   7 => 'Alternate Contact',
   8 => 'Email ID',
   9 => 'Contact Type',
-  10 => 'Status',
-), []), 'BusinessIntelligence-template.xlsx');
+  10 => 'Last Contacted Date',
+  11 => 'Next Follow-up Date',
+  12 => 'Contact Notes',
+  13 => 'Status',
+),
+            [],
+            $dropdowns
+        ), 'BusinessIntelligence-template.xlsx');
     }
 
     public function import(Request $request)
@@ -111,15 +147,18 @@ class BusinessIntelligenceController extends Controller
             $validRows[] = [
                 'contact_id' => $row['contact_id'] ?? null,
                 'account_id' => $row['account_id'] ?? null,
-                'account_name' => $row['account_name'] ?? '',
-                'contact_name' => $row['contact_name'] ?? '',
+                'account_name' => $row['account_name'] ?? null,
+                'contact_name' => $row['contact_name'] ?? null,
                 'designation' => $row['designation'] ?? null,
                 'department' => $row['department'] ?? null,
                 'mobile_number' => $row['mobile_number'] ?? null,
                 'alternate_contact' => $row['alternate_contact'] ?? null,
                 'email_id' => $row['email_id'] ?? null,
                 'contact_type' => $row['contact_type'] ?? null,
-                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0,
+                'last_contacted_date' => !empty($row['last_contacted_date']) ? \Carbon\Carbon::parse($row['last_contacted_date'])->format('Y-m-d') : null,
+                'next_follow_up_date' => !empty($row['next_follow_up_date']) ? \Carbon\Carbon::parse($row['next_follow_up_date'])->format('Y-m-d') : null,
+                'contact_notes' => $row['contact_notes'] ?? null,
+                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0
             ];
         }
         

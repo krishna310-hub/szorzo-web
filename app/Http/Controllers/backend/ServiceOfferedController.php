@@ -66,28 +66,52 @@ class ServiceOfferedController extends Controller
     public function export()
     {
         $data = \App\Models\ServiceOffered::all()->map(function ($row) {
-            return collect($row->toArray())->only(['id', 'status', 'created_at'])->merge([
-                'status' => $row->status ? 'Active' : 'Inactive'
-            ])->values()->toArray();
+            return [
+                $row->service_name,
+                $row->service_code,
+                $row->category,
+                $row->description,
+                $row->display_order,
+                $row->status ? "Active" : "Inactive"
+            ];
         });
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
+        
+        $dropdowns = [
+            'Status' => ["Active", "Inactive"],
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(
+            array (
   0 => 'Service Name',
   1 => 'Service Code',
   2 => 'Category',
   3 => 'Description',
-  4 => 'Status',
-), $data->toArray()), 'ServiceOffered-export.xlsx');
+  4 => 'Display Order',
+  5 => 'Status',
+),
+            $data->toArray(),
+            $dropdowns
+        ), 'ServicesOffered-export.xlsx');
     }
 
     public function importTemplate()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
+        $dropdowns = [
+            'Status' => ["Active", "Inactive"],
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(
+            array (
   0 => 'Service Name',
   1 => 'Service Code',
   2 => 'Category',
   3 => 'Description',
-  4 => 'Status',
-), []), 'ServiceOffered-template.xlsx');
+  4 => 'Display Order',
+  5 => 'Status',
+),
+            [],
+            $dropdowns
+        ), 'ServicesOffered-template.xlsx');
     }
 
     public function import(Request $request)
@@ -100,11 +124,12 @@ class ServiceOfferedController extends Controller
         $validRows = [];
         foreach ($rows as $row) {
             $validRows[] = [
-                'service_name' => $row['service_name'] ?? '',
+                'service_name' => $row['service_name'] ?? null,
                 'service_code' => $row['service_code'] ?? null,
                 'category' => $row['category'] ?? null,
                 'description' => $row['description'] ?? null,
-                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0,
+                'display_order' => $row['display_order'] ?? null,
+                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0
             ];
         }
         

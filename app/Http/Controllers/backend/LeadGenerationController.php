@@ -63,40 +63,105 @@ class LeadGenerationController extends Controller
     public function export()
     {
         $data = \App\Models\LeadGeneration::all()->map(function ($row) {
-            return collect($row->toArray())->only(['id', 'status', 'created_at'])->merge([
-                'status' => $row->status ? 'Active' : 'Inactive'
-            ])->values()->toArray();
+            return [
+                $row->account_id,
+                $row->account_source,
+                $row->account_name,
+                $row->industry,
+                $row->sub_industry,
+                $row->website_url,
+                $row->country_of_origin,
+                $row->region,
+                $row->state,
+                $row->city,
+                $row->pin_code,
+                $row->registered_address,
+                $row->ownership_type,
+                $row->registration_id,
+                $row->gstin,
+                $row->account_owner,
+                $row->relationship_manager,
+                $row->customer_since ? \Carbon\Carbon::parse($row->customer_since)->format("Y-m-d") : null,
+                $row->account_created_date ? \Carbon\Carbon::parse($row->account_created_date)->format("Y-m-d") : null,
+                $row->last_updated_date ? \Carbon\Carbon::parse($row->last_updated_date)->format("Y-m-d") : null,
+                $row->status ? "Active" : "Inactive"
+            ];
         });
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
+        
+        $dropdowns = [
+            'Industry' => \App\Models\Division::where("status", 1)->pluck("name")->toArray() ?: ["-- No Data --"],
+            'Country of Origin' => \App\Models\Country::pluck("name")->toArray() ?: ["-- No Data --"],
+            'State' => \App\Models\State::pluck("name")->toArray() ?: ["-- No Data --"],
+            'City' => \App\Models\City::pluck("name")->toArray() ?: ["-- No Data --"],
+            'Status' => ["Active", "Inactive"],
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(
+            array (
   0 => 'Account ID',
-  1 => 'Account/Lead Source',
+  1 => 'Account / Lead Source',
   2 => 'Account Name (Display)',
   3 => 'Industry',
   4 => 'Sub Industry',
   5 => 'Website URL',
-  6 => 'Country',
+  6 => 'Country of Origin',
   7 => 'Region',
   8 => 'State',
   9 => 'City',
-  10 => 'Status',
-), $data->toArray()), 'LeadGeneration-export.xlsx');
+  10 => 'PIN Code',
+  11 => 'Registered Address',
+  12 => 'Ownership Type',
+  13 => 'Registration / Entity ID',
+  14 => 'GSTIN / Tax ID',
+  15 => 'Account Owner',
+  16 => 'Relationship Manager',
+  17 => 'Customer Since',
+  18 => 'Account Created Date',
+  19 => 'Last Updated Date',
+  20 => 'Status',
+),
+            $data->toArray(),
+            $dropdowns
+        ), 'LeadGenerations-export.xlsx');
     }
 
     public function importTemplate()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(array (
+        $dropdowns = [
+            'Industry' => \App\Models\Division::where("status", 1)->pluck("name")->toArray() ?: ["-- No Data --"],
+            'Country of Origin' => \App\Models\Country::pluck("name")->toArray() ?: ["-- No Data --"],
+            'State' => \App\Models\State::pluck("name")->toArray() ?: ["-- No Data --"],
+            'City' => \App\Models\City::pluck("name")->toArray() ?: ["-- No Data --"],
+            'Status' => ["Active", "Inactive"],
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MasterDataExport(
+            array (
   0 => 'Account ID',
-  1 => 'Account/Lead Source',
+  1 => 'Account / Lead Source',
   2 => 'Account Name (Display)',
   3 => 'Industry',
   4 => 'Sub Industry',
   5 => 'Website URL',
-  6 => 'Country',
+  6 => 'Country of Origin',
   7 => 'Region',
   8 => 'State',
   9 => 'City',
-  10 => 'Status',
-), []), 'LeadGeneration-template.xlsx');
+  10 => 'PIN Code',
+  11 => 'Registered Address',
+  12 => 'Ownership Type',
+  13 => 'Registration / Entity ID',
+  14 => 'GSTIN / Tax ID',
+  15 => 'Account Owner',
+  16 => 'Relationship Manager',
+  17 => 'Customer Since',
+  18 => 'Account Created Date',
+  19 => 'Last Updated Date',
+  20 => 'Status',
+),
+            [],
+            $dropdowns
+        ), 'LeadGenerations-template.xlsx');
     }
 
     public function import(Request $request)
@@ -111,15 +176,25 @@ class LeadGenerationController extends Controller
             $validRows[] = [
                 'account_id' => $row['account_id'] ?? null,
                 'account_source' => $row['account_lead_source'] ?? null,
-                'account_name' => $row['account_name_display'] ?? $row['account_name'] ?? '',
+                'account_name' => $row['account_name_display'] ?? null,
                 'industry' => $row['industry'] ?? null,
                 'sub_industry' => $row['sub_industry'] ?? null,
                 'website_url' => $row['website_url'] ?? null,
-                'country_of_origin' => $row['country'] ?? null,
+                'country_of_origin' => $row['country_of_origin'] ?? null,
                 'region' => $row['region'] ?? null,
                 'state' => $row['state'] ?? null,
                 'city' => $row['city'] ?? null,
-                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0,
+                'pin_code' => $row['pin_code'] ?? null,
+                'registered_address' => $row['registered_address'] ?? null,
+                'ownership_type' => $row['ownership_type'] ?? null,
+                'registration_id' => $row['registration_entity_id'] ?? null,
+                'gstin' => $row['gstin_tax_id'] ?? null,
+                'account_owner' => $row['account_owner'] ?? null,
+                'relationship_manager' => $row['relationship_manager'] ?? null,
+                'customer_since' => $row['customer_since'] ?? null,
+                'account_created_date' => !empty($row['account_created_date']) ? \Carbon\Carbon::parse($row['account_created_date'])->format('Y-m-d') : null,
+                'last_updated_date' => !empty($row['last_updated_date']) ? \Carbon\Carbon::parse($row['last_updated_date'])->format('Y-m-d') : null,
+                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0
             ];
         }
         

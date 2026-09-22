@@ -15,30 +15,42 @@
     <div class="col-md-4 mb-3"><label>Website URL</label><input type="url" class="form-control" name="website_url" value="{{ $model->website_url ?? '' }}"></div>
     <div class="col-md-4 mb-3">
         <label>Country of Origin</label>
-        <select class="form-select" name="country_of_origin">
+        <select class="form-select" name="country_of_origin" id="country_id">
             <option value="">Select Country</option>
             @foreach(\App\Models\Country::all() as $country)
-                <option value="{{ $country->name }}" {{ (isset($model) && $model->country_of_origin == $country->name) ? 'selected' : '' }}>{{ $country->name }}</option>
+                <option value="{{ $country->name }}" data-id="{{ $country->id }}" {{ (isset($model) && $model->country_of_origin == $country->name) ? 'selected' : '' }}>{{ $country->name }}</option>
             @endforeach
         </select>
     </div>
     <div class="col-md-4 mb-3"><label>Region</label><input type="text" class="form-control" name="region" value="{{ $model->region ?? '' }}"></div>
     <div class="col-md-4 mb-3">
         <label>State</label>
-        <select class="form-select" name="state">
+        <select class="form-select" name="state" id="state_id">
             <option value="">Select State</option>
-            @foreach(\App\Models\State::all() as $state)
-                <option value="{{ $state->name }}" {{ (isset($model) && $model->state == $state->name) ? 'selected' : '' }}>{{ $state->name }}</option>
-            @endforeach
+            @if(isset($model) && $model->country_of_origin)
+                @php
+                    $selectedCountry = \App\Models\Country::where('name', $model->country_of_origin)->first();
+                    $states = $selectedCountry ? \App\Models\State::where('country_id', $selectedCountry->id)->get() : [];
+                @endphp
+                @foreach($states as $state)
+                    <option value="{{ $state->name }}" data-id="{{ $state->id }}" {{ $model->state == $state->name ? 'selected' : '' }}>{{ $state->name }}</option>
+                @endforeach
+            @endif
         </select>
     </div>
     <div class="col-md-4 mb-3">
         <label>City</label>
-        <select class="form-select" name="city">
+        <select class="form-select" name="city" id="city_id">
             <option value="">Select City</option>
-            @foreach(\App\Models\City::all() as $city)
-                <option value="{{ $city->name }}" {{ (isset($model) && $model->city == $city->name) ? 'selected' : '' }}>{{ $city->name }}</option>
-            @endforeach
+            @if(isset($model) && $model->state)
+                @php
+                    $selectedState = \App\Models\State::where('name', $model->state)->first();
+                    $cities = $selectedState ? \App\Models\City::where('state_id', $selectedState->id)->get() : [];
+                @endphp
+                @foreach($cities as $city)
+                    <option value="{{ $city->name }}" {{ $model->city == $city->name ? 'selected' : '' }}>{{ $city->name }}</option>
+                @endforeach
+            @endif
         </select>
     </div>
     <div class="col-md-4 mb-3"><label>PIN Code</label><input type="text" class="form-control" name="pin_code" value="{{ $model->pin_code ?? '' }}"></div>
@@ -65,3 +77,43 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#country_id').on('change', function() {
+            var country_id = $(this).find(':selected').data('id');
+            $('#state_id').html('<option value="">Select State</option>');
+            $('#city_id').html('<option value="">Select City</option>');
+            if (country_id) {
+                $.ajax({
+                    url: "{{ route('ajax.states') }}",
+                    type: "GET",
+                    data: { country_id: country_id },
+                    success: function(data) {
+                        $.each(data, function(key, value) {
+                            $('#state_id').append('<option value="' + value.name + '" data-id="' + value.id + '">' + value.name + '</option>');
+                        });
+                    }
+                });
+            }
+        });
+
+        $('#state_id').on('change', function() {
+            var state_id = $(this).find(':selected').data('id');
+            $('#city_id').html('<option value="">Select City</option>');
+            if (state_id) {
+                $.ajax({
+                    url: "{{ route('ajax.cities') }}",
+                    type: "GET",
+                    data: { state_id: state_id },
+                    success: function(data) {
+                        $.each(data, function(key, value) {
+                            $('#city_id').append('<option value="' + value.name + '">' + value.name + '</option>');
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>
