@@ -12,9 +12,8 @@
     @if(!auth()->user()->isSales())<div class="col-md-4 mb-3"><label>Assignment / Reassignment Reason</label><input type="text" class="form-control" name="assignment_reason" value="{{ old('assignment_reason') }}" placeholder="e.g. assigned by sales coordinator"></div>@endif
     <div class="col-md-4 mb-3">
         <label>Pipeline Stage <span class="text-danger">*</span></label>
-        @php($stages = \App\Models\LeadGeneration::STAGES)
         <select class="form-select" name="pipeline_stage" required>
-            @foreach($stages as $value => $label)
+            @foreach(\App\Models\LeadGeneration::STAGES as $value => $label)
                 <option value="{{ $value }}" {{ (isset($model) && $model->pipeline_stage === $value) || (!isset($model) && $value === 'new') ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
         </select>
@@ -56,32 +55,32 @@
     <div class="col-md-4 mb-3"><label>Region</label><input type="text" class="form-control" name="region" value="{{ $model->region ?? '' }}"></div>
     <div class="col-md-4 mb-3">
         <label>State</label>
+        @php
+            $selectedCountry = isset($model) && $model->country_of_origin
+                ? \App\Models\Country::where('name', $model->country_of_origin)->first()
+                : null;
+            $states = $selectedCountry ? \App\Models\State::where('country_id', $selectedCountry->id)->get() : collect();
+        @endphp
         <select class="form-select" name="state" id="state_id">
             <option value="">Select State</option>
-            @if(isset($model) && $model->country_of_origin)
-                @php
-                    $selectedCountry = \App\Models\Country::where('name', $model->country_of_origin)->first();
-                    $states = $selectedCountry ? \App\Models\State::where('country_id', $selectedCountry->id)->get() : [];
-                @endphp
-                @foreach($states as $state)
-                    <option value="{{ $state->name }}" data-id="{{ $state->id }}" {{ $model->state == $state->name ? 'selected' : '' }}>{{ $state->name }}</option>
-                @endforeach
-            @endif
+            @foreach($states as $state)
+                <option value="{{ $state->name }}" data-id="{{ $state->id }}" @selected(isset($model) && $model->state == $state->name)>{{ $state->name }}</option>
+            @endforeach
         </select>
     </div>
     <div class="col-md-4 mb-3">
         <label>City</label>
+        @php
+            $selectedState = isset($model) && $model->state
+                ? \App\Models\State::where('name', $model->state)->first()
+                : null;
+            $cities = $selectedState ? \App\Models\City::where('state_id', $selectedState->id)->get() : collect();
+        @endphp
         <select class="form-select" name="city" id="city_id">
             <option value="">Select City</option>
-            @if(isset($model) && $model->state)
-                @php
-                    $selectedState = \App\Models\State::where('name', $model->state)->first();
-                    $cities = $selectedState ? \App\Models\City::where('state_id', $selectedState->id)->get() : [];
-                @endphp
-                @foreach($cities as $city)
-                    <option value="{{ $city->name }}" {{ $model->city == $city->name ? 'selected' : '' }}>{{ $city->name }}</option>
-                @endforeach
-            @endif
+            @foreach($cities as $city)
+                <option value="{{ $city->name }}" @selected(isset($model) && $model->city == $city->name)>{{ $city->name }}</option>
+            @endforeach
         </select>
     </div>
     <div class="col-md-4 mb-3"><label>PIN Code</label><input type="text" class="form-control" name="pin_code" value="{{ $model->pin_code ?? '' }}"></div>
