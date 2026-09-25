@@ -52,6 +52,14 @@ class LoginController extends Controller
         $user = User::with('role')
             ->where('email', $request->email)
             ->first();
+            
+        if ((int) $user->is_active !== 1) {
+            return back()->with([
+                'error' => 'Your account is inactive. Please contact the administrator.'
+            ])->withErrors([
+                'email' => 'Your account is inactive. Please contact the administrator.'
+            ])->onlyInput('email');
+        }
 
         if (!$user || !password_verify($request->password, $user->password)) {
             return back()->with([
@@ -70,16 +78,13 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
-        if($user->id != 1){
-            if ($user->id != 1) {
-                if ($user->role->status != 1) {
-                    return back()->with([
-                        'error' => 'Your role is inactive. Please contact the administrator.'
-                    ])->withErrors([
-                        'email' => 'Your role is inactive. Please contact the administrator.'
-                    ])->onlyInput('email');
-                }
-            }
+        // Inactive roles cannot authenticate through any portal, including the root account.
+        if ((int) $user->role->status !== 1) {
+            return back()->with([
+                'error' => 'Your role is inactive. Please contact the administrator.'
+            ])->withErrors([
+                'email' => 'Your role is inactive. Please contact the administrator.'
+            ])->onlyInput('email');
         }
 
         // Portal access enforcement

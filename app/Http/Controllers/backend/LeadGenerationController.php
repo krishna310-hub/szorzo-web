@@ -12,13 +12,18 @@ class LeadGenerationController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            return DataTables::of(LeadGeneration::latest())
+            return DataTables::of($this->visibleLeads()->with('assignee')->latest())
                 ->addIndexColumn()
+                ->addColumn('assignee_name', fn ($row) => $row->assignee?->name ?? 'Unassigned')
+                ->editColumn('pipeline_stage', fn ($row) => ucfirst(str_replace('_', ' ', $row->pipeline_stage)))
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
                 ->addColumn('action', function ($row) {
                     $buttons = '';
+                    if ($row->pipeline_stage === 'interested' && !$row->client_profile_id) {
+                        $buttons .= '<button type="button" class="btn btn-sm btn-success me-1 convert-lead" data-route="'.route('admin.lead-generations.convert', $row->id).'">Create Profile</button>';
+                    }
                     $buttons .= '<a href="'.route('admin.lead-generations.edit', $row->id).'" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>';
                     $buttons .= '<button type="button" data-route="'.route('admin.lead-generations.delete', $row->id).'" class="btn btn-link text-danger fs-4 p-0 ms-1 delete-record" title="Delete"><i class="bx bxs-trash"></i></button>';
                     return $buttons ?: '-';
@@ -32,37 +37,45 @@ class LeadGenerationController extends Controller
 
     public function create()
     {
-        return view('backend.lead-generations.create');
+        return view('backend.lead-generations.create', ['salesUsers' => $this->salesUsers()]);
     }
 
     public function store(Request $request)
     {
-        LeadGeneration::create($this->validatedData($request));
+        $data = $this->validatedData($request);
+        $data['assigned_to'] = auth()->user()->isSales() ? auth()->id() : ($request->validate(['assigned_to' => ['nullable', \Illuminate\Validation\Rule::exists('users', 'id')]])['assigned_to'] ?? null);
+        if (!empty($data['pipeline_stage']) && in_array($data['pipeline_stage'], ['contacted', 'follow_up', 'interested', 'opportunity', 'proposal', 'negotiation', 'agreement_signed'], true)) $data['first_contact_at'] = now();
+        LeadGeneration::create($data);
         return redirect()->route('admin.lead-generations.index')->with('success', 'Record created successfully.');
     }
 
     public function edit($id)
     {
         return view('backend.lead-generations.edit', [
-            'model' => LeadGeneration::findOrFail($id)
+            'model' => $this->visibleLeads()->findOrFail($id),
+            'salesUsers' => $this->salesUsers()
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        LeadGeneration::findOrFail($id)->update($this->validatedData($request));
+        $lead = $this->visibleLeads()->findOrFail($id);
+        $data = $this->validatedData($request);
+        $data['assigned_to'] = auth()->user()->isSales() ? auth()->id() : ($request->validate(['assigned_to' => ['nullable', \Illuminate\Validation\Rule::exists('users', 'id')]])['assigned_to'] ?? null);
+        if (in_array($data['pipeline_stage'] ?? '', ['contacted', 'follow_up', 'interested', 'opportunity', 'proposal', 'negotiation', 'agreement_signed'], true) && !$lead->first_contact_at) $data['first_contact_at'] = now();
+        $lead->update($data);
         return redirect()->route('admin.lead-generations.index')->with('success', 'Record updated successfully.');
     }
 
     public function destroy($id)
     {
-        LeadGeneration::findOrFail($id)->delete();
+        $this->visibleLeads()->findOrFail($id)->delete();
         return response()->json(['status' => true, 'message' => 'Record deleted successfully.']);
     }
 
     public function export()
     {
-        $data = \App\Models\LeadGeneration::all()->map(function ($row) {
+        $data = $this->visibleLeads()->get()->map(function ($row) {
             return [
                 $row->account_id,
                 $row->account_source,
@@ -84,7 +97,7 @@ class LeadGenerationController extends Controller
                 $row->customer_since ? \Carbon\Carbon::parse($row->customer_since)->format("Y-m-d") : null,
                 $row->account_created_date ? \Carbon\Carbon::parse($row->account_created_date)->format("Y-m-d") : null,
                 $row->last_updated_date ? \Carbon\Carbon::parse($row->last_updated_date)->format("Y-m-d") : null,
-                $row->status ? "Active" : "Inactive"
+                $row->status ? "Active" : "Inactive",
             ];
         });
         
@@ -194,7 +207,9 @@ class LeadGenerationController extends Controller
                 'customer_since' => $row['customer_since'] ?? null,
                 'account_created_date' => !empty($row['account_created_date']) ? \Carbon\Carbon::parse($row['account_created_date'])->format('Y-m-d') : null,
                 'last_updated_date' => !empty($row['last_updated_date']) ? \Carbon\Carbon::parse($row['last_updated_date'])->format('Y-m-d') : null,
-                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0
+                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0,
+                'assigned_to' => auth()->user()->isSales() ? auth()->id() : null,
+                'pipeline_stage' => 'new'
             ];
         }
         
@@ -203,6 +218,45 @@ class LeadGenerationController extends Controller
         }
         
         return back()->with('success', 'Imported successfully');
+    }
+
+    public function convertToClientProfile($id)
+    {
+        $lead = $this->visibleLeads()->findOrFail($id);
+        if ($lead->pipeline_stage !== 'interested') {
+            return response()->json(['status' => false, 'message' => 'Qualify the lead as interested before creating a client profile.'], 422);
+        }
+        if ($lead->client_profile_id) {
+            return response()->json(['status' => false, 'message' => 'This lead already has a client profile.']);
+        }
+
+        $profile = \Illuminate\Support\Facades\DB::transaction(function () use ($lead) {
+            $profile = \App\Models\ClientProfile::create([
+                'account_id' => $lead->account_id, 'lead_generation_id' => $lead->id, 'assigned_to' => $lead->assigned_to,
+                'account_name' => $lead->account_name, 'industry' => $lead->industry, 'sub_industry' => $lead->sub_industry,
+                'website_url' => $lead->website_url, 'country_of_origin' => $lead->country_of_origin, 'region' => $lead->region,
+                'state' => $lead->state, 'city' => $lead->city, 'registered_address' => $lead->registered_address,
+                'pin_code' => $lead->pin_code, 'ownership_type' => $lead->ownership_type, 'registration_id' => $lead->registration_id,
+                'gstin' => $lead->gstin, 'account_source' => $lead->account_source, 'account_owner' => $lead->account_owner,
+                'relationship_manager' => $lead->relationship_manager, 'status' => $lead->status,
+            ]);
+            $lead->update(['client_profile_id' => $profile->id, 'pipeline_stage' => 'converted']);
+            return $profile;
+        });
+
+        return response()->json(['status' => true, 'message' => 'Lead converted to Client Profile.', 'url' => route('admin.client-profiles.edit', $profile->id)]);
+    }
+
+    private function visibleLeads()
+    {
+        $query = LeadGeneration::query();
+        if (auth()->check() && auth()->user()->isSales()) $query->where('assigned_to', auth()->id());
+        return $query;
+    }
+
+    private function salesUsers()
+    {
+        return \App\Models\User::with('role')->get()->filter(fn ($user) => $user->isSales())->values();
     }
 
     private function validatedData(Request $request)
@@ -225,6 +279,11 @@ class LeadGenerationController extends Controller
             'gstin' => 'nullable|string|max:255',
             'account_owner' => 'nullable|string|max:255',
             'relationship_manager' => 'nullable|string|max:255',
+            'assigned_to' => 'nullable|exists:users,id',
+            'pipeline_stage' => 'required|in:new,assigned,contacted,follow_up,interested,opportunity,proposal,negotiation,agreement_signed,converted,lost',
+            'opportunity_status' => 'nullable|string|max:255',
+            'next_follow_up_at' => 'nullable|date',
+            'follow_up_notes' => 'nullable|string|max:5000',
             'customer_since' => 'nullable|string|max:255',
             'account_created_date' => 'nullable|date',
             'last_updated_date' => 'nullable|date',

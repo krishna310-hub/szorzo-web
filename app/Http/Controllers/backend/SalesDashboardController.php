@@ -14,14 +14,22 @@ class SalesDashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $salesUser = auth()->user()->isSales();
+        $leadQuery = LeadGeneration::query();
+        $profileQuery = ClientProfile::query();
+        if ($salesUser) {
+            $leadQuery->where('assigned_to', auth()->id());
+            $profileQuery->where('assigned_to', auth()->id());
+        }
+
         // KPIs
-        $totalLeads = LeadGeneration::count();
-        $activeTempClients = ClientProfile::where('status', 1)->where('is_converted_to_client', 0)->count();
-        $convertedClients = ClientProfile::where('is_converted_to_client', 1)->count();
+        $totalLeads = (clone $leadQuery)->count();
+        $activeTempClients = (clone $profileQuery)->where('status', 1)->where('is_converted_to_client', 0)->count();
+        $convertedClients = (clone $profileQuery)->where('is_converted_to_client', 1)->count();
         $totalServices = ServiceOffered::where('status', 1)->count();
 
         // Monthly Leads Chart (Last 6 Months)
-        $monthlyLeads = LeadGeneration::select(
+        $monthlyLeads = (clone $leadQuery)->select(
             DB::raw('count(id) as count'),
             DB::raw("DATE_FORMAT(created_at, '%b') as month_name"),
             DB::raw("MONTH(created_at) as month")
@@ -45,7 +53,7 @@ class SalesDashboardController extends Controller
         ];
 
         // Recent Leads Table
-        $recentLeads = LeadGeneration::orderBy('created_at', 'desc')->take(5)->get();
+        $recentLeads = (clone $leadQuery)->with('assignee')->orderBy('created_at', 'desc')->take(5)->get();
 
         return view('backend.sales-dashboard.index', compact(
             'totalLeads', 

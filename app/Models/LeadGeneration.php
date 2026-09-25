@@ -28,6 +28,13 @@ class LeadGeneration extends Model
         'gstin',
         'account_owner',
         'relationship_manager',
+        'assigned_to',
+        'pipeline_stage',
+        'opportunity_status',
+        'next_follow_up_at',
+        'follow_up_notes',
+        'first_contact_at',
+        'client_profile_id',
         'customer_since',
         'account_created_date',
         'last_updated_date',
@@ -38,5 +45,17 @@ class LeadGeneration extends Model
         'status' => 'boolean',
         'account_created_date' => 'date',
         'last_updated_date' => 'date',
+        'next_follow_up_at' => 'datetime',
+        'first_contact_at' => 'datetime',
     ];
+
+    public function assignee()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function clientProfile()
+    {
+        return $this->belongsTo(ClientProfile::class);
+    }
 }

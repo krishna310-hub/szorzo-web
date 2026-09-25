@@ -452,7 +452,7 @@
                     </li>
                 @endif
 
-                @if (auth()->user()->role_id == 4)
+                @if (auth()->user()->isSales() || auth()->user()->role_id == 4)
 
                     {{-- Role ID 4: Direct Navigation --}}
                     @if (auth()->user()->can('read', \App\Models\ClientProfile::class) ||
@@ -464,21 +464,20 @@
                             <i class="ri-more-fill"></i>
                             <span>Sales Management</span>
                         </li>
+                        @can('read', \App\Models\LeadGeneration::class)
+                            <li class="nav-item">
+                                <a href="{{ route('admin.lead-generations.index') }}"
+                                    class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
+                                    Lead Generations
+                                </a>
+                            </li>
+                        @endcan
 
                         @can('read', \App\Models\ClientProfile::class)
                             <li class="nav-item">
                                 <a href="{{ route('admin.client-profiles.index') }}"
                                     class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
                                     Client Profiles
-                                </a>
-                            </li>
-                        @endcan
-
-                        @can('read', \App\Models\LeadGeneration::class)
-                            <li class="nav-item">
-                                <a href="{{ route('admin.lead-generations.index') }}"
-                                    class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
-                                    Lead Generations
                                 </a>
                             </li>
                         @endcan
@@ -500,11 +499,8 @@
                                 </a>
                             </li>
                         @endcan
-
                     @endif
-
                 @else
-
                     {{-- Other Roles: Dropdown --}}
                     @if (auth()->user()->can('read', \App\Models\ClientProfile::class) ||
                             auth()->user()->can('read', \App\Models\LeadGeneration::class) ||

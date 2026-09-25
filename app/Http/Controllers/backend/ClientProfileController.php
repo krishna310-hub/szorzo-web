@@ -14,8 +14,9 @@ class ClientProfileController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            return DataTables::of(ClientProfile::latest())
+            return DataTables::of($this->visibleProfiles()->with('assignee')->latest())
                 ->addIndexColumn()
+                ->addColumn('assignee_name', fn ($row) => $row->assignee?->name ?? 'Unassigned')
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -37,37 +38,44 @@ class ClientProfileController extends Controller
 
     public function create()
     {
-        return view('backend.client-profiles.create');
+        return view('backend.client-profiles.create', ['salesUsers' => $this->salesUsers()]);
     }
 
     public function store(Request $request)
     {
-        ClientProfile::create($this->validatedData($request));
+        $data = $this->validatedData($request);
+        $data['assigned_to'] = auth()->user()->isSales() ? auth()->id() : ($request->validate(['assigned_to' => ['nullable', \Illuminate\Validation\Rule::exists('users', 'id')]])['assigned_to'] ?? null);
+        ClientProfile::create($data);
         return redirect()->route('admin.client-profiles.index')->with('success', 'Client Profile created successfully.');
     }
 
     public function edit($id)
     {
         return view('backend.client-profiles.edit', [
-            'model' => ClientProfile::findOrFail($id)
+            'model' => $this->visibleProfiles()->findOrFail($id),
+            'salesUsers' => $this->salesUsers()
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        ClientProfile::findOrFail($id)->update($this->validatedData($request));
+        $profile = $this->visibleProfiles()->findOrFail($id);
+        $data = $this->validatedData($request);
+        if (auth()->user()->isSales()) $data['assigned_to'] = auth()->id();
+        else $data['assigned_to'] = $request->validate(['assigned_to' => ['nullable', \Illuminate\Validation\Rule::exists('users', 'id')]])['assigned_to'] ?? null;
+        $profile->update($data);
         return redirect()->route('admin.client-profiles.index')->with('success', 'Client Profile updated successfully.');
     }
 
     public function destroy($id)
     {
-        ClientProfile::findOrFail($id)->delete();
+        $this->visibleProfiles()->findOrFail($id)->delete();
         return response()->json(['status' => true, 'message' => 'Record deleted successfully.']);
     }
 
     public function convertToClient($id)
     {
-        $profile = ClientProfile::findOrFail($id);
+        $profile = $this->visibleProfiles()->findOrFail($id);
         
         if ($profile->is_converted_to_client) {
             return response()->json(['status' => false, 'message' => 'Already converted.']);
@@ -89,7 +97,7 @@ class ClientProfileController extends Controller
 
     public function export()
     {
-        $data = \App\Models\ClientProfile::all()->map(function ($row) {
+        $data = $this->visibleProfiles()->get()->map(function ($row) {
             return [
                 $row->account_id,
                 $row->client_id,
@@ -255,7 +263,8 @@ class ClientProfileController extends Controller
                 'primary_contact_name_designation' => $row['primary_contact_name_designation'] ?? null,
                 'primary_email' => $row['primary_email'] ?? null,
                 'primary_contact_number' => $row['primary_contact_number'] ?? null,
-                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0
+                'status' => strtolower($row['status'] ?? '') === 'active' ? 1 : 0,
+                'assigned_to' => auth()->user()->isSales() ? auth()->id() : null
             ];
         }
         
@@ -264,6 +273,18 @@ class ClientProfileController extends Controller
         }
         
         return back()->with('success', 'Imported successfully');
+    }
+
+    private function salesUsers()
+    {
+        return \App\Models\User::with('role')->get()->filter(fn ($user) => $user->isSales())->values();
+    }
+
+    private function visibleProfiles()
+    {
+        $query = ClientProfile::query();
+        if (auth()->check() && auth()->user()->isSales()) $query->where('assigned_to', auth()->id());
+        return $query;
     }
 
     private function validatedData(Request $request)

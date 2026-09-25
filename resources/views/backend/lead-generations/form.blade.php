@@ -1,4 +1,26 @@
 <div class="row">
+    <div class="col-md-4 mb-3">
+        <label>Assigned Sales Person</label>
+        <select class="form-select" name="assigned_to" {{ auth()->user()->isSales() ? 'disabled' : '' }}>
+            <option value="">Unassigned</option>
+            @foreach(($salesUsers ?? collect()) as $salesUser)
+                <option value="{{ $salesUser->id }}" {{ (isset($model) && $model->assigned_to == $salesUser->id) || (!isset($model) && auth()->id() == $salesUser->id) ? 'selected' : '' }}>{{ $salesUser->name }}</option>
+            @endforeach
+        </select>
+        @if(auth()->user()->isSales())<input type="hidden" name="assigned_to" value="{{ auth()->id() }}">@endif
+    </div>
+    <div class="col-md-4 mb-3">
+        <label>Pipeline Stage <span class="text-danger">*</span></label>
+        @php $stages = ['new'=>'New lead', 'assigned'=>'Assigned', 'contacted'=>'First contact attempt', 'follow_up'=>'Follow-up', 'interested'=>'Interested / qualified', 'opportunity'=>'Opportunity', 'proposal'=>'Proposal', 'negotiation'=>'Negotiation', 'agreement_signed'=>'Agreement signed', 'converted'=>'Client Profile created', 'lost'=>'Lost'] @endphp
+        <select class="form-select" name="pipeline_stage" required>
+            @foreach($stages as $value => $label)
+                <option value="{{ $value }}" {{ (isset($model) && $model->pipeline_stage === $value) || (!isset($model) && $value === 'new') ? 'selected' : '' }}>{{ $label }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="col-md-4 mb-3"><label>Opportunity / Proposal Status</label><input type="text" class="form-control" name="opportunity_status" value="{{ $model->opportunity_status ?? '' }}" placeholder="e.g. proposal sent"></div>
+    <div class="col-md-4 mb-3"><label>Next Follow-up</label><input type="datetime-local" class="form-control" name="next_follow_up_at" value="{{ isset($model->next_follow_up_at) ? $model->next_follow_up_at->format('Y-m-d\TH:i') : '' }}"></div>
+    <div class="col-md-8 mb-3"><label>Follow-up Notes (call, Teams, visit, email)</label><textarea class="form-control" name="follow_up_notes" rows="2">{{ $model->follow_up_notes ?? '' }}</textarea></div>
     <div class="col-md-4 mb-3"><label>Account ID</label><input type="text" class="form-control" name="account_id" value="{{ $model->account_id ?? '' }}"></div>
     <div class="col-md-4 mb-3"><label>Account / Lead Source</label><input type="text" class="form-control" name="account_source" value="{{ $model->account_source ?? '' }}"></div>
     <div class="col-md-4 mb-3"><label>Account Name (Display) <span class="text-danger">*</span></label><input type="text" class="form-control" name="account_name" value="{{ $model->account_name ?? '' }}" required></div>
