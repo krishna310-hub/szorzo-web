@@ -472,6 +472,9 @@
                                 </a>
                             </li>
                         @endcan
+                        <li class="nav-item">
+                            <a href="{{ route('admin.sales-follow-ups.index') }}" class="nav-link {{ request()->is('admin/sales-follow-ups*') ? 'active' : '' }}">Sales Follow-ups</a>
+                        </li>
 
                         @can('read', \App\Models\ClientProfile::class)
                             <li class="nav-item">

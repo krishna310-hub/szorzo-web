@@ -98,6 +98,12 @@
                 </div>
             </div>
 
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3"><a class="text-reset" href="{{ route('admin.sales-follow-ups.index', ['filter' => 'today']) }}"><div class="card border shadow-sm h-100"><div class="card-body"><div class="text-muted">Today’s Follow-ups</div><div class="fs-3 fw-bold">{{ $todayFollowUps }}</div><span class="small text-primary">Open follow-up list →</span></div></div></a></div>
+                <div class="col-md-4 mb-3"><a class="text-reset" href="{{ route('admin.sales-follow-ups.index', ['filter' => 'overdue']) }}"><div class="card border shadow-sm h-100"><div class="card-body"><div class="text-muted">Overdue Follow-ups</div><div class="fs-3 fw-bold text-danger">{{ $overdueFollowUps }}</div><span class="small text-primary">Review overdue tasks →</span></div></div></a></div>
+                <div class="col-md-4 mb-3"><a class="text-reset" href="{{ route('admin.lead-generations.index') }}"><div class="card border shadow-sm h-100"><div class="card-body"><div class="text-muted">High Priority: No Contact After 24 Hours</div><div class="fs-3 fw-bold text-warning">{{ $highPriorityUncontacted }}</div><span class="small text-primary">Review assigned leads →</span></div></div></a></div>
+            </div>
+
             <!-- Charts Section -->
             <div class="row">
                 <div class="col-xl-8">

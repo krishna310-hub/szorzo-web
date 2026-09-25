@@ -52,6 +52,11 @@ class ClientProfile extends Model
         'last_updated_date' => 'date',
     ];
 
+    public function leadGeneration()
+    {
+        return $this->belongsTo(LeadGeneration::class, 'lead_generation_id');
+    }
+
     public function assignee()
     {
         return $this->belongsTo(User::class, 'assigned_to');

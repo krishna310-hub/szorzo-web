@@ -7,6 +7,7 @@
         <div class="d-flex flex-wrap gap-2">
             <a href="{{ route('admin.lead-generations.export') }}" class="btn btn-sm btn-info">Export</a>
             <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importModal">Import</button>
+            <a href="{{ route('admin.sales-follow-ups.index') }}" class="btn btn-sm btn-warning">Today's Follow-ups</a>
             <a href="{{ route('admin.lead-generations.create') }}" class="btn btn-sm btn-primary">Add New</a>
         </div>
     </div>
@@ -14,7 +15,7 @@
         @include('backend.partials.import-feedback')
         <div class="table-responsive">
         <table id="datatable" class="table table-bordered nowrap w-100"><thead><tr>
-            <th>S.No</th><th>Account Name</th><th>Assigned To</th><th>Stage</th><th>Next Follow-up</th><th>Status</th><th>Action</th>
+            <th>S.No</th><th>Company</th><th>Contact</th><th>Mobile</th><th>Assigned To</th><th>Priority</th><th>Stage</th><th>Next Follow-up</th><th>Status</th><th>Action</th>
         </tr></thead><tbody></tbody></table>
     </div></div>
 </div></div></div></div></div></div>
@@ -53,7 +54,10 @@ $(document).ready(function () {
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'account_name', name: 'account_name' },
+            { data: 'contact_person', name: 'contact_person', defaultContent: '-' },
+            { data: 'mobile', name: 'mobile', defaultContent: '-' },
             { data: 'assignee_name', name: 'assignee_name', orderable: false },
+            { data: 'priority', name: 'priority' },
             { data: 'pipeline_stage', name: 'pipeline_stage' },
             { data: 'next_follow_up_at', name: 'next_follow_up_at', defaultContent: '-' },
             { data: 'status', name: 'status', orderable: false, searchable: false },
@@ -61,7 +65,7 @@ $(document).ready(function () {
         ]
     });
     $(document).on('click', '.convert-lead', function () {
-        if (!confirm('Create a Client Profile from this qualified lead?')) return;
+        if (!confirm('Create a Client Profile from this signed or won lead?')) return;
         $.ajax({ url: $(this).data('route'), type: 'POST', data: { _token: '{{ csrf_token() }}' }, success: function (res) {
             res.status ? toastr.success(res.message) : toastr.error(res.message); table.ajax.reload(null, false);
         }, error: function (xhr) { toastr.error(xhr.responseJSON?.message || 'Unable to convert lead.'); } });

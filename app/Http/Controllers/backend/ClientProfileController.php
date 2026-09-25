@@ -52,7 +52,7 @@ class ClientProfileController extends Controller
     public function edit($id)
     {
         return view('backend.client-profiles.edit', [
-            'model' => $this->visibleProfiles()->findOrFail($id),
+            'model' => $this->visibleProfiles()->with('leadGeneration')->findOrFail($id),
             'salesUsers' => $this->salesUsers()
         ]);
     }
@@ -277,7 +277,7 @@ class ClientProfileController extends Controller
 
     private function salesUsers()
     {
-        return \App\Models\User::with('role')->get()->filter(fn ($user) => $user->isSales())->values();
+        return \App\Models\User::with('role')->where('is_active', 1)->get()->filter(fn ($user) => $user->isSales())->values();
     }
 
     private function visibleProfiles()

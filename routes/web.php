@@ -378,6 +378,9 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::post('/enquiry/status',[ContactController::class,'changeStatus'])->name('enquiry.status');
 
     // Sales Dashboard
+    Route::get('/sales-follow-ups', [\App\Http\Controllers\backend\LeadActivityController::class, 'followUps'])->name('sales-follow-ups.index');
+    Route::post('/sales-follow-ups/{activity}/update', [\App\Http\Controllers\backend\LeadActivityController::class, 'updateFollowUp'])->name('sales-follow-ups.update');
+    Route::get('/lead-activity/{activity}/attachment', [\App\Http\Controllers\backend\LeadActivityController::class, 'downloadAttachment'])->name('lead-activities.attachment');
     Route::get('/sales-dashboard', [\App\Http\Controllers\backend\SalesDashboardController::class, 'index'])->name('sales-dashboard.index');
 
     // Master Management
@@ -399,6 +402,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
+            Route::post('/{id}/activities', [\App\Http\Controllers\backend\LeadActivityController::class, 'store'])->name('activities.store');
             Route::post('/{id}/convert-to-profile', 'convertToClientProfile')->name('convert');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}/update', 'update')->name('update');

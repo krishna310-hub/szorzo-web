@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\LeadGeneration;
 use App\Models\ClientProfile;
 use App\Models\ServiceOffered;
+use App\Models\LeadActivity;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -27,6 +28,17 @@ class SalesDashboardController extends Controller
         $activeTempClients = (clone $profileQuery)->where('status', 1)->where('is_converted_to_client', 0)->count();
         $convertedClients = (clone $profileQuery)->where('is_converted_to_client', 1)->count();
         $totalServices = ServiceOffered::where('status', 1)->count();
+
+        $followUpQuery = LeadActivity::whereNotNull('next_follow_up_at')
+            ->whereIn('follow_up_status', ['pending', 'rescheduled'])
+            ->whereHas('lead', function ($query) use ($salesUser) {
+                if ($salesUser) $query->where('assigned_to', auth()->id());
+            });
+        $todayFollowUps = (clone $followUpQuery)->whereBetween('next_follow_up_at', [now(), now()->endOfDay()])->count();
+        $overdueFollowUps = (clone $followUpQuery)->where('next_follow_up_at', '<', now())->count();
+        $highPriorityUncontacted = (clone $leadQuery)->where('priority', 'high')
+            ->whereIn('pipeline_stage', ['new', 'assigned'])
+            ->where('created_at', '<', now()->subDay())->count();
 
         // Monthly Leads Chart (Last 6 Months)
         $monthlyLeads = (clone $leadQuery)->select(
@@ -60,6 +72,9 @@ class SalesDashboardController extends Controller
             'activeTempClients', 
             'convertedClients', 
             'totalServices',
+            'todayFollowUps',
+            'overdueFollowUps',
+            'highPriorityUncontacted',
             'chartMonths',
             'chartLeadCounts',
             'conversionRate',

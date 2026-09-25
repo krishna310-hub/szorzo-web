@@ -9,9 +9,10 @@
         </select>
         @if(auth()->user()->isSales())<input type="hidden" name="assigned_to" value="{{ auth()->id() }}">@endif
     </div>
+    @if(!auth()->user()->isSales())<div class="col-md-4 mb-3"><label>Assignment / Reassignment Reason</label><input type="text" class="form-control" name="assignment_reason" value="{{ old('assignment_reason') }}" placeholder="e.g. assigned by sales coordinator"></div>@endif
     <div class="col-md-4 mb-3">
         <label>Pipeline Stage <span class="text-danger">*</span></label>
-        @php $stages = ['new'=>'New lead', 'assigned'=>'Assigned', 'contacted'=>'First contact attempt', 'follow_up'=>'Follow-up', 'interested'=>'Interested / qualified', 'opportunity'=>'Opportunity', 'proposal'=>'Proposal', 'negotiation'=>'Negotiation', 'agreement_signed'=>'Agreement signed', 'converted'=>'Client Profile created', 'lost'=>'Lost'] @endphp
+        @php($stages = \App\Models\LeadGeneration::STAGES)
         <select class="form-select" name="pipeline_stage" required>
             @foreach($stages as $value => $label)
                 <option value="{{ $value }}" {{ (isset($model) && $model->pipeline_stage === $value) || (!isset($model) && $value === 'new') ? 'selected' : '' }}>{{ $label }}</option>
@@ -19,8 +20,16 @@
         </select>
     </div>
     <div class="col-md-4 mb-3"><label>Opportunity / Proposal Status</label><input type="text" class="form-control" name="opportunity_status" value="{{ $model->opportunity_status ?? '' }}" placeholder="e.g. proposal sent"></div>
-    <div class="col-md-4 mb-3"><label>Next Follow-up</label><input type="datetime-local" class="form-control" name="next_follow_up_at" value="{{ isset($model->next_follow_up_at) ? $model->next_follow_up_at->format('Y-m-d\TH:i') : '' }}"></div>
-    <div class="col-md-8 mb-3"><label>Follow-up Notes (call, Teams, visit, email)</label><textarea class="form-control" name="follow_up_notes" rows="2">{{ $model->follow_up_notes ?? '' }}</textarea></div>
+    <div class="col-md-4 mb-3"><label>Priority <span class="text-danger">*</span></label><select class="form-select" name="priority" required>@foreach(['low'=>'Low','medium'=>'Medium','high'=>'High'] as $value => $label)<option value="{{ $value }}" @selected(($model->priority ?? 'medium') === $value)>{{ $label }}</option>@endforeach</select></div>
+    <div class="col-md-4 mb-3"><label>Contact Person</label><input type="text" class="form-control" name="contact_person" value="{{ $model->contact_person ?? '' }}"></div>
+    <div class="col-md-4 mb-3"><label>Mobile</label><input type="tel" class="form-control" name="mobile" value="{{ $model->mobile ?? '' }}"></div>
+    <div class="col-md-4 mb-3"><label>Email</label><input type="email" class="form-control" name="email" value="{{ $model->email ?? '' }}"></div>
+    <div class="col-md-4 mb-3"><label>Interested Service</label><select class="form-select" name="interested_service"><option value="">Select Service</option>@foreach(\App\Models\ServiceOffered::where('status', 1)->orderBy('service_name')->get() as $service)<option value="{{ $service->service_name }}" @selected(($model->interested_service ?? '') === $service->service_name)>{{ $service->service_name }}</option>@endforeach</select></div>
+    <div class="col-md-4 mb-3"><label>Lost Reason</label><select class="form-select" name="lost_reason"><option value="">Select if lost</option>@foreach(['price'=>'Price','competitor'=>'Competitor','no_requirement'=>'No Requirement','no_response'=>'No Response','duplicate'=>'Duplicate','budget'=>'Budget Issue','other'=>'Other'] as $value => $label)<option value="{{ $value }}" @selected(($model->lost_reason ?? '') === $value)>{{ $label }}</option>@endforeach</select></div>
+    <div class="col-md-4 mb-3"><label>Competitor</label><input type="text" class="form-control" name="competitor" value="{{ $model->competitor ?? '' }}"></div>
+    <div class="col-md-4 mb-3"><label>Nurture / Re-contact Date</label><input type="datetime-local" class="form-control" name="nurture_at" value="{{ isset($model->nurture_at) ? $model->nurture_at->format('Y-m-d\TH:i') : '' }}"></div>
+    <div class="col-md-4 mb-3"><label>Agreement Status</label><select class="form-select" name="agreement_status"><option value="">Not started</option>@foreach(['draft'=>'Draft','sent'=>'Sent','under_review'=>'Under review','signed'=>'Signed','rejected'=>'Rejected'] as $value => $label)<option value="{{ $value }}" @selected(($model->agreement_status ?? '') === $value)>{{ $label }}</option>@endforeach</select></div>
+    @if(isset($model) && $model->next_follow_up_at)<div class="col-12"><div class="alert alert-info mb-3"><strong>Next follow-up:</strong> {{ $model->next_follow_up_at->format('d M Y, h:i A') }} — {{ $model->next_action ?: 'No action detail' }} ({{ ucfirst($model->follow_up_status ?: 'pending') }})</div></div>@endif
     <div class="col-md-4 mb-3"><label>Account ID</label><input type="text" class="form-control" name="account_id" value="{{ $model->account_id ?? '' }}"></div>
     <div class="col-md-4 mb-3"><label>Account / Lead Source</label><input type="text" class="form-control" name="account_source" value="{{ $model->account_source ?? '' }}"></div>
     <div class="col-md-4 mb-3"><label>Account Name (Display) <span class="text-danger">*</span></label><input type="text" class="form-control" name="account_name" value="{{ $model->account_name ?? '' }}" required></div>
