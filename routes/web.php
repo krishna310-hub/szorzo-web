@@ -37,6 +37,7 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/', 'index')->name('index');
     // pages
     Route::get('/about-us','aboutUs')->name('about.us');
+    Route::get('/site-map', 'siteMap')->name('site.map');
     Route::get('/contact','contact')->name('contact');
     Route::post('/contact/store','contactStore')->name('contact.store');
     Route::get('/careers','careers')->name('careers');

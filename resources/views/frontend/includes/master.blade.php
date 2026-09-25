@@ -81,24 +81,43 @@
             },
             {
                 "@type": "SiteNavigationElement",
-                "name": [
-                    "About Us",
-                    "Contact Us",
-                    "SZORZO AI",
-                    "Enterprise Services",
-                    "IT Services",
-                    "Telecom Services",
-                    "Careers"
-                ],
-                "url": [
-                    "{{ route('about.us') }}",
-                    "{{ route('contact') }}",
-                    "{{ route('szorzo.ai') }}",
-                    "{{ route('enterprice.formation') }}",
-                    "{{ route('it.infrastructure') }}",
-                    "{{ route('telecom.services') }}",
-                    "{{ route('careers') }}"
-                ]
+                "name": "About Us",
+                "url": "{{ route('about.us') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Contact Us",
+                "url": "{{ route('contact') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "SZORZO AI",
+                "url": "{{ route('szorzo.ai') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Enterprise Formation and GCC Services",
+                "url": "{{ route('enterprice.formation') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "IT Infrastructure Services",
+                "url": "{{ route('it.infrastructure') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Telecom Services",
+                "url": "{{ route('telecom.services') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Careers",
+                "url": "{{ route('careers') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Sitemap",
+                "url": "{{ route('site.map') }}"
             }
         ]
     }

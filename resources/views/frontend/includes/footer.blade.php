@@ -59,6 +59,7 @@
                                 <li><a href="{{ route('telecom.services') }}">Telecom Services</a></li>
                                 <li><a href="{{ route('careers') }}">Careers</a></li>
                                 <li><a href="{{ route('about.us') }}#industries">Industries</a></li>
+                                <li><a href="{{ route('site.map') }}">Sitemap</a></li>
                             </ul>
                         </div>
                         <!-- Footer Links End -->

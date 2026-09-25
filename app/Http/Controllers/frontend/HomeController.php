@@ -23,6 +23,42 @@ class HomeController extends Controller
         }
         return view('frontend.landing', compact('page'));
     }
+    public function siteMap()
+    {
+        $siteMap = [
+            'Company' => [
+                ['label' => 'Home', 'url' => route('index')],
+                ['label' => 'About Us', 'url' => route('about.us')],
+                ['label' => 'Contact Us', 'url' => route('contact')],
+                ['label' => 'Careers', 'url' => route('careers')],
+                ['label' => 'Open Positions', 'url' => route('careers.list')],
+            ],
+            'Solutions' => [
+                ['label' => 'SZORZO AI', 'url' => route('szorzo.ai')],
+                ['label' => 'Technology Services', 'url' => route('tech.services')],
+                ['label' => 'Telecom Services', 'url' => route('telecom.services')],
+            ],
+            'Enterprise Services' => [
+                ['label' => 'Enterprise Formation and GCC Services', 'url' => route('enterprice.formation')],
+                ['label' => 'Enterprise Learning Solutions', 'url' => route('enterprise.learning.solution')],
+                ['label' => 'Marketing as a Service', 'url' => route('marketing.service')],
+                ['label' => 'Organization Capacity Assessment', 'url' => route('org.capacity.ass')],
+                ['label' => 'Operations and HR Infrastructure', 'url' => route('opt.infra.off')],
+                ['label' => 'Strategic Advisory', 'url' => route('strategic.advisory')],
+            ],
+            'IT Services' => [
+                ['label' => 'IT Infrastructure Services', 'url' => route('it.infrastructure')],
+                ['label' => 'Data Center Design', 'url' => route('data.center.design')],
+                ['label' => 'Data Center Managed Services', 'url' => route('data.center.managed.service')],
+                ['label' => 'Cyber Security Services', 'url' => route('cyber.security')],
+                ['label' => 'Certification and Compliance', 'url' => route('certificate.compliance')],
+                ['label' => 'Hardware and Software Integration', 'url' => route('hardware.software')],
+            ],
+        ];
+
+        return view('frontend.site-map', compact('siteMap'));
+    }
+
     public function aboutUs(){
         return view('frontend.about');
     }
