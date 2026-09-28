@@ -353,12 +353,12 @@
                         auth()->user()->can('read', \App\Models\InterviewLevel::class) ||
                         auth()->user()->can('read', \App\Models\Location::class) ||
                         auth()->user()->can('read', \App\Models\Division::class))
-                    <li class="menu-title"><i class="ri-more-fill"></i> <span>Masters</span></li>
+                    <li class="menu-title"><i class="ri-more-fill"></i> <span>TAG Masters</span></li>
                     <li class="nav-item">
                         <a class="nav-link menu-link" href="#sidebarMasters" data-bs-toggle="collapse"
                             role="button" aria-expanded="{{ request()->is('admin/masters*') ? 'true' : 'false' }}"
                             aria-controls="sidebarMasters">
-                            <i class="ri-database-2-line"></i> <span>Masters</span>
+                            <i class="ri-database-2-line"></i> <span>TAG Masters</span>
                         </a>
                         <div class="collapse menu-dropdown {{ request()->is('admin/masters*') ? 'show' : '' }}"
                             id="sidebarMasters">
@@ -462,7 +462,7 @@
 
                         <li class="menu-title">
                             <i class="ri-more-fill"></i>
-                            <span>Sales Management</span>
+                            <span>Sales Masters</span>
                         </li>
 
                         @can('read', \App\Models\ClientProfile::class)
@@ -513,7 +513,7 @@
 
                         <li class="menu-title">
                             <i class="ri-more-fill"></i>
-                            <span>Sales Management</span>
+                            <span>Sales Masters</span>
                         </li>
 
                         <li class="nav-item">
@@ -525,7 +525,7 @@
                                 aria-controls="sidebarMasterManagement">
 
                                 <i class="ri-database-2-fill"></i>
-                                <span>Sales Management</span>
+                                <span>Sales Masters</span>
                             </a>
 
                             <div class="collapse menu-dropdown {{ request()->is('admin/master-management*') ? 'show' : '' }}"
