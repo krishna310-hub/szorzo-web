@@ -14,7 +14,7 @@
         @include('backend.partials.import-feedback')
         <div class="table-responsive">
         <table id="datatable" class="table table-bordered nowrap w-100"><thead><tr>
-            <th>S.No</th><th>Account Name</th><th>Account Owner</th><th>Industry</th><th>Status</th><th>Action</th>
+            <th>S.No</th><th>Account Name</th><th>Assigned To</th><th>Account Owner</th><th>Industry</th><th>Status</th><th>Action</th>
         </tr></thead><tbody></tbody></table>
     </div></div>
 </div></div></div></div></div></div>
@@ -53,6 +53,7 @@ $(document).ready(function () {
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'account_name', name: 'account_name' },
+            { data: 'assignee_name', name: 'assignee_name', orderable: false },
             { data: 'account_owner', name: 'account_owner' },
             { data: 'industry', name: 'industry' },
             { data: 'status', name: 'status', orderable: false, searchable: false },

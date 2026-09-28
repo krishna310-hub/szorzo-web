@@ -29,6 +29,10 @@ class LeadGenerationPolicy
 
     private function getPermission(User $user, string $name): bool
     {
+        if ($user->isSales()) {
+            return in_array($name, ['Read', 'Create', 'Edit'], true);
+        }
+
         if (!$user->role) {
             return false;
         }

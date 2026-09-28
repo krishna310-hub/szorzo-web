@@ -1,4 +1,14 @@
 <div class="row">
+    <div class="col-md-4 mb-3">
+        <label>Assigned Sales Person</label>
+        <select class="form-select" name="assigned_to" {{ auth()->user()->isSales() ? 'disabled' : '' }}>
+            <option value="">Unassigned</option>
+            @foreach(($salesUsers ?? collect()) as $salesUser)
+                <option value="{{ $salesUser->id }}" {{ (isset($model) && $model->assigned_to == $salesUser->id) ? 'selected' : '' }}>{{ $salesUser->name }}</option>
+            @endforeach
+        </select>
+        @if(auth()->user()->isSales())<input type="hidden" name="assigned_to" value="{{ auth()->id() }}">@endif
+    </div>
     <div class="col-md-4 mb-3"><label>Account ID</label><input type="text" class="form-control" name="account_id" value="{{ $model->account_id ?? '' }}"></div>
     <div class="col-md-4 mb-3"><label>Client ID</label><input type="text" class="form-control" name="client_id" value="{{ $model->client_id ?? '' }}"></div>
     <div class="col-md-4 mb-3">

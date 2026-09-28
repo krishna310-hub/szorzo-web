@@ -13,7 +13,7 @@
             <div class="row mb-3">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-transparent shadow-none">
-                        <h4 class="mb-sm-0 fw-bold fs-24 text-dark"><i class="ri-rocket-line text-primary me-2"></i>Sales Analytics</h4>
+                        <h4 class="mb-sm-0 fw-bold fs-24 text-dark"><i class="ri-rocket-line text-primary me-2"></i>Sales Analytics{{ auth()->user()->isSales() ? ' — '.auth()->user()->name : '' }}</h4>
                         @if (auth()->user()->role_id == 1)
                             <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-primary rounded-pill shadow-sm px-4 fw-medium transition-all">
                                 <i class="ri-arrow-go-back-line me-1"></i> Admin Console
@@ -98,6 +98,12 @@
                 </div>
             </div>
 
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3"><a class="text-reset" href="{{ route('admin.sales-follow-ups.index', ['filter' => 'today']) }}"><div class="card border shadow-sm h-100"><div class="card-body"><div class="text-muted">Today’s Follow-ups</div><div class="fs-3 fw-bold">{{ $todayFollowUps }}</div><span class="small text-primary">Open follow-up list →</span></div></div></a></div>
+                <div class="col-md-4 mb-3"><a class="text-reset" href="{{ route('admin.sales-follow-ups.index', ['filter' => 'overdue']) }}"><div class="card border shadow-sm h-100"><div class="card-body"><div class="text-muted">Overdue Follow-ups</div><div class="fs-3 fw-bold text-danger">{{ $overdueFollowUps }}</div><span class="small text-primary">Review overdue tasks →</span></div></div></a></div>
+                <div class="col-md-4 mb-3"><a class="text-reset" href="{{ route('admin.lead-generations.index') }}"><div class="card border shadow-sm h-100"><div class="card-body"><div class="text-muted">High Priority: No Contact After 24 Hours</div><div class="fs-3 fw-bold text-warning">{{ $highPriorityUncontacted }}</div><span class="small text-primary">Review assigned leads →</span></div></div></a></div>
+            </div>
+
             <!-- Charts Section -->
             <div class="row">
                 <div class="col-xl-8">
@@ -139,7 +145,9 @@
                                     <thead class="table-light text-muted">
                                         <tr>
                                             <th scope="col">Title</th>
-                                            <th scope="col">Owner</th>
+                                            <th scope="col">Assigned To</th>
+                                            <th scope="col">Stage</th>
+                                            <th scope="col">Next Follow-up</th>
                                             <th scope="col">Date</th>
                                             <th scope="col">Status</th>
                                         </tr>
@@ -147,19 +155,21 @@
                                     <tbody>
                                         @forelse($recentLeads as $lead)
                                             <tr>
-                                                <td class="fw-medium">{{ $lead->title }}</td>
+                                                <td class="fw-medium">{{ $lead->account_name }}</td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <div class="flex-shrink-0 me-2">
                                                             <div class="avatar-xs">
                                                                 <span class="avatar-title bg-soft-primary text-primary rounded-circle fs-12">
-                                                                    {{ substr($lead->lead_owner ?? 'U', 0, 1) }}
+                                                                    {{ substr($lead->assignee?->name ?? 'U', 0, 1) }}
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        <div class="flex-grow-1">{{ $lead->lead_owner ?? 'Unassigned' }}</div>
+                                                        <div class="flex-grow-1">{{ $lead->assignee?->name ?? 'Unassigned' }}</div>
                                                     </div>
                                                 </td>
+                                                <td>{{ ucfirst(str_replace('_', ' ', $lead->pipeline_stage)) }}</td>
+                                                <td>{{ $lead->next_follow_up_at?->format('M d, Y h:i A') ?? '—' }}</td>
                                                 <td>{{ $lead->created_at->format('M d, Y') }}</td>
                                                 <td>
                                                     @if($lead->status)

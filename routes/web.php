@@ -37,6 +37,7 @@ Route::group(['controller' => HomeController::class], function () {
     Route::get('/', 'index')->name('index');
     // pages
     Route::get('/about-us','aboutUs')->name('about.us');
+    Route::get('/site-map', 'siteMap')->name('site.map');
     Route::get('/contact','contact')->name('contact');
     Route::post('/contact/store','contactStore')->name('contact.store');
     Route::get('/careers','careers')->name('careers');
@@ -377,6 +378,9 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
     Route::post('/enquiry/status',[ContactController::class,'changeStatus'])->name('enquiry.status');
 
     // Sales Dashboard
+    Route::get('/sales-follow-ups', [\App\Http\Controllers\backend\LeadActivityController::class, 'followUps'])->name('sales-follow-ups.index');
+    Route::post('/sales-follow-ups/{activity}/update', [\App\Http\Controllers\backend\LeadActivityController::class, 'updateFollowUp'])->name('sales-follow-ups.update');
+    Route::get('/lead-activity/{activity}/attachment', [\App\Http\Controllers\backend\LeadActivityController::class, 'downloadAttachment'])->name('lead-activities.attachment');
     Route::get('/sales-dashboard', [\App\Http\Controllers\backend\SalesDashboardController::class, 'index'])->name('sales-dashboard.index');
 
     // Master Management
@@ -398,6 +402,8 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
+            Route::post('/{id}/activities', [\App\Http\Controllers\backend\LeadActivityController::class, 'store'])->name('activities.store');
+            Route::post('/{id}/convert-to-profile', 'convertToClientProfile')->name('convert');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}/update', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('delete');

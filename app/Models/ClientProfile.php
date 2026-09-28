@@ -13,6 +13,8 @@ class ClientProfile extends Model
     protected $fillable = [
         'account_id',
         'client_id',
+        'lead_generation_id',
+        'assigned_to',
         'service_id',
         'legal_entity_name',
         'account_name',
@@ -49,4 +51,14 @@ class ClientProfile extends Model
         'account_created_date' => 'date',
         'last_updated_date' => 'date',
     ];
+
+    public function leadGeneration()
+    {
+        return $this->belongsTo(LeadGeneration::class, 'lead_generation_id');
+    }
+
+    public function assignee()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
 }
