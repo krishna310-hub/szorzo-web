@@ -178,12 +178,19 @@
                             </button>
 
                             @php
-                                $payslipQueryParams = array_merge(request()->query(), [
-                                    'employee_id' => $selected_employee_id,
-                                    'month' => $month,
-                                    'year' => $year,
-                                ]);
-                                unset($payslipQueryParams['candidate_id'], $payslipQueryParams['user_id']);
+                                $payslipQueryParams = request()->query();
+                                if ($target instanceof \App\Models\Employee) {
+                                    $payslipQueryParams['employee_id'] = $target->id;
+                                    unset($payslipQueryParams['candidate_id'], $payslipQueryParams['user_id']);
+                                } elseif ($target instanceof \App\Models\Candidate) {
+                                    $payslipQueryParams['candidate_id'] = $target->id;
+                                    unset($payslipQueryParams['employee_id'], $payslipQueryParams['user_id']);
+                                } elseif ($target instanceof \App\Models\User) {
+                                    $payslipQueryParams['user_id'] = $target->id;
+                                    unset($payslipQueryParams['employee_id'], $payslipQueryParams['candidate_id']);
+                                }
+                                $payslipQueryParams['month'] = $month;
+                                $payslipQueryParams['year'] = $year;
                             @endphp
                             <a href="{{ route('admin.payslip.download', $payslipQueryParams) }}" id="btnDownloadPdf" class="btn btn-success">
                                 <i class="ri-download-2-line align-bottom me-1"></i> Download PDF

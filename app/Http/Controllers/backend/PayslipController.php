@@ -101,8 +101,15 @@ class PayslipController extends Controller
     /**
      * Resolve the target Employee from the Employee module based on request inputs.
      */
-    protected function resolveTarget(Request $request): Employee
+    protected function resolveTarget(Request $request): Employee|Candidate|User
     {
+        if ($request->filled('candidate_id')) {
+            $candidate = Candidate::with(['mode', 'client', 'jobRole', 'clientRequirement.billing', 'recruiter'])->find($request->input('candidate_id'));
+            if ($candidate) {
+                return $candidate;
+            }
+        }
+
         if ($request->filled('employee_id')) {
             $employee = Employee::with(['mode', 'client'])->find($request->input('employee_id'));
             if ($employee) {

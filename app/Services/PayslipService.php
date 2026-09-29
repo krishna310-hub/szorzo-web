@@ -557,7 +557,7 @@ class PayslipService
         } catch (\Throwable $e) {
             $logoBase64 = null;
         }
-
+        $remarks = $employee->salary_remarks ?? "N/A";
         return [
             'target_type' => $targetType,
             'target_id' => $target->id,
