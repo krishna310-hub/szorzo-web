@@ -370,8 +370,7 @@ class PayslipService
                 $arrearsFull = (float) ($employee->arrears ?? 0);
                 
                 $totalEarningsFull = $basicFull + $hraFull + $conveyanceFull + $medicalFull + $specialFull + $overtimeFull + $ltaFull + $arrearsFull;
-                
-                $ratio = $totalEarningsFull > 0 ? ($totalEarningsActual / $totalEarningsFull) : 1.0;
+                $ratio = $monthlySalary > 0 ? ($payableSalary / $monthlySalary) : 1.0;
                 
                 $basicActual = round($basicFull * $ratio, 2);
                 $hraActual = round($hraFull * $ratio, 2);

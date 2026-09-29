@@ -280,7 +280,7 @@
                                             @endif
                                             <div style="color: #e52528; font-size: 18px; font-weight: bold; letter-spacing: 2px; margin-top: 4px; font-family: Arial, sans-serif;">szorzo</div>
                                         </td>
-                                        <td style="width: 80%; text-align: center; padding: 12px 15px 12px 0;">
+                                        <td style="width: 80%; text-align: center; padding: 12px 15% 12px 0;">
                                             <div style="font-size: 17px; font-weight: bold; margin-bottom: 4px;">M/s. SZORZO Technologies Private Limited</div>
                                             <div style="font-size: 13px; line-height: 1.4;">
                                                 No 81/1, 82/2, 1st Floor, Clayworks Shankara Campus,<br>
@@ -347,11 +347,11 @@
                                 <table style="width: 100%; border-collapse: collapse;">
                                     <thead>
                                         <tr style="background: transparent;">
-                                            <th style="width: 23%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Earnings</th>
+                                            <th style="width: 22%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Earnings</th>
                                             <th style="width: 13%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Full</th>
-                                            <th style="width: 14%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Actual</th>
-                                            <th style="width: 32%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Deductions</th>
-                                            <th style="width: 18%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Actual</th>
+                                            <th style="width: 17%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Actual</th>
+                                            <th style="width: 20%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Deductions</th>
+                                            <th style="width: 28%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Actual</th>
                                         </tr>
                                     </thead>
                                     <tbody>
