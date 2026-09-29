@@ -189,7 +189,7 @@
                     @if(!empty($logo_base64))
                         <img src="{{ $logo_base64 }}" class="logo-img" alt="Szorzo">
                     @endif
-                    <div><img src="{{ public_path('frontend/images/logo-bg.webp') }}" class="logo-img" alt="Szorzo"></div>
+                    <div><img src="{{ public_path('frontend/images/logo-bg.webp') }}" alt="Szorzo"></div>
                 </td>
                 <td class="company-info">
                     <div class="company-name">M/s. SZORZO Technologies Private Limited</div>
