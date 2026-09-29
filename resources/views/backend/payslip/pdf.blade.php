@@ -142,9 +142,9 @@
 
         .col-earn { width: 23%; }
         .col-full { width: 13%; }
-        .col-act1 { width: 14%; }
-        .col-ded  { width: 32%; }
-        .col-act2 { width: 18%; }
+        .col-act1 { width: 17%; }
+        .col-ded  { width: 20%; }
+        .col-act2 { width: 28%; }
 
         .bold-text {
             font-weight: bold;
