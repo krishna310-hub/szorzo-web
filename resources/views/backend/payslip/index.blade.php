@@ -285,7 +285,7 @@
                                             @else
                                                 <img src="{{ asset('frontend/images/rhino-logo.png') }}" style="width: 65px; height: auto;" alt="Szorzo">
                                             @endif
-                                            <div><img src="{{ asset('frontend/images/logo-bg.webp') }}" style="width: 110px; height: auto;" alt="Szorzo"></div>
+                                            <div><img src="{{ asset('frontend/images/logo-bg.webp') }}" style="width: 65px; height: auto;" alt="Szorzo"></div>
                                         </td>
                                         <td style="width: 80%; text-align: center; padding: 12px 15% 12px 0;">
                                             <div style="font-size: 17px; font-weight: bold; margin-bottom: 4px;">M/s. SZORZO Technologies Private Limited</div>
