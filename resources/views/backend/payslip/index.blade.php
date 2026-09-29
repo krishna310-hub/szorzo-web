@@ -283,9 +283,9 @@
                                             @if(!empty($logo_base64))
                                                 <img src="{{ $logo_base64 }}" style="width: 65px; height: auto;" alt="Szorzo">
                                             @else
-                                                <img src="{{ asset('frontend/images/logo-bg.webp') }}" style="width: 65px; height: auto;" alt="Szorzo">
+                                                <img src="{{ asset('frontend/images/rhino-logo.png') }}" style="width: 65px; height: auto;" alt="Szorzo">
                                             @endif
-                                            <div style="color: #e52528; font-size: 18px; font-weight: bold; letter-spacing: 2px; margin-top: 4px; font-family: Arial, sans-serif;">szorzo</div>
+                                            <div><img src="{{ asset('frontend/images/logo-bg.webp') }}" style="width: 110px; height: auto;" alt="Szorzo"></div>
                                         </td>
                                         <td style="width: 80%; text-align: center; padding: 12px 15% 12px 0;">
                                             <div style="font-size: 17px; font-weight: bold; margin-bottom: 4px;">M/s. SZORZO Technologies Private Limited</div>

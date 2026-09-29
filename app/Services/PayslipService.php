@@ -550,7 +550,7 @@ class PayslipService
         // 12. Logo Base64 for DomPDF embedding
         $logoBase64 = null;
         try {
-            $logoPath = function_exists('public_path') ? public_path('frontend/images/logo-bg.webp') : null;
+            $logoPath = function_exists('public_path') ? public_path('frontend/images/rhino-logo.png') : null;
             if ($logoPath && file_exists($logoPath)) {
                 $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
             }
