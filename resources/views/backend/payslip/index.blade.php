@@ -283,7 +283,7 @@
                                             @if(!empty($logo_base64))
                                                 <img src="{{ $logo_base64 }}" style="width: 65px; height: auto;" alt="Szorzo">
                                             @else
-                                                <img src="{{ asset('frontend/images/rhino-logo.png') }}" style="width: 65px; height: auto;" alt="Szorzo">
+                                                <img src="{{ asset('frontend/images/logo-bg.webp') }}" style="width: 65px; height: auto;" alt="Szorzo">
                                             @endif
                                             <div style="color: #e52528; font-size: 18px; font-weight: bold; letter-spacing: 2px; margin-top: 4px; font-family: Arial, sans-serif;">szorzo</div>
                                         </td>
