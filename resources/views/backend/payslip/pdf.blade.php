@@ -141,7 +141,7 @@
         }
 
         .col-earn { width: 21%; }
-        .col-full { width: 16; }
+        .col-full { width: 16%; }
         .col-act1 { width: 16%; }
         .col-ded  { width: 20%; }
         .col-act2 { width: 27%; }
