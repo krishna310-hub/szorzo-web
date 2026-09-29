@@ -93,6 +93,7 @@
         .info-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         .info-table td {
@@ -100,14 +101,15 @@
             padding: 3.5px 6px;
             font-size: 10px;
             vertical-align: middle;
+            box-sizing: border-box;
         }
 
         .label-col-1 {
-            width: 21%;
+            width: 22%;
         }
 
         .val-col-1 {
-            width: 32%;
+            width: 30%;
         }
 
         .label-col-2 {
@@ -115,13 +117,14 @@
         }
 
         .val-col-2 {
-            width: 27%;
+            width: 28%;
         }
 
         /* Earnings & Deductions Table */
         .salary-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         .salary-table th {
@@ -131,6 +134,7 @@
             font-weight: bold;
             text-align: left;
             background-color: transparent;
+            box-sizing: border-box;
         }
 
         .salary-table td {
@@ -138,13 +142,14 @@
             padding: 3px 6px;
             font-size: 10px;
             vertical-align: middle;
+            box-sizing: border-box;
         }
 
-        .col-earn { width: 21%; }
-        .col-full { width: 16%; }
-        .col-act1 { width: 16%; }
+        .col-earn { width: 22%; }
+        .col-full { width: 13%; }
+        .col-act1 { width: 17%; }
         .col-ded  { width: 20%; }
-        .col-act2 { width: 27%; }
+        .col-act2 { width: 28%; }
 
         .bold-text {
             font-weight: bold;
@@ -199,6 +204,12 @@
 
         <!-- Employee Information -->
         <table class="info-table">
+            <colgroup>
+                <col class="label-col-1">
+                <col class="val-col-1">
+                <col class="label-col-2">
+                <col class="val-col-2">
+            </colgroup>
             <tr>
                 <td class="label-col-1">Employee No:</td>
                 <td class="val-col-1">{{ $employee_no }}</td>
@@ -251,6 +262,13 @@
 
         <!-- Earnings and Deductions Table -->
         <table class="salary-table">
+            <colgroup>
+                <col class="col-earn">
+                <col class="col-full">
+                <col class="col-act1">
+                <col class="col-ded">
+                <col class="col-act2">
+            </colgroup>
             <thead>
                 <tr>
                     <th class="col-earn">Earnings</th>
