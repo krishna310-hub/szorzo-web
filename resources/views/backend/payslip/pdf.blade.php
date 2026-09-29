@@ -140,11 +140,11 @@
             vertical-align: middle;
         }
 
-        .col-earn { width: 23%; }
-        .col-full { width: 13%; }
-        .col-act1 { width: 17%; }
+        .col-earn { width: 21%; }
+        .col-full { width: 16; }
+        .col-act1 { width: 16%; }
         .col-ded  { width: 20%; }
-        .col-act2 { width: 28%; }
+        .col-act2 { width: 27%; }
 
         .bold-text {
             font-weight: bold;
