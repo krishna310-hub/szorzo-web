@@ -144,7 +144,7 @@ class ContractReportController extends Controller
             ->download('contract-report-'.$month->format('Y-m').'.pdf');
     }
 
-    public function invoice(Request $request, ContractReport $contractReport)
+    public function invoice(Request $request, ContractReport $contractReport, \App\Services\PayslipService $payslipService)
     {
         $this->authorize('export', ContractReport::class);
         $this->ensureVisible($request, $contractReport);
@@ -163,7 +163,13 @@ class ContractReportController extends Controller
             $contractReport->candidate?->candidate_name ?? 'candidate'
         );
 
-        return Pdf::loadView('backend.contract-reports.invoice', compact('contractReport', 'invoiceNumber'))
+        $payslipData = $payslipService->getPayslipData(
+            $contractReport->candidate, 
+            $contractReport->salary_month->month, 
+            $contractReport->salary_month->year
+        );
+
+        return Pdf::loadView('backend.contract-reports.invoice', array_merge($payslipData, compact('contractReport', 'invoiceNumber')))
             ->setPaper('a4', 'portrait')
             ->download($invoiceNumber.'-'.trim($candidateName, '-').'.pdf');
     }

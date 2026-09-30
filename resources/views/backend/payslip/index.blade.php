@@ -178,12 +178,19 @@
                             </button>
 
                             @php
-                                $payslipQueryParams = array_merge(request()->query(), [
-                                    'employee_id' => $selected_employee_id,
-                                    'month' => $month,
-                                    'year' => $year,
-                                ]);
-                                unset($payslipQueryParams['candidate_id'], $payslipQueryParams['user_id']);
+                                $payslipQueryParams = request()->query();
+                                if ($target instanceof \App\Models\Employee) {
+                                    $payslipQueryParams['employee_id'] = $target->id;
+                                    unset($payslipQueryParams['candidate_id'], $payslipQueryParams['user_id']);
+                                } elseif ($target instanceof \App\Models\Candidate) {
+                                    $payslipQueryParams['candidate_id'] = $target->id;
+                                    unset($payslipQueryParams['employee_id'], $payslipQueryParams['user_id']);
+                                } elseif ($target instanceof \App\Models\User) {
+                                    $payslipQueryParams['user_id'] = $target->id;
+                                    unset($payslipQueryParams['employee_id'], $payslipQueryParams['candidate_id']);
+                                }
+                                $payslipQueryParams['month'] = $month;
+                                $payslipQueryParams['year'] = $year;
                             @endphp
                             <a href="{{ route('admin.payslip.download', $payslipQueryParams) }}" id="btnDownloadPdf" class="btn btn-success">
                                 <i class="ri-download-2-line align-bottom me-1"></i> Download PDF
@@ -278,9 +285,9 @@
                                             @else
                                                 <img src="{{ asset('frontend/images/rhino-logo.png') }}" style="width: 65px; height: auto;" alt="Szorzo">
                                             @endif
-                                            <div style="color: #e52528; font-size: 18px; font-weight: bold; letter-spacing: 2px; margin-top: 4px; font-family: Arial, sans-serif;">szorzo</div>
+                                            <div><img src="{{ asset('frontend/images/logo-bg.webp') }}" style="width: 65px; height: auto;" alt="Szorzo"></div>
                                         </td>
-                                        <td style="width: 80%; text-align: center; padding: 12px 15px 12px 0;">
+                                        <td style="width: 80%; text-align: center; padding: 12px 15% 12px 0;">
                                             <div style="font-size: 17px; font-weight: bold; margin-bottom: 4px;">M/s. SZORZO Technologies Private Limited</div>
                                             <div style="font-size: 13px; line-height: 1.4;">
                                                 No 81/1, 82/2, 1st Floor, Clayworks Shankara Campus,<br>
@@ -347,11 +354,11 @@
                                 <table style="width: 100%; border-collapse: collapse;">
                                     <thead>
                                         <tr style="background: transparent;">
-                                            <th style="width: 23%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Earnings</th>
+                                            <th style="width: 22%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Earnings</th>
                                             <th style="width: 13%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Full</th>
-                                            <th style="width: 14%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Actual</th>
-                                            <th style="width: 32%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Deductions</th>
-                                            <th style="width: 18%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Actual</th>
+                                            <th style="width: 17%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Actual</th>
+                                            <th style="width: 20%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Deductions</th>
+                                            <th style="width: 28%; border: 1px solid #000; padding: 6px 10px; font-weight: bold; text-align: left;">Actual</th>
                                         </tr>
                                     </thead>
                                     <tbody>

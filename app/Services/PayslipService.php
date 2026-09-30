@@ -360,48 +360,74 @@ class PayslipService
 
             $hasExplicitStructure = $employee && (float) ($employee->basic_salary ?? 0) > 0;
             if ($hasExplicitStructure) {
-                $basicRatio = $totalEarningsFull > 0 ? ((float) $employee->basic_salary / $totalEarningsFull) : 0.50;
-                $hraRatio = $totalEarningsFull > 0 ? ((float) ($employee->hra ?? 0) / $totalEarningsFull) : 0.20;
+                $basicFull = (float) $employee->basic_salary;
+                $hraFull = (float) ($employee->hra ?? 0);
+                $conveyanceFull = (float) ($employee->conveyance ?? 0);
+                $medicalFull = (float) ($employee->medical_allowance ?? 0);
+                $specialFull = (float) ($employee->special_allowance ?? 0);
+                $overtimeFull = (float) ($employee->overtime_amount ?? ($otHours > 0 ? round($otHours * 150) : 0));
+                $ltaFull = (float) ($employee->lta ?? 0);
+                $arrearsFull = (float) ($employee->arrears ?? 0);
+                
+                $totalEarningsFull = $basicFull + $hraFull + $conveyanceFull + $medicalFull + $specialFull + $overtimeFull + $ltaFull + $arrearsFull;
+                $ratio = $monthlySalary > 0 ? ($payableSalary / $monthlySalary) : 1.0;
+                
+                $basicActual = round($basicFull * $ratio, 2);
+                $hraActual = round($hraFull * $ratio, 2);
+                $conveyanceActual = round($conveyanceFull * $ratio, 2);
+                $medicalActual = round($medicalFull * $ratio, 2);
+                $specialActual = round($specialFull * $ratio, 2);
+                $overtimeActual = $overtimeFull;
+                $ltaActual = round($ltaFull * $ratio, 2);
+                $arrearsActual = $arrearsFull;
+                
+                $totalEarningsActual = $basicActual + $hraActual + $conveyanceActual + $medicalActual + $specialActual + $overtimeActual + $ltaActual + $arrearsActual;
+                
+                $pfDeduction = (float) ($employee->pf_deduction ?? 0);
+                $esiDeduction = (float) ($employee->esi_deduction ?? 0);
+                $ptDeduction = (float) ($employee->pt_deduction ?? 0);
+                $incomeTax = (float) ($employee->income_tax ?? 0);
+                $salaryAdvance = (float) ($employee->salary_advance ?? 0);
+                $fines = (float) ($employee->fines ?? 0);
+                $lwf = (float) ($employee->labour_welfare_fund ?? 0);
+                $otherDeductions = (float) ($employee->other_deductions ?? 0);
             } else {
                 $basicRatio = 0.50;
                 $hraRatio = 0.20;
-            }
 
-            $basicFull = round($totalEarningsFull * $basicRatio, 2);
-            $hraFull = round($totalEarningsFull * $hraRatio, 2);
-            $conveyanceFull = 0.0;
-            $medicalFull = 0.0;
-            $specialFull = round($totalEarningsFull - $basicFull - $hraFull, 2);
-            $overtimeFull = 0.0;
-            $ltaFull = 0.0;
-            $arrearsFull = 0.0;
+                $basicFull = round($totalEarningsFull * $basicRatio, 2);
+                $hraFull = round($totalEarningsFull * $hraRatio, 2);
+                $conveyanceFull = 0.0;
+                $medicalFull = 0.0;
+                $specialFull = round($totalEarningsFull - $basicFull - $hraFull, 2);
+                $overtimeFull = 0.0;
+                $ltaFull = 0.0;
+                $arrearsFull = 0.0;
 
-            $basicActual = round($totalEarningsActual * $basicRatio, 2);
-            $hraActual = round($totalEarningsActual * $hraRatio, 2);
-            $conveyanceActual = 0.0;
-            $medicalActual = 0.0;
-            // Subtract to ensure the sum of actual earnings exactly equals $payableSalary to the cent
-            $specialActual = round($totalEarningsActual - $basicActual - $hraActual, 2);
-            $overtimeActual = 0.0;
-            $ltaActual = 0.0;
-            $arrearsActual = 0.0;
+                $basicActual = round($totalEarningsActual * $basicRatio, 2);
+                $hraActual = round($totalEarningsActual * $hraRatio, 2);
+                $conveyanceActual = 0.0;
+                $medicalActual = 0.0;
+                $specialActual = round($totalEarningsActual - $basicActual - $hraActual, 2);
+                $overtimeActual = 0.0;
+                $ltaActual = 0.0;
+                $arrearsActual = 0.0;
 
-            // In Contract Report, contract candidates have no statutory PF/PT deductions
-            $pfDeduction = 0.0;
-            $esiDeduction = 0.0;
-            $ptDeduction = 0.0;
-            $incomeTax = 0.0;
-            $salaryAdvance = 0.0;
-            $fines = 0.0;
-            $lwf = 0.0;
-            $otherDeductions = 0.0;
+                $pfDeduction = 0.0;
+                $esiDeduction = 0.0;
+                $ptDeduction = 0.0;
+                $incomeTax = 0.0;
+                $salaryAdvance = 0.0;
+                $fines = 0.0;
+                $lwf = 0.0;
+                $otherDeductions = 0.0;
 
-            if ($employee) {
-                // If an employee record explicitly specifies advance/fine/tds
-                $salaryAdvance = (float) ($employee->salary_advance ?? 0);
-                $fines = (float) ($employee->fines ?? 0);
-                $incomeTax = (float) ($employee->income_tax ?? 0);
-                $otherDeductions = (float) ($employee->other_deductions ?? 0);
+                if ($employee) {
+                    $salaryAdvance = (float) ($employee->salary_advance ?? 0);
+                    $fines = (float) ($employee->fines ?? 0);
+                    $incomeTax = (float) ($employee->income_tax ?? 0);
+                    $otherDeductions = (float) ($employee->other_deductions ?? 0);
+                }
             }
 
             $totalDeductionsActual = $pfDeduction + $esiDeduction + $ptDeduction + $incomeTax + $salaryAdvance + $fines + $lwf + $otherDeductions;
@@ -531,7 +557,7 @@ class PayslipService
         } catch (\Throwable $e) {
             $logoBase64 = null;
         }
-
+        $remarks = $employee->salary_remarks ?? "N/A";
         return [
             'target_type' => $targetType,
             'target_id' => $target->id,
