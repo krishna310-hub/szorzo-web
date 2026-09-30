@@ -34,6 +34,7 @@ class ClientRequirementController extends Controller
             $recruiterNames = Recruiter::pluck('recruiter_name', 'id');
             $query = ClientRequirement::visibleTo($request->user())
                 ->with(['client', 'jobDescription', 'mode', 'jobRole', 'location', 'projectOwner', 'billing'])
+                ->withCount('onboardedCandidates')
                 ->when($request->filled('client_id'), fn ($query) => $query->where('client_id', $request->client_id))
                 ->when($request->filled('project_owner_id'), function ($query) use ($request) {
                     $id = (int) $request->project_owner_id;
@@ -108,6 +109,28 @@ class ClientRequirementController extends Controller
             }
 
             return $dataTable->editColumn('requirement_open_date', fn ($row) => $row->requirement_open_date?->format('d-m-Y') ?? '-')
+                ->addColumn('onboarded_count', function ($row) {
+                    $onboarded = (int) ($row->onboarded_candidates_count ?? 0);
+                    $positions = (int) ($row->number_of_position ?? 0);
+                    $badgeClass = ($positions > 0 && $onboarded >= $positions)
+                        ? 'bg-success text-white'
+                        : 'bg-info-subtle text-info';
+
+                    return '<span class="badge '.$badgeClass.' fw-semibold">'.$onboarded.' / '.$positions.'</span>';
+                })
+                ->editColumn('cv_uploaded', function ($row) {
+                    $uploaded = (int) ($row->cv_uploaded ?? 0);
+                    $required = (int) ($row->cv_required ?? 0);
+
+                    if ($required > 0 && $uploaded > $required) {
+                        $extra = $uploaded - $required;
+                        return '<span class="badge bg-danger text-white fw-bold">'.$uploaded.'</span> <span class="badge bg-danger-subtle text-danger ms-1">+'.$extra.' extra</span>';
+                    } elseif ($required > 0 && $uploaded === $required) {
+                        return '<span class="badge bg-success-subtle text-success fw-bold">'.$uploaded.'</span>';
+                    }
+
+                    return '<span>'.$uploaded.'</span>';
+                })
                 ->editColumn('closure_target_date', fn ($row) => $row->closure_target_date?->format('d-m-Y') ?? '-')
                 ->editColumn('ctc', fn ($row) => $row->ctc !== null ? number_format((float) $row->ctc, 2) : '-')
                 ->editColumn('status', fn ($row) => $row->status
@@ -128,7 +151,7 @@ class ClientRequirementController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['job_description_content', 'job_description_action', 'status', 'priority', 'action'])
+                ->rawColumns(['job_description_content', 'job_description_action', 'cv_uploaded', 'onboarded_count', 'status', 'priority', 'action'])
                 ->make(true);
         }
 
