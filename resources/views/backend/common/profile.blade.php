@@ -47,7 +47,7 @@
                                     @php
                                         $sections = [
                                             'Personal Information' => ['employee_name'=>'Employee Name','dob'=>'Date of Birth','gender'=>'Gender','marital_status'=>'Marital Status','nationality'=>'Nationality','blood_group'=>'Blood Group'],
-                                            'Employee Details' => ['employee_no'=>'Employee ID','designation'=>'Designation','date_of_joining'=>'Date of Joining (DOJ)','employee_uan_pf_number'=>'UAN / PF Number','employee_esi_number'=>'ESI Number','status'=>'Status'],
+                                            'Employee Details' => ['employee_no'=>'Employee ID','designation'=>'Designation','employment_type'=>'Employment Type','date_of_joining'=>'Date of Joining (DOJ)','relieving_date'=>'Relieving Date','employee_uan_pf_number'=>'UAN / PF Number','employee_esi_number'=>'ESI Number','status'=>'Status'],
                                             'Contact Information' => ['mobile_number'=>'Mobile Number','alternate_mobile_number'=>'Alternate Mobile Number','official_mail'=>'Official Mail','personal_mail'=>'Personal Mail'],
                                             'Address Details' => ['permanent_address'=>'Permanent Address','current_residential_address'=>'Current Residential Address'],
                                             'Emergency Contact' => ['emergency_contact_name'=>'Contact Name','relationship'=>'Relationship','emergency_contact_number'=>'Contact Number','emergency_contact_mail'=>'Contact Mail','emergency_contact_address'=>'Contact Address'],
@@ -57,7 +57,7 @@
                                             'Health Information' => ['any_health_issue'=>'Health Issues'],
                                             'Additional Information' => ['passion'=>'Passion','awards_appreciation'=>'Awards / Appreciation'],
                                         ];
-                                        $dateFields = ['dob','date_of_joining','passport_validity_date','husband_wife_dob'];
+                                        $dateFields = ['dob','date_of_joining','relieving_date','passport_validity_date','husband_wife_dob'];
                                     @endphp
                                     @foreach ($sections as $title => $fields)
                                         <h5 class="text-primary {{ $loop->first ? '' : 'mt-4' }} mb-3">{{ $title }}</h5>

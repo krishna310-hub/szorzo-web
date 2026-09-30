@@ -126,10 +126,29 @@
     </div>
     @unless($publicEmployeeForm ?? false)
     <div class="col-md-4">
+        <label for="employment_type" class="form-label">Employment Type</label>
+        <select class="form-select" id="employment_type" name="employment_type">
+            <option value="">Select Employment Type</option>
+            <option value="Internal" {{ old('employment_type', $employee->employment_type ?? '') == 'Internal' ? 'selected' : '' }}>Internal</option>
+            <option value="External" {{ old('employment_type', $employee->employment_type ?? '') == 'External' ? 'selected' : '' }}>External</option>
+        </select>
+        @error('employment_type')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-4 mt-3">
         <label for="date_of_joining" class="form-label">Date of Joining (DOJ)</label>
         <input type="date" class="form-control" id="date_of_joining" name="date_of_joining"
             value="{{ old('date_of_joining', isset($employee) && $employee->date_of_joining ? $employee->date_of_joining->format('Y-m-d') : '') }}">
         @error('date_of_joining')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-4 mt-3">
+        <label for="relieving_date" class="form-label">Relieving Date</label>
+        <input type="date" class="form-control" id="relieving_date" name="relieving_date"
+            value="{{ old('relieving_date', isset($employee) && $employee->relieving_date ? $employee->relieving_date->format('Y-m-d') : '') }}">
+        @error('relieving_date')
             <span class="text-danger small">{{ $message }}</span>
         @enderror
     </div>

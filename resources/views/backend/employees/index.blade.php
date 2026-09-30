@@ -38,7 +38,9 @@
                                                 <th>Employee ID</th>
                                                 <th>Employee</th>
                                                 <th>Designation</th>
+                                                <th>Employment Type</th>
                                                 <th>Date of Joining</th>
+                                                <th>Relieving Date</th>
                                                 <th>Status</th>
                                                 <th>Created At</th>
                                                 <th>Action</th>
@@ -312,8 +314,16 @@
                         name: 'designation'
                     },
                     {
+                        data: 'employment_type',
+                        name: 'employment_type'
+                    },
+                    {
                         data: 'date_of_joining',
                         name: 'date_of_joining'
+                    },
+                    {
+                        data: 'relieving_date',
+                        name: 'relieving_date'
                     },
                     {
                         data: 'status',

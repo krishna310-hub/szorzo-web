@@ -9,6 +9,13 @@ class Employee extends Model
 {
     use SoftDeletes;
 
+    public const EMPLOYMENT_TYPE_INTERNAL = 'Internal';
+    public const EMPLOYMENT_TYPE_EXTERNAL = 'External';
+    public const EMPLOYMENT_TYPES = [
+        self::EMPLOYMENT_TYPE_INTERNAL,
+        self::EMPLOYMENT_TYPE_EXTERNAL,
+    ];
+
     protected $fillable = [
         'employee_name',
         'employee_image',
@@ -20,6 +27,8 @@ class Employee extends Model
         'employee_no',
         'designation',
         'date_of_joining',
+        'relieving_date',
+        'employment_type',
         'client_id',
         'mode_id',
         'contract_from_date',
@@ -114,6 +123,7 @@ class Employee extends Model
         'labour_welfare_fund' => 'decimal:2',
         'other_deductions' => 'decimal:2',
         'date_of_joining' => 'date',
+        'relieving_date' => 'date',
         'contract_from_date' => 'date',
         'contract_to_date' => 'date',
         'previous_company_offer_letters' => 'array',

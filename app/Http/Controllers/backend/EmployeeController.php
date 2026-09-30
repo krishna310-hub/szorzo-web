@@ -74,6 +74,15 @@ class EmployeeController extends Controller
                     </div>';
                 })
                 ->editColumn('date_of_joining', fn ($row) => $row->date_of_joining?->format('d-m-Y') ?? '-')
+                ->editColumn('relieving_date', fn ($row) => $row->relieving_date?->format('d-m-Y') ?? '-')
+                ->editColumn('employment_type', function ($row) {
+                    if ($row->employment_type === 'Internal') {
+                        return '<span class="badge bg-primary-subtle text-primary">Internal</span>';
+                    } elseif ($row->employment_type === 'External') {
+                        return '<span class="badge bg-info-subtle text-info">External</span>';
+                    }
+                    return '-';
+                })
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -98,7 +107,7 @@ class EmployeeController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['employee_name', 'status', 'action'])
+                ->rawColumns(['employee_name', 'employment_type', 'status', 'action'])
                 ->make(true);
         }
 
@@ -146,6 +155,8 @@ class EmployeeController extends Controller
             'employee_no' => 'prohibited',
             'client_id' => 'prohibited',
             'date_of_joining' => 'prohibited',
+            'relieving_date' => 'prohibited',
+            'employment_type' => 'prohibited',
             'mode_id' => 'prohibited',
             'offer_letter' => 'prohibited',
             'intent_letter' => 'prohibited',
@@ -171,7 +182,7 @@ class EmployeeController extends Controller
         $request->merge(['status' => 0]);
         $data = $this->validatedData($request);
         unset(
-            $data['client_id'], $data['date_of_joining'], $data['mode_id'],
+            $data['client_id'], $data['date_of_joining'], $data['relieving_date'], $data['employment_type'], $data['mode_id'],
             $data['offer_letter'], $data['intent_letter'], $data['official_mail'],
             $data['monthly_gross'], $data['basic_salary'], $data['hra'],
             $data['conveyance'], $data['medical_allowance'], $data['special_allowance'],
@@ -362,6 +373,8 @@ class EmployeeController extends Controller
             'employee_no' => ['nullable', 'string', 'max:255', Rule::unique('employees', 'employee_no')->ignore($employeeId)->whereNull('deleted_at')],
             'designation' => 'nullable|string|max:255',
             'date_of_joining' => 'nullable|date',
+            'relieving_date' => 'nullable|date',
+            'employment_type' => ['nullable', 'string', Rule::in(Employee::EMPLOYMENT_TYPES)],
             'client_id' => 'nullable|integer|exists:clients,id',
             'mode_id' => 'nullable|integer|exists:modes,id',
             'contract_from_date' => [Rule::requiredIf($requiresContractDates), 'nullable', 'date'],
