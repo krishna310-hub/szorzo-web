@@ -52,7 +52,35 @@ class Candidate extends Model
         'hourly_salary' => 'decimal:2',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(function (Candidate $candidate) {
+            if ($candidate->client_requirement_id) {
+                $candidate->clientRequirement?->syncCountsAndStatus();
+            }
+            if ($candidate->wasChanged('client_requirement_id')) {
+                $originalId = $candidate->getOriginal('client_requirement_id');
+                if ($originalId) {
+                    ClientRequirement::find($originalId)?->syncCountsAndStatus();
+                }
+            }
+        });
+
+        static::deleted(function (Candidate $candidate) {
+            if ($candidate->client_requirement_id) {
+                $candidate->clientRequirement?->syncCountsAndStatus();
+            }
+        });
+
+        static::restored(function (Candidate $candidate) {
+            if ($candidate->client_requirement_id) {
+                $candidate->clientRequirement?->syncCountsAndStatus();
+            }
+        });
+    }
+
     public function recruiter()
+
     {
         return $this->belongsTo(Recruiter::class);
     }

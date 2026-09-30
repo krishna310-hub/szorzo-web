@@ -40,6 +40,7 @@
                                                 <th>Mode</th>
                                                 <th>Requirement Open Date</th>
                                                 <th>Number Of Position</th>
+                                                <th>Onboarded</th>
                                                 <th>Closure Target Date</th>
                                                 <th>CV's Required</th>
                                                 <th>CV's Uploaded</th>
@@ -151,6 +152,11 @@
                 }, {
                     data: 'number_of_position',
                     name: 'number_of_position'
+                }, {
+                    data: 'onboarded_count',
+                    name: 'onboarded_count',
+                    orderable: false,
+                    searchable: false
                 }, {
                     data: 'closure_target_date',
                     name: 'closure_target_date'
