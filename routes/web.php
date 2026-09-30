@@ -29,6 +29,7 @@ use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\backend\TargetController;
 use App\Http\Controllers\backend\AttendanceController;
 use App\Http\Controllers\backend\LeaveController;
+use App\Http\Controllers\backend\NotificationController;
 use App\Http\Controllers\backend\PayslipController;
 use App\Http\Controllers\frontend\HomeController;
 use Illuminate\Support\Facades\Route;
@@ -142,6 +143,13 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/', 'index')->name('index');
         Route::get('/download', 'download')->name('download');
         Route::get('/preview', 'preview')->name('preview');
+    });
+
+    // Notifications
+    Route::prefix('notifications')->name('notifications.')->controller(NotificationController::class)->group(function () {
+        Route::get('/unread', 'getUnread')->name('unread');
+        Route::post('/{id}/mark-read', 'markAsRead')->name('mark-read');
+        Route::post('/mark-all-read', 'markAllAsRead')->name('mark-all-read');
     });
 
     // Roles
@@ -313,6 +321,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/', 'store')->name('store');
+        Route::post('/parse-cv', 'parseCv')->name('parse-cv');
         Route::get('/{profileSourced}/edit', 'edit')->name('edit');
         Route::put('/{profileSourced}', 'update')->name('update');
         Route::post('/{profileSourced}/move-to-candidate', 'moveToCandidate')->name('move');

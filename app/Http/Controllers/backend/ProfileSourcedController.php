@@ -9,6 +9,7 @@ use App\Models\InterviewLevel;
 use App\Models\JobRole;
 use App\Models\ProfileSourced;
 use App\Models\Recruiter;
+use App\Services\CvParserService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -78,6 +79,22 @@ class ProfileSourcedController extends Controller
         $this->authorize('create', ProfileSourced::class);
 
         return view('backend.profile-sourced.create', $this->formData());
+    }
+
+    public function parseCv(Request $request, CvParserService $parser)
+    {
+        $this->authorize('create', ProfileSourced::class);
+
+        $request->validate([
+            'cv' => 'required|file|mimes:pdf,doc,docx|max:10240',
+        ]);
+
+        $data = $parser->parse($request->file('cv'));
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
     }
 
     public function store(Request $request)

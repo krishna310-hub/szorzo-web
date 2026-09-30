@@ -44,7 +44,20 @@ class ClientRequirement extends Model
         'status' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (ClientRequirement $requirement) {
+            if ($requirement->exists && $requirement->isDirty('number_of_position')) {
+                if ($requirement->number_of_position > 0 && $requirement->onboardedCandidates()->count() >= (int) $requirement->number_of_position) {
+                    $requirement->is_priority = false;
+                    $requirement->status = false;
+                }
+            }
+        });
+    }
+
     /**
+
      * Recruiters may only see requirements assigned to their recruiter record.
      * Delivery leads, administrators, and all other permitted roles remain
      * unscoped.
@@ -123,4 +136,38 @@ class ClientRequirement extends Model
     {
         return $this->belongsTo(Billing::class);
     }
+
+    public function candidates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Candidate::class, 'client_requirement_id');
+    }
+
+    public function onboardedCandidates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Candidate::class, 'client_requirement_id')
+            ->where(function ($query) {
+                $query->where('level_of_interview_id', 20)
+                    ->orWhereNotNull('onboarding_date');
+            });
+    }
+
+    /**
+     * Synchronize cv_uploaded and check if requirement positions are filled.
+     * When onboarded count >= number_of_position, set is_priority = false and status = false.
+     */
+    public function syncCountsAndStatus(): void
+    {
+        $cvCount = $this->candidates()->whereNotNull('upload_cv')->count();
+        $onboardedCount = $this->onboardedCandidates()->count();
+
+        $this->cv_uploaded = $cvCount;
+
+        if ($this->number_of_position > 0 && $onboardedCount >= (int) $this->number_of_position) {
+            $this->is_priority = false;
+            $this->status = false;
+        }
+
+        $this->saveQuietly();
+    }
 }
+
