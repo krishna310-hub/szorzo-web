@@ -371,7 +371,7 @@
                         </a>
                     </li>
                 @endcan --}}
-                
+
                 @can('read', \App\Models\ClientProfile::class)
                     <li class="nav-item">
                         <a href="{{ route('admin.client-profiles.index') }}"
@@ -398,7 +398,7 @@
                         <a href="{{ route('admin.reports.index') }}"
                             class="nav-link menu-link {{ request()->is('admin/reports*') ? 'active' : '' }}">
                             <i class="ri-bar-chart-box-line"></i>
-                            <span>Reports</span>
+                            <span>TAG Reports</span>
                         </a>
                     </li>
                 @endcan
@@ -408,7 +408,7 @@
                         <a href="{{ route('admin.contract-reports.index') }}"
                             class="nav-link menu-link {{ request()->is('admin/contract-reports*') ? 'active' : '' }}">
                             <i class="ri-file-list-3-line"></i>
-                            <span>Contract Report</span>
+                            <span>Contract Reports</span>
                         </a>
                     </li>
                 @endcan
@@ -418,7 +418,7 @@
                         <a href="{{ route('admin.revenues.index') }}"
                             class="nav-link menu-link {{ request()->is('admin/revenues*') ? 'active' : '' }}">
                             <i class="ri-money-rupee-circle-line"></i>
-                            <span>Revenue</span>
+                            <span>Revenue Invoices</span>
                         </a>
                     </li>
                 @endcan
