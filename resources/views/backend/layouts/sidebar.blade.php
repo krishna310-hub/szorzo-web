@@ -258,7 +258,7 @@
                                         <li class="nav-item">
                                             <a href="{{ route('admin.lead-generations.index') }}"
                                                 class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
-                                                Lead Generations
+                                                Leads
                                             </a>
                                         </li>
                                     @endcan
@@ -635,7 +635,7 @@
                             <li class="nav-item">
                                 <a href="{{ route('admin.lead-generations.index') }}"
                                     class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
-                                    Lead Generations
+                                    Leads
                                 </a>
                             </li>
                         @endcan
