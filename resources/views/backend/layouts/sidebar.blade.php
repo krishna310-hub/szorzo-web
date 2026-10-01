@@ -347,7 +347,7 @@
                                         </li>
                                     @endcan
 
-                                    @can('read', \App\Models\InterviewSchedule::class)
+                                    @can('read', \App\Models\Candidate::class)
                                         <li class="nav-item">
                                             <a href="{{ route('admin.interview-schedules.index') }}"
                                                 class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">
