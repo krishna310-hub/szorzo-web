@@ -229,50 +229,51 @@
                         </a>
                     </li>
                 @endif
-                @if (auth()->user()->can('read', \App\Models\ClientProfile::class) ||
-                        auth()->user()->can('read', \App\Models\LeadGeneration::class))
+                @if (auth()->user()->id === 1)
+                    @if (auth()->user()->can('read', \App\Models\ClientProfile::class) ||
+                            auth()->user()->can('read', \App\Models\LeadGeneration::class))
 
-                    <li class="menu-title">
-                        <i class="ri-more-fill"></i>
-                        <span>Sales</span>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link menu-link"
-                            href="#sidebarMasterManagement"
-                            data-bs-toggle="collapse"
-                            role="button"
-                            aria-expanded="{{ request()->is('admin/master-management*') ? 'true' : 'false' }}"
-                            aria-controls="sidebarMasterManagement">
-
-                            <i class="ri-database-2-fill"></i>
+                        <li class="menu-title">
+                            <i class="ri-more-fill"></i>
                             <span>Sales</span>
-                        </a>
+                        </li>
 
-                        <div class="collapse menu-dropdown {{ request()->is('admin/master-management*') ? 'show' : '' }}"
-                            id="sidebarMasterManagement">
+                        <li class="nav-item">
+                            <a class="nav-link menu-link"
+                                href="#sidebarMasterManagement"
+                                data-bs-toggle="collapse"
+                                role="button"
+                                aria-expanded="{{ request()->is('admin/master-management*') ? 'true' : 'false' }}"
+                                aria-controls="sidebarMasterManagement">
 
-                            <ul class="nav nav-sm flex-column">
-                                @can('read', \App\Models\LeadGeneration::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.lead-generations.index') }}"
-                                            class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
-                                            Lead Generations
-                                        </a>
-                                    </li>
-                                @endcan
-                                @can('read', \App\Models\ClientProfile::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.client-profiles.index') }}"
-                                            class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
-                                            Client Profiles
-                                        </a>
-                                    </li>
-                                @endcan
-                            </ul>
-                        </div>
-                    </li>
+                                <i class="ri-database-2-fill"></i>
+                                <span>Sales</span>
+                            </a>
 
+                            <div class="collapse menu-dropdown {{ request()->is('admin/master-management*') ? 'show' : '' }}"
+                                id="sidebarMasterManagement">
+
+                                <ul class="nav nav-sm flex-column">
+                                    @can('read', \App\Models\LeadGeneration::class)
+                                        <li class="nav-item">
+                                            <a href="{{ route('admin.lead-generations.index') }}"
+                                                class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
+                                                Lead Generations
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('read', \App\Models\ClientProfile::class)
+                                        <li class="nav-item">
+                                            <a href="{{ route('admin.client-profiles.index') }}"
+                                                class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
+                                                Client Profiles
+                                            </a>
+                                        </li>
+                                    @endcan
+                                </ul>
+                            </div>
+                        </li>
+                    @endif
                 @endif
                 @if (auth()->user()->id === 1)
 

@@ -10,7 +10,7 @@
                             <div class="card-header align-items-center d-flex">
                                 <h4 class="card-title mb-0 flex-grow-1">Interview History</h4>
                                 <div class="d-flex gap-2">
-                                    @can('create', \App\Models\Candidate::class)
+                                    @can('create', \App\Models\InterviewSchedule::class)
                                         <a href="{{ route('admin.interview-schedules.create', ['candidate_id' => $candidate->id]) }}" class="btn btn-sm btn-primary">Add Schedule</a>
                                     @endcan
                                     <a href="{{ route('admin.interview-schedules.index') }}" class="btn btn-sm btn-light">Back</a>
@@ -61,7 +61,7 @@
                                                     <td>{{ \App\Models\InterviewSchedule::STATUSES[$schedule->status] ?? ucfirst($schedule->status) }}</td>
                                                     <td>{{ $schedule->notes ?: '-' }}</td>
                                                     <td>
-                                                        @can('edit', \App\Models\Candidate::class)
+                                                        @can('edit', \App\Models\InterviewSchedule::class)
                                                             <a href="{{ route('admin.interview-schedules.edit', $schedule->id) }}" class="text-info fs-4 me-1" title="Edit"><i class="bx bxs-edit"></i></a>
                                                         @endcan
                                                     </td>

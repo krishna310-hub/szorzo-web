@@ -26,7 +26,7 @@ class InterviewScheduleController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorize('read', Candidate::class);
+        $this->authorize('read', InterviewSchedule::class);
 
         if ($request->ajax()) {
             return DataTables::of(
@@ -179,7 +179,7 @@ class InterviewScheduleController extends Controller
                             <i class="ri-history-line"></i>
                         </a>';
 
-                    if (auth()->user()->can('edit', Candidate::class)) {
+                    if (auth()->user()->can('edit', InterviewSchedule::class)) {
                         $buttons .= '<a href="'.
                             route(
                                 'admin.interview-schedules.edit',
@@ -190,7 +190,7 @@ class InterviewScheduleController extends Controller
                             </a>';
                     }
 
-                    if (auth()->user()->can('delete', Candidate::class)) {
+                    if (auth()->user()->can('delete', InterviewSchedule::class)) {
                         $buttons .= '<button
                             type="button"
                             data-route="'.
@@ -220,7 +220,7 @@ class InterviewScheduleController extends Controller
 
     public function create(Request $request)
     {
-        $this->authorize('create', Candidate::class);
+        $this->authorize('create', InterviewSchedule::class);
 
         $data = $this->formData();
         $candidate = $request->filled('candidate_id')
@@ -236,7 +236,7 @@ class InterviewScheduleController extends Controller
 
     public function export(Request $request)
     {
-        $this->authorize('read', Candidate::class);
+        $this->authorize('read', InterviewSchedule::class);
 
         $rows = $this->scheduleQuery($request)
             ->oldest('schedule_date')
@@ -264,7 +264,7 @@ class InterviewScheduleController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('create', Candidate::class);
+        $this->authorize('create', InterviewSchedule::class);
 
         $data = $this->validatedData($request);
 
@@ -297,7 +297,7 @@ class InterviewScheduleController extends Controller
 
     public function edit($id)
     {
-        $this->authorize('edit', Candidate::class);
+        $this->authorize('edit', InterviewSchedule::class);
 
         $interviewSchedule = $this->visibleSchedules()->with('interviewMode')->findOrFail($id);
         $onboarding_candidate = $this->visibleCandidates()->findOrFail($interviewSchedule->candidate_id);
@@ -314,7 +314,7 @@ class InterviewScheduleController extends Controller
 
     public function update(Request $request, $id)
     {
-        $this->authorize('edit', Candidate::class);
+        $this->authorize('edit', InterviewSchedule::class);
 
         $level = InterviewLevel::find($request->level_of_interview_id);
         if ($level && $level->level === 'Offer Released' && ! $request->filled('onboarding_date')) {
@@ -346,7 +346,7 @@ class InterviewScheduleController extends Controller
 
     public function show($candidateId)
     {
-        $this->authorize('read', Candidate::class);
+        $this->authorize('read', InterviewSchedule::class);
 
         $candidate = $this->visibleCandidates()->with(['recruiter', 'client', 'jobRole', 'interviewLevel'])->findOrFail($candidateId);
         $schedules = InterviewSchedule::with(['client', 'jobRole', 'interviewLevel'])
@@ -359,7 +359,7 @@ class InterviewScheduleController extends Controller
 
     public function destroy($id)
     {
-        $this->authorize('delete', Candidate::class);
+        $this->authorize('delete', InterviewSchedule::class);
 
         $this->visibleSchedules()->findOrFail($id)->delete();
 

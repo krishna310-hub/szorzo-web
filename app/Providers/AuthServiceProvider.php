@@ -14,6 +14,7 @@ use App\Models\Division;
 use App\Models\Employee;
 use App\Models\InterviewLevel;
 use App\Models\InterviewMode;
+use App\Models\InterviewSchedule;
 use App\Models\JobRole;
 use App\Models\Location;
 use App\Models\Mode;
@@ -35,6 +36,7 @@ use App\Policies\EmployeePolicy;
 use App\Policies\GeneralPolicy;
 use App\Policies\InterviewLevelPolicy;
 use App\Policies\InterviewModePolicy;
+use App\Policies\InterviewSchedulePolicy;
 use App\Policies\JobRolePolicy;
 use App\Policies\LocationPolicy;
 use App\Policies\ModePolicy;
@@ -84,6 +86,7 @@ class AuthServiceProvider extends ServiceProvider
         ContractReport::class => ContractReportPolicy::class,
         Attendance::class => AttendancePolicy::class,
         LeaveRequest::class => LeaveRequestPolicy::class,
+        InterviewSchedule::class => InterviewSchedulePolicy::class,
         \App\Models\ClientProfile::class => ClientProfilePolicy::class,
         \App\Models\LeadGeneration::class => LeadGenerationPolicy::class,
         \App\Models\BusinessIntelligence::class => BusinessIntelligencePolicy::class,
@@ -111,6 +114,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::Resource('ClientJobRole', 'App\Policies\ClientJobRolePolicy');
         Gate::Resource('ClientRequirement', 'App\Policies\ClientRequirementPolicy');
         Gate::Resource('Candidate', 'App\Policies\CandidatePolicy');
+        Gate::Resource('InterviewSchedule', 'App\Policies\InterviewSchedulePolicy');
         Gate::Resource('Division', 'App\Policies\DivisionPolicy');
         Gate::Resource('Billing','App\Policies\BillingPolicy');
         Gate::Resource('ClientProfile', 'App\Policies\ClientProfilePolicy');

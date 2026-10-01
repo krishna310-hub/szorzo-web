@@ -72,7 +72,7 @@
                                                                 data-bs-target="#collapse{{ $loop->index }}"
                                                                 aria-expanded="false"
                                                                 aria-controls="collapse{{ $loop->index }}">
-                                                                {{ ucfirst($page) }}
+                                                                {{ ucwords(str_replace('_', ' ', $page)) }}
                                                             </button>
                                                         </h2>
 
