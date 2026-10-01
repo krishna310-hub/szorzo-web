@@ -59,7 +59,7 @@
                                                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                                                     data-bs-target="#collapse{{ $loop->index }}" aria-expanded="false"
                                                                     aria-controls="collapse{{ $loop->index }}">
-                                                                {{ ucfirst($page) }}
+                                                                {{ ucwords(str_replace('_', ' ', $page)) }}
                                                             </button>
                                                         </h2>
                                                         <div id="collapse{{ $loop->index }}" class="accordion-collapse collapse"

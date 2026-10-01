@@ -16,7 +16,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#interviewScheduleFilterOffcanvas" aria-controls="interviewScheduleFilterOffcanvas">
                                         <i class="ri-filter-3-line me-1"></i> Filter
                                     </button>
-                                    @can('create', \App\Models\Candidate::class)
+                                    @can('create', \App\Models\InterviewSchedule::class)
                                         <a href="{{ route('admin.interview-schedules.create') }}" class="btn btn-sm btn-primary">Add Schedule</a>
                                     @endcan
                                 </div>

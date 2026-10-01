@@ -114,6 +114,11 @@ class PermissionsSeeder extends Seeder
             ['name' => 'Edit',      'page' => 'interview_mode'],
             ['name' => 'Delete',    'page' => 'interview_mode'],
 
+            ['name' => 'Read',      'page' => 'interview_schedule'],
+            ['name' => 'Create',    'page' => 'interview_schedule'],
+            ['name' => 'Edit',      'page' => 'interview_schedule'],
+            ['name' => 'Delete',    'page' => 'interview_schedule'],
+
             ['name' => 'Read',      'page' => 'target'],
             ['name' => 'Create',    'page' => 'target'],
             ['name' => 'Edit',      'page' => 'target'],
