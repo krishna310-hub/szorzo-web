@@ -258,7 +258,7 @@
                                         <li class="nav-item">
                                             <a href="{{ route('admin.lead-generations.index') }}"
                                                 class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
-                                                Leads
+                                                Lead Generations
                                             </a>
                                         </li>
                                     @endcan
@@ -348,7 +348,7 @@
                                         </li>
                                     @endcan
 
-                                    @can('read', \App\Models\InterviewSchedule::class)
+                                    @can('read', \App\Models\Candidate::class)
                                         <li class="nav-item">
                                             <a href="{{ route('admin.interview-schedules.index') }}"
                                                 class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">
@@ -413,7 +413,7 @@
                         @endcan
 
                         {{-- Interview Scheduled --}}
-                        @can('read', \App\Models\InterviewSchedule::class)
+                        @can('read', \App\Models\Candidate::class)
                             <li class="nav-item">
                                 <a href="{{ route('admin.interview-schedules.index') }}"
                                     class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">
@@ -635,7 +635,7 @@
                             <li class="nav-item">
                                 <a href="{{ route('admin.lead-generations.index') }}"
                                     class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
-                                    Leads
+                                    Lead Generations
                                 </a>
                             </li>
                         @endcan
