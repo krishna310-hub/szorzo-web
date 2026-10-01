@@ -12,24 +12,17 @@ class Attendance extends Model
 
     public const STATUSES = ['present', 'absent', 'half_day', 'on_leave', 'holiday', 'week_off'];
 
-    protected $fillable = ['employee_id', 'user_id', 'attendance_date', 'status', 'check_in', 'check_out', 'remarks', 'leave_request_id', 'marked_by'];
+    protected $fillable = ['user_id', 'attendance_date', 'status', 'check_in', 'check_out', 'remarks', 'leave_request_id', 'marked_by'];
 
     protected function casts(): array { return ['attendance_date' => 'date']; }
 
-    public function employee() { return $this->belongsTo(Employee::class); }
     public function user() { return $this->belongsTo(User::class); }
     public function marker() { return $this->belongsTo(User::class, 'marked_by'); }
     public function leaveRequest() { return $this->belongsTo(LeaveRequest::class); }
 
     public function scopeEligible(Builder $query): Builder
     {
-        return $query->where(function ($q) {
-            $q->whereHas('employee', fn (Builder $eq) => $eq->eligibleForAttendance())
-              ->orWhere(function ($uq) {
-                  $uq->whereNull('employee_id')
-                     ->whereHas('user', fn (Builder $users) => $users->eligibleForAttendance());
-              });
-        });
+        return $query->whereHas('user', fn (Builder $users) => $users->eligibleForAttendance());
     }
 
     public function getWorkingMinutesAttribute(): int

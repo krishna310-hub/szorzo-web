@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -204,13 +203,6 @@ class Employee extends Model
      */
     public function isExternal(): bool
     {
-        if ($this->employment_type === self::EMPLOYMENT_TYPE_EXTERNAL) {
-            return true;
-        }
-        if ($this->employment_type === self::EMPLOYMENT_TYPE_INTERNAL) {
-            return false;
-        }
-
         if ($this->isContract() || $this->isC2H()) {
             return true;
         }
@@ -245,12 +237,6 @@ class Employee extends Model
      */
     public function isInternal(): bool
     {
-        if ($this->employment_type === self::EMPLOYMENT_TYPE_INTERNAL) {
-            return true;
-        }
-        if ($this->employment_type === self::EMPLOYMENT_TYPE_EXTERNAL) {
-            return false;
-        }
         return !$this->isExternal();
     }
 
@@ -268,43 +254,20 @@ class Employee extends Model
     public function scopeInternal($query)
     {
         return $query->where(function ($q) {
-            $q->where('employment_type', self::EMPLOYMENT_TYPE_INTERNAL)
-              ->orWhere(function ($sq) {
-                  $sq->where(function ($tq) {
-                         $tq->whereNull('employment_type')->orWhere('employment_type', '');
-                     })
-                     ->where(function ($ssq) {
-                         $ssq->whereNull('mode_id')
-                             ->orWhereDoesntHave('mode', function ($mq) {
-                                 $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
-                                    ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
-                                    ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
-                             });
-                     })->where(function ($ssq) {
-                         $ssq->whereNull('client_id')
-                             ->orWhereHas('client', function ($cq) {
-                                 $cq->whereRaw('LOWER(client) LIKE ?', ['%szorzo%']);
-                             });
-                     });
-              });
-        });
-    }
-
-    public function attendances()
-    {
-        return $this->hasMany(Attendance::class);
-    }
-
-    public function scopeEligibleForAttendance(Builder $query, ?string $date = null): Builder
-    {
-        $date = $date ?? now()->toDateString();
-
-        return $query->internal()
-            ->where('status', 1)
-            ->where(function ($q) use ($date) {
-                $q->whereNull('relieving_date')
-                  ->orWhere('relieving_date', '>=', $date);
+            $q->where(function ($sq) {
+                $sq->whereNull('mode_id')
+                   ->orWhereDoesntHave('mode', function ($mq) {
+                       $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
+                          ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
+                          ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
+                   });
+            })->where(function ($sq) {
+                $sq->whereNull('client_id')
+                   ->orWhereHas('client', function ($cq) {
+                       $cq->whereRaw('LOWER(client) LIKE ?', ['%szorzo%']);
+                   });
             });
+        });
     }
 
     /**
