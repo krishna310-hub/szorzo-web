@@ -221,13 +221,127 @@
                         </a>
                     </li>
                 @endcan
+                @if(auth()->id() === 1 || auth()->user()->isSales() || auth()->user()->role_id == 4)
+                    <li class="nav-item">
+                        <a class="nav-link menu-link {{ request()->is('admin/sales-dashboard') ? 'active' : '' }}"
+                            href="{{ route('admin.sales-dashboard.index') }}">
+                            <i class="ri-dashboard-fill"></i> <span data-key="t-sales-dashboards">Sales Dashboard</span>
+                        </a>
+                    </li>
+                @endif
+                @if (auth()->user()->can('read', \App\Models\ClientProfile::class) ||
+                        auth()->user()->can('read', \App\Models\LeadGeneration::class))
 
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ request()->is('admin/sales-dashboard') ? 'active' : '' }}"
-                        href="{{ route('admin.sales-dashboard.index') }}">
-                        <i class="ri-dashboard-fill"></i> <span data-key="t-sales-dashboards">Sales Dashboard</span>
-                    </a>
-                </li>
+                    <li class="menu-title">
+                        <i class="ri-more-fill"></i>
+                        <span>Sales</span>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link menu-link"
+                            href="#sidebarMasterManagement"
+                            data-bs-toggle="collapse"
+                            role="button"
+                            aria-expanded="{{ request()->is('admin/master-management*') ? 'true' : 'false' }}"
+                            aria-controls="sidebarMasterManagement">
+
+                            <i class="ri-database-2-fill"></i>
+                            <span>Sales</span>
+                        </a>
+
+                        <div class="collapse menu-dropdown {{ request()->is('admin/master-management*') ? 'show' : '' }}"
+                            id="sidebarMasterManagement">
+
+                            <ul class="nav nav-sm flex-column">
+                                @can('read', \App\Models\LeadGeneration::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.lead-generations.index') }}"
+                                            class="nav-link {{ request()->is('admin/master-management/lead-generations*') ? 'active' : '' }}">
+                                            Lead Generations
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('read', \App\Models\ClientProfile::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.client-profiles.index') }}"
+                                            class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
+                                            Client Profiles
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+
+                @endif
+
+                @if (auth()->user()->can('read', \App\Models\ClientRequirement::class) ||
+                        auth()->user()->can('read', \App\Models\ProfileSourced::class) ||
+                        auth()->user()->can('read', \App\Models\Candidate::class) ||
+                        auth()->user()->can('read', \App\Models\InterviewSchedule::class))
+
+                    <li class="menu-title">
+                        <i class="ri-more-fill"></i>
+                        <span>Tag</span>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link menu-link"
+                            href="#sidebarMasterManagement"
+                            data-bs-toggle="collapse"
+                            role="button"
+                            aria-expanded="{{ request()->is('admin/master-management*') ? 'true' : 'false' }}"
+                            aria-controls="sidebarMasterManagement">
+
+                            <i class="ri-database-2-fill"></i>
+                            <span>Tag</span>
+                        </a>
+
+                        <div class="collapse menu-dropdown {{ request()->is(['admin/profile-sourced*','admin/client-requirements*','admin/candidates*','admin/interview-schedules*']) ? 'show' : '' }}"
+                            id="sidebarMasterManagement">
+
+                            <ul class="nav nav-sm flex-column">
+                                @can('read', \App\Models\ClientRequirement::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.client-requirements.index') }}"
+                                            class="nav-link menu-link {{ request()->is('admin/client-requirements*') ? 'active' : '' }}">
+                                            <i class="ri-file-list-3-line"></i>
+                                            <span>Client Requirements</span>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('read', \App\Models\ProfileSourced::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.profile-sourced.index') }}"
+                                            class="nav-link menu-link {{ request()->is('admin/profile-sourced*') ? 'active' : '' }}">
+                                            <i class="ri-user-line"></i>
+                                            Profiles </a>
+                                    </li>
+                                @endcan
+
+                                @can('read', \App\Models\Candidate::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.candidates.index') }}"
+                                            class="nav-link menu-link {{ request()->is('admin/candidates*') ? 'active' : '' }}">
+                                            <i class="ri-user-search-line"></i>
+                                            <span>Candidates</span>
+                                        </a>
+                                    </li>
+                                @endcan
+
+                                @can('read', \App\Models\Candidate::class)
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.interview-schedules.index') }}"
+                                            class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">
+                                            <i class="ri-calendar-check-line"></i>
+                                            <span>Interview Scheduled List</span>
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </div>
+                    </li>
+                @endif
 
                 {{-- @can('read', \App\Models\ContactEnquiry::class)
                     <li class="nav-item">
@@ -257,46 +371,15 @@
                         </a>
                     </li>
                 @endcan --}}
-
-                @can('read', \App\Models\ClientRequirement::class)
+                
+                @can('read', \App\Models\ClientProfile::class)
                     <li class="nav-item">
-                        <a href="{{ route('admin.client-requirements.index') }}"
-                            class="nav-link menu-link {{ request()->is('admin/client-requirements*') ? 'active' : '' }}">
-                            <i class="ri-file-list-3-line"></i>
-                            <span>Client Requirements</span>
+                        <a href="{{ route('admin.client-profiles.index') }}"
+                            class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
+                            Client Profiles
                         </a>
                     </li>
                 @endcan
-
-                @can('read', \App\Models\ProfileSourced::class)
-                    <li class="nav-item">
-                        <a href="{{ route('admin.profile-sourced.index') }}"
-                            class="nav-link menu-link {{ request()->is('admin/profile-sourced*') ? 'active' : '' }}">
-                            <i class="ri-user-line"></i>
-                            Profiles </a>
-                    </li>
-                @endcan
-
-                @can('read', \App\Models\Candidate::class)
-                    <li class="nav-item">
-                        <a href="{{ route('admin.candidates.index') }}"
-                            class="nav-link menu-link {{ request()->is('admin/candidates*') ? 'active' : '' }}">
-                            <i class="ri-user-search-line"></i>
-                            <span>Candidates</span>
-                        </a>
-                    </li>
-                @endcan
-
-                @can('read', \App\Models\Candidate::class)
-                <li class="nav-item">
-                    <a href="{{ route('admin.interview-schedules.index') }}"
-                        class="nav-link menu-link {{ request()->is('admin/interview-schedules*') ? 'active' : '' }}">
-                        <i class="ri-calendar-check-line"></i>
-                        <span>Interview Scheduled List</span>
-                    </a>
-                </li>
-                @endcan
-
                 @if(auth()->user()->can('read', \App\Models\Attendance::class) || auth()->user()->can('read', \App\Models\LeaveRequest::class))
                     <li class="menu-title"><i class="ri-more-fill"></i><span>Attendance & Leave</span></li>
                     @can('read', \App\Models\Attendance::class)
@@ -532,7 +615,7 @@
 
                                 <ul class="nav nav-sm flex-column">
 
-                                    @can('read', \App\Models\ClientProfile::class)
+                                    {{-- @can('read', \App\Models\ClientProfile::class)
                                         <li class="nav-item">
                                             <a href="{{ route('admin.client-profiles.index') }}"
                                                 class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
@@ -548,7 +631,7 @@
                                                 Lead Generations
                                             </a>
                                         </li>
-                                    @endcan
+                                    @endcan --}}
 
                                     @can('read', \App\Models\BusinessIntelligence::class)
                                         <li class="nav-item">
