@@ -163,6 +163,29 @@ class User extends Authenticatable
             ->whereHas('role', fn (Builder $role) => $role->where('access_level', '!=', 'super_admin'));
     }
 
+    /**
+     * Employees employed on the supplied attendance date, including inactive
+     * accounts so historical attendance can still be entered or corrected.
+     */
+    public function scopeEmployedOn(Builder $query, string $date): Builder
+    {
+        return $query->whereHas('role', fn (Builder $role) => $role->where('access_level', '!=', 'super_admin'))
+            ->whereExists(function ($employee) use ($date) {
+                $employee->selectRaw('1')->from('employees')
+                    ->whereNull('employees.deleted_at')
+                    ->where(function ($email) {
+                        $email->whereRaw('LOWER(employees.official_mail) = LOWER(users.email)')
+                            ->orWhereRaw('LOWER(employees.personal_mail) = LOWER(users.email)');
+                    })
+                    ->where(function ($q) use ($date) {
+                        $q->whereNull('employees.date_of_joining')->orWhereDate('employees.date_of_joining', '<=', $date);
+                    })
+                    ->where(function ($q) use ($date) {
+                        $q->whereNull('employees.relieving_date')->orWhereDate('employees.relieving_date', '>=', $date);
+                    });
+            });
+    }
+
     public function linkedEmployee(): ?Employee
     {
         return Employee::where(function ($query) {
@@ -170,4 +193,5 @@ class User extends Authenticatable
                 ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($this->email)]);
         })->first();
     }
+
 }

@@ -33,9 +33,9 @@ class AttendanceController extends Controller
         $this->authorize('read', Attendance::class);
         $filters = $request->validate(['date'=>['nullable','date_format:Y-m-d'],'user_id'=>['nullable','integer'],'resource_type'=>['nullable','string','max:100'],'status'=>['nullable','in:'.implode(',',Attendance::STATUSES)]]);
         $date = $filters['date'] ?? now()->toDateString();
-        $users = User::eligibleForAttendance()->with(['attendances'=>fn($q)=>$q->whereDate('attendance_date',$date)])->when($filters['user_id']??null,fn($q,$id)=>$q->whereKey($id))->when($filters['resource_type']??null,fn($q,$v)=>$q->where('resource_type',$v))->orderBy('name')->paginate(50)->withQueryString();
+        $users = User::employedOn($date)->with(['attendances'=>fn($q)=>$q->whereDate('attendance_date',$date)])->when($filters['user_id']??null,fn($q,$id)=>$q->whereKey($id))->when($filters['resource_type']??null,fn($q,$v)=>$q->where('resource_type',$v))->orderBy('name')->paginate(50)->withQueryString();
         $recent = Attendance::eligible()->with('user')->when($filters['status']??null,fn($q,$v)=>$q->where('status',$v))->when($filters['user_id']??null,fn($q,$id)=>$q->where('user_id',$id))->latest('attendance_date')->latest('id')->paginate(20,['*'],'recent_page')->withQueryString();
-        return view('backend.attendance.index',['users'=>$users,'recent'=>$recent,'date'=>$date,'filters'=>$filters,'allUsers'=>User::eligibleForAttendance()->orderBy('name')->get(['id','name']),'resourceTypes'=>User::eligibleForAttendance()->whereNotNull('resource_type')->distinct()->orderBy('resource_type')->pluck('resource_type')]);
+        return view('backend.attendance.index',['users'=>$users,'recent'=>$recent,'date'=>$date,'filters'=>$filters,'allUsers'=>User::employedOn($date)->orderBy('name')->get(['id','name']),'resourceTypes'=>User::employedOn($date)->whereNotNull('resource_type')->distinct()->orderBy('resource_type')->pluck('resource_type')]);
     }
 
     public function store(StoreAttendanceRequest $request)
