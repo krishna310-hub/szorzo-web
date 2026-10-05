@@ -188,10 +188,66 @@ class User extends Authenticatable
 
     public function linkedEmployee(): ?Employee
     {
-        return Employee::where(function ($query) {
+        $employee = Employee::where(function ($query) {
             $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($this->email)])
                 ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($this->email)]);
         })->first();
+
+        if ($employee) {
+            return $employee;
+        }
+
+        if (!empty($this->ref)) {
+            $employee = Employee::where('employee_no', $this->ref)->first();
+            if ($employee) {
+                return $employee;
+            }
+        }
+
+        return Employee::whereRaw('LOWER(employee_name) = ?', [mb_strtolower($this->name)])->first();
     }
 
+    public function getOrCreateEmployee(): Employee
+    {
+        $employee = $this->linkedEmployee();
+        if ($employee) {
+            if (empty($employee->official_mail)) {
+                $employee->update(['official_mail' => $this->email]);
+            }
+            return $employee;
+        }
+
+        $maxNo = 0;
+        foreach (Employee::pluck('employee_no') as $no) {
+            if (preg_match('/SZ\s*0*(\d+)/i', (string) $no, $m)) {
+                $maxNo = max($maxNo, (int) $m[1]);
+            }
+        }
+        $nextNo = 'SZ ' . str_pad($maxNo + 1, 3, '0', STR_PAD_LEFT);
+
+        return Employee::create([
+            'employee_name' => $this->name,
+            'employee_no' => $nextNo,
+            'official_mail' => $this->email,
+            'designation' => $this->role?->name ?? 'Staff',
+            'employment_type' => 'Internal',
+            'status' => 1,
+        ]);
+    }
+
+    public function todayAttendance(?string $date = null): ?Attendance
+    {
+        $date = $date ?? now()->toDateString();
+        $employee = $this->linkedEmployee();
+        
+        $attendance = null;
+        if ($employee) {
+            $attendance = Attendance::where('employee_id', $employee->id)->whereDate('attendance_date', $date)->first();
+        }
+        if (!$attendance) {
+            $attendance = Attendance::where('user_id', $this->id)->whereDate('attendance_date', $date)->first();
+        }
+        return $attendance;
+    }
 }
+

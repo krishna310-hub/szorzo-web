@@ -47,8 +47,34 @@ class AttendanceController extends Controller
             foreach ($data['records'] as $record) {
                 $values = collect($record)->only(['status','check_in','check_out','remarks'])->all();
                 if (!in_array($values['status'],['present','half_day'],true)) $values['check_in']=$values['check_out']=null;
-                $attendance=Attendance::where('user_id',$record['user_id'])->whereDate('attendance_date',$data['attendance_date'])->first();
-                $attendance ? $attendance->update($values+['marked_by'=>$request->user()->id,'leave_request_id'=>null]) : Attendance::create(['user_id'=>$record['user_id'],'attendance_date'=>$data['attendance_date']]+$values+['marked_by'=>$request->user()->id,'leave_request_id'=>null]);
+                
+                $user = User::find($record['user_id']);
+                $employee = $user?->linkedEmployee() ?? $user?->getOrCreateEmployee();
+                $employeeId = $employee?->id;
+
+                $attendance = null;
+                if ($employeeId) {
+                    $attendance = Attendance::where('employee_id', $employeeId)->whereDate('attendance_date', $data['attendance_date'])->first();
+                }
+                if (!$attendance) {
+                    $attendance = Attendance::where('user_id', $record['user_id'])->whereDate('attendance_date', $data['attendance_date'])->first();
+                }
+
+                $saveValues = $values + [
+                    'employee_id' => $employeeId,
+                    'user_id' => $record['user_id'],
+                    'attendance_date' => $data['attendance_date'],
+                    'marked_by' => $request->user()->id,
+                    'leave_request_id' => null,
+                ];
+
+                if (!empty($values['check_out'])) {
+                    $saveValues['timer_status'] = Attendance::TIMER_COMPLETED;
+                } elseif (!empty($values['check_in']) && (!$attendance || $attendance->timer_status === Attendance::TIMER_NOT_STARTED)) {
+                    $saveValues['timer_status'] = Attendance::TIMER_RUNNING;
+                }
+
+                $attendance ? $attendance->update($saveValues) : Attendance::create($saveValues);
             }
         });
         return back()->with('success','Attendance saved successfully.');
@@ -60,6 +86,17 @@ class AttendanceController extends Controller
         abort_unless(User::eligibleForAttendance()->whereKey($attendance->user_id)->exists(),404);
         $data=$request->validate(['status'=>['required','in:'.implode(',',Attendance::STATUSES)],'check_in'=>['nullable','date_format:H:i'],'check_out'=>['nullable','date_format:H:i','after:check_in'],'remarks'=>['nullable','string','max:1000']]);
         if (!in_array($data['status'],['present','half_day'],true)) $data['check_in']=$data['check_out']=null;
+        
+        if (!$attendance->employee_id && $attendance->user) {
+            $attendance->employee_id = $attendance->user->linkedEmployee()?->id ?? $attendance->user->getOrCreateEmployee()->id;
+        }
+
+        if (!empty($data['check_out'])) {
+            $data['timer_status'] = Attendance::TIMER_COMPLETED;
+        } elseif (!empty($data['check_in']) && $attendance->timer_status === Attendance::TIMER_NOT_STARTED) {
+            $data['timer_status'] = Attendance::TIMER_RUNNING;
+        }
+
         $attendance->update($data+['marked_by'=>$request->user()->id,'leave_request_id'=>$data['status']==='on_leave'?$attendance->leave_request_id:null]);
         return back()->with('success','Attendance updated successfully.');
     }

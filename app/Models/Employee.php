@@ -145,6 +145,11 @@ class Employee extends Model
         return $this->belongsTo(Mode::class);
     }
 
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
     public function linkedUser(): ?User
     {
         $emails = array_filter([

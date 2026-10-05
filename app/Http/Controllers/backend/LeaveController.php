@@ -34,8 +34,16 @@ class LeaveController extends Controller {
         DB::transaction(function() use($leave,$data,$request){
             $leave->update($data+['reviewed_by'=>$request->user()->id,'reviewed_at'=>now()]);
             if($data['status']==='approved') for($date=CarbonImmutable::parse($leave->from_date);$date->lte($leave->to_date);$date=$date->addDay()) {
-                $values=['status'=>'on_leave','check_in'=>null,'check_out'=>null,'remarks'=>'Approved '.$leave->leave_type,'leave_request_id'=>$leave->id,'marked_by'=>$request->user()->id];
-                $attendance=Attendance::where('user_id',$leave->user_id)->whereDate('attendance_date',$date->toDateString())->first();
+                $employee = $leave->user?->linkedEmployee() ?? $leave->user?->getOrCreateEmployee();
+                $employeeId = $employee?->id;
+                $values=['status'=>'on_leave','check_in'=>null,'check_out'=>null,'remarks'=>'Approved '.$leave->leave_type,'leave_request_id'=>$leave->id,'marked_by'=>$request->user()->id,'timer_status'=>Attendance::TIMER_COMPLETED,'employee_id'=>$employeeId];
+                $attendance = null;
+                if ($employeeId) {
+                    $attendance = Attendance::where('employee_id', $employeeId)->whereDate('attendance_date', $date->toDateString())->first();
+                }
+                if (!$attendance) {
+                    $attendance = Attendance::where('user_id', $leave->user_id)->whereDate('attendance_date', $date->toDateString())->first();
+                }
                 $attendance ? $attendance->update($values) : Attendance::create(['user_id'=>$leave->user_id,'attendance_date'=>$date->toDateString()]+$values);
             }
         }); return back()->with('success','Leave request '.$data['status'].'.');

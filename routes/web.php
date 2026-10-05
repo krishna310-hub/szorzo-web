@@ -28,6 +28,7 @@ use App\Http\Controllers\backend\RevenueController;
 use App\Http\Controllers\backend\SitemapRobotsController;
 use App\Http\Controllers\backend\TargetController;
 use App\Http\Controllers\backend\AttendanceController;
+use App\Http\Controllers\backend\AttendanceTimerController;
 use App\Http\Controllers\backend\LeaveController;
 use App\Http\Controllers\backend\NotificationController;
 use App\Http\Controllers\backend\PayslipController;
@@ -109,6 +110,20 @@ Route::controller(EmployeeController::class)->prefix('employee-onboarding')->nam
 });
 
 Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->group(function () {
+    // Daily Attendance Timer (for all authenticated roles) & Admin Employee Attendance
+    Route::prefix('attendance-timer')->name('attendance.timer.')->controller(AttendanceTimerController::class)->group(function () {
+        Route::get('/status', 'status')->name('status');
+        Route::post('/start', 'start')->name('start');
+        Route::post('/pause', 'pause')->name('pause');
+        Route::post('/resume', 'resume')->name('resume');
+        Route::post('/stop', 'stop')->name('stop');
+
+        // Admin employee-based attendance updates using Employee ID
+        Route::get('/admin/employees', 'adminEmployees')->name('admin.employees');
+        Route::get('/admin/employee/{employeeIdentifier}', 'adminEmployeeStatus')->name('admin.employee.status');
+        Route::post('/admin/employee/{employeeIdentifier}/action', 'adminEmployeeAction')->name('admin.employee.action');
+    });
+
     Route::prefix('attendance')->name('attendance.')->controller(AttendanceController::class)->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/', 'index')->name('index');
