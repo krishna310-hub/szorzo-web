@@ -371,14 +371,23 @@
                         auth()->user()->can('read', \App\Models\ClientRequirement::class) ||
                         auth()->user()->can('read', \App\Models\ProfileSourced::class) ||
                         auth()->user()->can('read', \App\Models\Candidate::class) ||
-                        auth()->user()->can('read', \App\Models\InterviewSchedule::class)
+                        auth()->user()->can('read', \App\Models\InterviewSchedule::class) ||
+                        auth()->user()->can('read', \App\Models\ClientProfile::class)
                     )
 
                         <li class="menu-title">
                             <i class="ri-more-fill"></i>
                             <span>TAG</span>
                         </li>
-
+                        
+                        @can('read', \App\Models\ClientProfile::class)
+                            <li class="nav-item">
+                                <a href="{{ route('admin.client-profiles.index') }}"
+                                    class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
+                                    Client Profiles
+                                </a>
+                            </li>
+                        @endcan
                         {{-- Client Requirements --}}
                         @can('read', \App\Models\ClientRequirement::class)
                             <li class="nav-item">
@@ -456,14 +465,6 @@
                     </li>
                 @endcan --}}
 
-                @can('read', \App\Models\ClientProfile::class)
-                    <li class="nav-item">
-                        <a href="{{ route('admin.client-profiles.index') }}"
-                            class="nav-link {{ request()->is('admin/master-management/client-profiles*') ? 'active' : '' }}">
-                            Client Profiles
-                        </a>
-                    </li>
-                @endcan
                 @if(auth()->user()->can('read', \App\Models\Attendance::class) || auth()->user()->can('read', \App\Models\LeaveRequest::class))
                     <li class="menu-title"><i class="ri-more-fill"></i><span>Attendance & Leave</span></li>
                     @can('read', \App\Models\Attendance::class)
