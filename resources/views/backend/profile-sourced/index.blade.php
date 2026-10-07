@@ -50,17 +50,18 @@ $(function () {
         processing: true,
         serverSide: true,
         ajax: { url: '{{ route('admin.profile-sourced.index') }}', data: function (data) { Object.assign(data, filters); } },
+        order: [[8, 'desc']],
         columns: [
-            { data: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'candidate_name', name: 'candidate_name' },
-            { data: 'job_role_name', name: 'jobRole.job_role', orderable: false },
+            { data: 'job_role_name', name: 'job_role_name', orderable: false, searchable: false },
             { data: 'need', name: 'need' },
-            { data: 'cv', orderable: false, searchable: false },
-            { data: 'recruiter_name', name: 'recruiter.recruiter_name' },
+            { data: 'cv', name: 'cv', orderable: false, searchable: false },
+            { data: 'recruiter_name', name: 'recruiter_name', orderable: false, searchable: false },
             { data: 'mobile_number', name: 'mobile_number' },
             { data: 'email', name: 'email' },
             { data: 'created_at', name: 'created_at' },
-            { data: 'action', orderable: false, searchable: false }
+            { data: 'action', name: 'action', orderable: false, searchable: false }
         ]
     });
 

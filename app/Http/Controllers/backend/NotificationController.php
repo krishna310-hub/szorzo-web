@@ -35,10 +35,23 @@ class NotificationController extends Controller
     public function getUnread(Request $request): JsonResponse
     {
         $user = $request->user();
-        $notifications = $user->notifications()->latest()->take(15)->get();
+        $today = now()->startOfDay();
+        $notifications = $user->notifications()->latest()->take(30)->get()->filter(function ($notif) use ($today) {
+            $data = $notif->data ?? [];
+            if (($data['contractable_type'] ?? '') === 'employee') {
+                $empId = $data['contractable_id'] ?? null;
+                if ($empId) {
+                    $emp = \App\Models\Employee::find($empId);
+                    if (! $emp || ! $emp->status || ($emp->relieving_date && \Carbon\Carbon::parse($emp->relieving_date)->lte($today))) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        })->values()->take(15);
 
         return response()->json([
-            'unread_count' => $user->unreadNotifications()->count(),
+            'unread_count' => $notifications->whereNull('read_at')->count(),
             'notifications' => $notifications,
         ]);
     }

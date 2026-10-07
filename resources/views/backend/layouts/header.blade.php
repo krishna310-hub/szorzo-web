@@ -155,8 +155,21 @@
                 </div>
 
                 @php
-                    $headerUnreadCount = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
-                    $headerNotifications = auth()->check() ? auth()->user()->notifications()->latest()->take(15)->get() : collect();
+                    $rawNotifs = auth()->check() ? auth()->user()->notifications()->latest()->take(30)->get() : collect();
+                    $headerNotifications = $rawNotifs->filter(function ($notif) {
+                        $data = $notif->data ?? [];
+                        if (($data['contractable_type'] ?? '') === 'employee') {
+                            $empId = $data['contractable_id'] ?? null;
+                            if ($empId) {
+                                $emp = \App\Models\Employee::find($empId);
+                                if (! $emp || ! $emp->status || ($emp->relieving_date && \Carbon\Carbon::parse($emp->relieving_date)->lte(today()))) {
+                                    return false;
+                                }
+                            }
+                        }
+                        return true;
+                    })->values()->take(15);
+                    $headerUnreadCount = $headerNotifications->whereNull('read_at')->count();
                 @endphp
                 <div class="dropdown topbar-head-dropdown ms-1 header-item" id="notificationDropdown">
                     <button type="button" class="btn btn-icon btn-topbar material-shadow-none btn-ghost-secondary rounded-circle position-relative" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">

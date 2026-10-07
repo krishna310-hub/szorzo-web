@@ -3,20 +3,42 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ContractExpiryNotification extends Notification
 {
     use Queueable;
 
+    public string $title;
+    public string $message;
+    public string $actionUrl;
+    public string $status;
+    public string $contractableType;
+    public int $contractableId;
+    public ?string $contractToDate;
+    public int $daysLeft;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
-    {
-        //
+    public function __construct(
+        string $title,
+        string $message,
+        string $actionUrl,
+        string $status = 'warning',
+        string $contractableType = 'employee',
+        int $contractableId = 0,
+        ?string $contractToDate = null,
+        int $daysLeft = 0
+    ) {
+        $this->title = $title;
+        $this->message = $message;
+        $this->actionUrl = $actionUrl;
+        $this->status = $status;
+        $this->contractableType = $contractableType;
+        $this->contractableId = $contractableId;
+        $this->contractToDate = $contractToDate;
+        $this->daysLeft = $daysLeft;
     }
 
     /**
@@ -26,18 +48,7 @@ class ContractExpiryNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     /**
@@ -48,7 +59,14 @@ class ContractExpiryNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title' => $this->title,
+            'message' => $this->message,
+            'action_url' => $this->actionUrl,
+            'status' => $this->status,
+            'contractable_type' => $this->contractableType,
+            'contractable_id' => $this->contractableId,
+            'contract_to_date' => $this->contractToDate,
+            'days_left' => $this->daysLeft,
         ];
     }
 }

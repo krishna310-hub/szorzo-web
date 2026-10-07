@@ -16,6 +16,13 @@ class Employee extends Model
         self::EMPLOYMENT_TYPE_EXTERNAL,
     ];
 
+    public const SALARY_SLIP_TDS = 'TDS';
+    public const SALARY_SLIP_PF = 'PF';
+    public const SALARY_SLIPS = [
+        self::SALARY_SLIP_TDS,
+        self::SALARY_SLIP_PF,
+    ];
+
     protected $fillable = [
         'employee_name',
         'employee_image',
@@ -29,6 +36,7 @@ class Employee extends Model
         'date_of_joining',
         'relieving_date',
         'employment_type',
+        'salary_slip',
         'client_id',
         'mode_id',
         'contract_from_date',

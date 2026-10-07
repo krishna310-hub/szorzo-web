@@ -110,8 +110,9 @@ class AttendanceTimerController extends Controller
         $newStatus = ($type === 'lunch') ? Attendance::TIMER_ON_LUNCH : Attendance::TIMER_ON_BREAK;
 
         // Accumulate work time from active run
-        if ($attendance->timer_started_at) {
-            $elapsedWork = max(0, (int) now()->diffInSeconds($attendance->timer_started_at));
+        $startedAt = $attendance->timer_started_at ?: ($attendance->check_in ? Carbon::parse($attendance->attendance_date?->toDateString() . ' ' . $attendance->check_in) : null);
+        if ($startedAt) {
+            $elapsedWork = max(0, (int) Carbon::parse($startedAt)->diffInSeconds(now(), false));
             $attendance->total_work_seconds = (int) $attendance->total_work_seconds + $elapsedWork;
         }
 
@@ -151,7 +152,7 @@ class AttendanceTimerController extends Controller
 
         // Accumulate break time
         if ($attendance->break_started_at) {
-            $elapsedBreak = max(0, (int) now()->diffInSeconds($attendance->break_started_at));
+            $elapsedBreak = max(0, (int) Carbon::parse($attendance->break_started_at)->diffInSeconds(now(), false));
             $attendance->total_break_seconds = (int) $attendance->total_break_seconds + $elapsedBreak;
 
             $breaks = is_array($attendance->breaks) ? $attendance->breaks : [];
@@ -199,14 +200,17 @@ class AttendanceTimerController extends Controller
         }
 
         // If running, accumulate remaining work seconds
-        if ($attendance->timer_status === Attendance::TIMER_RUNNING && $attendance->timer_started_at) {
-            $elapsedWork = max(0, (int) now()->diffInSeconds($attendance->timer_started_at));
-            $attendance->total_work_seconds = (int) $attendance->total_work_seconds + $elapsedWork;
+        if ($attendance->timer_status === Attendance::TIMER_RUNNING) {
+            $startedAt = $attendance->timer_started_at ?: ($attendance->check_in ? Carbon::parse($attendance->attendance_date?->toDateString() . ' ' . $attendance->check_in) : null);
+            if ($startedAt) {
+                $elapsedWork = max(0, (int) Carbon::parse($startedAt)->diffInSeconds(now(), false));
+                $attendance->total_work_seconds = (int) $attendance->total_work_seconds + $elapsedWork;
+            }
         }
 
         // If on break/lunch, accumulate break seconds
         if (in_array($attendance->timer_status, [Attendance::TIMER_ON_BREAK, Attendance::TIMER_ON_LUNCH], true) && $attendance->break_started_at) {
-            $elapsedBreak = max(0, (int) now()->diffInSeconds($attendance->break_started_at));
+            $elapsedBreak = max(0, (int) Carbon::parse($attendance->break_started_at)->diffInSeconds(now(), false));
             $attendance->total_break_seconds = (int) $attendance->total_break_seconds + $elapsedBreak;
 
             $breaks = is_array($attendance->breaks) ? $attendance->breaks : [];
@@ -324,9 +328,12 @@ class AttendanceTimerController extends Controller
             $msg = "Timer started for {$employee->employee_name} ({$employee->employee_no}).";
         } elseif ($action === 'pause') {
             $type = $request->input('type', 'break');
-            if ($attendance->timer_status === Attendance::TIMER_RUNNING && $attendance->timer_started_at) {
-                $elapsed = max(0, (int) now()->diffInSeconds($attendance->timer_started_at));
-                $attendance->total_work_seconds = (int) $attendance->total_work_seconds + $elapsed;
+            if ($attendance->timer_status === Attendance::TIMER_RUNNING) {
+                $startedAt = $attendance->timer_started_at ?: ($attendance->check_in ? Carbon::parse($attendance->attendance_date?->toDateString() . ' ' . $attendance->check_in) : null);
+                if ($startedAt) {
+                    $elapsed = max(0, (int) Carbon::parse($startedAt)->diffInSeconds(now(), false));
+                    $attendance->total_work_seconds = (int) $attendance->total_work_seconds + $elapsed;
+                }
             }
             $attendance->timer_status = ($type === 'lunch') ? Attendance::TIMER_ON_LUNCH : Attendance::TIMER_ON_BREAK;
             $attendance->break_started_at = now();
@@ -337,7 +344,7 @@ class AttendanceTimerController extends Controller
             $msg = "{$typeName} activated for {$employee->employee_name} ({$employee->employee_no}).";
         } elseif ($action === 'resume') {
             if (in_array($attendance->timer_status, [Attendance::TIMER_ON_BREAK, Attendance::TIMER_ON_LUNCH], true) && $attendance->break_started_at) {
-                $elapsedBreak = max(0, (int) now()->diffInSeconds($attendance->break_started_at));
+                $elapsedBreak = max(0, (int) Carbon::parse($attendance->break_started_at)->diffInSeconds(now(), false));
                 $attendance->total_break_seconds = (int) $attendance->total_break_seconds + $elapsedBreak;
 
                 $breaks = is_array($attendance->breaks) ? $attendance->breaks : [];
@@ -357,12 +364,15 @@ class AttendanceTimerController extends Controller
 
             $msg = "Timer resumed for {$employee->employee_name} ({$employee->employee_no}).";
         } elseif ($action === 'stop') {
-            if ($attendance->timer_status === Attendance::TIMER_RUNNING && $attendance->timer_started_at) {
-                $elapsed = max(0, (int) now()->diffInSeconds($attendance->timer_started_at));
-                $attendance->total_work_seconds = (int) $attendance->total_work_seconds + $elapsed;
+            if ($attendance->timer_status === Attendance::TIMER_RUNNING) {
+                $startedAt = $attendance->timer_started_at ?: ($attendance->check_in ? Carbon::parse($attendance->attendance_date?->toDateString() . ' ' . $attendance->check_in) : null);
+                if ($startedAt) {
+                    $elapsed = max(0, (int) Carbon::parse($startedAt)->diffInSeconds(now(), false));
+                    $attendance->total_work_seconds = (int) $attendance->total_work_seconds + $elapsed;
+                }
             }
             if (in_array($attendance->timer_status, [Attendance::TIMER_ON_BREAK, Attendance::TIMER_ON_LUNCH], true) && $attendance->break_started_at) {
-                $elapsedBreak = max(0, (int) now()->diffInSeconds($attendance->break_started_at));
+                $elapsedBreak = max(0, (int) Carbon::parse($attendance->break_started_at)->diffInSeconds(now(), false));
                 $attendance->total_break_seconds = (int) $attendance->total_break_seconds + $elapsedBreak;
 
                 $breaks = is_array($attendance->breaks) ? $attendance->breaks : [];

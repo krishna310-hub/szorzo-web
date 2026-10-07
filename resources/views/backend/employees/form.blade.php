@@ -137,6 +137,17 @@
         @enderror
     </div>
     <div class="col-md-4 mt-3">
+        <label for="salary_slip" class="form-label">Salary Slip</label>
+        <select class="form-select" id="salary_slip" name="salary_slip">
+            <option value="">Select Salary Slip</option>
+            <option value="TDS" {{ old('salary_slip', $employee->salary_slip ?? '') == 'TDS' ? 'selected' : '' }}>TDS</option>
+            <option value="PF" {{ old('salary_slip', $employee->salary_slip ?? '') == 'PF' ? 'selected' : '' }}>PF</option>
+        </select>
+        @error('salary_slip')
+            <span class="text-danger small">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-4 mt-3">
         <label for="date_of_joining" class="form-label">Date of Joining (DOJ)</label>
         <input type="date" class="form-control" id="date_of_joining" name="date_of_joining"
             value="{{ old('date_of_joining', isset($employee) && $employee->date_of_joining ? $employee->date_of_joining->format('Y-m-d') : '') }}">

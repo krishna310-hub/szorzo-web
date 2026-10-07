@@ -42,7 +42,43 @@ class EmployeeController extends Controller
     {
         $this->authorize('read', Employee::class);
         if ($request->ajax()) {
-            return DataTables::of(Employee::orderBy('employee_no', 'asc')->get())
+            $query = Employee::with('client')->orderBy('employee_no', 'asc');
+
+            if ($request->filled('doj_from')) {
+                $query->whereDate('date_of_joining', '>=', $request->input('doj_from'));
+            }
+            if ($request->filled('doj_to')) {
+                $query->whereDate('date_of_joining', '<=', $request->input('doj_to'));
+            }
+            if ($request->filled('employment_type')) {
+                $query->where('employment_type', $request->input('employment_type'));
+            }
+            if ($request->filled('salary_slip')) {
+                $query->where('salary_slip', $request->input('salary_slip'));
+            }
+            if ($request->filled('client_id')) {
+                $query->where('client_id', $request->input('client_id'));
+            }
+            if ($request->filled('status')) {
+                $query->where('status', (int) $request->input('status'));
+            }
+
+            return DataTables::of($query)
+                ->filter(function ($query) use ($request) {
+                    $search = trim((string) $request->input('search.value'));
+                    if ($search !== '') {
+                        $query->where(function ($q) use ($search) {
+                            $q->where('employee_no', 'like', "%{$search}%")
+                                ->orWhere('employee_name', 'like', "%{$search}%")
+                                ->orWhere('designation', 'like', "%{$search}%")
+                                ->orWhere('employment_type', 'like', "%{$search}%")
+                                ->orWhere('salary_slip', 'like', "%{$search}%")
+                                ->orWhereHas('client', function ($clientQ) use ($search) {
+                                    $clientQ->where('client', 'like', "%{$search}%");
+                                });
+                        });
+                    }
+                })
                 ->addIndexColumn()
                 ->editColumn('employee_name', function ($row) {
                     $completion = $row->profile_completion;
@@ -73,6 +109,7 @@ class EmployeeController extends Controller
                         </div>
                     </div>';
                 })
+                ->addColumn('client_name', fn ($row) => e($row->client?->client ?? '-'))
                 ->editColumn('date_of_joining', fn ($row) => $row->date_of_joining?->format('d-m-Y') ?? '-')
                 ->editColumn('relieving_date', fn ($row) => $row->relieving_date?->format('d-m-Y') ?? '-')
                 ->editColumn('employment_type', function ($row) {
@@ -80,6 +117,14 @@ class EmployeeController extends Controller
                         return '<span class="badge bg-primary-subtle text-primary">Internal</span>';
                     } elseif ($row->employment_type === 'External') {
                         return '<span class="badge bg-info-subtle text-info">External</span>';
+                    }
+                    return '-';
+                })
+                ->editColumn('salary_slip', function ($row) {
+                    if ($row->salary_slip === 'TDS') {
+                        return '<span class="badge bg-secondary-subtle text-secondary">TDS</span>';
+                    } elseif ($row->salary_slip === 'PF') {
+                        return '<span class="badge bg-warning-subtle text-warning">PF</span>';
                     }
                     return '-';
                 })
@@ -107,11 +152,13 @@ class EmployeeController extends Controller
 
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['employee_name', 'employment_type', 'status', 'action'])
+                ->rawColumns(['employee_name', 'employment_type', 'salary_slip', 'status', 'action'])
                 ->make(true);
         }
 
-        return view('backend.employees.index');
+        $clients = Client::orderBy('client', 'asc')->get(['id', 'client']);
+
+        return view('backend.employees.index', compact('clients'));
     }
 
     public function create()
@@ -157,6 +204,7 @@ class EmployeeController extends Controller
             'date_of_joining' => 'prohibited',
             'relieving_date' => 'prohibited',
             'employment_type' => 'prohibited',
+            'salary_slip' => 'prohibited',
             'mode_id' => 'prohibited',
             'offer_letter' => 'prohibited',
             'intent_letter' => 'prohibited',
@@ -182,7 +230,7 @@ class EmployeeController extends Controller
         $request->merge(['status' => 0]);
         $data = $this->validatedData($request);
         unset(
-            $data['client_id'], $data['date_of_joining'], $data['relieving_date'], $data['employment_type'], $data['mode_id'],
+            $data['client_id'], $data['date_of_joining'], $data['relieving_date'], $data['employment_type'], $data['salary_slip'], $data['mode_id'],
             $data['offer_letter'], $data['intent_letter'], $data['official_mail'],
             $data['monthly_gross'], $data['basic_salary'], $data['hra'],
             $data['conveyance'], $data['medical_allowance'], $data['special_allowance'],
@@ -375,6 +423,7 @@ class EmployeeController extends Controller
             'date_of_joining' => 'nullable|date',
             'relieving_date' => 'nullable|date',
             'employment_type' => ['nullable', 'string', Rule::in(Employee::EMPLOYMENT_TYPES)],
+            'salary_slip' => ['nullable', 'string', Rule::in(Employee::SALARY_SLIPS)],
             'client_id' => 'nullable|integer|exists:clients,id',
             'mode_id' => 'nullable|integer|exists:modes,id',
             'contract_from_date' => [Rule::requiredIf($requiresContractDates), 'nullable', 'date'],

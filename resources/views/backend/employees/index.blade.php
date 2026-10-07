@@ -10,8 +10,11 @@
                             <div class="card-header d-flex align-items-center">
                                 <h5 class="card-title mb-0 flex-grow-1">Employees</h5>
                                 @php($employeeAccess = str_replace('_', '-', strtolower((string) auth()->user()->role?->access_level)))
-                                @can('create', \App\Models\Employee::class)
                                 <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#employeeFilterOffcanvas">
+                                        <i class="ri-filter-3-line me-1"></i>Filter
+                                    </button>
+                                    @can('create', \App\Models\Employee::class)
                                     @if(in_array($employeeAccess, ['super-admin', 'delivery-lead', 'recruiter-dl'], true))
                                     <form method="POST" action="{{ route('admin.employees.generate-link') }}">@csrf
                                         <button class="btn btn-sm btn-outline-primary"><i class="ri-link me-1"></i>Generate Link</button>
@@ -19,8 +22,8 @@
                                     @endif
                                     <a href="{{ route('admin.employees.create') }}" class="btn btn-sm btn-primary">Add New
                                         Employee</a>
+                                    @endcan
                                 </div>
-                                @endcan
                             </div>
                             <div class="card-body">
                                 @if(session('onboarding_link'))
@@ -31,14 +34,16 @@
                                     </div>
                                 @endif
                                 <div class="table-responsive">
-                                    <table id="employees-table" class="table table-bordered dt-responsive nowrap w-100">
+                                    <table id="employees-table" class="table table-bordered nowrap w-100">
                                         <thead>
                                             <tr>
                                                 <th>S.No</th>
                                                 <th>Employee ID</th>
                                                 <th>Employee</th>
                                                 <th>Designation</th>
+                                                <th>Client</th>
                                                 <th>Employment Type</th>
+                                                <th>Salary Slip</th>
                                                 <th>Date of Joining</th>
                                                 <th>Relieving Date</th>
                                                 <th>Status</th>
@@ -90,6 +95,61 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Employee Filter Offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="employeeFilterOffcanvas" aria-labelledby="employeeFilterOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="employeeFilterOffcanvasLabel">Employee Filters</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <form id="employee-filter-form" class="offcanvas-body d-flex flex-column gap-3">
+            <div>
+                <label for="filter_doj_from" class="form-label">Date of Joining (From)</label>
+                <input type="date" class="form-control" id="filter_doj_from" name="doj_from">
+            </div>
+            <div>
+                <label for="filter_doj_to" class="form-label">Date of Joining (To)</label>
+                <input type="date" class="form-control" id="filter_doj_to" name="doj_to">
+            </div>
+            <div>
+                <label for="filter_employment_type" class="form-label">Internal / External</label>
+                <select class="form-select" id="filter_employment_type" name="employment_type">
+                    <option value="">All Types</option>
+                    <option value="Internal">Internal</option>
+                    <option value="External">External</option>
+                </select>
+            </div>
+            <div>
+                <label for="filter_salary_slip" class="form-label">Salary Slip (TDS / PF)</label>
+                <select class="form-select" id="filter_salary_slip" name="salary_slip">
+                    <option value="">All Slips</option>
+                    <option value="TDS">TDS</option>
+                    <option value="PF">PF</option>
+                </select>
+            </div>
+            <div>
+                <label for="filter_client_id" class="form-label">Client</label>
+                <select class="form-select" id="filter_client_id" name="client_id">
+                    <option value="">All Clients</option>
+                    @foreach($clients as $c)
+                        <option value="{{ $c->id }}">{{ $c->client }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="filter_status" class="form-label">Status</label>
+                <select class="form-select" id="filter_status" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                </select>
+            </div>
+            <div class="mt-auto d-flex gap-2 border-top pt-3">
+                <button type="button" class="btn btn-light w-50" id="employee-filter-reset">Reset</button>
+                <button type="submit" class="btn btn-primary w-50">Apply</button>
+            </div>
+        </form>
     </div>
 @endsection
 
@@ -281,6 +341,18 @@
         display: none !important;
     }
 }
+.table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+#employees-table {
+    width: 100% !important;
+    white-space: nowrap;
+}
+#employees-table th, #employees-table td {
+    white-space: nowrap !important;
+    vertical-align: middle;
+}
 </style>
 @endpush
 
@@ -291,9 +363,20 @@
                 processing: true,
                 serverSide: true,
                 scrollX: true,
+                scrollCollapse: true,
+                autoWidth: false,
+                responsive: false,
                 ajax: {
                     url: '{{ route('admin.employees.index') }}',
-                    type: 'GET'
+                    type: 'GET',
+                    data: function(d) {
+                        d.doj_from = $('#filter_doj_from').val();
+                        d.doj_to = $('#filter_doj_to').val();
+                        d.employment_type = $('#filter_employment_type').val();
+                        d.salary_slip = $('#filter_salary_slip').val();
+                        d.client_id = $('#filter_client_id').val();
+                        d.status = $('#filter_status').val();
+                    }
                 },
                 columns: [{
                         data: 'DT_RowIndex',
@@ -314,8 +397,17 @@
                         name: 'designation'
                     },
                     {
+                        data: 'client_name',
+                        name: 'client.client',
+                        orderable: false
+                    },
+                    {
                         data: 'employment_type',
                         name: 'employment_type'
+                    },
+                    {
+                        data: 'salary_slip',
+                        name: 'salary_slip'
                     },
                     {
                         data: 'date_of_joining',
@@ -341,6 +433,21 @@
                         searchable: false
                     }
                 ]
+            });
+
+            $('#employee-filter-form').on('submit', function(e) {
+                e.preventDefault();
+                table.ajax.reload();
+                var offcanvasEl = document.getElementById('employeeFilterOffcanvas');
+                if (offcanvasEl && window.bootstrap) {
+                    var bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+                    if (bsOffcanvas) bsOffcanvas.hide();
+                }
+            });
+
+            $('#employee-filter-reset').on('click', function() {
+                $('#employee-filter-form')[0].reset();
+                table.ajax.reload();
             });
 
             // Checklist modal trigger

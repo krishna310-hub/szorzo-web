@@ -40,6 +40,15 @@ class ContractReportController extends Controller
         $this->authorize('export', ContractReport::class);
         $month = $this->month($request);
         $contractType = $this->contractType($request);
+
+        // Prune contract reports for candidates who are inactive or whose employee is inactive/relieved
+        ContractReport::whereDate('salary_month', $month->toDateString())
+            ->whereDoesntHave('candidate', fn ($q) => $this->applyActiveContractFilter(
+                $q->visibleTo($request->user()->loadMissing('role')),
+                $month
+            ))
+            ->delete();
+
         $candidates = $this->contractCandidates($request)
             ->get([
                 'candidates.id',
@@ -196,13 +205,11 @@ class ContractReportController extends Controller
     {
         $month = $this->month($request);
 
-        return Candidate::query()
+        $query = Candidate::query()
             ->with('client.billing')
-            ->visibleTo($request->user()->loadMissing('role'))
-            ->where('status', true)
-            ->where('mode_id', 2)
-            ->whereDate('contract_from_date', '<=', $month->endOfMonth()->toDateString())
-            ->whereDate('contract_to_date', '>=', $month->startOfMonth()->toDateString());
+            ->visibleTo($request->user()->loadMissing('role'));
+
+        return $this->applyActiveContractFilter($query, $month);
     }
 
     private function monthlyTakeHome(Candidate $candidate): float
@@ -325,12 +332,10 @@ class ContractReportController extends Controller
             ->whereDate('salary_month', $month->toDateString())
             ->when($contractType === 'monthly', fn ($query) => $query->where('is_hourly', false))
             ->when($contractType === 'hourly', fn ($query) => $query->where('is_hourly', true))
-            ->whereHas('candidate', fn ($query) => $query
-                ->visibleTo($request->user()->loadMissing('role'))
-                ->where('status', true)
-                ->where('mode_id', 2)
-                ->whereDate('contract_from_date', '<=', $month->endOfMonth()->toDateString())
-                ->whereDate('contract_to_date', '>=', $month->startOfMonth()->toDateString()))
+            ->whereHas('candidate', fn ($query) => $this->applyActiveContractFilter(
+                $query->visibleTo($request->user()->loadMissing('role')),
+                $month
+            ))
             ->orderBy(Candidate::select('candidate_name')->whereColumn('candidates.id', 'contract_reports.candidate_id'));
     }
 
@@ -339,14 +344,48 @@ class ContractReportController extends Controller
         $month = $report->salary_month->toImmutable();
 
         abort_unless(
-            Candidate::visibleTo($request->user()->loadMissing('role'))
-                ->whereKey($report->candidate_id)
-                ->where('status', true)
-                ->where('mode_id', 2)
-                ->whereDate('contract_from_date', '<=', $month->endOfMonth()->toDateString())
-                ->whereDate('contract_to_date', '>=', $month->startOfMonth()->toDateString())
-                ->exists(),
+            $this->applyActiveContractFilter(
+                Candidate::visibleTo($request->user()->loadMissing('role'))->whereKey($report->candidate_id),
+                $month
+            )->exists(),
             403
         );
+    }
+
+    private function applyActiveContractFilter($query, CarbonImmutable $month)
+    {
+        return $query
+            ->where('candidates.status', true)
+            ->where('candidates.mode_id', 2)
+            ->whereDate('candidates.contract_from_date', '<=', $month->endOfMonth()->toDateString())
+            ->whereDate('candidates.contract_to_date', '>=', $month->startOfMonth()->toDateString())
+            ->whereNotExists(function ($sub) use ($month) {
+                $sub->selectRaw('1')->from('employees')
+                    ->whereNull('employees.deleted_at')
+                    ->where(function ($match) {
+                        $match->where(function ($m1) {
+                            $m1->whereNotNull('candidates.email')
+                               ->where('candidates.email', '!=', '')
+                               ->where(function ($e) {
+                                   $e->whereRaw('LOWER(employees.official_mail) = LOWER(candidates.email)')
+                                     ->orWhereRaw('LOWER(employees.personal_mail) = LOWER(candidates.email)');
+                               });
+                        })->orWhere(function ($m2) {
+                            $m2->whereNotNull('candidates.mobile_no')
+                               ->where('candidates.mobile_no', '!=', '')
+                               ->where(function ($p) {
+                                   $p->whereRaw('employees.mobile_number = candidates.mobile_no')
+                                     ->orWhereRaw('employees.alternate_mobile_number = candidates.mobile_no');
+                               });
+                        });
+                    })
+                    ->where(function ($inactive) use ($month) {
+                        $inactive->where('employees.status', 0)
+                            ->orWhere(function ($rel) use ($month) {
+                                $rel->whereNotNull('employees.relieving_date')
+                                    ->whereDate('employees.relieving_date', '<', $month->startOfMonth()->toDateString());
+                            });
+                    });
+            });
     }
 }

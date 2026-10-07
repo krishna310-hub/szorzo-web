@@ -44,7 +44,7 @@ class ProfileSourcedController extends Controller
                                 ->orWhereHas('recruiter', fn ($recruiterQuery) => $recruiterQuery->where('recruiter_name', 'like', "%{$search}%"));
                         });
                     }
-                })
+                }, true)
                 ->addIndexColumn()
                 ->addColumn('recruiter_name', fn ($row) => e($row->recruiter?->recruiter_name ?? '-'))
                 ->addColumn('job_role_name', fn ($row) => e($row->jobRole?->job_role ?? '-'))

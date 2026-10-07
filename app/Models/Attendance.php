@@ -63,8 +63,11 @@ class Attendance extends Model
     public function getCurrentWorkSecondsAttribute(): int
     {
         $seconds = (int) ($this->total_work_seconds ?? 0);
-        if ($this->timer_status === self::TIMER_RUNNING && $this->timer_started_at) {
-            $seconds += max(0, (int) now()->diffInSeconds($this->timer_started_at));
+        if ($this->timer_status === self::TIMER_RUNNING) {
+            $startedAt = $this->timer_started_at ?: ($this->check_in ? \Carbon\Carbon::parse($this->attendance_date?->toDateString() . ' ' . $this->check_in) : null);
+            if ($startedAt) {
+                $seconds += max(0, (int) \Carbon\Carbon::parse($startedAt)->diffInSeconds(now(), false));
+            }
         }
         return $seconds;
     }
@@ -73,7 +76,7 @@ class Attendance extends Model
     {
         $seconds = (int) ($this->total_break_seconds ?? 0);
         if (in_array($this->timer_status, [self::TIMER_ON_BREAK, self::TIMER_ON_LUNCH], true) && $this->break_started_at) {
-            $seconds += max(0, (int) now()->diffInSeconds($this->break_started_at));
+            $seconds += max(0, (int) \Carbon\Carbon::parse($this->break_started_at)->diffInSeconds(now(), false));
         }
         return $seconds;
     }

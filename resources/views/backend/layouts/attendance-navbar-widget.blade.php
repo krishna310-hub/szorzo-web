@@ -11,6 +11,43 @@
     );
     // Personal timer is only shown for other roles (NOT Super Admin)
     $showPersonalTimer = $user && !$isSuperAdmin;
+
+    $todayAtt = $showPersonalTimer ? $user->todayAttendance() : null;
+    $initialTimerStatus = $todayAtt?->timer_status ?? 'not_started';
+    $initialWorkSecs = (int) ($todayAtt?->current_work_seconds ?? 0);
+    $initialBreakSecs = (int) ($todayAtt?->current_break_seconds ?? 0);
+    $empObj = $showPersonalTimer ? $user->linkedEmployee() : null;
+    $initialEmpName = $empObj?->employee_name ?? ($user?->name ?? 'My Attendance');
+    $initialEmpNo = $empObj?->employee_no ?? '—';
+    $initialCheckIn = $todayAtt?->check_in ? substr((string)$todayAtt->check_in, 0, 5) : '—';
+    $initialCheckOut = $todayAtt?->check_out ? substr((string)$todayAtt->check_out, 0, 5) : ($initialTimerStatus === 'running' ? 'Active' : '—');
+
+    $formatSecs = function($s) {
+        $s = max(0, (int)$s);
+        return sprintf('%02d:%02d:%02d', intdiv($s, 3600), intdiv($s % 3600, 60), $s % 60);
+    };
+
+    $initialClockText = $formatSecs($initialWorkSecs);
+    $initialDotClass = 'att-pulse-stopped';
+    $initialBadgeClass = 'bg-light text-muted border';
+    $initialBadgeText = 'Not Started';
+
+    if ($initialTimerStatus === 'running') {
+        $initialDotClass = 'att-pulse-running';
+        $initialBadgeClass = 'bg-success-subtle text-success border border-success';
+        $initialBadgeText = 'Working';
+    } elseif ($initialTimerStatus === 'on_break') {
+        $initialDotClass = 'att-pulse-break';
+        $initialBadgeClass = 'bg-warning-subtle text-warning border border-warning';
+        $initialBadgeText = 'Break (' . $formatSecs($initialBreakSecs) . ')';
+    } elseif ($initialTimerStatus === 'on_lunch') {
+        $initialDotClass = 'att-pulse-lunch';
+        $initialBadgeClass = 'bg-danger-subtle text-danger border border-danger';
+        $initialBadgeText = 'Lunch (' . $formatSecs($initialBreakSecs) . ')';
+    } elseif ($initialTimerStatus === 'completed') {
+        $initialBadgeClass = 'bg-info-subtle text-info border border-info';
+        $initialBadgeText = 'Day Closed';
+    }
 @endphp
 
 <!-- Attendance Navbar Widget -->
@@ -87,9 +124,9 @@
         <!-- Live Dot & Clock Display with Dropdown trigger -->
         <div class="dropdown d-inline-block">
             <a href="javascript:void(0);" class="text-reset text-decoration-none d-flex align-items-center" id="attTimerDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Click for attendance summary">
-                <span id="attPulseDot" class="att-pulse-dot att-pulse-stopped"></span>
-                <span id="attClockDisplay" class="att-clock-text">00:00:00</span>
-                <span id="attStatusBadge" class="badge bg-light text-muted border ms-1 fs-11 py-1">Loading...</span>
+                <span id="attPulseDot" class="att-pulse-dot {{ $initialDotClass }}"></span>
+                <span id="attClockDisplay" class="att-clock-text">{{ $initialClockText }}</span>
+                <span id="attStatusBadge" class="badge ms-1 fs-11 py-1 {{ $initialBadgeClass }}">{{ $initialBadgeText }}</span>
                 <i class="mdi mdi-chevron-down ms-1 text-muted fs-12"></i>
             </a>
 
@@ -97,8 +134,8 @@
             <div class="dropdown-menu dropdown-menu-end shadow-lg att-dropdown-menu" aria-labelledby="attTimerDropdownBtn">
                 <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-2">
                     <div>
-                        <h6 class="mb-0 fs-13 fw-bold" id="attDropEmpName">My Attendance</h6>
-                        <small class="text-muted fs-11" id="attDropEmpId">Employee ID: —</small>
+                        <h6 class="mb-0 fs-13 fw-bold" id="attDropEmpName">{{ $initialEmpName }}</h6>
+                        <small class="text-muted fs-11" id="attDropEmpId">Employee ID: {{ $initialEmpNo }}</small>
                     </div>
                     <span class="badge bg-primary-subtle text-primary" id="attDropDate">{{ date('d M Y') }}</span>
                 </div>
@@ -107,33 +144,47 @@
                     <div class="col-6">
                         <div class="p-2 border rounded bg-light-subtle">
                             <span class="text-muted d-block fs-11">Check In</span>
-                            <strong id="attDropCheckIn" class="text-success">—</strong>
+                            <strong id="attDropCheckIn" class="text-success">{{ $initialCheckIn }}</strong>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="p-2 border rounded bg-light-subtle">
                             <span class="text-muted d-block fs-11">Check Out</span>
-                            <strong id="attDropCheckOut" class="text-danger">—</strong>
+                            <strong id="attDropCheckOut" class="text-danger">{{ $initialCheckOut }}</strong>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="p-2 border rounded bg-light-subtle">
                             <span class="text-muted d-block fs-11">Total Work</span>
-                            <strong id="attDropWorkTime" class="text-primary">00:00:00</strong>
+                            <strong id="attDropWorkTime" class="text-primary">{{ $formatSecs($initialWorkSecs) }}</strong>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="p-2 border rounded bg-light-subtle">
                             <span class="text-muted d-block fs-11">Total Break</span>
-                            <strong id="attDropBreakTime" class="text-warning">00:00:00</strong>
+                            <strong id="attDropBreakTime" class="text-warning">{{ $formatSecs($initialBreakSecs) }}</strong>
                         </div>
                     </div>
                 </div>
 
                 <!-- Break Log List -->
-                <div id="attBreakLogSection" class="mb-2 d-none">
+                <div id="attBreakLogSection" class="mb-2 {{ ($todayAtt && !empty($todayAtt->breaks)) ? '' : 'd-none' }}">
                     <span class="text-muted fs-11 fw-semibold text-uppercase">Today's Breaks:</span>
-                    <ul class="list-unstyled mb-0 mt-1 fs-11" id="attBreakLogList" style="max-height: 90px; overflow-y: auto;"></ul>
+                    <ul class="list-unstyled mb-0 mt-1 fs-11" id="attBreakLogList" style="max-height: 90px; overflow-y: auto;">
+                        @if($todayAtt && !empty($todayAtt->breaks))
+                            @foreach($todayAtt->breaks as $b)
+                                @php
+                                    $isLunch = ($b['type'] ?? '') === 'lunch';
+                                    $tLabel = $isLunch ? 'Lunch' : 'Break';
+                                    $icon = $isLunch ? 'mdi-food text-danger' : 'mdi-coffee text-warning';
+                                @endphp
+                                <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                                    <span><i class="mdi {{ $icon }} me-1"></i>{{ $tLabel }}: {{ $b['start'] ?? '' }} – {{ $b['end'] ?? '' }}</span>
+                                    <span class="text-muted">{{ $b['minutes'] ?? round(($b['seconds'] ?? 0) / 60) }}m</span>
+                                </li>
+                            @endforeach
+                        @endif
+                    </ul>
                 </div>
             </div>
         </div>
@@ -141,12 +192,12 @@
         <!-- Dynamic Action Buttons Group for Non-Admin Roles -->
         <div class="d-flex align-items-center gap-1" id="attActionButtons">
             <!-- 1. Start Button (Shown when not started) -->
-            <button type="button" class="btn btn-sm btn-success px-2 py-1 fs-12 d-none" id="btnAttStart" onclick="attendanceTimer.start()" title="Start Today's Attendance">
+            <button type="button" class="btn btn-sm btn-success px-2 py-1 fs-12 {{ $initialTimerStatus === 'not_started' ? '' : 'd-none' }}" id="btnAttStart" onclick="attendanceTimer.start()" title="Start Today's Attendance">
                 <i class="mdi mdi-play me-1"></i><span>Start</span>
             </button>
 
             <!-- 2. Break Dropdown (Shown when running) -->
-            <div class="btn-group btn-group-sm d-none" id="btnGroupAttBreak">
+            <div class="btn-group btn-group-sm {{ $initialTimerStatus === 'running' ? '' : 'd-none' }}" id="btnGroupAttBreak">
                 <button type="button" class="btn btn-warning px-2 py-1 fs-12 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Take a break">
                     <i class="mdi mdi-pause me-1"></i><span>Break</span>
                 </button>
@@ -174,17 +225,17 @@
             </div>
 
             <!-- 3. Restart / Resume Button (Shown when on break/lunch) -->
-            <button type="button" class="btn btn-sm btn-success px-2 py-1 fs-12 d-none" id="btnAttResume" onclick="attendanceTimer.resume()" title="Resume Working">
-                <i class="mdi mdi-play me-1"></i><span>Restart</span>
+            <button type="button" class="btn btn-sm btn-success px-2 py-1 fs-12 {{ ($initialTimerStatus === 'on_break' || $initialTimerStatus === 'on_lunch') ? '' : 'd-none' }}" id="btnAttResume" onclick="attendanceTimer.resume()" title="Resume Working">
+                <i class="mdi mdi-play me-1"></i><span>Resume</span>
             </button>
 
             <!-- 4. End Day / Stop Button (Shown when running or on break) -->
-            <button type="button" class="btn btn-sm btn-danger px-2 py-1 fs-12 d-none" id="btnAttStop" onclick="attendanceTimer.stopDay()" title="End of the day close time">
+            <button type="button" class="btn btn-sm btn-danger px-2 py-1 fs-12 {{ ($initialTimerStatus === 'running' || $initialTimerStatus === 'on_break' || $initialTimerStatus === 'on_lunch') ? '' : 'd-none' }}" id="btnAttStop" onclick="attendanceTimer.stopDay()" title="End of the day close time">
                 <i class="mdi mdi-stop me-1"></i><span>Stop</span>
             </button>
 
             <!-- 5. Completed Restart (Shown when completed) -->
-            <button type="button" class="btn btn-sm btn-outline-secondary px-2 py-1 fs-12 d-none" id="btnAttRestartCompleted" onclick="attendanceTimer.start()" title="Continue working today">
+            <button type="button" class="btn btn-sm btn-outline-secondary px-2 py-1 fs-12 {{ $initialTimerStatus === 'completed' ? '' : 'd-none' }}" id="btnAttRestartCompleted" onclick="attendanceTimer.start()" title="Continue working today">
                 <i class="mdi mdi-refresh me-1"></i><span>Restart</span>
             </button>
         </div>
@@ -329,9 +380,9 @@
 window.attendanceTimer = (function() {
     let currentData = null;
     let timerInterval = null;
-    let workSecs = 0;
-    let breakSecs = 0;
-    let status = 'not_started';
+    let workSecs = {{ $initialWorkSecs }};
+    let breakSecs = {{ $initialBreakSecs }};
+    let status = '{{ $initialTimerStatus }}';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
     const isPersonalTimerActive = {{ $showPersonalTimer ? 'true' : 'false' }};
 
@@ -362,17 +413,23 @@ window.attendanceTimer = (function() {
         if (!isPersonalTimerActive) return;
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
+            const clockEl = document.getElementById('attClockDisplay');
+            const badgeEl = document.getElementById('attStatusBadge');
+            const workDrop = document.getElementById('attDropWorkTime');
+            const breakDrop = document.getElementById('attDropBreakTime');
+
             if (status === 'running') {
                 workSecs++;
-                const clockEl = document.getElementById('attClockDisplay');
                 if (clockEl) clockEl.textContent = formatTime(workSecs);
-                const workDrop = document.getElementById('attDropWorkTime');
                 if (workDrop) workDrop.textContent = formatTime(workSecs);
             } else if (status === 'on_break' || status === 'on_lunch') {
                 breakSecs++;
-                const clockEl = document.getElementById('attClockDisplay');
-                if (clockEl) clockEl.textContent = formatTime(breakSecs);
-                const breakDrop = document.getElementById('attDropBreakTime');
+                // Work timer remains intact and visible on the navbar clock
+                if (clockEl) clockEl.textContent = formatTime(workSecs);
+                if (badgeEl) {
+                    const prefix = status === 'on_lunch' ? 'Lunch' : 'Break';
+                    badgeEl.textContent = `${prefix} (${formatTime(breakSecs)})`;
+                }
                 if (breakDrop) breakDrop.textContent = formatTime(breakSecs);
             }
         }, 1000);
@@ -398,14 +455,10 @@ window.attendanceTimer = (function() {
             else dot.classList.add('att-pulse-stopped');
         }
 
-        // Update Clock Display
+        // Update Clock Display - ALWAYS preserves total work time!
         const clock = document.getElementById('attClockDisplay');
         if (clock) {
-            if (status === 'on_break' || status === 'on_lunch') {
-                clock.textContent = formatTime(breakSecs);
-            } else {
-                clock.textContent = formatTime(workSecs);
-            }
+            clock.textContent = formatTime(workSecs);
         }
 
         // Update Status Badge
@@ -417,10 +470,10 @@ window.attendanceTimer = (function() {
                 badge.textContent = 'Working';
             } else if (status === 'on_break') {
                 badge.className += ' bg-warning-subtle text-warning border border-warning';
-                badge.textContent = 'Break';
+                badge.textContent = `Break (${formatTime(breakSecs)})`;
             } else if (status === 'on_lunch') {
                 badge.className += ' bg-danger-subtle text-danger border border-danger';
-                badge.textContent = 'Lunch';
+                badge.textContent = `Lunch (${formatTime(breakSecs)})`;
             } else if (status === 'completed') {
                 badge.className += ' bg-info-subtle text-info border border-info';
                 badge.textContent = 'Day Closed';
@@ -766,6 +819,7 @@ window.attendanceTimer = (function() {
         ensureModalInBody();
 
         if (isPersonalTimerActive) {
+            startTicker();
             fetchStatus();
             // Periodically refresh every 60 seconds to stay in sync with server
             setInterval(fetchStatus, 60000);
