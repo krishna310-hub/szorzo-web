@@ -90,7 +90,7 @@ class ClientRequirementController extends Controller
                 ->addColumn('client_name', fn ($row) => $row->client->client ?? '-')
                 ->addColumn('job_description_content', fn ($row) => $row->jobDescription?->job_description)
                 ->addColumn('job_description_action', fn ($row) => filled($row->jobDescription?->job_description)
-                    ? '<button type="button" class="btn btn-link text-primary fs-4 p-0 view-job-description" title="View Job Description" aria-label="View Job Description"><i class="ri-eye-line"></i></button>'
+                    ? '<button type="button" class="btn btn-link text-primary fs-4 p-0 view-job-description" data-id="'.$row->id.'" data-title="'.e(($row->jobRole?->job_role ?? 'Job Description').($row->client?->client ? ' - '.$row->client->client : '')).'" title="View Job Description" aria-label="View Job Description"><i class="ri-eye-line"></i></button>'
                     : '-')
                 ->addColumn('psoition_level', fn ($row) => $row->position_level ?? '-')
                 ->addColumn('mode_name', fn ($row) => collect($row->mode_ids ?: array_filter([$row->mode_id]))
@@ -520,5 +520,19 @@ class ClientRequirementController extends Controller
         }
 
         return [array_values(array_unique($ids)), $missing];
+    }
+
+    public function jobDescription(Request $request, int $id)
+    {
+        $this->authorize('read', ClientRequirement::class);
+        $requirement = ClientRequirement::visibleTo($request->user())
+            ->with(['jobDescription', 'jobRole', 'client'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'status' => true,
+            'title' => ($requirement->jobRole?->job_role ?? 'Job Description') . ($requirement->client?->client ? ' - ' . $requirement->client->client : ''),
+            'content' => $requirement->jobDescription?->job_description ?? '',
+        ]);
     }
 }

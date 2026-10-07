@@ -76,21 +76,53 @@
         </form>
     </div>
 
-    <div class="modal fade" id="job-description-modal" tabindex="-1" aria-labelledby="job-description-modal-title" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="job-description-modal-title">Job Description</h5>
+    <div class="modal fade" id="job-description-modal" tabindex="-1" aria-labelledby="job-description-modal-title" aria-hidden="true" style="z-index: 1065 !important;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="z-index: 1070 !important;">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-light py-3 border-bottom">
+                    <h5 class="modal-title d-flex align-items-center gap-2" id="job-description-modal-title">
+                        <i class="ri-file-text-line text-primary fs-4"></i>
+                        <span id="job-description-modal-title-text">Job Description</span>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="job-description-modal-content"></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <div class="modal-body p-4" id="job-description-modal-content"></div>
+                <div class="modal-footer bg-light py-2 border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+@push('style')
+<style>
+    #job-description-modal {
+        z-index: 1065 !important;
+    }
+    #job-description-modal .modal-dialog {
+        z-index: 1070 !important;
+    }
+    #job-description-modal-content {
+        max-height: 70vh;
+        overflow-y: auto !important;
+        word-break: break-word;
+    }
+    #job-description-modal-content img {
+        max-width: 100%;
+        height: auto;
+    }
+    #job-description-modal-content table {
+        width: 100% !important;
+        margin-bottom: 1rem;
+        border-collapse: collapse;
+    }
+    #job-description-modal-content table th,
+    #job-description-modal-content table td {
+        padding: 0.5rem;
+        border: 1px solid #dee2e6;
+    }
+</style>
+@endpush
 @section('script')
     <script>
         $(document).ready(function() {
@@ -211,31 +243,140 @@
             $('#requirement-filter-reset').on('click', function() { $('#requirement-filter-form')[0].reset(); currentFilters = {}; updateExportUrl(); table.ajax.reload(); });
 
             function sanitizeJobDescription(html) {
-                const parsed = new DOMParser().parseFromString(html || '', 'text/html');
-                parsed.querySelectorAll('script, iframe, object, embed').forEach(function(element) {
-                    element.remove();
-                });
-                parsed.body.querySelectorAll('*').forEach(function(element) {
-                    Array.from(element.attributes).forEach(function(attribute) {
-                        const name = attribute.name.toLowerCase();
-                        if (name.startsWith('on') ||
-                            (['href', 'src'].includes(name) && /^\s*javascript:/i.test(attribute.value))) {
-                            element.removeAttribute(attribute.name);
-                        }
+                if (!html || typeof html !== 'string') {
+                    return '<p class="text-muted mb-0">No job description is available.</p>';
+                }
+                try {
+                    const parsed = new DOMParser().parseFromString(html, 'text/html');
+                    // Strip dangerous tags, stylesheets, and external links that could affect host page layout
+                    parsed.querySelectorAll('script, style, link, iframe, object, embed').forEach(function(element) {
+                        element.remove();
                     });
-                });
+                    // Strip inline javascript handlers and javascript: URLs
+                    parsed.body.querySelectorAll('*').forEach(function(element) {
+                        Array.from(element.attributes).forEach(function(attribute) {
+                            const name = attribute.name.toLowerCase();
+                            if (name.startsWith('on') ||
+                                (['href', 'src'].includes(name) && /^\s*javascript:/i.test(attribute.value))) {
+                                element.removeAttribute(attribute.name);
+                            }
+                        });
+                    });
 
-                return parsed.body.innerHTML;
+                    const clean = parsed.body.innerHTML.trim();
+                    return clean || '<p class="text-muted mb-0">No job description is available.</p>';
+                } catch (e) {
+                    console.error('Error sanitizing job description:', e);
+                    return $('<div>').text(html).html();
+                }
             }
 
-            $(document).on('click', '.view-job-description', function() {
-                const rowData = table.row($(this).closest('tr')).data();
-                const content = rowData && rowData.job_description_content
-                    ? sanitizeJobDescription(rowData.job_description_content)
-                    : '<p class="text-muted mb-0">No job description is available.</p>';
+            function ensureModalInBody() {
+                const modal = document.getElementById('job-description-modal');
+                if (modal && modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+            }
 
-                $('#job-description-modal-content').html(content);
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('job-description-modal')).show();
+            // Move modal to body immediately so it is not trapped behind backdrops
+            ensureModalInBody();
+
+            // When modal is hidden, clean up any remaining backdrops and reset body lock
+            $('#job-description-modal').on('hidden.bs.modal', function() {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
+            });
+
+            // Fallback close handler to guarantee modal dismisses reliably
+            $(document).on('click', '#job-description-modal [data-bs-dismiss="modal"]', function(e) {
+                e.preventDefault();
+                const modalEl = document.getElementById('job-description-modal');
+                if (window.bootstrap && bootstrap.Modal) {
+                    const inst = bootstrap.Modal.getInstance(modalEl);
+                    if (inst) {
+                        inst.hide();
+                    } else {
+                        $(modalEl).modal('hide');
+                    }
+                } else {
+                    $(modalEl).modal('hide');
+                }
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
+            });
+
+            $(document).on('click', '.view-job-description', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                ensureModalInBody();
+
+                // Clean up any stale or stacked backdrops
+                if (!$('#job-description-modal').hasClass('show')) {
+                    $('.modal-backdrop').remove();
+                }
+
+                const button = $(this);
+                const reqId = button.data('id');
+                const customTitle = button.data('title');
+
+                if (customTitle) {
+                    $('#job-description-modal-title-text').text(customTitle);
+                } else {
+                    $('#job-description-modal-title-text').text('Job Description');
+                }
+
+                // Check DataTables cache first
+                let rowData = null;
+                const tr = button.closest('tr');
+                if (tr.length && typeof table !== 'undefined' && table.row) {
+                    rowData = table.row(tr).data();
+                }
+                if (!rowData && button.closest('td').length && typeof table !== 'undefined' && table.row) {
+                    rowData = table.row(button.closest('td')).data();
+                }
+
+                const modalEl = document.getElementById('job-description-modal');
+                const showModal = function() {
+                    if (window.bootstrap && bootstrap.Modal) {
+                        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                        modal.show();
+                    } else {
+                        $(modalEl).modal('show');
+                    }
+                };
+
+                if (rowData && rowData.job_description_content !== undefined && rowData.job_description_content !== null) {
+                    const cleanContent = sanitizeJobDescription(rowData.job_description_content);
+                    $('#job-description-modal-content').html(cleanContent);
+                    showModal();
+                } else if (reqId) {
+                    // Show spinner while fetching via dedicated endpoint
+                    $('#job-description-modal-content').html(
+                        '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2 text-muted mb-0">Loading job description...</p></div>'
+                    );
+                    showModal();
+
+                    $.ajax({
+                        url: '{{ url('admin/client-requirements') }}/' + reqId + '/job-description',
+                        type: 'GET',
+                        success: function(res) {
+                            if (res && res.title) {
+                                $('#job-description-modal-title-text').text(res.title);
+                            }
+                            const content = res && res.content
+                                ? sanitizeJobDescription(res.content)
+                                : '<p class="text-muted mb-0">No job description is available.</p>';
+                            $('#job-description-modal-content').html(content);
+                        },
+                        error: function() {
+                            $('#job-description-modal-content').html('<div class="alert alert-danger mb-0">Failed to load job description.</div>');
+                        }
+                    });
+                } else {
+                    $('#job-description-modal-content').html('<p class="text-muted mb-0">No job description is available.</p>');
+                    showModal();
+                }
             });
 
             $(document).on('click', '.delete-record', function() {

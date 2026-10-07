@@ -316,6 +316,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::post('/import', 'import')->name('import');
         Route::get('/create', 'create')->name('create');
         Route::post('/store', 'store')->name('store');
+        Route::get('/{id}/job-description', 'jobDescription')->name('job-description');
         Route::get('/{id}/edit', 'edit')->name('edit');
         Route::put('/{id}/update', 'update')->name('update');
         Route::delete('/{id}', 'destroy')->name('delete');
