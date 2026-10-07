@@ -238,16 +238,22 @@ class AttendanceTimerController extends Controller
     }
 
     /**
-     * Admin: List all active employees for selection by Employee ID or Name.
+     * Admin: List only active internal employees for selection by Employee ID or Name.
      */
     public function adminEmployees(Request $request): JsonResponse
     {
         $this->authorizeAdmin($request->user());
 
-        $employees = Employee::whereNull('deleted_at')
+        $employees = Employee::with(['mode', 'client'])
+            ->whereNull('deleted_at')
+            ->where(function ($q) {
+                $q->whereNull('status')->orWhere('status', true);
+            })
             ->orderBy('employee_no')
             ->orderBy('employee_name')
-            ->get(['id', 'employee_no', 'employee_name', 'designation', 'official_mail'])
+            ->get()
+            ->filter(fn ($emp) => $emp->isInternal())
+            ->values()
             ->map(function ($emp) {
                 return [
                     'id' => $emp->id,
@@ -272,8 +278,8 @@ class AttendanceTimerController extends Controller
         $this->authorizeAdmin($request->user());
 
         $employee = $this->findEmployee($employeeIdentifier);
-        if (!$employee) {
-            return response()->json(['success' => false, 'message' => 'Employee not found.'], 404);
+        if (!$employee || !$employee->isInternal()) {
+            return response()->json(['success' => false, 'message' => 'Internal employee not found.'], 404);
         }
 
         $user = $employee->linkedUser();
@@ -292,8 +298,8 @@ class AttendanceTimerController extends Controller
         $this->authorizeAdmin($adminUser);
 
         $employee = $this->findEmployee($employeeIdentifier);
-        if (!$employee) {
-            return response()->json(['success' => false, 'message' => 'Employee not found.'], 404);
+        if (!$employee || !$employee->isInternal()) {
+            return response()->json(['success' => false, 'message' => 'Internal employee not found.'], 404);
         }
 
         $user = $employee->linkedUser();

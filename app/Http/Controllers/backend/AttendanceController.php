@@ -114,26 +114,48 @@ class AttendanceController extends Controller
     public function report(Request $request)
     {
         $this->authorize('read', Attendance::class);
-        [$records,$filters,$users,$summary]=$this->reportRecords($request,true);
-        return view('backend.attendance.report',compact('records','filters','users','summary'));
+        [$records,$filters,$users,$summary,$timeMetrics]=$this->reportRecords($request,true);
+        return view('backend.attendance.report',compact('records','filters','users','summary','timeMetrics'));
     }
 
     public function export(Request $request,string $format)
     {
         $this->authorize('export', Attendance::class);
         abort_unless(in_array($format,['csv','xlsx','pdf','print'],true),404);
-        [$records,$filters]=$this->reportRecords($request,false); $name='attendance-report-'.now()->format('Ymd-His');
-        if ($format==='pdf') return Pdf::loadView('backend.attendance.pdf',compact('records','filters'))->setPaper('a4','landscape')->download($name.'.pdf');
-        if ($format==='print') return view('backend.attendance.pdf',compact('records','filters')+['print'=>true]);
+        [$records,$filters,$users,$summary,$timeMetrics]=$this->reportRecords($request,false); $name='attendance-report-'.now()->format('Ymd-His');
+        if ($format==='pdf') return Pdf::loadView('backend.attendance.pdf',compact('records','filters','timeMetrics'))->setPaper('a4','landscape')->download($name.'.pdf');
+        if ($format==='print') return view('backend.attendance.pdf',compact('records','filters','timeMetrics')+['print'=>true]);
         return Excel::download(new AttendanceReportExport($records),$name.'.'.$format, $format==='csv'?\Maatwebsite\Excel\Excel::CSV:\Maatwebsite\Excel\Excel::XLSX);
     }
 
     private function reportRecords(Request $request,bool $paginate): array
     {
         $filters=$request->validate(['from_date'=>['nullable','date_format:Y-m-d'],'to_date'=>['nullable','date_format:Y-m-d','after_or_equal:from_date'],'month'=>['nullable','integer','between:1,12'],'year'=>['nullable','integer','between:2000,2100'],'user_id'=>['nullable','integer'],'status'=>['nullable','in:'.implode(',',Attendance::STATUSES)]]);
-        $query=Attendance::eligible()->with(['user','leaveRequest'])->when($filters['user_id']??null,fn($q,$v)=>$q->where('user_id',$v))->when($filters['status']??null,fn($q,$v)=>$q->where('status',$v))->when($filters['from_date']??null,fn($q,$v)=>$q->whereDate('attendance_date','>=',$v))->when($filters['to_date']??null,fn($q,$v)=>$q->whereDate('attendance_date','<=',$v))->when($filters['month']??null,fn($q,$v)=>$q->whereMonth('attendance_date',$v))->when($filters['year']??null,fn($q,$v)=>$q->whereYear('attendance_date',$v))->latest('attendance_date')->latest('id');
+        $query=Attendance::eligible()->with(['user','employee','leaveRequest'])->when($filters['user_id']??null,fn($q,$v)=>$q->where('user_id',$v))->when($filters['status']??null,fn($q,$v)=>$q->where('status',$v))->when($filters['from_date']??null,fn($q,$v)=>$q->whereDate('attendance_date','>=',$v))->when($filters['to_date']??null,fn($q,$v)=>$q->whereDate('attendance_date','<=',$v))->when($filters['month']??null,fn($q,$v)=>$q->whereMonth('attendance_date',$v))->when($filters['year']??null,fn($q,$v)=>$q->whereYear('attendance_date',$v))->latest('attendance_date')->latest('id');
         $summary=(clone $query)->reorder()->selectRaw('status, COUNT(*) total')->groupBy('status')->pluck('total','status');
         $records=$paginate?$query->paginate(50)->withQueryString():$query->get();
-        return [$records,$filters,User::eligibleForAttendance()->orderBy('name')->get(['id','name']),$summary];
+
+        $totalWorkSeconds = 0;
+        $totalBreakSeconds = 0;
+        $totalLunchSeconds = 0;
+
+        foreach ($records as $rec) {
+            $totalWorkSeconds += $rec->current_work_seconds ?: ($rec->working_minutes * 60);
+            $totalBreakSeconds += $rec->break_seconds;
+            $totalLunchSeconds += $rec->lunch_seconds;
+        }
+
+        $timeMetrics = [
+            'total_work_seconds' => $totalWorkSeconds,
+            'total_break_seconds' => $totalBreakSeconds,
+            'total_lunch_seconds' => $totalLunchSeconds,
+            'total_combined_seconds' => $totalBreakSeconds + $totalLunchSeconds,
+            'total_work_formatted' => Attendance::formatSecondsHuman($totalWorkSeconds),
+            'total_break_formatted' => Attendance::formatSecondsHuman($totalBreakSeconds),
+            'total_lunch_formatted' => Attendance::formatSecondsHuman($totalLunchSeconds),
+            'total_combined_break_formatted' => Attendance::formatSecondsHuman($totalBreakSeconds + $totalLunchSeconds),
+        ];
+
+        return [$records,$filters,User::eligibleForAttendance()->orderBy('name')->get(['id','name']),$summary,$timeMetrics];
     }
 }

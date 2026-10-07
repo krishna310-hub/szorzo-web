@@ -216,6 +216,13 @@ class Employee extends Model
      */
     public function isExternal(): bool
     {
+        if ($this->employment_type === self::EMPLOYMENT_TYPE_EXTERNAL) {
+            return true;
+        }
+        if ($this->employment_type === self::EMPLOYMENT_TYPE_INTERNAL) {
+            return false;
+        }
+
         if ($this->isContract() || $this->isC2H()) {
             return true;
         }
@@ -267,19 +274,25 @@ class Employee extends Model
     public function scopeInternal($query)
     {
         return $query->where(function ($q) {
-            $q->where(function ($sq) {
-                $sq->whereNull('mode_id')
-                   ->orWhereDoesntHave('mode', function ($mq) {
-                       $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
-                          ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
-                          ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
-                   });
-            })->where(function ($sq) {
-                $sq->whereNull('client_id')
-                   ->orWhereHas('client', function ($cq) {
-                       $cq->whereRaw('LOWER(client) LIKE ?', ['%szorzo%']);
-                   });
-            });
+            $q->where('employment_type', self::EMPLOYMENT_TYPE_INTERNAL)
+              ->orWhere(function ($fallback) {
+                  $fallback->where(function ($sq) {
+                      $sq->whereNull('mode_id')
+                         ->orWhereDoesntHave('mode', function ($mq) {
+                             $mq->whereRaw('LOWER(mode) LIKE ?', ['%contract%'])
+                                ->orWhereRaw('LOWER(mode) LIKE ?', ['%c2h%'])
+                                ->orWhereRaw('LOWER(mode) LIKE ?', ['%hire%']);
+                         });
+                  })->where(function ($sq) {
+                      $sq->whereNull('client_id')
+                         ->orWhereHas('client', function ($cq) {
+                             $cq->whereRaw('LOWER(client) LIKE ?', ['%szorzo%']);
+                         });
+                  });
+              });
+        })->where(function ($q) {
+            $q->whereNull('employment_type')
+              ->orWhere('employment_type', '!=', self::EMPLOYMENT_TYPE_EXTERNAL);
         });
     }
 

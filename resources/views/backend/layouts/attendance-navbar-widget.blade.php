@@ -270,9 +270,9 @@
                 <!-- Employee Selection Row -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-7">
-                        <label class="form-label fw-bold">Select Employee <span class="text-danger">*</span></label>
+                        <label class="form-label fw-bold">Select Internal Employee <span class="text-danger">*</span></label>
                         <select class="form-select" id="adminEmpSelect" onchange="attendanceTimer.onAdminSelectChange()">
-                            <option value="">-- Choose Employee (ID / Name) --</option>
+                            <option value="">-- Choose Internal Employee (ID / Name) --</option>
                         </select>
                     </div>
                     <div class="col-md-5">
@@ -640,7 +640,7 @@ window.attendanceTimer = (function() {
                 adminEmployeesList = data.employees || [];
                 const select = document.getElementById('adminEmpSelect');
                 if (select) {
-                    select.innerHTML = '<option value="">-- Choose Employee (ID / Name) --</option>' +
+                    select.innerHTML = '<option value="">-- Choose Internal Employee (ID / Name) --</option>' +
                         adminEmployeesList.map(e => `<option value="${e.id}">[${e.employee_no}] ${e.employee_name} (${e.designation})</option>`).join('');
                 }
             }

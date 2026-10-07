@@ -154,6 +154,11 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class,'role_id');
     }
 
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'official_mail', 'email');
+    }
+
     public function attendances() { return $this->hasMany(Attendance::class); }
     public function leaveRequests() { return $this->hasMany(LeaveRequest::class); }
 
