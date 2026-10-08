@@ -53,8 +53,8 @@
     </div>
     <div class="col-md-6 mb-3">
         <label for="cv" class="form-label">CV @unless(isset($profileSourced))<span class="text-danger">*</span>@endunless</label>
-        <input type="file" id="cv" name="cv" class="form-control" accept=".pdf,.doc,.docx" @unless(isset($profileSourced)) required @endunless>
-        <div id="cv-parse-status" class="small text-muted mt-1">Upload a CV to automatically extract Name, Email, and Mobile number.</div>
+        <input type="file" id="cv" name="cv" class="form-control" accept=".pdf,.doc,.docx,.rtf,.odt,.txt" @unless(isset($profileSourced)) required @endunless>
+        <div id="cv-parse-status" class="small text-muted mt-1">Upload a CV (PDF, DOCX, DOC) to automatically extract Name, Email, Mobile number, Job Role, and Remarks.</div>
         @isset($profileSourced)<a href="{{ asset($profileSourced->cv_path) }}" target="_blank" class="small">View current CV</a>@endisset
         @error('cv')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
@@ -71,6 +71,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const nameInput = document.getElementById('candidate_name');
     const emailInput = document.getElementById('email');
     const mobileInput = document.getElementById('mobile_number');
+    const roleSelect = document.getElementById('job_role_id');
+    const needInput = document.getElementById('need');
 
     if (!cvInput) return;
 
@@ -78,15 +80,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!this.files || !this.files[0]) return;
 
         const file = this.files[0];
-        const validExtensions = ['pdf', 'doc', 'docx'];
+        const validExtensions = ['pdf', 'doc', 'docx', 'rtf', 'odt', 'txt'];
         const extension = file.name.split('.').pop().toLowerCase();
 
         if (!validExtensions.includes(extension)) {
+            if (statusDiv) {
+                statusDiv.innerHTML = '<span class="text-danger"><i class="bx bx-error-circle align-middle me-1"></i> Unsupported file extension (.' + extension + '). Please upload a PDF, DOCX, or DOC.</span>';
+            }
             return;
         }
 
         if (statusDiv) {
-            statusDiv.innerHTML = '<span class="text-primary"><i class="bx bx-loader-alt bx-spin align-middle me-1"></i> Extracting details from CV...</span>';
+            statusDiv.innerHTML = '<span class="text-primary"><i class="bx bx-loader-alt bx-spin align-middle me-1"></i> Analyzing ' + file.name + ' with AI...</span>';
         }
 
         const formData = new FormData();
@@ -101,13 +106,18 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Server returned ' + response.status);
+                return response.json().then(errData => {
+                    throw new Error(errData.message || ('Server error ' + response.status));
+                }).catch(e => {
+                    throw new Error(e.message || ('Server returned ' + response.status));
+                });
             }
             return response.json();
         })
         .then(res => {
             if (res.success && res.data) {
                 let filledFields = [];
+
                 if (res.data.candidate_name) {
                     nameInput.value = res.data.candidate_name;
                     nameInput.classList.add('is-valid');
@@ -123,29 +133,41 @@ document.addEventListener('DOMContentLoaded', function () {
                     mobileInput.classList.add('is-valid');
                     filledFields.push('Mobile');
                 }
+                if (res.data.job_role_id && roleSelect) {
+                    roleSelect.value = res.data.job_role_id;
+                    roleSelect.classList.add('is-valid');
+                    filledFields.push('Job Role (' + (res.data.job_role_name || 'Matched') + ')');
+                }
+                if (res.data.need && needInput && (!needInput.value || needInput.value.trim() === '')) {
+                    needInput.value = res.data.need;
+                    needInput.classList.add('is-valid');
+                    filledFields.push('Remarks');
+                }
 
                 if (filledFields.length > 0) {
                     if (statusDiv) {
-                        statusDiv.innerHTML = '<span class="text-success fw-medium"><i class="bx bx-check-circle align-middle me-1"></i> Auto-filled ' + filledFields.join(', ') + ' from CV!</span>';
+                        const aiBadge = res.data.ai_powered
+                            ? '<span class="badge bg-success-subtle text-success me-1"><i class="ri-sparkling-fill text-warning me-1"></i>AI Powered</span>'
+                            : '<span class="badge bg-primary-subtle text-primary me-1"><i class="bx bx-check-circle me-1"></i>Auto-Parsed</span>';
+                        statusDiv.innerHTML = aiBadge + ' <span class="text-success fw-medium">Auto-filled ' + filledFields.join(', ') + ' from CV!</span>';
                     }
                 } else {
                     if (statusDiv) {
-                        statusDiv.innerHTML = '<span class="text-muted"><i class="bx bx-info-circle align-middle me-1"></i> Text read from CV. Please verify details manually.</span>';
+                        statusDiv.innerHTML = '<span class="text-muted"><i class="bx bx-info-circle align-middle me-1"></i> Text read from CV. Please verify or complete details manually.</span>';
                     }
                 }
             } else {
                 if (statusDiv) {
-                    statusDiv.innerHTML = '<span class="text-muted">Upload a CV to automatically extract Name, Email, and Mobile number.</span>';
+                    statusDiv.innerHTML = '<span class="text-muted">Upload a CV to automatically extract Name, Email, Mobile number, and Remarks.</span>';
                 }
             }
         })
         .catch(err => {
             console.error('CV parse error:', err);
             if (statusDiv) {
-                statusDiv.innerHTML = '<span class="text-muted">Upload a CV to automatically extract Name, Email, and Mobile number.</span>';
+                statusDiv.innerHTML = '<span class="text-warning"><i class="bx bx-info-circle align-middle me-1"></i> Could not auto-extract all fields (' + (err.message || 'enter manually') + ').</span>';
             }
         });
     });
 });
 </script>
-

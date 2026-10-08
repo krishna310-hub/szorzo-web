@@ -83,13 +83,49 @@ class ProfileSourcedController extends Controller
 
     public function parseCv(Request $request, CvParserService $parser)
     {
-        $this->authorize('create', ProfileSourced::class);
+        if (! auth()->user()->can('create', ProfileSourced::class) && ! auth()->user()->can('edit', ProfileSourced::class)) {
+            abort(403);
+        }
 
         $request->validate([
-            'cv' => 'required|file|mimes:pdf,doc,docx|max:10240',
+            'cv' => [
+                'required',
+                'file',
+                'max:15360',
+                function ($attribute, $value, $fail) {
+                    if (! $value instanceof \Illuminate\Http\UploadedFile) {
+                        return;
+                    }
+                    $ext = strtolower($value->getClientOriginalExtension() ?: pathinfo($value->getClientOriginalName(), PATHINFO_EXTENSION));
+                    $allowed = ['pdf', 'doc', 'docx', 'rtf', 'odt', 'txt'];
+                    if (! in_array($ext, $allowed, true)) {
+                        $fail('The ' . $attribute . ' must be a file of type: ' . implode(', ', $allowed) . '.');
+                    }
+                }
+            ],
         ]);
 
-        $data = $parser->parse($request->file('cv'));
+        try {
+            $jobRoles = [];
+            try {
+                $jobRoles = JobRole::where('status', true)->pluck('job_role', 'id')->toArray();
+            } catch (\Throwable $e) {
+                // Fallback if DB is offline
+            }
+
+            $data = $parser->parse($request->file('cv'), $jobRoles);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('CV parse exception: ' . $e->getMessage());
+            $data = [
+                'candidate_name' => null,
+                'email' => null,
+                'mobile_number' => null,
+                'need' => null,
+                'job_role_id' => null,
+                'job_role_name' => null,
+                'ai_powered' => false,
+            ];
+        }
 
         return response()->json([
             'success' => true,
