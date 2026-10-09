@@ -180,12 +180,19 @@ class AdminController extends Controller
         $yearStart = CarbonImmutable::create($chartYear, 4, 1)->startOfDay();
         $yearEnd = $yearStart->addYear()->subDay()->endOfDay();
 
-        $candidateLevelScope = function ($query) use ($isDeliveryLead, $deliveryLeadRecruiterIds, $selectedRecruiterId, $selectedClientId, $yearStart, $yearEnd) {
+        $candidateLevelScope = function ($query) use ($isDeliveryLead, $deliveryLeadRecruiterIds, $selectedRecruiterId, $selectedClientId, $dateFrom, $dateTo, $yearStart, $yearEnd) {
             $query
                 ->when($isDeliveryLead, fn ($candidate) => $candidate->whereIn('recruiter_id', $deliveryLeadRecruiterIds))
                 ->when($selectedRecruiterId !== null, fn ($candidate) => $candidate->where('recruiter_id', $selectedRecruiterId))
-                ->when($selectedClientId, fn ($candidate) => $candidate->where('client_id', $selectedClientId))
-                ->whereBetween('candidates.created_at', [$yearStart, $yearEnd]);
+                ->when($selectedClientId, fn ($candidate) => $candidate->where('client_id', $selectedClientId));
+
+            if ($dateFrom || $dateTo) {
+                $query
+                    ->when($dateFrom, fn ($candidate) => $candidate->where('candidates.created_at', '>=', $dateFrom))
+                    ->when($dateTo, fn ($candidate) => $candidate->where('candidates.created_at', '<=', $dateTo));
+            } else {
+                $query->whereBetween('candidates.created_at', [$yearStart, $yearEnd]);
+            }
         };
         $candidateLevels = InterviewLevel::query()
             ->withCount(['candidates' => $candidateLevelScope])
@@ -197,13 +204,25 @@ class AdminController extends Controller
         // Onboarding outcomes must follow the actual onboarding date, not the
         // date on which the candidate record was created.
         $onboardingLevelCounts = (clone $candidateScope)
-            ->where(function ($query) use ($yearStart, $yearEnd) {
-                $query->where(function ($onboarded) use ($yearStart, $yearEnd) {
-                    $onboarded->where('level_of_interview_id', 20)
-                        ->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
-                })->orWhere(function ($declined) use ($yearStart, $yearEnd) {
-                    $declined->where('level_of_interview_id', 21)
-                        ->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
+            ->where(function ($query) use ($dateFrom, $dateTo, $yearStart, $yearEnd) {
+                $query->where(function ($onboarded) use ($dateFrom, $dateTo, $yearStart, $yearEnd) {
+                    $onboarded->where('level_of_interview_id', 20);
+                    if ($dateFrom || $dateTo) {
+                        $onboarded
+                            ->when($dateFrom, fn ($q) => $q->whereDate('onboarding_date', '>=', $dateFrom->toDateString()))
+                            ->when($dateTo, fn ($q) => $q->whereDate('onboarding_date', '<=', $dateTo->toDateString()));
+                    } else {
+                        $onboarded->whereBetween('onboarding_date', [$yearStart, $yearEnd]);
+                    }
+                })->orWhere(function ($declined) use ($dateFrom, $dateTo, $yearStart, $yearEnd) {
+                    $declined->where('level_of_interview_id', 21);
+                    if ($dateFrom || $dateTo) {
+                        $declined
+                            ->when($dateFrom, fn ($q) => $q->where('candidates.updated_at', '>=', $dateFrom))
+                            ->when($dateTo, fn ($q) => $q->where('candidates.updated_at', '<=', $dateTo));
+                    } else {
+                        $declined->whereBetween('candidates.updated_at', [$yearStart, $yearEnd]);
+                    }
                 });
             })
             ->selectRaw('level_of_interview_id, COUNT(*) as total')
