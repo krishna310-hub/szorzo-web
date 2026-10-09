@@ -261,4 +261,29 @@ $(document).ready(function () {
 
         icon.toggleClass("ri-eye-fill ri-eye-off-fill");
     });
+
+    // Mobile sidebar toggle, close button & overlay helpers
+    $(document).on('click', '#sidebar-close-btn, .sidebar-mobile-close-btn', function () {
+        $('body').removeClass('vertical-sidebar-enable');
+        $('.hamburger-icon').removeClass('open');
+    });
+
+    $(document).on('click', '.vertical-overlay', function () {
+        $('body').removeClass('vertical-sidebar-enable');
+        $('.hamburger-icon').removeClass('open');
+    });
+
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape' && $('body').hasClass('vertical-sidebar-enable')) {
+            $('body').removeClass('vertical-sidebar-enable');
+            $('.hamburger-icon').removeClass('open');
+        }
+    });
+
+    $(document).on('click', '.navbar-menu .navbar-nav a:not([data-bs-toggle="collapse"])', function () {
+        if ($(window).width() <= 767) {
+            $('body').removeClass('vertical-sidebar-enable');
+            $('.hamburger-icon').removeClass('open');
+        }
+    });
 });

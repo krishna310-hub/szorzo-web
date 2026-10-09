@@ -309,7 +309,7 @@
               'horizontal' != sessionStorage.getItem('data-layout') &&
                 document.documentElement.setAttribute('data-sidebar-size', 'lg'),
               document.querySelector('.hamburger-icon')) &&
-              document.querySelector('.hamburger-icon').classList.add('open'),
+              document.querySelector('.hamburger-icon').classList.remove('open'),
           document.querySelectorAll('#navbar-nav > li.nav-item'))
       Array.from(e).forEach(function (e) {
         e.addEventListener('click', c.bind(this), !1),
@@ -363,6 +363,7 @@
     function O () {
       var e = document.documentElement.clientWidth
       767 < e &&
+        document.querySelector('.hamburger-icon') &&
         document.querySelector('.hamburger-icon').classList.toggle('open'),
         'horizontal' === document.documentElement.getAttribute('data-layout') &&
           (document.body.classList.contains('menu')
@@ -386,8 +387,14 @@
                     'lg'
                   ))
             : e <= 767 &&
-              (document.body.classList.add('vertical-sidebar-enable'),
-              document.documentElement.setAttribute('data-sidebar-size', 'lg'))),
+              (document.body.classList.contains('vertical-sidebar-enable')
+                ? (document.body.classList.remove('vertical-sidebar-enable'),
+                  document.querySelector('.hamburger-icon') &&
+                    document.querySelector('.hamburger-icon').classList.remove('open'))
+                : (document.body.classList.add('vertical-sidebar-enable'),
+                  document.documentElement.setAttribute('data-sidebar-size', 'lg'),
+                  document.querySelector('.hamburger-icon') &&
+                    document.querySelector('.hamburger-icon').classList.add('open')))),
         'semibox' === document.documentElement.getAttribute('data-layout') &&
           (767 < e
             ? 'show' ==
@@ -401,8 +408,14 @@
                   document.documentElement.getAttribute('data-sidebar-size')
                 ))
             : e <= 767 &&
-              (document.body.classList.add('vertical-sidebar-enable'),
-              document.documentElement.setAttribute('data-sidebar-size', 'lg'))),
+              (document.body.classList.contains('vertical-sidebar-enable')
+                ? (document.body.classList.remove('vertical-sidebar-enable'),
+                  document.querySelector('.hamburger-icon') &&
+                    document.querySelector('.hamburger-icon').classList.remove('open'))
+                : (document.body.classList.add('vertical-sidebar-enable'),
+                  document.documentElement.setAttribute('data-sidebar-size', 'lg'),
+                  document.querySelector('.hamburger-icon') &&
+                    document.querySelector('.hamburger-icon').classList.add('open')))),
         'twocolumn' == document.documentElement.getAttribute('data-layout') &&
           (document.body.classList.contains('twocolumn-panel')
             ? document.body.classList.remove('twocolumn-panel')
@@ -443,12 +456,22 @@
               Array.from(e).forEach(function (e) {
                 e.addEventListener('click', function () {
                   document.body.classList.remove('vertical-sidebar-enable'),
+                    document.querySelector('.hamburger-icon') &&
+                      document.querySelector('.hamburger-icon').classList.remove('open'),
                     'twocolumn' == sessionStorage.getItem('data-layout')
                       ? document.body.classList.add('twocolumn-panel')
                       : document.documentElement.setAttribute(
                           'data-sidebar-size',
                           sessionStorage.getItem('data-sidebar-size')
                         )
+                })
+              }),
+            (e = document.querySelectorAll('.sidebar-mobile-close-btn, #sidebar-close-btn')) &&
+              Array.from(e).forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                  document.body.classList.remove('vertical-sidebar-enable'),
+                    document.querySelector('.hamburger-icon') &&
+                      document.querySelector('.hamburger-icon').classList.remove('open')
                 })
               }),
             E()

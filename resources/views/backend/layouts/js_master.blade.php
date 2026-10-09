@@ -1,6 +1,6 @@
 <!-- Custom Script -->
 
-<script src="{{asset('admin/js/custom-script.js')}}"></script>
+<script src="{{asset('admin/js/custom-script.js')}}?v={{ file_exists(public_path('admin/js/custom-script.js')) ? filemtime(public_path('admin/js/custom-script.js')) : '1.1' }}"></script>
 <!-- JAVASCRIPT -->
 <script src="{{asset('admin/libs/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
 <script src="{{asset('admin/libs/simplebar/simplebar.min.js')}}"></script>
@@ -30,7 +30,7 @@
 {{-- <script src="{{ asset('admin/libs/%40ckeditor/ckeditor5-build-classic/build/ckeditor.js')}}"></script> --}}
 
 <!-- App js -->
-<script src="{{asset('admin/js/app.js')}}"></script>
+<script src="{{asset('admin/js/app.js')}}?v={{ file_exists(public_path('admin/js/app.js')) ? filemtime(public_path('admin/js/app.js')) : '1.1' }}"></script>
 
 {{-- Profile --}}
 <script src="{{ asset('admin/js/pages/profile-setting.init.js')}}"></script>

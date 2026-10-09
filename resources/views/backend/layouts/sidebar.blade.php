@@ -121,6 +121,91 @@
         left: auto !important;
         right: 100% !important;
     }
+
+    /* -----------------------------------------
+       5. Mobile Sidebar Styles & Close Button
+    ----------------------------------------- */
+    @media (max-width: 767.98px) {
+        :is([data-layout="vertical"], [data-layout="semibox"]) .navbar-menu .navbar-brand-box {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px !important;
+            height: 64px !important;
+            width: 100% !important;
+            position: relative !important;
+            top: 0 !important;
+            left: 0 !important;
+            text-align: left !important;
+            background: transparent !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .navbar-menu .navbar-brand-box .logo-light {
+            display: flex !important;
+            align-items: center;
+        }
+
+        .navbar-menu .navbar-brand-box .logo-dark {
+            display: none !important;
+        }
+
+        .navbar-menu .navbar-brand-box .sz-logo-wrapper-inner {
+            margin: 0 !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+
+        .navbar-menu .navbar-brand-box .sz-logo-top {
+            max-height: 28px !important;
+            margin-bottom: 0 !important;
+        }
+
+        .navbar-menu .navbar-brand-box .sz-logo-bottom {
+            max-width: 110px !important;
+            margin-top: 0 !important;
+        }
+
+        .navbar-menu .sidebar-mobile-close-btn {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .navbar-menu .sidebar-mobile-close-btn:hover,
+        .navbar-menu .sidebar-mobile-close-btn:active {
+            background: rgba(239, 68, 68, 0.5) !important;
+            border-color: rgba(239, 68, 68, 0.7) !important;
+            color: #ffffff !important;
+        }
+
+        .app-menu {
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .sidebar-mobile-close-btn {
+            display: none !important;
+        }
+    }
+
+    .vertical-overlay {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
 </style>
 
 <div class="app-menu navbar-menu">
@@ -134,7 +219,7 @@
             </span>
             <span class="logo-lg">
                 <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp') }}"
-                    alt="" height="17">
+                    alt="" height="80">
                 <img src="{{ asset('frontend/images/logo-bg.webp') }}" alt="Logo" width="230px"
                     class="logo-second">
             </span>
@@ -160,6 +245,11 @@
         <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
             id="vertical-hover">
             <i class="ri-record-circle-line"></i>
+        </button>
+
+        <button type="button" class="btn sidebar-mobile-close-btn d-md-none" id="sidebar-close-btn"
+            aria-label="Close sidebar">
+            <i class="ri-close-line fs-20"></i>
         </button>
     </div>
 
@@ -240,18 +330,18 @@
 
                         <li class="nav-item">
                             <a class="nav-link menu-link"
-                                href="#sidebarMasterManagement"
+                                href="#sidebarSalesManagement"
                                 data-bs-toggle="collapse"
                                 role="button"
                                 aria-expanded="{{ request()->is('admin/master-management*') ? 'true' : 'false' }}"
-                                aria-controls="sidebarMasterManagement">
+                                aria-controls="sidebarSalesManagement">
 
                                 <i class="ri-database-2-fill"></i>
                                 <span>Sales</span>
                             </a>
 
                             <div class="collapse menu-dropdown {{ request()->is('admin/master-management*') ? 'show' : '' }}"
-                                id="sidebarMasterManagement">
+                                id="sidebarSalesManagement">
 
                                 <ul class="nav nav-sm flex-column">
                                     @can('read', \App\Models\LeadGeneration::class)
@@ -292,7 +382,7 @@
 
                         <li class="nav-item">
                             <a class="nav-link menu-link"
-                                href="#sidebarMasterManagement"
+                                href="#sidebarTagManagement"
                                 data-bs-toggle="collapse"
                                 role="button"
                                 aria-expanded="{{ request()->is([
@@ -301,7 +391,7 @@
                                     'admin/candidates*',
                                     'admin/interview-schedules*'
                                 ]) ? 'true' : 'false' }}"
-                                aria-controls="sidebarMasterManagement">
+                                aria-controls="sidebarTagManagement">
 
                                 <i class="ri-database-2-fill"></i>
                                 <span>TAG</span>
@@ -314,7 +404,7 @@
                                     'admin/candidates*',
                                     'admin/interview-schedules*'
                                 ]) ? 'show' : '' }}"
-                                id="sidebarMasterManagement">
+                                id="sidebarTagManagement">
 
                                 <ul class="nav nav-sm flex-column">
 
@@ -523,13 +613,13 @@
                         auth()->user()->can('read', \App\Models\Division::class))
                     <li class="menu-title"><i class="ri-more-fill"></i> <span>TAG Masters</span></li>
                     <li class="nav-item">
-                        <a class="nav-link menu-link" href="#sidebarMasters" data-bs-toggle="collapse"
+                        <a class="nav-link menu-link" href="#sidebarTagMasters" data-bs-toggle="collapse"
                             role="button" aria-expanded="{{ request()->is('admin/masters*') ? 'true' : 'false' }}"
-                            aria-controls="sidebarMasters">
+                            aria-controls="sidebarTagMasters">
                             <i class="ri-database-2-line"></i> <span>TAG Masters</span>
                         </a>
                         <div class="collapse menu-dropdown {{ request()->is('admin/masters*') ? 'show' : '' }}"
-                            id="sidebarMasters">
+                            id="sidebarTagMasters">
                             <ul class="nav nav-sm flex-column">
                                 @can('read', \App\Models\Client::class)
                                     <li class="nav-item">
@@ -824,3 +914,5 @@
     </div>
     <div class="sidebar-background"></div>
 </div>
+<!-- Vertical Overlay-->
+<div class="vertical-overlay"></div>
