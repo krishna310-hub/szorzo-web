@@ -1,7 +1,61 @@
 <style>
+    /* ==========================================================================
+       PREMIUM GLOSSY OBSIDIAN & SZORZO BRAND LOGO SIDEBAR
+       - Eyecare-optimized: No harsh bright red glare / bands
+       - Glossy obsidian glassmorphism with subtle top brand-red ambient glow
+       - 100% Crisp white typography for effortless legibility & high contrast
+       - Brand logo colors (#ea1c26 / #f74d2d) for active/hover interactive accents
+       ========================================================================== */
+
+    :root {
+        --sz-brand-red: #ea1c26;
+        --sz-brand-orange: #f74d2d;
+        --sz-brand-glow: rgba(234, 28, 38, 0.22);
+        --sz-sidebar-glass-border: rgba(255, 255, 255, 0.08);
+        --sz-sidebar-text-white: #ffffff;
+    }
+
     /* -----------------------------------------
-       1. Logo Wrapper Overrides
+       1. Base Sidebar Glassmorphic Container
     ----------------------------------------- */
+    .app-menu.navbar-menu {
+        /* Deep obsidian glass with smooth subtle ambient brand light at the top */
+        background: 
+            radial-gradient(ellipse 140% 320px at 50% 0%, rgba(234, 28, 38, 0.16) 0%, rgba(234, 28, 38, 0.04) 55%, transparent 85%),
+            radial-gradient(ellipse 90% 240px at 50% 100%, rgba(247, 77, 45, 0.08) 0%, transparent 75%),
+            linear-gradient(180deg, #12141c 0%, #0d0f15 45%, #07080c 100%) !important;
+        backdrop-filter: blur(24px) saturate(190%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+        border-right: 1px solid var(--sz-sidebar-glass-border) !important;
+        box-shadow: 
+            inset -1px 0 0 rgba(255, 255, 255, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12),
+            10px 0 35px rgba(0, 0, 0, 0.45) !important;
+        -webkit-box-shadow: 
+            inset -1px 0 0 rgba(255, 255, 255, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12),
+            10px 0 35px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    /* -----------------------------------------
+       2. Brand Logo Wrapper & Header Box
+    ----------------------------------------- */
+    .navbar-menu .navbar-brand-box {
+        background: transparent !important;
+        border-bottom: 1px solid var(--sz-sidebar-glass-border) !important;
+        position: relative;
+    }
+
+    .navbar-menu .navbar-brand-box::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 20px;
+        right: 20px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(234, 28, 38, 0.4), transparent);
+    }
+
     .sz-logo-wrapper-inner {
         display: flex;
         flex-direction: column;
@@ -20,6 +74,7 @@
         height: auto;
         max-height: 50px;
         margin-bottom: -5px;
+        filter: drop-shadow(0 2px 8px rgba(234, 28, 38, 0.25));
     }
 
     .sz-logo-bottom {
@@ -28,6 +83,7 @@
         max-width: 180px;
         height: auto;
         margin-top: 0;
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
     }
 
     .horizontal-logo .logo-lg img {
@@ -36,78 +92,242 @@
     }
 
     /* -----------------------------------------
-       2. Minimized Sidebar Parent Link Hover
-       (Your Custom Red/Dark Gradient)
+       3. Pure White Typography & Section Headers
+    ----------------------------------------- */
+    .navbar-menu .menu-title {
+        color: rgba(255, 255, 255, 0.72) !important;
+        font-weight: 700 !important;
+        font-size: 11px !important;
+        letter-spacing: 0.12em !important;
+        text-transform: uppercase !important;
+        padding: 18px 24px 8px 24px !important;
+    }
+
+    .navbar-menu .menu-title span {
+        color: rgba(255, 255, 255, 0.72) !important;
+        font-weight: 700 !important;
+        padding: 0 !important;
+    }
+
+    .navbar-menu .menu-title i {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* -----------------------------------------
+       4. Navigation Links (Pure Crisp White)
+    ----------------------------------------- */
+    .navbar-menu .navbar-nav .nav-link {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+        font-size: 0.92rem !important;
+        letter-spacing: 0.2px !important;
+        padding: 0.65rem 1.25rem !important;
+        margin: 2px 12px !important;
+        border-radius: 8px !important;
+        position: relative !important;
+        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-link i,
+    .navbar-menu .navbar-nav .nav-link svg {
+        color: #ffffff !important;
+        font-size: 1.15rem !important;
+        min-width: 1.75rem !important;
+        opacity: 0.92 !important;
+        transition: all 0.2s ease !important;
+    }
+
+    /* Expand / Collapse Chevron Arrows */
+    .navbar-menu .navbar-nav .nav-link[data-bs-toggle="collapse"]:after {
+        color: #ffffff !important;
+        opacity: 0.75 !important;
+        right: 14px !important;
+        transition: transform 0.25s ease, opacity 0.2s ease !important;
+    }
+
+    /* -----------------------------------------
+       5. Interactive Hover & Active States (Logo Color)
+    ----------------------------------------- */
+    /* Hover Link */
+    .navbar-menu .navbar-nav .nav-link:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+        transform: translateX(3px) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-link:hover i,
+    .navbar-menu .navbar-nav .nav-link:hover svg {
+        color: #ffffff !important;
+        opacity: 1 !important;
+        transform: scale(1.08) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-link:hover[data-bs-toggle="collapse"]:after {
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    /* Active Link - Premium Glossy Pill with Brand Logo Red */
+    .navbar-menu .navbar-nav .nav-link.active {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        background: linear-gradient(90deg, rgba(234, 28, 38, 0.24) 0%, rgba(247, 77, 45, 0.10) 65%, rgba(255, 255, 255, 0.03) 100%) !important;
+        border-left: 3.5px solid var(--sz-brand-red) !important;
+        border-radius: 0 8px 8px 0 !important;
+        box-shadow: 
+            0 4px 18px rgba(234, 28, 38, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-link.active i,
+    .navbar-menu .navbar-nav .nav-link.active svg {
+        color: var(--sz-brand-orange) !important;
+        opacity: 1 !important;
+        text-shadow: 0 0 12px rgba(247, 77, 45, 0.6) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-link.active[data-bs-toggle="collapse"]:after {
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    /* Open Parent Category */
+    .navbar-menu .navbar-nav .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        font-weight: 600 !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] i {
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:after {
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    /* -----------------------------------------
+       6. Sub-Menu Accordion & Tree (White Text & Logo Accents)
+    ----------------------------------------- */
+    .navbar-menu .navbar-nav .nav-sm {
+        padding-left: 1.25rem !important;
+        margin-left: 1.5rem !important;
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-sm .nav-link {
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-size: 0.86rem !important;
+        padding: 0.5rem 1rem !important;
+        margin: 2px 6px !important;
+        font-weight: 400 !important;
+        border-radius: 6px !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-sm .nav-link:before {
+        background-color: rgba(255, 255, 255, 0.4) !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-sm .nav-link:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        font-weight: 500 !important;
+        transform: translateX(4px) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-sm .nav-link:hover:before {
+        background-color: var(--sz-brand-orange) !important;
+        box-shadow: 0 0 8px var(--sz-brand-orange) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-sm .nav-link.active {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        background: linear-gradient(90deg, rgba(234, 28, 38, 0.2) 0%, rgba(247, 77, 45, 0.06) 100%) !important;
+        border-left: 2px solid var(--sz-brand-red) !important;
+        border-radius: 0 6px 6px 0 !important;
+        box-shadow: 0 2px 10px rgba(234, 28, 38, 0.2) !important;
+    }
+
+    .navbar-menu .navbar-nav .nav-sm .nav-link.active:before {
+        background-color: var(--sz-brand-red) !important;
+        box-shadow: 0 0 10px var(--sz-brand-red) !important;
+    }
+
+    /* -----------------------------------------
+       7. Minimized Sidebar Hover & Flyout Menu
     ----------------------------------------- */
     :is([data-layout=vertical], [data-layout=semibox])[data-sidebar-size=sm] .navbar-menu .navbar-nav .nav-item:hover>a.menu-link {
         position: relative;
         width: calc(200px + var(--vz-vertical-menu-width-sm)) !important;
         -webkit-transition: none !important;
         transition: none !important;
-
-        /* Applied your custom requested gradient */
-        background: #000000 !important;
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
-
-        /* Polished UI Tweaks: white text contrast and rounded top-right edge */
+        background: #0f1118 !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
         color: #ffffff !important;
-        border-top-right-radius: 16px !important;
-        box-shadow: 10px 4px 30px rgba(0, 0, 0, 0.25) !important;
+        border-top-right-radius: 12px !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 10px 4px 30px rgba(0, 0, 0, 0.5) !important;
         z-index: 1001 !important;
     }
 
-    /* Force the icon inside the hovered parent link to white */
     :is([data-layout=vertical], [data-layout=semibox])[data-sidebar-size=sm] .navbar-menu .navbar-nav .nav-item:hover>a.menu-link i {
         color: #ffffff !important;
     }
 
-    /* -----------------------------------------
-       3. Premium Sidebar Sub-Menu (Flyout)
-    ----------------------------------------- */
     [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item:hover>.menu-dropdown,
     [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown.show {
-        /* Applied your custom requested gradient */
-        background: linear-gradient(180deg, #050505 0%, #1a0a0a 15%, #4b0f0f 35%, #b91c1c 65%, #7f1d1d 85%, #111111 100%) !important;
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-
-        /* Match the border radius with the parent link hover state */
-        border-radius: 0 0 16px 16px !important;
-        box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3) !important;
+        background: linear-gradient(180deg, rgba(15, 17, 24, 0.98) 0%, rgba(10, 11, 17, 0.99) 100%) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-left: 2px solid var(--sz-brand-red) !important;
+        border-radius: 0 0 14px 14px !important;
+        box-shadow: 
+            12px 12px 35px rgba(0, 0, 0, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
         padding: 12px 0 !important;
-        animation: fadeSlideIn 0.3s ease-out forwards;
+        animation: fadeSlideIn 0.25s ease-out forwards;
     }
 
     [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown .nav-link {
-        color: #9ba1a6 !important;
+        color: rgba(255, 255, 255, 0.88) !important;
         padding: 10px 24px !important;
         margin: 2px 12px !important;
         border-radius: 8px !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.2s ease !important;
         font-weight: 500;
         letter-spacing: 0.3px;
     }
 
     [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown .nav-link:hover {
-        background: rgba(255, 255, 255, 0.06) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
         color: #ffffff !important;
         transform: translateX(4px);
     }
 
     [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown .nav-link.active {
-        background: linear-gradient(90deg, rgba(230, 56, 56, 0.1) 0%, transparent 100%) !important;
-        color: #f04444 !important;
-        border-left: 2px solid #f04444 !important;
+        background: linear-gradient(90deg, rgba(234, 28, 38, 0.22) 0%, transparent 100%) !important;
+        color: #ffffff !important;
+        border-left: 2px solid var(--sz-brand-red) !important;
+        font-weight: 600 !important;
     }
 
     @keyframes fadeSlideIn {
         from {
             opacity: 0;
-            transform: translateX(-10px);
+            transform: translateX(-8px);
         }
-
         to {
             opacity: 1;
             transform: translateX(0);
@@ -115,7 +335,7 @@
     }
 
     /* -----------------------------------------
-       4. Horizontal Sub-Menu Alignment Fix
+       8. Horizontal Sub-Menu Alignment Fix
     ----------------------------------------- */
     html[data-layout="horizontal"] .navbar-menu .navbar-nav .nav-item .menu-dropdown .menu-dropdown {
         left: auto !important;
@@ -123,7 +343,34 @@
     }
 
     /* -----------------------------------------
-       5. Mobile Sidebar Styles & Close Button
+       9. Scrollbar & User Profile Styling
+    ----------------------------------------- */
+    .navbar-menu #scrollbar .simplebar-scrollbar:before {
+        background: rgba(255, 255, 255, 0.22) !important;
+        border-radius: 4px !important;
+    }
+
+    .navbar-menu #scrollbar .simplebar-scrollbar.simplebar-visible:before {
+        opacity: 0.6 !important;
+    }
+
+    .navbar-menu .sidebar-user {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+
+    .navbar-menu .sidebar-user-name-text {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+
+    .navbar-menu .sidebar-user-name-sub-text {
+        color: rgba(255, 255, 255, 0.72) !important;
+    }
+
+    /* -----------------------------------------
+       10. Mobile Sidebar Styles & Close Button
     ----------------------------------------- */
     @media (max-width: 767.98px) {
         :is([data-layout="vertical"], [data-layout="semibox"]) .navbar-menu .navbar-brand-box {
@@ -186,8 +433,8 @@
 
         .navbar-menu .sidebar-mobile-close-btn:hover,
         .navbar-menu .sidebar-mobile-close-btn:active {
-            background: rgba(239, 68, 68, 0.5) !important;
-            border-color: rgba(239, 68, 68, 0.7) !important;
+            background: var(--sz-brand-red) !important;
+            border-color: var(--sz-brand-orange) !important;
             color: #ffffff !important;
         }
 
