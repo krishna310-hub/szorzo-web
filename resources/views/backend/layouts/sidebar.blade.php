@@ -19,22 +19,22 @@
        1. Base Sidebar Glassmorphic Container
     ----------------------------------------- */
     .app-menu.navbar-menu {
-        /* Deep obsidian glass with smooth subtle ambient brand light at the top */
+        /* Deep Wine & Crimson Obsidian Glass - enriched with brand tones without eye strain */
         background: 
-            radial-gradient(ellipse 140% 320px at 50% 0%, rgba(234, 28, 38, 0.16) 0%, rgba(234, 28, 38, 0.04) 55%, transparent 85%),
-            radial-gradient(ellipse 90% 240px at 50% 100%, rgba(247, 77, 45, 0.08) 0%, transparent 75%),
-            linear-gradient(180deg, #12141c 0%, #0d0f15 45%, #07080c 100%) !important;
+            radial-gradient(ellipse 140% 340px at 50% 0%, rgba(234, 28, 38, 0.24) 0%, rgba(234, 28, 38, 0.08) 55%, transparent 85%),
+            radial-gradient(ellipse 100% 300px at 50% 100%, rgba(247, 77, 45, 0.12) 0%, transparent 80%),
+            linear-gradient(180deg, #24090d 0%, #1c0609 25%, #140407 50%, #0d0204 75%, #070102 100%) !important;
         backdrop-filter: blur(24px) saturate(190%) !important;
         -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
         border-right: 1px solid var(--sz-sidebar-glass-border) !important;
         box-shadow: 
             inset -1px 0 0 rgba(255, 255, 255, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 0.12),
-            10px 0 35px rgba(0, 0, 0, 0.45) !important;
+            inset 0 1px 0 rgba(255, 255, 255, 0.14),
+            10px 0 35px rgba(0, 0, 0, 0.5) !important;
         -webkit-box-shadow: 
             inset -1px 0 0 rgba(255, 255, 255, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 0.12),
-            10px 0 35px rgba(0, 0, 0, 0.45) !important;
+            inset 0 1px 0 rgba(255, 255, 255, 0.14),
+            10px 0 35px rgba(0, 0, 0, 0.5) !important;
     }
 
     /* -----------------------------------------
@@ -270,7 +270,7 @@
         width: calc(200px + var(--vz-vertical-menu-width-sm)) !important;
         -webkit-transition: none !important;
         transition: none !important;
-        background: #0f1118 !important;
+        background: #1e070b !important;
         backdrop-filter: blur(16px) !important;
         -webkit-backdrop-filter: blur(16px) !important;
         color: #ffffff !important;
@@ -287,7 +287,7 @@
 
     [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item:hover>.menu-dropdown,
     [data-sidebar-size="sm"] .navbar-menu .navbar-nav .nav-item .menu-dropdown.show {
-        background: linear-gradient(180deg, rgba(15, 17, 24, 0.98) 0%, rgba(10, 11, 17, 0.99) 100%) !important;
+        background: linear-gradient(180deg, rgba(30, 8, 12, 0.98) 0%, rgba(18, 5, 8, 0.99) 100%) !important;
         backdrop-filter: blur(20px) !important;
         -webkit-backdrop-filter: blur(20px) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
