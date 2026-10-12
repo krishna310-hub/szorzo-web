@@ -451,6 +451,54 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::post('/import', 'import')->name('import');
         });
     });
+
+    // Investers Module (4 Masters)
+    Route::prefix('investers')->group(function () {
+        // Master 1: Investers
+        Route::name('investers.')->controller(\App\Http\Controllers\backend\InvesterController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/{id}/show', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        // Master 2: Team & Management Scope
+        Route::prefix('team-managements')->name('invester-team-managements.')->controller(\App\Http\Controllers\backend\InvesterTeamManagementController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        // Master 3: Financial & Investment Details
+        Route::prefix('financial-details')->name('invester-financial-details.')->controller(\App\Http\Controllers\backend\InvesterFinancialDetailController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        // Master 4: Legal, Compliance & Governance
+        Route::prefix('legal-compliances')->name('invester-legal-compliances.')->controller(\App\Http\Controllers\backend\InvesterLegalComplianceController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/export', 'export')->name('export');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+    });
 });
 
 // AJAX Routes
