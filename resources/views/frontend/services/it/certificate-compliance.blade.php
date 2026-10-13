@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Certification & Compliance | SZORZO')
+@section('meta_description', 'Explore SZORZO certification and compliance services for enterprise IT infrastructure.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-certificate-compliance-bg">

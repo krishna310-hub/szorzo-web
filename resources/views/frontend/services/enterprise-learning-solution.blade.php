@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Enterprise Learning Solutions | SZORZO')
+@section('meta_description', 'Explore enterprise learning and workforce development solutions from SZORZO.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-enterprise-learning-solution-bg">

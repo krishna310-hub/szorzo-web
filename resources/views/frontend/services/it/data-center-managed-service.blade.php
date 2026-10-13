@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Data Center Managed Services | SZORZO')
+@section('meta_description', 'Explore SZORZO managed data center services for infrastructure monitoring, operations, and maintenance.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-it-managed-services-bg">

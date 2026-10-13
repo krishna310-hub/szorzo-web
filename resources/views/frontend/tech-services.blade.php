@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Technology Services | SZORZO')
+@section('meta_description', 'Software development, architecture, application engineering, integrations, and security services from SZORZO.')
 
 @section('body_class', 'tech-services-page')
 

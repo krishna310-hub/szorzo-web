@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Open Positions & Careers | SZORZO')
+@section('meta_description', 'Browse available positions and career opportunities at SZORZO.')
 
 @section('content')
 <!-- Page Header Start -->

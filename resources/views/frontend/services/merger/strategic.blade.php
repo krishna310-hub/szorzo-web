@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Merger & Acquisition Advisory | SZORZO')
+@section('meta_description', 'Explore strategic advisory and merger and acquisition services from SZORZO.')
 @section('content')
 <!-- Page Header Start -->
     <div class="page-header-ma-bg">

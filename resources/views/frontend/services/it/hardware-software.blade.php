@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Hardware & Software Integration | SZORZO')
+@section('meta_description', 'Connect enterprise hardware and software with SZORZO integration services.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-data-hardware-software-bg">

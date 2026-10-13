@@ -97,7 +97,7 @@
                         <!-- GCC SERVICES -->
                         <li class="menu-item-has-children">
                             <a
-                                href="{{ route('index') }}"
+                                href="{{ route('enterprice.formation') }}"
                                 style="font-size: large; color: white; font-weight: bold;"
                             >
                                 GCC SERVICES
@@ -105,7 +105,7 @@
 
                             <div class="sub-menu single-column-menu">
                                 <h4 class="title">
-                                    <a href="">
+                                    <a href="{{ route('enterprice.formation') }}">
                                         ENTERPRISE SERVICES
                                     </a>
                                 </h4>
@@ -159,7 +159,7 @@
                         <!-- IT SERVICES -->
                         <li class="menu-item-has-children">
                             <a
-                                href="#"
+                                href="{{ route('it.infrastructure') }}"
                                 style="font-size: large; color: white; font-weight: bold;"
                             >
                                 IT SERVICES
@@ -167,7 +167,7 @@
 
                             <div class="sub-menu single-column-menu">
                                 <h4 class="title">
-                                    <a href="">
+                                    <a href="{{ route('it.infrastructure') }}">
                                         IT SERVICES
                                     </a>
                                 </h4>

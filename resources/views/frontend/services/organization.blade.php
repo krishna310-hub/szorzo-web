@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Organization Capacity Assessment | SZORZO')
+@section('meta_description', 'Assess organizational capacity and workforce capabilities with SZORZO.')
 @section('content')
 <!-- Page Header Start -->
     <div class="page-header-oc-bg">

@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Marketing as a Service | SZORZO')
+@section('meta_description', 'Explore SZORZO marketing services to support market expansion and business growth.')
 @section('content')
 <!-- Page Header Start -->
     <div class="page-header-maas-bg">

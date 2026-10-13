@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Data Center Design, Build & Maintenance | SZORZO')
+@section('meta_description', 'Plan, build, and maintain data center infrastructure with SZORZO data center design and engineering services.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-data-center-design-bg">

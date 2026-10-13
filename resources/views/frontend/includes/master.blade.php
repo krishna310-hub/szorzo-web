@@ -51,6 +51,76 @@
     <!-- Page Title -->
     <title>@yield('title', 'SZORZO India\'s #1 GCC Launchpad | Global AI Partner')</title>
 
+    <!-- Structured Data (JSON-LD) for Sitelinks, Organization & WebSite -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": "{{ url('/') }}/#organization",
+                "name": "SZORZO",
+                "url": "{{ url('/') }}",
+                "logo": "{{ asset('frontend/images/rhino-logo.webp') }}",
+                "description": "SZORZO is India's leading GCC launchpad and global business transformation partner specializing in GCC setup, AI solutions, engineering services, and digital transformation.",
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "Customer Support",
+                    "url": "{{ route('contact') }}"
+                }
+            },
+            {
+                "@type": "WebSite",
+                "@id": "{{ url('/') }}/#website",
+                "url": "{{ url('/') }}",
+                "name": "SZORZO",
+                "description": "SZORZO India's #1 GCC Launchpad | Global AI Partner",
+                "publisher": {
+                    "@id": "{{ url('/') }}/#organization"
+                }
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "About Us",
+                "url": "{{ route('about.us') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Contact Us",
+                "url": "{{ route('contact') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "SZORZO AI",
+                "url": "{{ route('szorzo.ai') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Enterprise Formation and GCC Services",
+                "url": "{{ route('enterprice.formation') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "IT Infrastructure Services",
+                "url": "{{ route('it.infrastructure') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Telecom Services",
+                "url": "{{ route('telecom.services') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Careers",
+                "url": "{{ route('careers') }}"
+            },
+            {
+                "@type": "SiteNavigationElement",
+                "name": "Sitemap",
+                "url": "{{ route('site.map') }}"
+            }
+        ]
+    }
     </script>
     @yield('structured_data')
 

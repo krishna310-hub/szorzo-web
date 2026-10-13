@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Operations & HR Infrastructure | SZORZO')
+@section('meta_description', 'Build operations and HR infrastructure for enterprise growth with SZORZO.')
 @section('content')
 <!-- Page Header Start -->
     <div class="page-header-oi-bg">

@@ -1,4 +1,6 @@
 @extends('frontend.includes.master')
+@section('title', 'Cyber Security Services | SZORZO')
+@section('meta_description', 'Protect business systems and infrastructure with SZORZO cyber security services.')
 @section('content')
     <!-- Page Header Start -->
     <div class="page-header-cyber-security-bg">
