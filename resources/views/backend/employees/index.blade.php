@@ -63,8 +63,8 @@
     </div>
 
     <!-- Document Checklist & Verification Modal -->
-    <div class="modal fade" id="employeeChecklistModal" tabindex="-1" aria-labelledby="employeeChecklistModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+    <div class="modal fade" id="employeeChecklistModal" tabindex="-1" aria-labelledby="employeeChecklistModalLabel" aria-hidden="true" style="z-index: 1065 !important;">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down" style="z-index: 1070 !important;">
             <form id="checklist-verify-form" class="modal-content shadow-lg border-0 position-relative" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header bg-light py-3 border-bottom sticky-top z-3">
@@ -217,6 +217,12 @@
 }
 
 /* Modal Scroll & Responsive Card Enhancements */
+#employeeChecklistModal {
+    z-index: 1065 !important;
+}
+#employeeChecklistModal .modal-dialog {
+    z-index: 1070 !important;
+}
 #employeeChecklistModal .modal-dialog-scrollable {
     max-height: calc(100% - 2.5rem);
 }
@@ -450,10 +456,58 @@
                 table.ajax.reload();
             });
 
+            function ensureChecklistModalInBody() {
+                const modal = document.getElementById('employeeChecklistModal');
+                if (modal && modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+            }
+
+            // Move modal to body immediately so it is not trapped behind backdrops
+            ensureChecklistModalInBody();
+
+            // When modal is hidden, clean up any remaining backdrops and reset body lock
+            $('#employeeChecklistModal').on('hidden.bs.modal', function() {
+                $('#checklistScrollTopBtn').hide();
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
+            });
+
+            // Fallback close handler to guarantee modal dismisses reliably
+            $(document).on('click', '#employeeChecklistModal [data-bs-dismiss="modal"]', function(e) {
+                e.preventDefault();
+                const modalEl = document.getElementById('employeeChecklistModal');
+                if (window.bootstrap && bootstrap.Modal) {
+                    const inst = bootstrap.Modal.getInstance(modalEl);
+                    if (inst) {
+                        inst.hide();
+                    } else {
+                        $(modalEl).modal('hide');
+                    }
+                } else {
+                    $(modalEl).modal('hide');
+                }
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
+            });
+
             // Checklist modal trigger
-            $(document).on('click', '.open-checklist-modal', function() {
+            $(document).on('click', '.open-checklist-modal', function(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ensureChecklistModalInBody();
+
+                // Clean up any stale or stacked backdrops
+                if (!$('#employeeChecklistModal').hasClass('show')) {
+                    $('.modal-backdrop').remove();
+                }
+
                 var empId = $(this).data('id');
                 var empName = $(this).data('name') || 'Employee';
+                var modalEl = document.getElementById('employeeChecklistModal');
                 var modal = $('#employeeChecklistModal');
                 var form = $('#checklist-verify-form');
                 var content = $('#checklist-modal-content');
@@ -463,7 +517,13 @@
                 form.attr('action', '{{ url('admin/masters/employees') }}/' + empId + '/verify-checklist');
                 content.scrollTop(0);
                 content.html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2 text-muted">Loading checklist &amp; documents for ' + empName + '...</p></div>');
-                modal.modal('show');
+
+                if (window.bootstrap && bootstrap.Modal) {
+                    const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    bsModal.show();
+                } else {
+                    modal.modal('show');
+                }
 
                 $.ajax({
                     url: '{{ url('admin/masters/employees') }}/' + empId + '/checklist',
@@ -495,10 +555,6 @@
             $(document).on('click', '#checklistScrollTopBtn', function(e) {
                 e.preventDefault();
                 $('#checklist-modal-content').animate({ scrollTop: 0 }, 300);
-            });
-
-            $('#employeeChecklistModal').on('hidden.bs.modal', function() {
-                $('#checklistScrollTopBtn').hide();
             });
 
             // Checklist checkbox toggle in modal
@@ -572,7 +628,19 @@
                     success: function(res) {
                         if (res.status) {
                             toastr.success(res.message);
-                            $('#employeeChecklistModal').modal('hide');
+                            const modalEl = document.getElementById('employeeChecklistModal');
+                            if (window.bootstrap && bootstrap.Modal) {
+                                const bsModal = bootstrap.Modal.getInstance(modalEl);
+                                if (bsModal) {
+                                    bsModal.hide();
+                                } else {
+                                    $('#employeeChecklistModal').modal('hide');
+                                }
+                            } else {
+                                $('#employeeChecklistModal').modal('hide');
+                            }
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
                             table.ajax.reload(null, false);
                         } else {
                             toastr.error(res.message || 'Failed to save verification.');
