@@ -83,5 +83,28 @@ class InvesterModuleTest extends TestCase
             $this->assertTrue(method_exists($policy, 'before'));
         }
     }
+
+    public function test_sidebar_and_navigation_buttons(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $sidebarContent = file_get_contents($baseDir . '/resources/views/backend/layouts/sidebar.blade.php');
+        $this->assertStringNotContainsString('#sidebarInvesters', $sidebarContent, 'Sidebar should not contain collapsible investor submenus');
+        $this->assertStringContainsString('ri-funds-line', $sidebarContent);
+        $this->assertStringContainsString('admin/investers*', $sidebarContent);
+
+        $navButtonsPath = $baseDir . '/resources/views/backend/investers/partials/nav-buttons.blade.php';
+        $this->assertFileExists($navButtonsPath);
+        $navButtonsContent = file_get_contents($navButtonsPath);
+
+        $this->assertStringContainsString("can('read', \\App\\Models\\Invester::class)", $navButtonsContent);
+        $this->assertStringContainsString("can('read', \\App\\Models\\InvesterTeamManagement::class)", $navButtonsContent);
+        $this->assertStringContainsString("can('read', \\App\\Models\\InvesterFinancialDetail::class)", $navButtonsContent);
+        $this->assertStringContainsString("can('read', \\App\\Models\\InvesterLegalCompliance::class)", $navButtonsContent);
+
+        $this->assertStringContainsString("route('admin.investers.index')", $navButtonsContent);
+        $this->assertStringContainsString("route('admin.invester-team-managements.index')", $navButtonsContent);
+        $this->assertStringContainsString("route('admin.invester-financial-details.index')", $navButtonsContent);
+        $this->assertStringContainsString("route('admin.invester-legal-compliances.index')", $navButtonsContent);
+    }
 }
 

@@ -30,19 +30,51 @@
     </div>
     <div class="summary">Total candidates<br><strong>{{ number_format($total) }}</strong></div>
 
-    @foreach([['Recruiter Report', $recruiterReport], ['Client Report', $clientReport], ['Level of Interview Report', $levelReport]] as [$title, $rows])
+    @foreach([['Recruiter Report', $recruiterReport, false], ['Client Report', $clientReport, true], ['Level of Interview Report', $levelReport, false]] as [$title, $rows, $hasLevels])
         <div class="section">
             <div class="section-title"><h2>{{ $title }}</h2></div>
             <table class="report">
-                <thead><tr><th>Name</th><th class="number">Count</th><th class="number">%</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th class="number" style="width: 50px;">Count</th>
+                        @if($hasLevels)
+                            @foreach($levelReport as $lvl)
+                                <th class="number" style="font-size: 8px;">{{ $lvl->label }}</th>
+                            @endforeach
+                        @endif
+                        <th class="number" style="width: 50px;">%</th>
+                    </tr>
+                </thead>
                 <tbody>
                     @forelse($rows as $row)
-                        <tr><td>{{ $row->label }}</td><td class="number">{{ number_format($row->total) }}</td><td class="number">{{ number_format($row->percentage, 2) }}%</td></tr>
+                        <tr>
+                            <td>{{ $row->label }}</td>
+                            <td class="number">{{ number_format($row->total) }}</td>
+                            @if($hasLevels)
+                                @foreach($levelReport as $lvl)
+                                    @php $cnt = $row->level_counts[$lvl->label] ?? 0; @endphp
+                                    <td class="number" style="font-size: 8px;">{{ $cnt > 0 ? number_format($cnt) : 0 }}</td>
+                                @endforeach
+                            @endif
+                            <td class="number">{{ number_format($row->percentage, 2) }}%</td>
+                        </tr>
                     @empty
-                        <tr><td colspan="3">No candidate data found.</td></tr>
+                        <tr><td colspan="{{ $hasLevels ? (count($levelReport) + 3) : 3 }}">No candidate data found.</td></tr>
                     @endforelse
                 </tbody>
-                <tfoot><tr><td>Total Result</td><td class="number">{{ number_format($total) }}</td><td class="number">{{ $total ? '100.00%' : '0.00%' }}</td></tr></tfoot>
+                <tfoot>
+                    <tr>
+                        <td>Total Result</td>
+                        <td class="number">{{ number_format($total) }}</td>
+                        @if($hasLevels)
+                            @foreach($levelReport as $lvl)
+                                <td class="number" style="font-size: 8px;">{{ number_format($lvl->total) }}</td>
+                            @endforeach
+                        @endif
+                        <td class="number">{{ $total ? '100.00%' : '0.00%' }}</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     @endforeach

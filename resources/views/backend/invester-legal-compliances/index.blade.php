@@ -21,6 +21,8 @@
                 </div>
             </div>
 
+            @include('backend.investers.partials.nav-buttons')
+
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="ri-check-double-line me-1"></i> {{ session('success') }}

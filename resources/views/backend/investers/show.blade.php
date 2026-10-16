@@ -21,6 +21,8 @@
                 </div>
             </div>
 
+            @include('backend.investers.partials.nav-buttons')
+
             <!-- Profile Summary Card -->
             <div class="row">
                 <div class="col-lg-12">

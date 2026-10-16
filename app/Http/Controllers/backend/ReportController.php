@@ -72,7 +72,7 @@ class ReportController extends Controller
             'scopeLabel' => $scopeLabel,
             'total' => $total,
             'recruiterReport' => $this->breakdown($query, 'recruiters', 'recruiter_id', 'recruiter_name', $total, 'Unassigned recruiter'),
-            'clientReport' => $this->breakdown($query, 'clients', 'client_id', 'client', $total, 'Unassigned client'),
+            'clientReport' => $this->clientReportWithLevels($query, $total),
             'levelReport' => $this->breakdown($query, 'level_of_interviews', 'level_of_interview_id', 'level', $total, 'No interview level', 'sort_order'),
         ];
     }
@@ -136,5 +136,31 @@ class ReportController extends Controller
 
                 return $row;
             });
+    }
+
+    private function clientReportWithLevels(Builder $base, int $total)
+    {
+        $clientReport = $this->breakdown($base, 'clients', 'client_id', 'client', $total, 'Unassigned client');
+
+        $clientLevels = (clone $base)
+            ->leftJoin('level_of_interviews', function ($join) {
+                $join->on('level_of_interviews.id', '=', 'candidates.level_of_interview_id')
+                    ->whereNull('level_of_interviews.deleted_at');
+            })
+            ->selectRaw('candidates.client_id, candidates.level_of_interview_id, COALESCE(level_of_interviews.level, ?) as level_label, COALESCE(level_of_interviews.sort_order, 999999) as sort_order, COUNT(candidates.id) as total', ['No interview level'])
+            ->groupBy('candidates.client_id', 'candidates.level_of_interview_id', 'level_of_interviews.level', 'level_of_interviews.sort_order')
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('total', 'desc')
+            ->get()
+            ->groupBy(fn ($item) => (string) $item->client_id);
+
+        return $clientReport->map(function ($row) use ($clientLevels) {
+            $key = (string) $row->item_id;
+            $levels = $clientLevels->get($key, collect());
+            $row->levels = $levels;
+            $row->level_counts = $levels->pluck('total', 'level_label')->all();
+
+            return $row;
+        });
     }
 }

@@ -36,16 +36,161 @@
         <div class="text-uppercase opacity-75">Total candidates</div><div class="display-5 fw-semibold">{{ number_format($total) }}</div><div>{{ $scopeLabel }}</div>
     </div></div></div></div>
 
-    <div class="row">
-        @foreach([['Recruiter report', $recruiterReport, true], ['Client report', $clientReport, false], ['Level of interview report', $levelReport, false]] as [$title, $rows, $drilldown])
-        <div class="col-xl-{{ $loop->last ? 12 : 6 }}"><div class="card"><div class="card-header"><h5 class="card-title mb-0">{{ $title }}</h5></div><div class="card-body p-0"><div class="table-responsive">
-            <table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Name</th><th class="text-end">Count</th><th class="text-end">Percentage</th>@if($drilldown && !$filters['is_recruiter'])<th></th>@endif</tr></thead><tbody>
-            @forelse($rows as $row)<tr><td>{{ $row->label }}</td><td class="text-end fw-semibold">{{ number_format($row->total) }}</td><td class="text-end">{{ number_format($row->percentage, 2) }}%</td>
-                @if($drilldown && !$filters['is_recruiter'])<td class="text-end">@if($row->item_id)<div class="d-flex justify-content-end gap-1"><a class="btn btn-sm btn-outline-primary" href="{{ route('admin.reports.index', array_merge(request()->except('page'), ['recruiter_id' => $row->item_id])) }}">View</a>@can('export', \App\Models\Report::class)<a class="btn btn-sm btn-outline-danger" title="Download individual PDF" href="{{ route('admin.reports.pdf', array_merge(request()->except(['page', 'recruiter_id']), ['recruiter_id' => $row->item_id])) }}"><i class="ri-file-pdf-2-line"></i></a>@endcan</div>@endif</td>@endif
-            </tr>@empty<tr><td colspan="4" class="text-center text-muted py-4">No candidate data found.</td></tr>@endforelse
-            </tbody><tfoot><tr class="fw-bold"><td>Total Result</td><td class="text-end">{{ number_format($total) }}</td><td class="text-end">{{ $total ? '100.00%' : '0.00%' }}</td>@if($drilldown && !$filters['is_recruiter'])<td></td>@endif</tr></tfoot></table>
-        </div></div></div></div>
-        @endforeach
+    <div class="row g-3">
+        {{-- Recruiter report --}}
+        <div class="col-12">
+            <div class="card mb-0">
+                <div class="card-header"><h5 class="card-title mb-0">Recruiter report</h5></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th class="text-end" style="width: 140px;">Count</th>
+                                    <th class="text-end" style="width: 140px;">Percentage</th>
+                                    @if(!$filters['is_recruiter'])
+                                        <th style="width: 110px;"></th>
+                                    @endif
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recruiterReport as $row)
+                                    <tr>
+                                        <td>{{ $row->label }}</td>
+                                        <td class="text-end fw-semibold">{{ number_format($row->total) }}</td>
+                                        <td class="text-end">{{ number_format($row->percentage, 2) }}%</td>
+                                        @if(!$filters['is_recruiter'])
+                                            <td class="text-end">
+                                                @if($row->item_id)
+                                                    <div class="d-flex justify-content-end gap-1">
+                                                        <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.reports.index', array_merge(request()->except('page'), ['recruiter_id' => $row->item_id])) }}">View</a>
+                                                        @can('export', \App\Models\Report::class)
+                                                            <a class="btn btn-sm btn-outline-danger" title="Download individual PDF" href="{{ route('admin.reports.pdf', array_merge(request()->except(['page', 'recruiter_id']), ['recruiter_id' => $row->item_id])) }}"><i class="ri-file-pdf-2-line"></i></a>
+                                                        @endcan
+                                                    </div>
+                                                @endif
+                                            </td>
+                                        @endif
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="{{ !$filters['is_recruiter'] ? 4 : 3 }}" class="text-center text-muted py-4">No candidate data found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold">
+                                    <td>Total Result</td>
+                                    <td class="text-end">{{ number_format($total) }}</td>
+                                    <td class="text-end">{{ $total ? '100.00%' : '0.00%' }}</td>
+                                    @if(!$filters['is_recruiter'])
+                                        <td></td>
+                                    @endif
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Client report (col 12 with direct interview level column headers & horizontal scrolling) --}}
+        <div class="col-12">
+            <div class="card mb-0">
+                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h5 class="card-title mb-0">Client report</h5>
+                    @if(!empty($levelReport) && count($levelReport) > 4)
+                        <span class="badge bg-light text-muted border"><i class="ri-arrow-left-right-line me-1"></i>Scroll horizontally for all interview levels</span>
+                    @endif
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                        <table class="table table-hover align-middle mb-0 text-nowrap">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="min-width: 240px;">Name</th>
+                                    <th class="text-end" style="min-width: 90px;">Count</th>
+                                    @foreach($levelReport as $lvl)
+                                        <th class="text-end px-3" style="min-width: 120px;">{{ $lvl->label }}</th>
+                                    @endforeach
+                                    <th class="text-end" style="min-width: 100px;">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($clientReport as $row)
+                                    <tr>
+                                        <td class="fw-medium text-dark">{{ $row->label }}</td>
+                                        <td class="text-end fw-semibold fs-6">{{ number_format($row->total) }}</td>
+                                        @foreach($levelReport as $lvl)
+                                            @php $cnt = $row->level_counts[$lvl->label] ?? 0; @endphp
+                                            <td class="text-end px-3 {{ $cnt > 0 ? 'fw-semibold text-dark' : 'text-muted opacity-50' }}">
+                                                {{ $cnt > 0 ? number_format($cnt) : 0 }}
+                                            </td>
+                                        @endforeach
+                                        <td class="text-end">{{ number_format($row->percentage, 2) }}%</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="{{ count($levelReport) + 3 }}" class="text-center text-muted py-4">No candidate data found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold">
+                                    <td>Total Result</td>
+                                    <td class="text-end">{{ number_format($total) }}</td>
+                                    @foreach($levelReport as $lvl)
+                                        <td class="text-end px-3">{{ number_format($lvl->total) }}</td>
+                                    @endforeach
+                                    <td class="text-end">{{ $total ? '100.00%' : '0.00%' }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Level of interview report --}}
+        <div class="col-12">
+            <div class="card mb-0">
+                <div class="card-header"><h5 class="card-title mb-0">Level of interview report</h5></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th class="text-end" style="width: 140px;">Count</th>
+                                    <th class="text-end" style="width: 140px;">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($levelReport as $row)
+                                    <tr>
+                                        <td>{{ $row->label }}</td>
+                                        <td class="text-end fw-semibold">{{ number_format($row->total) }}</td>
+                                        <td class="text-end">{{ number_format($row->percentage, 2) }}%</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">No candidate data found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold">
+                                    <td>Total Result</td>
+                                    <td class="text-end">{{ number_format($total) }}</td>
+                                    <td class="text-end">{{ $total ? '100.00%' : '0.00%' }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div></div></div>
 @endsection

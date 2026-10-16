@@ -1087,50 +1087,24 @@
                     auth()->user()->can('read', \App\Models\InvesterFinancialDetail::class) ||
                     auth()->user()->can('read', \App\Models\InvesterLegalCompliance::class)
                 )
+                    @php
+                        $investerSidebarUrl = auth()->user()->can('read', \App\Models\Invester::class)
+                            ? route('admin.investers.index')
+                            : (auth()->user()->can('read', \App\Models\InvesterTeamManagement::class)
+                                ? route('admin.invester-team-managements.index')
+                                : (auth()->user()->can('read', \App\Models\InvesterFinancialDetail::class)
+                                    ? route('admin.invester-financial-details.index')
+                                    : (auth()->user()->can('read', \App\Models\InvesterLegalCompliance::class)
+                                        ? route('admin.invester-legal-compliances.index')
+                                        : '#')));
+                    @endphp
                     <li class="menu-title"><i class="ri-more-fill"></i> <span>Investers</span></li>
                     <li class="nav-item">
-                        <a class="nav-link menu-link" href="#sidebarInvesters" data-bs-toggle="collapse"
-                            role="button" aria-expanded="{{ request()->is('admin/investers*') ? 'true' : 'false' }}"
-                            aria-controls="sidebarInvesters">
-                            <i class="ri-funds-line"></i> <span>Investers</span>
+                        <a href="{{ $investerSidebarUrl }}"
+                            class="nav-link menu-link {{ request()->is('admin/investers*') ? 'active' : '' }}">
+                            <i class="ri-funds-line"></i>
+                            <span>Investers</span>
                         </a>
-                        <div class="collapse menu-dropdown {{ request()->is('admin/investers*') ? 'show' : '' }}"
-                            id="sidebarInvesters">
-                            <ul class="nav nav-sm flex-column">
-                                @can('read', \App\Models\Invester::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.investers.index') }}"
-                                            class="nav-link {{ request()->routeIs('admin.investers.*') ? 'active' : '' }}">
-                                            Investers
-                                        </a>
-                                    </li>
-                                @endcan
-                                @can('read', \App\Models\InvesterTeamManagement::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.invester-team-managements.index') }}"
-                                            class="nav-link {{ request()->routeIs('admin.invester-team-managements.*') ? 'active' : '' }}">
-                                            Team & Management Scope
-                                        </a>
-                                    </li>
-                                @endcan
-                                @can('read', \App\Models\InvesterFinancialDetail::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.invester-financial-details.index') }}"
-                                            class="nav-link {{ request()->routeIs('admin.invester-financial-details.*') ? 'active' : '' }}">
-                                            Financial & Investment Details
-                                        </a>
-                                    </li>
-                                @endcan
-                                @can('read', \App\Models\InvesterLegalCompliance::class)
-                                    <li class="nav-item">
-                                        <a href="{{ route('admin.invester-legal-compliances.index') }}"
-                                            class="nav-link {{ request()->routeIs('admin.invester-legal-compliances.*') ? 'active' : '' }}">
-                                            Legal, Compliance & Governance
-                                        </a>
-                                    </li>
-                                @endcan
-                            </ul>
-                        </div>
                     </li>
                 @endif
                 @if (auth()->user()->can('read', \App\Models\User::class) || auth()->user()->can('read', \App\Models\Role::class))
