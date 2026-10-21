@@ -129,6 +129,10 @@ class LoginController extends Controller
         session(['locked' => false]);
         session()->flash('success', 'Login Successfully!');
 
+        if ($user->isInvestor() || (int) $user->role_id === 6) {
+            return redirect()->intended(route('admin.investers.dashboard'));
+        }
+
         if ($user->role_id == 4) {
             return redirect()->intended(route('admin.sales-dashboard.index'));
         }

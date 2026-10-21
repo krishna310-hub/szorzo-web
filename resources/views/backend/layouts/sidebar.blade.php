@@ -550,7 +550,14 @@
             <div id="two-column-menu"></div>
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="menu-title"><span data-key="t-menu">Menu</span></li>
-                @can('dashboard', \App\Models\General::class)
+                @if(auth()->user()->isInvestor() || (int) auth()->user()->role_id === 6)
+                    <li class="nav-item">
+                        <a class="nav-link menu-link {{ request()->is('admin/investers/dashboard*') ? 'active' : '' }}"
+                            href="{{ route('admin.investers.dashboard') }}">
+                            <i class="ri-dashboard-2-line"></i> <span>Investor Dashboard</span>
+                        </a>
+                    </li>
+                @elseif(auth()->user()->can('dashboard', \App\Models\General::class))
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/dashboard') ? 'active' : '' }}"
                             href="{{ route('admin.dashboard') }}">
@@ -845,13 +852,22 @@
                     </li>
                 @endcan
 
+                @can('read', \App\Models\Employee::class)
+                    <li class="nav-item">
+                        <a href="{{ route('admin.employees.index') }}"
+                            class="nav-link menu-link {{ request()->is('admin/masters/employees*', 'admin/employees*') ? 'active' : '' }}">
+                            <i class="ri-team-line"></i>
+                            <span>Employees</span>
+                        </a>
+                    </li>
+                @endcan
+
                 @if (auth()->user()->can('read', \App\Models\Client::class) ||
                         auth()->user()->can('read', \App\Models\ClientJobRole::class) ||
                         auth()->user()->can('read', \App\Models\Recruiter::class) ||
                         auth()->user()->can('read', \App\Models\ProfileSourced::class) ||
                         auth()->user()->can('read', \App\Models\JobRole::class) ||
                         auth()->user()->can('read', \App\Models\Mode::class) ||
-                        auth()->user()->can('read', \App\Models\Employee::class) ||
                         auth()->user()->can('read', \App\Models\InterviewMode::class) ||
                         auth()->user()->can('read', \App\Models\Target::class) ||
                         ((int) auth()->id() === 1 && auth()->user()->can('read', \App\Models\Billing::class)) ||
@@ -861,11 +877,11 @@
                     <li class="menu-title"><i class="ri-more-fill"></i> <span>TAG Masters</span></li>
                     <li class="nav-item">
                         <a class="nav-link menu-link" href="#sidebarTagMasters" data-bs-toggle="collapse"
-                            role="button" aria-expanded="{{ request()->is('admin/masters*') ? 'true' : 'false' }}"
+                            role="button" aria-expanded="{{ (request()->is('admin/masters*') && !request()->is('admin/masters/employees*')) ? 'true' : 'false' }}"
                             aria-controls="sidebarTagMasters">
                             <i class="ri-database-2-line"></i> <span>TAG Masters</span>
                         </a>
-                        <div class="collapse menu-dropdown {{ request()->is('admin/masters*') ? 'show' : '' }}"
+                        <div class="collapse menu-dropdown {{ (request()->is('admin/masters*') && !request()->is('admin/masters/employees*')) ? 'show' : '' }}"
                             id="sidebarTagMasters">
                             <ul class="nav nav-sm flex-column">
                                 @can('read', \App\Models\Client::class)
@@ -881,13 +897,6 @@
                                             class="nav-link {{ request()->is('admin/masters/client-job-roles*') ? 'active' : '' }}">
                                             Client Job Roles </a>
                                     </li>
-                                @endcan
-                                @can('read', \App\Models\Employee::class)
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.employees.index') }}"
-                                        class="nav-link {{ request()->is('admin/masters/employees*') ? 'active' : '' }}">
-                                        Employees </a>
-                                </li>
                                 @endcan
                                 @can('read', \App\Models\Recruiter::class)
                                     <li class="nav-item">
@@ -1082,30 +1091,40 @@
                 @endif
 
                 @if (
+                    auth()->user()->isInvestor() ||
+                    (int) auth()->user()->role_id === 6 ||
                     auth()->user()->can('read', \App\Models\Invester::class) ||
+                    auth()->user()->can('read', \App\Models\InvesterDeployment::class) ||
                     auth()->user()->can('read', \App\Models\InvesterTeamManagement::class) ||
                     auth()->user()->can('read', \App\Models\InvesterFinancialDetail::class) ||
                     auth()->user()->can('read', \App\Models\InvesterLegalCompliance::class)
                 )
-                    @php
-                        $investerSidebarUrl = auth()->user()->can('read', \App\Models\Invester::class)
-                            ? route('admin.investers.index')
-                            : (auth()->user()->can('read', \App\Models\InvesterTeamManagement::class)
-                                ? route('admin.invester-team-managements.index')
-                                : (auth()->user()->can('read', \App\Models\InvesterFinancialDetail::class)
-                                    ? route('admin.invester-financial-details.index')
-                                    : (auth()->user()->can('read', \App\Models\InvesterLegalCompliance::class)
-                                        ? route('admin.invester-legal-compliances.index')
-                                        : '#')));
-                    @endphp
                     <li class="menu-title"><i class="ri-more-fill"></i> <span>Investers</span></li>
                     <li class="nav-item">
-                        <a href="{{ $investerSidebarUrl }}"
-                            class="nav-link menu-link {{ request()->is('admin/investers*') ? 'active' : '' }}">
-                            <i class="ri-funds-line"></i>
-                            <span>Investers</span>
+                        <a href="{{ route('admin.investers.dashboard') }}"
+                            class="nav-link menu-link {{ request()->is('admin/investers/dashboard*') ? 'active' : '' }}">
+                            <i class="ri-dashboard-2-line"></i>
+                            <span>Invester Dashboard</span>
                         </a>
                     </li>
+                    @can('read', \App\Models\Invester::class)
+                        <li class="nav-item">
+                            <a href="{{ route('admin.investers.index') }}"
+                                class="nav-link menu-link {{ (request()->is('admin/investers*') && !request()->is('admin/investers/dashboard*') && !request()->is('admin/investers/deployments*')) ? 'active' : '' }}">
+                                <i class="ri-funds-line"></i>
+                                <span>Investers List</span>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('read', \App\Models\InvesterDeployment::class)
+                        <li class="nav-item">
+                            <a href="{{ route('admin.invester-deployments.index') }}"
+                                class="nav-link menu-link {{ request()->is('admin/investers/deployments*') ? 'active' : '' }}">
+                                <i class="ri-briefcase-4-line"></i>
+                                <span>Invest Modules</span>
+                            </a>
+                        </li>
+                    @endcan
                 @endif
                 @if (auth()->user()->can('read', \App\Models\User::class) || auth()->user()->can('read', \App\Models\Role::class))
                     <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-settings">Roles &

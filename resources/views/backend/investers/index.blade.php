@@ -103,7 +103,7 @@ $(document).ready(function () {
             { data: 'investor_type', name: 'investor_type' },
             { data: 'contact', name: 'contact' },
             { data: 'primary_email', name: 'primary_email' },
-            { data: 'account_manager_name', name: 'accountManager.name' },
+            { data: 'account_manager_name', name: 'accountManager.employee_name' },
             { data: 'status', name: 'status', orderable: false, searchable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ]

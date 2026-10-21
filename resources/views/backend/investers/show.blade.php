@@ -55,6 +55,9 @@
                                     </div>
                                 </div>
                                 <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('admin.investers.dashboard') }}?invester_id={{ $invester->id }}" class="btn btn-success">
+                                        <i class="ri-dashboard-2-line align-middle me-1"></i> Investor Dashboard
+                                    </a>
                                     @can('edit', \App\Models\Invester::class)
                                         <a href="{{ route('admin.investers.edit', $invester->id) }}" class="btn btn-primary">
                                             <i class="bx bxs-edit align-middle me-1"></i> Edit Investor
@@ -84,16 +87,45 @@
                                 </div>
                                 <div class="col-md-3">
                                     <span class="text-muted d-block small">Account Manager / Internal POC</span>
-                                    <span class="fw-semibold text-primary">
-                                        <i class="ri-user-star-line me-1"></i>
-                                        {{ $invester->accountManager?->name ?: 'Unassigned' }}
-                                    </span>
+                                    @php
+                                        $assignedManagers = $invester->assigned_account_managers;
+                                    @endphp
+                                    @if($assignedManagers->isNotEmpty())
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                            @foreach($assignedManagers as $mgr)
+                                                <span class="badge bg-primary-subtle text-primary fs-7">
+                                                    <i class="ri-user-star-line me-1"></i>
+                                                    {{ $mgr->employee_name }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @elseif($invester->accountManager)
+                                        <span class="fw-semibold text-primary">
+                                            <i class="ri-user-star-line me-1"></i>
+                                            {{ $invester->accountManager->employee_name ?: ($invester->accountManager->name ?: 'Unassigned') }}
+                                        </span>
+                                    @else
+                                        <span class="fw-semibold text-muted">Unassigned</span>
+                                    @endif
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <span class="text-muted d-block small">Residential / Office Address</span>
                                     <span class="fw-semibold">{{ $invester->address ?: '-' }}</span>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
+                                    <span class="text-muted d-block small">Portal Login Account (Role ID 6)</span>
+                                    @php $linkedUser = $invester->linkedUser(); @endphp
+                                    @if($linkedUser)
+                                        <span class="badge bg-success-subtle text-success fs-12">
+                                            <i class="ri-checkbox-circle-line me-1"></i> {{ $linkedUser->email }}
+                                        </span>
+                                    @else
+                                        <span class="badge bg-warning-subtle text-warning fs-12">
+                                            <i class="ri-alert-line me-1"></i> Not Created
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="col-md-4">
                                     <span class="text-muted d-block small">Internal Notes</span>
                                     <span class="fw-normal text-secondary">{{ $invester->internal_notes ?: 'No notes available.' }}</span>
                                 </div>
@@ -223,7 +255,139 @@
                     </div>
                 </div>
 
-                <!-- 3. Legal, Compliance & Governance -->
+                <!-- 3. Invest Modules: Employment Details & Profit Sharing -->
+                <div class="col-lg-12 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2 bg-light">
+                            <div>
+                                <h5 class="card-title mb-0">
+                                    <i class="ri-briefcase-4-line me-2 text-primary"></i> Employment Details & Profit Sharing Deployments
+                                </h5>
+                                <small class="text-muted">Deployed employees funded by this investor with margin calculation and profit sharing model</small>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ route('admin.invester-deployments.create') }}?invester_id={{ $invester->id }}" class="btn btn-sm btn-primary">
+                                    <i class="ri-add-line align-middle me-1"></i> Add Deployment / Invest Module
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Quick totals -->
+                            @php
+                                $activeDeployments = $invester->deployments->where('status', true);
+                                $totalRateCard = $activeDeployments->sum('approved_rate_card');
+                                $totalMargin = $activeDeployments->sum('margin_amount');
+                                $totalSzShare = $activeDeployments->sum('szorzo_commission_amount');
+                                $totalInvShare = $activeDeployments->sum('investor_commission_amount');
+                            @endphp
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-3">
+                                    <div class="p-2 border rounded bg-light text-center">
+                                        <div class="text-muted small">Active Deployments</div>
+                                        <div class="fw-bold fs-5">{{ $activeDeployments->count() }} Employees</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-2 border rounded bg-light text-center">
+                                        <div class="text-muted small">Total Margin Generated</div>
+                                        <div class="fw-bold fs-5 text-warning-emphasis">₹ {{ number_format($totalMargin, 2) }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-2 border rounded bg-light text-center">
+                                        <div class="text-muted small">SZ Share (70%)</div>
+                                        <div class="fw-bold fs-5 text-primary">₹ {{ number_format($totalSzShare, 2) }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-2 border rounded bg-light text-center">
+                                        <div class="text-muted small">Investor Share (30%)</div>
+                                        <div class="fw-bold fs-5 text-success">₹ {{ number_format($totalInvShare, 2) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Employee Name</th>
+                                            <th>Deployed To (Client)</th>
+                                            <th>Mode of Engagement</th>
+                                            <th>Duration</th>
+                                            <th>Approved Rate Card</th>
+                                            <th>Employee CTC</th>
+                                            <th>Margin %</th>
+                                            <th class="table-warning">Margin In Rupees</th>
+                                            <th>Profit Sharing (SZ / Investor)</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($invester->deployments as $dep)
+                                            <tr>
+                                                <td class="fw-semibold">
+                                                    @if($dep->employee)
+                                                        {{ $dep->employee->employee_name }}
+                                                        <span class="badge bg-secondary-subtle text-secondary fs-11 d-block mt-1">
+                                                            {{ $dep->employee->employee_no ?: 'SZ' . str_pad($dep->employee->id, 3, '0', STR_PAD_LEFT) }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">Unassigned</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($dep->client)
+                                                        <span class="fw-medium">{{ $dep->client->client }}</span>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info-subtle text-info">{{ $dep->mode_of_engagement ?: 'Contract' }}</span>
+                                                </td>
+                                                <td>{{ $dep->contract_duration ?: '-' }}</td>
+                                                <td class="fw-semibold">₹ {{ number_format((float) $dep->approved_rate_card, 2) }}</td>
+                                                <td>₹ {{ number_format((float) $dep->employee_ctc, 2) }}</td>
+                                                <td>{{ number_format((float) $dep->margin_percentage, 2) }}%</td>
+                                                <td class="table-warning fw-bold text-dark">
+                                                    ₹ {{ number_format((float) $dep->margin_amount, 2) }}
+                                                </td>
+                                                <td>
+                                                    <div class="small">
+                                                        <span class="text-primary fw-semibold">SZ ({{ number_format((float) $dep->szorzo_share_percentage, 0) }}%):</span> ₹ {{ number_format((float) $dep->szorzo_commission_amount, 2) }}
+                                                    </div>
+                                                    <div class="small">
+                                                        <span class="text-success fw-semibold">Inv ({{ number_format((float) $dep->investor_share_percentage, 0) }}%):</span> ₹ {{ number_format((float) $dep->investor_commission_amount, 2) }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if($dep->status)
+                                                        <span class="badge bg-success-subtle text-success">Active</span>
+                                                    @else
+                                                        <span class="badge bg-danger-subtle text-danger">Inactive</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('admin.invester-deployments.edit', $dep->id) }}" class="text-info fs-5 me-2" title="Edit"><i class="bx bxs-edit"></i></a>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="11" class="text-center text-muted py-4">
+                                                    No deployment records linked yet. Click "Add Deployment / Invest Module" to link employee employment details.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Legal, Compliance & Governance -->
                 <div class="col-lg-12 mb-4">
                     <div class="card">
                         <div class="card-header d-flex align-items-center justify-content-between bg-light">

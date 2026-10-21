@@ -91,6 +91,11 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\LeadGeneration::class => LeadGenerationPolicy::class,
         \App\Models\BusinessIntelligence::class => BusinessIntelligencePolicy::class,
         \App\Models\ServiceOffered::class => ServiceOfferedPolicy::class,
+        \App\Models\Invester::class => \App\Policies\InvesterPolicy::class,
+        \App\Models\InvesterFinancialDetail::class => \App\Policies\InvesterFinancialDetailPolicy::class,
+        \App\Models\InvesterTeamManagement::class => \App\Policies\InvesterTeamManagementPolicy::class,
+        \App\Models\InvesterLegalCompliance::class => \App\Policies\InvesterLegalCompliancePolicy::class,
+        \App\Models\InvesterDeployment::class => \App\Policies\InvesterDeploymentPolicy::class,
     ];
 
     /**

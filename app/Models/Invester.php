@@ -14,6 +14,7 @@ class Invester extends Model
 
     protected $fillable = [
         'invester_id',
+        'user_id',
         'name',
         'profile_picture',
         'investor_type',
@@ -22,20 +23,49 @@ class Invester extends Model
         'alternate_email',
         'address',
         'account_manager_id',
+        'account_manager_ids',
         'internal_notes',
         'status',
     ];
 
     protected $casts = [
         'status' => 'boolean',
+        'account_manager_ids' => 'array',
     ];
 
     /**
-     * Account Manager / Internal Point of Contact (Employee/User).
+     * Account Manager / Point of Contact (External Employee - Primary).
      */
     public function accountManager()
     {
-        return $this->belongsTo(User::class, 'account_manager_id');
+        return $this->belongsTo(Employee::class, 'account_manager_id');
+    }
+
+    /**
+     * Collection of all assigned Account Managers (External Employees).
+     */
+    public function getAssignedAccountManagersAttribute()
+    {
+        $ids = $this->account_manager_ids;
+        if (empty($ids) && !empty($this->account_manager_id)) {
+            $ids = [(int) $this->account_manager_id];
+        }
+        if (empty($ids) || !is_array($ids)) {
+            return collect();
+        }
+        return Employee::whereIn('id', $ids)->get();
+    }
+
+    /**
+     * Comma-separated names of assigned Account Managers.
+     */
+    public function getAccountManagerNamesAttribute(): string
+    {
+        $managers = $this->assigned_account_managers;
+        if ($managers->isNotEmpty()) {
+            return $managers->pluck('employee_name')->filter()->join(', ');
+        }
+        return (string) ($this->accountManager?->employee_name ?? $this->accountManager?->name ?? 'Unassigned');
     }
 
     /**
@@ -47,11 +77,86 @@ class Invester extends Model
     }
 
     /**
+     * Linked Login Account (User with Role ID 6).
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Locate linked user record via user_id, ref (invester_id), or email.
+     */
+    public function linkedUser(): ?User
+    {
+        if ($this->user) {
+            return $this->user;
+        }
+
+        if (!empty($this->invester_id)) {
+            $u = User::where('ref', $this->invester_id)->first();
+            if ($u) {
+                return $u;
+            }
+        }
+
+        $email = mb_strtolower(trim((string) $this->primary_email));
+        if ($email !== '') {
+            $u = User::whereRaw('LOWER(email) = ?', [$email])->first();
+            if ($u) {
+                return $u;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Invest Modules / Employment Details & Profit Sharing Deployments.
+     */
+    public function deployments()
+    {
+        return $this->hasMany(InvesterDeployment::class, 'invester_id');
+    }
+
+    /**
      * Financial & Investment Details records.
      */
     public function financialDetails()
     {
         return $this->hasMany(InvesterFinancialDetail::class, 'invester_id');
+    }
+
+    /**
+     * Total Overall Investment capital (sum of tranches).
+     */
+    public function getTotalOverallInvestmentAttribute(): float
+    {
+        return (float) $this->financialDetails()->sum('investment_amount');
+    }
+
+    /**
+     * Total Gross Margin Generated across active deployments.
+     */
+    public function getTotalMarginGeneratedAttribute(): float
+    {
+        return (float) $this->deployments()->where('status', true)->sum('margin_amount');
+    }
+
+    /**
+     * Total Investor Commission Earnings (e.g. 30% share).
+     */
+    public function getTotalInvestorEarningsAttribute(): float
+    {
+        return (float) $this->deployments()->where('status', true)->sum('investor_commission_amount');
+    }
+
+    /**
+     * Total Szorzo Commission Earnings (e.g. 70% share).
+     */
+    public function getTotalSzorzoEarningsAttribute(): float
+    {
+        return (float) $this->deployments()->where('status', true)->sum('szorzo_commission_amount');
     }
 
     /**

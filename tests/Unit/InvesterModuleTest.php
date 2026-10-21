@@ -106,5 +106,28 @@ class InvesterModuleTest extends TestCase
         $this->assertStringContainsString("route('admin.invester-financial-details.index')", $navButtonsContent);
         $this->assertStringContainsString("route('admin.invester-legal-compliances.index')", $navButtonsContent);
     }
+
+    public function test_invester_account_manager_relationship_and_employee_accessors(): void
+    {
+        $reflection = new \ReflectionMethod(Invester::class, 'accountManager');
+        $this->assertTrue($reflection->isPublic());
+
+        $employee = new \App\Models\Employee([
+            'employee_name' => 'John External',
+            'official_mail' => 'john@client.com',
+        ]);
+        $this->assertSame('John External', $employee->name);
+        $this->assertSame('john@client.com', $employee->email);
+    }
+
+    public function test_invester_multiselect_account_managers(): void
+    {
+        $invester = new Invester([
+            'account_manager_ids' => [4, 5],
+        ]);
+        $this->assertEquals([4, 5], $invester->account_manager_ids);
+        $this->assertTrue(method_exists($invester, 'getAssignedAccountManagersAttribute'));
+        $this->assertTrue(method_exists($invester, 'getAccountManagerNamesAttribute'));
+    }
 }
 

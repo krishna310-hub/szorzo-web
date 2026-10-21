@@ -4,13 +4,16 @@ namespace App\Http\Controllers\backend;
 
 use App\Exports\MasterDataExport;
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\Invester;
 use App\Models\InvesterFinancialDetail;
 use App\Models\InvesterLegalCompliance;
 use App\Models\InvesterTeamManagement;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -36,7 +39,12 @@ class InvesterController extends Controller
                     $initial = strtoupper(substr($row->name, 0, 1));
                     return '<div class="avatar-xs d-inline-block"><div class="avatar-title rounded-circle bg-primary-subtle text-primary fw-bold" style="width:36px;height:36px;line-height:36px;text-align:center;">' . $initial . '</div></div>';
                 })
-                ->addColumn('account_manager_name', fn ($row) => $row->accountManager?->name ?? '<span class="text-muted">Unassigned</span>')
+                ->addColumn('account_manager_name', function ($row) {
+                    $names = $row->account_manager_names;
+                    return $names !== 'Unassigned' && !empty($names)
+                        ? e($names)
+                        : '<span class="text-muted">Unassigned</span>';
+                })
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')
@@ -62,12 +70,24 @@ class InvesterController extends Controller
         return view('backend.investers.index');
     }
 
+    /**
+     * Get external employees only for Account Manager / Point of Contact.
+     */
+    protected function getExternalAccountManagers()
+    {
+        return Employee::with(['mode', 'client'])
+            ->orderBy('employee_name')
+            ->get()
+            ->filter(fn ($emp) => $emp->isExternal())
+            ->values();
+    }
+
     public function create()
     {
         $this->authorize('create', Invester::class);
 
         $suggestedId = Invester::nextInvesterId();
-        $accountManagers = User::orderBy('name')->get();
+        $accountManagers = $this->getExternalAccountManagers();
 
         return view('backend.investers.create', compact('suggestedId', 'accountManagers'));
     }
@@ -85,7 +105,9 @@ class InvesterController extends Controller
             'primary_email' => 'nullable|email|max:150',
             'alternate_email' => 'nullable|email|max:150',
             'address' => 'nullable|string',
-            'account_manager_id' => 'nullable|exists:users,id',
+            'account_manager_id' => 'nullable|exists:employees,id',
+            'account_manager_ids' => 'nullable|array',
+            'account_manager_ids.*' => 'integer|exists:employees,id',
             'internal_notes' => 'nullable|string',
             'status' => 'required|in:0,1',
 
@@ -107,6 +129,17 @@ class InvesterController extends Controller
             'nda_signed_doc' => 'nullable|file|mimes:pdf,doc,docx,zip,png,jpg,jpeg|max:10240',
         ]);
 
+        $managerIds = $request->input('account_manager_ids');
+        if (is_array($managerIds)) {
+            $managerIds = array_values(array_filter(array_map('intval', $managerIds)));
+        } elseif (!empty($validated['account_manager_id'])) {
+            $managerIds = [(int) $validated['account_manager_id']];
+        } else {
+            $managerIds = [];
+        }
+
+        $primaryManagerId = !empty($managerIds) ? $managerIds[0] : null;
+
         $investerData = [
             'invester_id' => $validated['invester_id'],
             'name' => $validated['name'],
@@ -115,7 +148,8 @@ class InvesterController extends Controller
             'primary_email' => $validated['primary_email'] ?? null,
             'alternate_email' => $validated['alternate_email'] ?? null,
             'address' => $validated['address'] ?? null,
-            'account_manager_id' => $validated['account_manager_id'] ?? null,
+            'account_manager_id' => $primaryManagerId,
+            'account_manager_ids' => !empty($managerIds) ? $managerIds : null,
             'internal_notes' => $validated['internal_notes'] ?? null,
             'status' => (bool) $validated['status'],
         ];
@@ -180,6 +214,44 @@ class InvesterController extends Controller
             ]);
         }
 
+        // Create or link User Account with Role ID 6 (Invester)
+        if ($request->boolean('create_user_account') || $request->filled('user_email') || $request->filled('user_password')) {
+            $userEmail = trim($request->input('user_email') ?: ($invester->primary_email ?? ''));
+            $userName = trim($request->input('user_name') ?: $invester->name);
+            $userPass = $request->input('user_password');
+
+            if (!empty($userEmail)) {
+                Role::firstOrCreate(
+                    ['id' => 6],
+                    ['name' => 'Invester', 'access_level' => 'invester', 'status' => 1, 'its_default' => 1]
+                );
+
+                $userData = [
+                    'name' => $userName,
+                    'email' => $userEmail,
+                    'role_id' => 6,
+                    'ref' => $invester->invester_id,
+                    'phone_number' => $invester->contact,
+                    'is_active' => $invester->status ? 1 : 0,
+                ];
+
+                if (!empty($userPass)) {
+                    $userData['password'] = Hash::make($userPass);
+                } else {
+                    $userData['password'] = Hash::make('Investor@123');
+                }
+
+                $user = User::where('email', $userEmail)->first();
+                if ($user) {
+                    $user->update($userData);
+                } else {
+                    $user = User::create($userData);
+                }
+
+                $invester->update(['user_id' => $user->id]);
+            }
+        }
+
         return redirect()->route('admin.investers.index')->with('success', 'Investor ' . $invester->name . ' (' . $invester->invester_id . ') created successfully.');
     }
 
@@ -187,7 +259,15 @@ class InvesterController extends Controller
     {
         $this->authorize('read', Invester::class);
 
-        $invester = Invester::with(['accountManager', 'teamManagements', 'financialDetails', 'legalCompliances'])->findOrFail($id);
+        $invester = Invester::with([
+            'accountManager',
+            'teamManagements',
+            'financialDetails',
+            'legalCompliances',
+            'deployments.employee',
+            'deployments.client',
+            'user',
+        ])->findOrFail($id);
 
         return view('backend.investers.show', compact('invester'));
     }
@@ -196,8 +276,26 @@ class InvesterController extends Controller
     {
         $this->authorize('edit', Invester::class);
 
-        $invester = Invester::with(['accountManager', 'teamManagements', 'financialDetails', 'legalCompliances'])->findOrFail($id);
-        $accountManagers = User::orderBy('name')->get();
+        $invester = Invester::with([
+            'accountManager',
+            'teamManagements',
+            'financialDetails',
+            'legalCompliances',
+            'deployments.employee',
+            'deployments.client',
+            'user',
+        ])->findOrFail($id);
+        $accountManagers = $this->getExternalAccountManagers();
+
+        $assignedIds = (array) ($invester->account_manager_ids ?: ($invester->account_manager_id ? [$invester->account_manager_id] : []));
+        foreach ($assignedIds as $aId) {
+            if ($aId && !$accountManagers->contains('id', (int) $aId)) {
+                $currentManager = Employee::with(['mode', 'client'])->find($aId);
+                if ($currentManager) {
+                    $accountManagers->push($currentManager);
+                }
+            }
+        }
 
         return view('backend.investers.edit', compact('invester', 'accountManagers'));
     }
@@ -222,10 +320,23 @@ class InvesterController extends Controller
             'primary_email' => 'nullable|email|max:150',
             'alternate_email' => 'nullable|email|max:150',
             'address' => 'nullable|string',
-            'account_manager_id' => 'nullable|exists:users,id',
+            'account_manager_id' => 'nullable|exists:employees,id',
+            'account_manager_ids' => 'nullable|array',
+            'account_manager_ids.*' => 'integer|exists:employees,id',
             'internal_notes' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
+
+        $managerIds = $request->input('account_manager_ids');
+        if (is_array($managerIds)) {
+            $managerIds = array_values(array_filter(array_map('intval', $managerIds)));
+        } elseif (!empty($validated['account_manager_id'])) {
+            $managerIds = [(int) $validated['account_manager_id']];
+        } else {
+            $managerIds = [];
+        }
+
+        $primaryManagerId = !empty($managerIds) ? $managerIds[0] : null;
 
         $data = [
             'invester_id' => $validated['invester_id'],
@@ -235,7 +346,8 @@ class InvesterController extends Controller
             'primary_email' => $validated['primary_email'] ?? null,
             'alternate_email' => $validated['alternate_email'] ?? null,
             'address' => $validated['address'] ?? null,
-            'account_manager_id' => $validated['account_manager_id'] ?? null,
+            'account_manager_id' => $primaryManagerId,
+            'account_manager_ids' => !empty($managerIds) ? $managerIds : null,
             'internal_notes' => $validated['internal_notes'] ?? null,
             'status' => (bool) $validated['status'],
         ];
@@ -256,6 +368,47 @@ class InvesterController extends Controller
         }
 
         $invester->update($data);
+
+        // Update or create linked User Account (Role ID 6)
+        if ($request->boolean('create_user_account') || $request->filled('user_email') || $request->filled('user_password')) {
+            $userEmail = trim($request->input('user_email') ?: ($invester->primary_email ?? ''));
+            $userName = trim($request->input('user_name') ?: $invester->name);
+            $userPass = $request->input('user_password');
+
+            if (!empty($userEmail)) {
+                Role::firstOrCreate(
+                    ['id' => 6],
+                    ['name' => 'Invester', 'access_level' => 'invester', 'status' => 1, 'its_default' => 1]
+                );
+
+                $existingUser = $invester->user_id ? User::find($invester->user_id) : User::where('email', $userEmail)->first();
+
+                $userData = [
+                    'name' => $userName,
+                    'email' => $userEmail,
+                    'role_id' => 6,
+                    'ref' => $invester->invester_id,
+                    'phone_number' => $invester->contact,
+                    'is_active' => $invester->status ? 1 : 0,
+                ];
+
+                if (!empty($userPass)) {
+                    $userData['password'] = Hash::make($userPass);
+                }
+
+                if ($existingUser) {
+                    $existingUser->update($userData);
+                    $user = $existingUser;
+                } else {
+                    if (empty($userData['password'])) {
+                        $userData['password'] = Hash::make('Investor@123');
+                    }
+                    $user = User::create($userData);
+                }
+
+                $invester->update(['user_id' => $user->id]);
+            }
+        }
 
         return redirect()->route('admin.investers.index')->with('success', 'Investor ' . $invester->name . ' updated successfully.');
     }
@@ -283,7 +436,7 @@ class InvesterController extends Controller
                 $row->primary_email,
                 $row->alternate_email,
                 $row->address,
-                $row->accountManager?->name ?? 'Unassigned',
+                $row->account_manager_names,
                 $row->internal_notes,
                 $row->status ? 'Active' : 'Inactive',
                 $row->created_at ? $row->created_at->format('Y-m-d H:i') : '-',

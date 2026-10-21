@@ -315,7 +315,7 @@
                 </div>
                 @if($records->hasPages())
                     <div class="card-footer bg-transparent border-top py-2">
-                        {{ $records->links() }}
+                        {{ $records->links('pagination::bootstrap-5') }}
                     </div>
                 @endif
             </div>

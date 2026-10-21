@@ -269,6 +269,22 @@ class Employee extends Model
     }
 
     /**
+     * Standardized name accessor compatible with User/Employee polymorphic expectations.
+     */
+    public function getNameAttribute(): string
+    {
+        return (string) ($this->employee_name ?? '');
+    }
+
+    /**
+     * Standardized email accessor compatible with User/Employee polymorphic expectations.
+     */
+    public function getEmailAttribute(): string
+    {
+        return (string) ($this->official_mail ?: ($this->personal_mail ?: ''));
+    }
+
+    /**
      * Scope query to Internal Users (Szorzo full-time employees).
      */
     public function scopeInternal($query)

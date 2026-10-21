@@ -114,18 +114,34 @@
     </div>
     <div class="card-body">
         <div class="row">
+            @php
+                $selectedAccountManagers = array_map('intval', (array) old(
+                    'account_manager_ids',
+                    $invester->account_manager_ids ?? (isset($invester->account_manager_id) && $invester->account_manager_id ? [$invester->account_manager_id] : [])
+                ));
+            @endphp
             <div class="col-md-6 mb-3">
-                <label class="form-label">Account Manager / Internal Point of Contact</label>
-                <select class="form-select @error('account_manager_id') is-invalid @enderror" name="account_manager_id">
-                    <option value="">Select Employee / User</option>
-                    @foreach($accountManagers as $user)
-                        <option value="{{ $user->id }}" {{ (old('account_manager_id', $invester->account_manager_id ?? '') == $user->id) ? 'selected' : '' }}>
-                            {{ $user->name }} ({{ $user->email }})
+                <label class="form-label" for="account_manager_ids">Account Manager / Internal Point of Contact</label>
+                <select class="form-select @error('account_manager_ids') is-invalid @enderror @error('account_manager_ids.*') is-invalid @enderror" 
+                    id="account_manager_ids" 
+                    name="account_manager_ids[]" 
+                    multiple>
+                    @foreach($accountManagers as $employee)
+                        @php
+                            $empName = $employee->employee_name ?: ($employee->name ?? 'Unknown');
+                            $empMail = $employee->official_mail ?: ($employee->personal_mail ?: '');
+                            $empLabel = $empMail ? $empName . ' (' . $empMail . ')' : $empName . ' (' . ($employee->employee_no ?: 'SZ' . str_pad($employee->id, 3, '0', STR_PAD_LEFT)) . ')';
+                        @endphp
+                        <option value="{{ $employee->id }}" {{ in_array((int) $employee->id, $selectedAccountManagers, true) ? 'selected' : '' }}>
+                            {{ $empLabel }}
                         </option>
                     @endforeach
                 </select>
-                <small class="text-muted">The employee within your company responsible for managing this investor relationship.</small>
-                @error('account_manager_id')
+                <small class="text-muted">Search and select one or more external employees.</small>
+                @error('account_manager_ids')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                @error('account_manager_ids.*')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
@@ -151,6 +167,94 @@
                 <textarea class="form-control @error('internal_notes') is-invalid @enderror" 
                     name="internal_notes" rows="3" placeholder="Enter internal notes, relationship highlights, or key discussions...">{{ old('internal_notes', $invester->internal_notes ?? '') }}</textarea>
                 @error('internal_notes')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Investor Portal Login Account (Role ID 6) -->
+<div class="card mb-4 border shadow-none">
+    <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h6 class="card-title mb-0">
+            <i class="ri-shield-user-line me-1 text-primary"></i> Investor Portal Login Account
+        </h6>
+        <span class="badge bg-primary-subtle text-primary fw-semibold fs-12">
+            <i class="ri-user-star-line me-1"></i> Default Role ID 6 (Invester)
+        </span>
+    </div>
+    <div class="card-body">
+        @php
+            $linkedUser = isset($invester) ? $invester->linkedUser() : null;
+        @endphp
+        @if($linkedUser)
+            <div class="alert alert-success d-flex align-items-center mb-3 py-2" role="alert">
+                <i class="ri-checkbox-circle-line fs-18 me-2 text-success"></i>
+                <div>
+                    Connected to Login Account: <strong>{{ $linkedUser->email }}</strong> (Username: <strong>{{ $linkedUser->name }}</strong>, Role ID: <strong>{{ $linkedUser->role_id }}</strong> - {{ $linkedUser->role?->name ?? 'Invester' }})
+                </div>
+            </div>
+        @else
+            <div class="alert alert-info py-2 mb-3">
+                <i class="ri-information-line me-1"></i> Enable login account below to set username and password for this investor. They can log in to view their dedicated <strong>Invester Dashboard</strong>.
+            </div>
+        @endif
+
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="create_user_account" name="create_user_account" value="1"
+                        {{ old('create_user_account', $linkedUser ? '1' : '1') == '1' ? 'checked' : '' }} onchange="toggleUserAccountFields(this.checked)">
+                    <label class="form-check-label fw-semibold" for="create_user_account">
+                        Enable Portal Login Account for this Investor
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3 login-account-box">
+                <label class="form-label">Username / Display Name</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="ri-user-line"></i></span>
+                    <input type="text" class="form-control @error('user_name') is-invalid @enderror" 
+                        name="user_name" id="user_name"
+                        value="{{ old('user_name', $linkedUser->name ?? ($invester->name ?? '')) }}" 
+                        placeholder="e.g. Investor Name">
+                </div>
+                @error('user_name')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-4 mb-3 login-account-box">
+                <label class="form-label">Login Email <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="ri-mail-line"></i></span>
+                    <input type="email" class="form-control @error('user_email') is-invalid @enderror" 
+                        name="user_email" id="user_email"
+                        value="{{ old('user_email', $linkedUser->email ?? ($invester->primary_email ?? '')) }}" 
+                        placeholder="investor@example.com">
+                </div>
+                @error('user_email')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-4 mb-3 login-account-box">
+                <label class="form-label">
+                    {{ $linkedUser ? 'Set New Password (leave blank to keep current)' : 'Password' }}
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="ri-lock-line"></i></span>
+                    <input type="password" class="form-control @error('user_password') is-invalid @enderror" 
+                        name="user_password" id="user_password"
+                        placeholder="{{ $linkedUser ? 'Enter new password if changing' : 'Enter login password (default: Investor@123)' }}">
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('user_password', 'user_password_eye')">
+                        <i class="ri-eye-line" id="user_password_eye"></i>
+                    </button>
+                </div>
+                <small class="text-muted">Role ID 6 will be automatically assigned.</small>
+                @error('user_password')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
@@ -261,4 +365,90 @@
     </div>
 </div>
 @endif
+
+@push('script')
+<script>
+function togglePasswordVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) {
+            icon.classList.remove('ri-eye-line');
+            icon.classList.add('ri-eye-off-line');
+        }
+    } else {
+        input.type = 'password';
+        if (icon) {
+            icon.classList.remove('ri-eye-off-line');
+            icon.classList.add('ri-eye-line');
+        }
+    }
+}
+
+function toggleUserAccountFields(enabled) {
+    const boxes = document.querySelectorAll('.login-account-box');
+    boxes.forEach(box => {
+        box.style.opacity = enabled ? '1' : '0.5';
+        const inputs = box.querySelectorAll('input');
+        inputs.forEach(input => input.disabled = !enabled);
+    });
+}
+
+(function() {
+    function initAccountManagerChoices() {
+        const el = document.getElementById('account_manager_ids');
+        if (el && !el.dataset.choicesInitialized && typeof Choices !== 'undefined') {
+            new Choices(el, {
+                removeItemButton: true,
+                searchEnabled: true,
+                shouldSort: false,
+                duplicateItemsAllowed: false,
+                itemSelectText: '',
+                noResultsText: 'No matching employees found',
+                noChoicesText: 'All external employees selected',
+                placeholder: true,
+                placeholderValue: 'Select External Employees'
+            });
+            el.dataset.choicesInitialized = 'true';
+        }
+    }
+
+    // Auto-sync investor name and email to user credentials if untouched
+    const nameInput = document.querySelector('input[name="name"]');
+    const emailInput = document.querySelector('input[name="primary_email"]');
+    const userNameInput = document.getElementById('user_name');
+    const userEmailInput = document.getElementById('user_email');
+
+    if (nameInput && userNameInput) {
+        nameInput.addEventListener('input', function() {
+            if (!userNameInput.dataset.dirty) {
+                userNameInput.value = this.value;
+            }
+        });
+        userNameInput.addEventListener('input', function() {
+            this.dataset.dirty = 'true';
+        });
+    }
+
+    if (emailInput && userEmailInput) {
+        emailInput.addEventListener('input', function() {
+            if (!userEmailInput.dataset.dirty) {
+                userEmailInput.value = this.value;
+            }
+        });
+        userEmailInput.addEventListener('input', function() {
+            this.dataset.dirty = 'true';
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAccountManagerChoices);
+    } else {
+        initAccountManagerChoices();
+    }
+})();
+</script>
+@endpush
 

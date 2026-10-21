@@ -8,5 +8,12 @@
 .t-completed{background:#f3e8ff;color:#6b21a8}
 .t-stopped{background:#f1f5f9;color:#475569}
 .metric-pill{font-family:monospace;font-size:.82rem;padding:.2rem .45rem;border-radius:6px;background:#f8fafc;border:1px solid #e2e8f0}
-.calendar-cell{min-width:38px;text-align:center}.calendar-dot{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800}@media(max-width:767px){.atl-hero{border-radius:14px}.atl-card{border-radius:12px}.attendance-table{font-size:.8rem}}
+.calendar-cell{min-width:38px;text-align:center}.calendar-dot{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800}
+.card-footer nav{width:100%}
+.card-footer .pagination{margin-bottom:0}
+.card-footer .page-item.active .page-link{background-color:#111827;border-color:#111827;color:#fff}
+.card-footer .page-link{color:#374151;font-size:.85rem;padding:.35rem .75rem;border-radius:6px;margin:0 2px}
+.card-footer .page-link:hover{color:#111827;background-color:#f3f4f6}
+.card-footer svg{max-width:1.25rem;max-height:1.25rem;vertical-align:middle}
+@media(max-width:767px){.atl-hero{border-radius:14px}.atl-card{border-radius:12px}.attendance-table{font-size:.8rem}}
 </style>

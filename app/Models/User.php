@@ -110,6 +110,26 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine whether the user belongs to the Invester role group (Default Role ID 6).
+     */
+    public function isInvestor(): bool
+    {
+        if ($this->id === 1) {
+            return false;
+        }
+
+        if ((int) $this->role_id === 6) {
+            return true;
+        }
+
+        $accessLevel = str_replace(['_', ' '], '-', strtolower(trim((string) ($this->role?->access_level ?? ''))));
+        $roleName = str_replace(['_', ' '], '-', strtolower(trim((string) ($this->role?->name ?? ''))));
+
+        return str_contains($accessLevel, 'invest')
+            || str_contains($roleName, 'invest');
+    }
+
+    /**
      * Determine whether the user belongs to the Management / Super Admin / Subadmin role group.
      */
     public function isManagement(): bool
@@ -118,7 +138,7 @@ class User extends Authenticatable
             return true;
         }
 
-        if ($this->isRecruiter() || $this->isSales()) {
+        if ($this->isRecruiter() || $this->isSales() || $this->isInvestor()) {
             return false;
         }
 
@@ -157,6 +177,37 @@ class User extends Authenticatable
     public function employee()
     {
         return $this->hasOne(Employee::class, 'official_mail', 'email');
+    }
+
+    public function invester()
+    {
+        return $this->hasOne(Invester::class, 'user_id');
+    }
+
+    public function linkedInvester(): ?Invester
+    {
+        if ($this->invester) {
+            return $this->invester;
+        }
+
+        if (!empty($this->ref)) {
+            $inv = Invester::where('invester_id', $this->ref)->first();
+            if ($inv) {
+                return $inv;
+            }
+        }
+
+        $email = mb_strtolower(trim((string) $this->email));
+        if ($email !== '') {
+            $inv = Invester::whereRaw('LOWER(primary_email) = ?', [$email])
+                ->orWhereRaw('LOWER(alternate_email) = ?', [$email])
+                ->first();
+            if ($inv) {
+                return $inv;
+            }
+        }
+
+        return Invester::whereRaw('LOWER(name) = ?', [mb_strtolower(trim((string) $this->name))])->first();
     }
 
     public function attendances() { return $this->hasMany(Attendance::class); }

@@ -452,8 +452,11 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         });
     });
 
-    // Investers Module (4 Masters)
+    // Investers Module & Dashboard
     Route::prefix('investers')->group(function () {
+        // Investor Dedicated Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\backend\InvesterDashboardController::class, 'index'])->name('investers.dashboard');
+
         // Master 1: Investers
         Route::name('investers.')->controller(\App\Http\Controllers\backend\InvesterController::class)->group(function () {
             Route::get('/', 'index')->name('index');
@@ -461,6 +464,17 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::post('/store', 'store')->name('store');
             Route::get('/export', 'export')->name('export');
             Route::get('/{id}/show', 'show')->name('show');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::put('/{id}/update', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('delete');
+        });
+
+        // Invest Modules: Employment Details & Profit Sharing Deployments
+        Route::prefix('deployments')->name('invester-deployments.')->controller(\App\Http\Controllers\backend\InvesterDeploymentController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/export', 'export')->name('export');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}/update', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('delete');
