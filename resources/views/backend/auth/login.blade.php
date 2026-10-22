@@ -326,11 +326,13 @@
                         $portalBadgeClass = match($portalKey) {
                             'rinos' => 'bg-info-subtle text-info border border-info',
                             'sales' => 'bg-success-subtle text-success border border-success',
+                            'investor' => 'bg-warning-subtle text-warning border border-warning',
                             default => 'bg-danger-subtle text-danger border border-danger',
                         };
                         $portalIcon = match($portalKey) {
                             'rinos' => 'ri-user-search-line',
                             'sales' => 'ri-funds-line',
+                            'investor' => 'ri-hand-coin-line',
                             default => 'ri-shield-keyhole-line',
                         };
                     @endphp
@@ -420,6 +422,10 @@
                                 @if($portalKey !== 'sales')
                                     <span class="text-muted">•</span>
                                     <a href="{{ route('login.sales') }}" class="text-decoration-none text-success fw-semibold">Sales Login</a>
+                                @endif
+                                @if($portalKey !== 'investor')
+                                    <span class="text-muted">•</span>
+                                    <a href="{{ route('login.investor') }}" class="text-decoration-none text-warning fw-semibold">Investor Login</a>
                                 @endif
                             </div>
                         </div>

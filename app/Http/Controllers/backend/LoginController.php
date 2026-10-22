@@ -39,6 +39,11 @@ class LoginController extends Controller
         return $this->index($request, 'sales');
     }
 
+    public function indexInvestor(Request $request)
+    {
+        return $this->index($request, 'investor');
+    }
+
     /**
      * Handle authentication attempt with role-based portal validation.
      */
@@ -93,17 +98,21 @@ class LoginController extends Controller
 
         if ($requestedPortal !== $userPortal) {
             $portalConfigs = [
-                'mgmt'  => [
+                'mgmt'     => [
                     'label' => 'Management / Super Admin / Subadmin',
                     'url'   => self::getPortalRouteUrl('mgmt'),
                 ],
-                'rinos' => [
+                'rinos'    => [
                     'label' => 'Recruiters',
                     'url'   => self::getPortalRouteUrl('rinos'),
                 ],
-                'sales' => [
+                'sales'    => [
                     'label' => 'Sales',
                     'url'   => self::getPortalRouteUrl('sales'),
+                ],
+                'investor' => [
+                    'label' => 'Investor Portal',
+                    'url'   => self::getPortalRouteUrl('investor'),
                 ],
             ];
 
@@ -146,8 +155,8 @@ class LoginController extends Controller
     public function resolveRequestedPortal(Request $request): string
     {
         $portal = strtolower(trim((string) $request->input('portal')));
-        if (in_array($portal, ['mgmt', 'rinos', 'sales'], true)) {
-            return $portal;
+        if (in_array($portal, ['mgmt', 'rinos', 'sales', 'investor', 'invester'], true)) {
+            return ($portal === 'invester') ? 'investor' : $portal;
         }
 
         $routeName = (string) $request->route()?->getName();
@@ -160,6 +169,9 @@ class LoginController extends Controller
         if (str_contains($routeName, 'sales')) {
             return 'sales';
         }
+        if (str_contains($routeName, 'invest')) {
+            return 'investor';
+        }
 
         $path = strtolower(trim($request->path(), '/'));
         if (str_starts_with($path, 'mgmt')) {
@@ -171,6 +183,9 @@ class LoginController extends Controller
         if (str_starts_with($path, 'sales')) {
             return 'sales';
         }
+        if (str_starts_with($path, 'invest') || str_starts_with($path, 'invester')) {
+            return 'investor';
+        }
 
         $referer = strtolower((string) $request->header('referer'));
         if (str_contains($referer, '/rinos/login')) {
@@ -178,6 +193,9 @@ class LoginController extends Controller
         }
         if (str_contains($referer, '/sales/login')) {
             return 'sales';
+        }
+        if (str_contains($referer, '/investor/login') || str_contains($referer, '/invester/login')) {
+            return 'investor';
         }
         if (str_contains($referer, '/mgmt/login')) {
             return 'mgmt';
@@ -245,6 +263,13 @@ class LoginController extends Controller
                 'portalBadge'    => 'Sales Portal',
                 'portalAction'   => self::getPortalCheckUrl('sales'),
             ],
+            'investor' => [
+                'portal'         => 'investor',
+                'portalTitle'    => 'Investor Portal',
+                'portalSubtitle' => 'Investor Portfolio & Deployments',
+                'portalBadge'    => 'Investor Portal',
+                'portalAction'   => self::getPortalCheckUrl('investor'),
+            ],
         ];
 
         return $configs[$portal] ?? $configs['mgmt'];
@@ -265,6 +290,7 @@ class LoginController extends Controller
         $redirectRoute = match ($portal) {
             'rinos' => 'login.rinos',
             'sales' => 'login.sales',
+            'investor' => 'login.investor',
             default => 'login.mgmt',
         };
 

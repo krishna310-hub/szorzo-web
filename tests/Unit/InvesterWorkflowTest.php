@@ -114,6 +114,94 @@ class InvesterWorkflowTest extends TestCase
         $this->assertStringContainsString("invester-deployments.", $routesContent);
     }
 
+    public function test_investor_portal_login_and_routing(): void
+    {
+        $role = new Role([
+            'name' => 'Invester',
+            'access_level' => 'invester',
+            'status' => 1,
+            'its_default' => 1,
+        ]);
+        $role->id = 6;
+
+        $user = new User([
+            'name' => 'Investor User',
+            'email' => 'investor@szorzo.com',
+            'role_id' => 6,
+        ]);
+        $user->setRelation('role', $role);
+
+        // Verify designated portal is investor
+        $this->assertSame('investor', $user->getDesignatedPortal());
+        $this->assertTrue($user->isAllowedForPortal('investor'));
+        $this->assertFalse($user->isAllowedForPortal('mgmt'));
+        $this->assertFalse($user->isAllowedForPortal('rinos'));
+        $this->assertFalse($user->isAllowedForPortal('sales'));
+
+        // Verify portal configuration
+        $config = \App\Http\Controllers\backend\LoginController::getPortalConfig('investor');
+        $this->assertSame('investor', $config['portal']);
+        $this->assertSame('Investor Portal', $config['portalTitle']);
+        $this->assertSame('Investor Portal', $config['portalBadge']);
+        $this->assertStringContainsString('investor', $config['portalAction']);
+
+        // Verify portal resolution from request
+        $controller = new \App\Http\Controllers\backend\LoginController();
+        $req1 = \Illuminate\Http\Request::create('/investor/login', 'GET');
+        $this->assertSame('investor', $controller->resolveRequestedPortal($req1));
+
+        $req2 = \Illuminate\Http\Request::create('/check-login', 'POST', ['portal' => 'investor']);
+        $this->assertSame('investor', $controller->resolveRequestedPortal($req2));
+
+        $req3 = \Illuminate\Http\Request::create('/check-login', 'POST', ['portal' => 'invester']);
+        $this->assertSame('investor', $controller->resolveRequestedPortal($req3));
+
+        // Verify routes in web.php
+        $routesContent = file_get_contents(dirname(__DIR__, 2) . '/routes/web.php');
+        $this->assertStringContainsString("login.investor", $routesContent);
+        $this->assertStringContainsString("indexInvestor", $routesContent);
+        $this->assertStringContainsString("/invester/login", $routesContent);
+    }
+
+    public function test_invester_deployment_multiselect_and_tds_calculation(): void
+    {
+        $deployment = new InvesterDeployment([
+            'invester_id' => 1,
+            'client_ids' => [10, 12],
+            'employee_ids' => [101, 102, 103],
+            'mode_of_engagement' => 'Contract',
+            'contract_duration' => '12 Months',
+            'approved_rate_card' => 250000.00,
+            'employee_ctc' => 2200000.00,
+            'billing_percentage' => 8.33,
+            'margin_percentage' => 8.33,
+            'tds_percentage' => 10.00,
+            'szorzo_share_percentage' => 70.00,
+            'investor_share_percentage' => 30.00,
+            'status' => 1,
+        ]);
+
+        $deployment->computeCommissions();
+
+        // Rate card: 250000
+        // TDS amount = 250000 * 10% = 25000
+        $this->assertEquals(25000.00, (float) $deployment->tds_amount);
+
+        // Margin In Rupees = 250000 * 8.33% = 20825.00
+        $this->assertEquals(20825.00, (float) $deployment->margin_amount);
+
+        // SZ Share (70%) = 20825 * 0.70 = 14577.50
+        $this->assertEquals(14577.50, (float) $deployment->szorzo_commission_amount);
+
+        // Investor Share (30%) = 20825 * 0.30 = 6247.50
+        $this->assertEquals(6247.50, (float) $deployment->investor_commission_amount);
+
+        // JSON array serialization
+        $this->assertSame([10, 12], $deployment->client_ids);
+        $this->assertSame([101, 102, 103], $deployment->employee_ids);
+        $this->assertEquals(8.33, (float) $deployment->billing_percentage);
+    }
+
     public function test_sidebar_includes_investor_dashboard_and_modules(): void
     {
         $sidebarContent = file_get_contents(dirname(__DIR__, 2) . '/resources/views/backend/layouts/sidebar.blade.php');

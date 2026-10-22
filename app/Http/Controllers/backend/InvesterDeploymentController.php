@@ -56,23 +56,46 @@ class InvesterDeploymentController extends Controller
                         . e($row->invester->name) . ' <span class="badge bg-primary-subtle text-primary fs-11">' . e($row->invester->invester_id) . '</span></a>';
                 })
                 ->addColumn('employee_name', function ($row) {
-                    if (!$row->employee) {
-                        return '<span class="text-muted">Unassigned</span>';
+                    $assigned = $row->assigned_employees;
+                    if ($assigned->count() > 1) {
+                        return '<div><span class="badge bg-primary-subtle text-primary mb-1">' . $assigned->count() . ' External Employees</span><br><small class="text-muted">' . e($assigned->pluck('employee_name')->take(2)->implode(', ')) . ($assigned->count() > 2 ? ' +' . ($assigned->count() - 2) . ' more' : '') . '</small></div>';
+                    } elseif ($assigned->count() === 1) {
+                        $emp = $assigned->first();
+                        $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                        return '<div><strong>' . e($emp->employee_name) . '</strong><br><small class="text-muted">' . e($no) . '</small></div>';
+                    } elseif ($row->employee) {
+                        $no = $row->employee->employee_no ?: ('SZ' . str_pad($row->employee->id, 3, '0', STR_PAD_LEFT));
+                        return '<div><strong>' . e($row->employee->employee_name) . '</strong><br><small class="text-muted">' . e($no) . '</small></div>';
                     }
-                    $no = $row->employee->employee_no ?: ('SZ' . str_pad($row->employee->id, 3, '0', STR_PAD_LEFT));
-                    return '<div><strong>' . e($row->employee->employee_name) . '</strong><br><small class="text-muted">' . e($no) . '</small></div>';
+                    return '<span class="text-muted">Unassigned</span>';
                 })
                 ->addColumn('client_name', function ($row) {
-                    return $row->client ? e($row->client->client) : '-';
+                    $assignedClients = $row->assigned_clients;
+                    if ($assignedClients->count() > 1) {
+                        return '<div><span class="badge bg-info-subtle text-info mb-1">' . $assignedClients->count() . ' Clients</span><br><small class="text-muted">' . e($assignedClients->pluck('client')->take(2)->implode(', ')) . ($assignedClients->count() > 2 ? ' +' . ($assignedClients->count() - 2) . ' more' : '') . '</small></div>';
+                    } elseif ($assignedClients->count() === 1) {
+                        return e($assignedClients->first()->client);
+                    } elseif ($row->client) {
+                        return e($row->client->client);
+                    }
+                    return '-';
                 })
                 ->addColumn('mode_badge', function ($row) {
                     return '<span class="badge bg-info-subtle text-info">' . e($row->mode_of_engagement ?: 'Contract') . '</span>';
                 })
                 ->addColumn('rate_card_formatted', function ($row) {
-                    return '₹ ' . number_format((float) $row->approved_rate_card, 2);
+                    $html = '₹ ' . number_format((float) $row->approved_rate_card, 2);
+                    if ($row->billing_percentage !== null) {
+                        $html .= '<br><small class="text-muted">Billing: ' . (float) $row->billing_percentage . '%</small>';
+                    }
+                    return $html;
                 })
                 ->addColumn('margin_in_rupees', function ($row) {
-                    return '<span class="badge bg-warning text-dark fs-12 fw-bold">₹ ' . number_format((float) $row->margin_amount, 2) . '</span>';
+                    $html = '<span class="badge bg-warning text-dark fs-12 fw-bold">₹ ' . number_format((float) $row->margin_amount, 2) . '</span>';
+                    if ($row->tds_amount > 0) {
+                        $html .= '<br><small class="text-muted">TDS (' . (float) $row->tds_percentage . '%): ₹' . number_format((float) $row->tds_amount, 2) . '</small>';
+                    }
+                    return $html;
                 })
                 ->addColumn('commission_split', function ($row) {
                     $sz = 'SZ (' . (float) $row->szorzo_share_percentage . '%): ₹' . number_format((float) $row->szorzo_commission_amount, 2);
@@ -109,8 +132,9 @@ class InvesterDeploymentController extends Controller
         $this->authorize('create', InvesterDeployment::class);
 
         $investers = Invester::where('status', true)->orderBy('name')->get();
-        $employees = Employee::orderBy('employee_name')->get();
-        $clients = Client::where('status', true)->orderBy('client')->get();
+        $clients = Client::with('billing')->where('status', true)->orderBy('client')->get();
+        $allEmployees = Employee::with('client')->orderBy('employee_name')->get();
+        $employees = $allEmployees->filter(fn ($emp) => $emp->isExternal())->values();
         $preselectedInvesterId = $request->query('invester_id');
 
         return view('backend.invester-deployments.create', compact('investers', 'employees', 'clients', 'preselectedInvesterId'));
@@ -124,8 +148,10 @@ class InvesterDeploymentController extends Controller
 
         $deployment = InvesterDeployment::create($validated);
 
+        $employeeName = $deployment->employee_names ?: ($deployment->employee?->employee_name ?? 'External Employees');
+
         return redirect()->route('admin.invester-deployments.index')
-            ->with('success', 'Invest Module Deployment for ' . ($deployment->employee?->employee_name ?? 'Employee') . ' created successfully.');
+            ->with('success', 'Invest Module Deployment for ' . $employeeName . ' created successfully.');
     }
 
     public function edit($id)
@@ -134,8 +160,9 @@ class InvesterDeploymentController extends Controller
 
         $deployment = InvesterDeployment::findOrFail($id);
         $investers = Invester::where('status', true)->orderBy('name')->get();
-        $employees = Employee::orderBy('employee_name')->get();
-        $clients = Client::where('status', true)->orderBy('client')->get();
+        $clients = Client::with('billing')->where('status', true)->orderBy('client')->get();
+        $allEmployees = Employee::with('client')->orderBy('employee_name')->get();
+        $employees = $allEmployees->filter(fn ($emp) => $emp->isExternal())->values();
 
         return view('backend.invester-deployments.edit', compact('deployment', 'investers', 'employees', 'clients'));
     }
@@ -163,18 +190,100 @@ class InvesterDeploymentController extends Controller
         return response()->json(['status' => true, 'message' => 'Invest Module Deployment deleted successfully.']);
     }
 
+    /**
+     * AJAX endpoint to return external employees and auto-calculated billing/TDS for selected client(s).
+     */
+    public function getClientEmployees(Request $request)
+    {
+        $rawClientIds = $request->input('client_ids');
+        if (is_string($rawClientIds)) {
+            $clientIds = array_filter(explode(',', $rawClientIds));
+        } elseif (is_array($rawClientIds)) {
+            $clientIds = array_filter($rawClientIds);
+        } else {
+            $clientIds = [];
+        }
+
+        if (empty($clientIds) && $request->filled('client_id')) {
+            $clientIds = [(int) $request->client_id];
+        }
+
+        $clientIds = array_map('intval', array_values($clientIds));
+
+        $clients = Client::with('billing')->whereIn('id', $clientIds)->get();
+
+        $billingPercentages = [];
+        foreach ($clients as $client) {
+            $billingVal = $client->billing ? (float) $client->billing->value : null;
+            if ($billingVal !== null) {
+                $billingPercentages[$client->id] = $billingVal;
+            }
+        }
+
+        $defaultBilling = count($billingPercentages) > 0
+            ? round(array_sum($billingPercentages) / count($billingPercentages), 2)
+            : 8.33;
+
+        // External contract employees ONLY for the selected client(s)
+        $employees = Employee::with('client')
+            ->whereIn('client_id', $clientIds)
+            ->where(function ($q) {
+                $q->where('employment_type', Employee::EMPLOYMENT_TYPE_EXTERNAL)
+                  ->orWhereNull('employment_type');
+            })
+            ->get()
+            ->filter(fn ($emp) => $emp->isExternal())
+            ->values()
+            ->map(function ($emp) {
+                $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                $monthly = (float) ($emp->monthly_gross ?? 0);
+                $ctc = $monthly > 0 ? round($monthly * 12, 2) : 0;
+                return [
+                    'id' => $emp->id,
+                    'client_id' => $emp->client_id,
+                    'client_name' => $emp->client?->client,
+                    'employee_name' => $emp->employee_name,
+                    'employee_no' => $no,
+                    'designation' => $emp->designation,
+                    'monthly_gross' => $monthly,
+                    'ctc' => $ctc,
+                    'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($emp->client ? ' - ' . $emp->client->client : ''),
+                ];
+            });
+
+        return response()->json([
+            'status' => true,
+            'clients' => $clients->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->client,
+                'billing_percentage' => $c->billing ? (float) $c->billing->value : null,
+            ]),
+            'billing_percentage' => $defaultBilling,
+            'billing_percentages_map' => $billingPercentages,
+            'tds_percentage' => 10.00,
+            'employees' => $employees,
+            'total_external_employees' => $employees->count(),
+        ]);
+    }
+
     protected function validateDeployment(Request $request): array
     {
         $data = $request->validate([
             'invester_id' => 'required|exists:investers,id',
             'employee_id' => 'nullable|exists:employees,id',
+            'employee_ids' => 'nullable|array',
+            'employee_ids.*' => 'nullable|exists:employees,id',
             'client_id' => 'nullable|exists:clients,id',
+            'client_ids' => 'nullable|array',
+            'client_ids.*' => 'nullable|exists:clients,id',
             'mode_of_engagement' => 'required|string|max:100',
             'contract_duration' => 'nullable|string|max:100',
             'approved_rate_card' => 'nullable|numeric|min:0',
             'employee_ctc' => 'nullable|numeric|min:0',
+            'billing_percentage' => 'nullable|numeric|between:0,100',
             'margin_percentage' => 'nullable|numeric|between:0,100',
             'tds_percentage' => 'nullable|numeric|between:0,100',
+            'tds_amount' => 'nullable|numeric|min:0',
             'margin_amount' => 'nullable|numeric|min:0',
             'szorzo_share_percentage' => 'nullable|numeric|between:0,100',
             'investor_share_percentage' => 'nullable|numeric|between:0,100',
@@ -184,9 +293,28 @@ class InvesterDeploymentController extends Controller
             'status' => 'required|in:0,1',
         ]);
 
+        // Process client_ids and client_id
+        $clientIds = array_values(array_filter((array) ($request->input('client_ids') ?? [])));
+        if (empty($clientIds) && !empty($data['client_id'])) {
+            $clientIds = [(int) $data['client_id']];
+        }
+        $data['client_ids'] = !empty($clientIds) ? array_map('intval', $clientIds) : null;
+        $data['client_id'] = $clientIds[0] ?? ($data['client_id'] ?? null);
+
+        // Process employee_ids and employee_id
+        $employeeIds = array_values(array_filter((array) ($request->input('employee_ids') ?? [])));
+        if (empty($employeeIds) && !empty($data['employee_id'])) {
+            $employeeIds = [(int) $data['employee_id']];
+        }
+        $data['employee_ids'] = !empty($employeeIds) ? array_map('intval', $employeeIds) : null;
+        $data['employee_id'] = $employeeIds[0] ?? ($data['employee_id'] ?? null);
+
         $data['approved_rate_card'] = (float) ($data['approved_rate_card'] ?? 0);
         $data['employee_ctc'] = (float) ($data['employee_ctc'] ?? 0);
-        $data['margin_percentage'] = isset($data['margin_percentage']) && $data['margin_percentage'] !== '' ? (float) $data['margin_percentage'] : 15.0;
+        $data['billing_percentage'] = isset($data['billing_percentage']) && $data['billing_percentage'] !== '' ? (float) $data['billing_percentage'] : null;
+        $data['margin_percentage'] = isset($data['margin_percentage']) && $data['margin_percentage'] !== ''
+            ? (float) $data['margin_percentage']
+            : ($data['billing_percentage'] ?? 15.0);
         $data['tds_percentage'] = isset($data['tds_percentage']) && $data['tds_percentage'] !== '' ? (float) $data['tds_percentage'] : 10.0;
         $data['szorzo_share_percentage'] = isset($data['szorzo_share_percentage']) && $data['szorzo_share_percentage'] !== '' ? (float) $data['szorzo_share_percentage'] : 70.0;
         $data['investor_share_percentage'] = 100.0 - $data['szorzo_share_percentage'];
@@ -197,6 +325,9 @@ class InvesterDeploymentController extends Controller
         } else {
             $data['margin_amount'] = (float) $data['margin_amount'];
         }
+
+        // TDS deduction calculation on gross rate card
+        $data['tds_amount'] = round($data['approved_rate_card'] * ($data['tds_percentage'] / 100), 2);
 
         $data['szorzo_commission_amount'] = round($data['margin_amount'] * ($data['szorzo_share_percentage'] / 100), 2);
         $data['investor_commission_amount'] = round($data['margin_amount'] * ($data['investor_share_percentage'] / 100), 2);
@@ -212,14 +343,16 @@ class InvesterDeploymentController extends Controller
         $rows = InvesterDeployment::with(['invester', 'employee', 'client'])->get()->map(function ($row) {
             return [
                 $row->invester?->name ?: '-',
-                $row->employee?->employee_name ?: '-',
-                $row->client?->client ?: '-',
+                $row->employee_names ?: ($row->employee?->employee_name ?: '-'),
+                $row->client_names ?: ($row->client?->client ?: '-'),
                 $row->mode_of_engagement,
                 $row->contract_duration,
                 $row->approved_rate_card,
                 $row->employee_ctc,
+                $row->billing_percentage !== null ? $row->billing_percentage : '-',
                 $row->margin_percentage,
                 $row->tds_percentage,
+                $row->tds_amount,
                 $row->margin_amount,
                 $row->szorzo_share_percentage,
                 $row->szorzo_commission_amount,
@@ -232,14 +365,16 @@ class InvesterDeploymentController extends Controller
 
         $headings = [
             'Invester',
-            'Employee Name',
-            'Deployed To (Client)',
+            'Employee Name(s)',
+            'Deployed To (Client(s))',
             'Mode of Engagement',
             'Contract Duration',
             'Approved Rate Card (INR)',
             'Employee CTC (INR)',
+            'Billing %',
             'Margin %',
             'TDS %',
+            'TDS Amount (INR)',
             'Margin In Rupees',
             'SZ Share %',
             'SZ Commission (INR)',
@@ -250,6 +385,7 @@ class InvesterDeploymentController extends Controller
         ];
 
         return Excel::download(new MasterDataExport($headings, $rows), 'invest-deployments-export-' . date('Y-m-d') . '.xlsx');
+    }
     }
 }
 

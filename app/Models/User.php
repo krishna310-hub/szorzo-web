@@ -146,10 +146,14 @@ class User extends Authenticatable
     }
 
     /**
-     * Resolve the designated login portal for this user: 'mgmt', 'rinos', or 'sales'.
+     * Resolve the designated login portal for this user: 'mgmt', 'rinos', 'sales', or 'investor'.
      */
     public function getDesignatedPortal(): string
     {
+        if ($this->isInvestor()) {
+            return 'investor';
+        }
+
         if ($this->isRecruiter()) {
             return 'rinos';
         }
@@ -162,7 +166,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is allowed to log in via the given portal ('mgmt', 'rinos', 'sales').
+     * Check if user is allowed to log in via the given portal ('mgmt', 'rinos', 'sales', 'investor').
      */
     public function isAllowedForPortal(string $portal): bool
     {

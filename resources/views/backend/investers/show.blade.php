@@ -328,7 +328,21 @@
                                         @forelse($invester->deployments as $dep)
                                             <tr>
                                                 <td class="fw-semibold">
-                                                    @if($dep->employee)
+                                                    @php
+                                                        $showEmps = $dep->assigned_employees;
+                                                        $showClients = $dep->assigned_clients;
+                                                    @endphp
+                                                    @if($showEmps->count() > 1)
+                                                        <span class="badge bg-primary-subtle text-primary mb-1">
+                                                            <i class="ri-team-line me-1"></i> {{ $showEmps->count() }} Employees
+                                                        </span>
+                                                        <small class="text-muted d-block">{{ Str::limit($dep->employee_names, 40) }}</small>
+                                                    @elseif($showEmps->count() === 1)
+                                                        {{ $showEmps->first()->employee_name }}
+                                                        <span class="badge bg-secondary-subtle text-secondary fs-11 d-block mt-1">
+                                                            {{ $showEmps->first()->employee_no ?: 'SZ' . str_pad($showEmps->first()->id, 3, '0', STR_PAD_LEFT) }}
+                                                        </span>
+                                                    @elseif($dep->employee)
                                                         {{ $dep->employee->employee_name }}
                                                         <span class="badge bg-secondary-subtle text-secondary fs-11 d-block mt-1">
                                                             {{ $dep->employee->employee_no ?: 'SZ' . str_pad($dep->employee->id, 3, '0', STR_PAD_LEFT) }}
@@ -338,7 +352,14 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if($dep->client)
+                                                    @if($showClients->count() > 1)
+                                                        <span class="badge bg-info-subtle text-info mb-1">
+                                                            <i class="ri-building-line me-1"></i> {{ $showClients->count() }} Clients
+                                                        </span>
+                                                        <small class="text-muted d-block">{{ Str::limit($dep->client_names, 35) }}</small>
+                                                    @elseif($showClients->count() === 1)
+                                                        <span class="fw-medium">{{ $showClients->first()->client }}</span>
+                                                    @elseif($dep->client)
                                                         <span class="fw-medium">{{ $dep->client->client }}</span>
                                                     @else
                                                         <span class="text-muted">-</span>

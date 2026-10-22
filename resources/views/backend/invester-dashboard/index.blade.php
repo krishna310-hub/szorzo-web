@@ -388,21 +388,34 @@
                                     </thead>
                                     <tbody>
                                         @forelse($allDeployments as $dep)
+                                            @php
+                                                $depEmps = $dep->assigned_employees;
+                                                $depClients = $dep->assigned_clients;
+                                            @endphp
                                             <tr>
                                                 <td>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        @if($dep->employee && $dep->employee->employee_image && file_exists(public_path($dep->employee->employee_image)))
-                                                            <img src="{{ asset($dep->employee->employee_image) }}" class="avatar-sm-circle border" alt="">
-                                                        @else
-                                                            <div class="avatar-sm-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center">
-                                                                {{ strtoupper(substr($dep->employee?->employee_name ?? 'E', 0, 1)) }}
-                                                            </div>
-                                                        @endif
+                                                    @if($depEmps->count() > 1)
                                                         <div>
-                                                            <span class="fw-bold d-block">{{ $dep->employee?->employee_name ?? 'Unassigned' }}</span>
-                                                            <small class="text-muted">{{ $dep->employee?->designation ?: 'Staff' }} ({{ $dep->employee?->employee_no ?: '-' }})</small>
+                                                            <span class="badge bg-primary-subtle text-primary mb-1">
+                                                                <i class="ri-team-line me-1"></i> {{ $depEmps->count() }} External Employees
+                                                            </span>
+                                                            <small class="text-muted d-block">{{ Str::limit($dep->employee_names, 40) }}</small>
                                                         </div>
-                                                    </div>
+                                                    @else
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            @if($dep->employee && $dep->employee->employee_image && file_exists(public_path($dep->employee->employee_image)))
+                                                                <img src="{{ asset($dep->employee->employee_image) }}" class="avatar-sm-circle border" alt="">
+                                                            @else
+                                                                <div class="avatar-sm-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center">
+                                                                    {{ strtoupper(substr($dep->employee?->employee_name ?? 'E', 0, 1)) }}
+                                                                </div>
+                                                            @endif
+                                                            <div>
+                                                                <span class="fw-bold d-block">{{ $dep->employee?->employee_name ?? 'Unassigned' }}</span>
+                                                                <small class="text-muted">{{ $dep->employee?->designation ?: 'Staff' }} ({{ $dep->employee?->employee_no ?: '-' }})</small>
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                 </td>
                                                 @if(!$currentInvester)
                                                     <td>
@@ -410,7 +423,16 @@
                                                     </td>
                                                 @endif
                                                 <td>
-                                                    <span class="fw-semibold text-dark">{{ $dep->client?->client ?? 'Unassigned' }}</span>
+                                                    @if($depClients->count() > 1)
+                                                        <div>
+                                                            <span class="badge bg-info-subtle text-info mb-1">
+                                                                <i class="ri-building-line me-1"></i> {{ $depClients->count() }} Clients
+                                                            </span>
+                                                            <small class="text-muted d-block">{{ Str::limit($dep->client_names, 35) }}</small>
+                                                        </div>
+                                                    @else
+                                                        <span class="fw-semibold text-dark">{{ $dep->client?->client ?? 'Unassigned' }}</span>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-info-subtle text-info">{{ $dep->mode_of_engagement ?: 'Contract' }}</span>

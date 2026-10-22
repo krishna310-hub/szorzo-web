@@ -98,6 +98,12 @@ Route::group(['controller' => LoginController::class], function () {
     Route::get('/sales/login', 'indexSales')->name('login.sales');
     Route::post('/sales/login', 'login')->name('login.sales.check');
 
+    // Investor Portal
+    Route::get('/investor/login', 'indexInvestor')->name('login.investor');
+    Route::post('/investor/login', 'login')->name('login.investor.check');
+    Route::get('/invester/login', fn () => redirect()->route('login.investor'));
+    Route::post('/invester/login', 'login');
+
     // Compatibility and Fallback Routes
     Route::get('/login', fn () => redirect()->route('login.mgmt'))->name('login');
     Route::post('/check-login', 'login')->name('login.check');
@@ -474,6 +480,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
+            Route::get('/client-employees', 'getClientEmployees')->name('client-employees');
             Route::get('/export', 'export')->name('export');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}/update', 'update')->name('update');

@@ -54,7 +54,11 @@ class InvesterDashboardController extends Controller
         }
 
         if ($selectedClientId) {
-            $deploymentsQuery->where('client_id', $selectedClientId);
+            $deploymentsQuery->where(function ($q) use ($selectedClientId) {
+                $q->where('client_id', $selectedClientId)
+                    ->orWhereJsonContains('client_ids', (string) $selectedClientId)
+                    ->orWhereJsonContains('client_ids', (int) $selectedClientId);
+            });
         }
 
         if ($selectedMode) {
@@ -92,7 +96,26 @@ class InvesterDashboardController extends Controller
         $metrics = [
             'overall_investment' => (float) $allFinancials->sum('investment_amount'),
             'total_deployments' => $activeDeployments->count(),
-            'total_clients' => $activeDeployments->pluck('client_id')->filter()->unique()->count(),
+            'total_clients' => $activeDeployments->flatMap(function ($d) {
+                $ids = $d->client_ids;
+                if (is_string($ids)) {
+                    $ids = json_decode($ids, true);
+                }
+                if (empty($ids) && $d->client_id) {
+                    $ids = [$d->client_id];
+                }
+                return (array) $ids;
+            })->filter()->unique()->count(),
+            'total_employees' => $activeDeployments->flatMap(function ($d) {
+                $ids = $d->employee_ids;
+                if (is_string($ids)) {
+                    $ids = json_decode($ids, true);
+                }
+                if (empty($ids) && $d->employee_id) {
+                    $ids = [$d->employee_id];
+                }
+                return (array) $ids;
+            })->filter()->unique()->count(),
             'total_rate_card' => (float) $activeDeployments->sum('approved_rate_card'),
             'total_employee_ctc' => (float) $activeDeployments->sum('employee_ctc'),
             'total_margin' => (float) $activeDeployments->sum('margin_amount'),
