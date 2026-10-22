@@ -386,6 +386,5 @@ class InvesterDeploymentController extends Controller
 
         return Excel::download(new MasterDataExport($headings, $rows), 'invest-deployments-export-' . date('Y-m-d') . '.xlsx');
     }
-    }
 }
 
