@@ -584,10 +584,20 @@ class Employee extends Model
     }
 
     /**
+     * Cache matching candidate on this employee instance during request lifecycle.
+     */
+    protected ?Candidate $cachedMatchingCandidate = null;
+    protected bool $matchingCandidateLoaded = false;
+
+    /**
      * Locate matching Candidate by email, name, or contact number.
      */
     public function getMatchingCandidate(): ?Candidate
     {
+        if ($this->matchingCandidateLoaded) {
+            return $this->cachedMatchingCandidate;
+        }
+
         try {
             $emails = array_values(array_filter([
                 $this->official_mail ? mb_strtolower(trim($this->official_mail)) : null,
@@ -596,30 +606,86 @@ class Employee extends Model
 
             $candidate = null;
             if (!empty($emails)) {
-                $candidate = Candidate::where(function ($q) use ($emails) {
-                    foreach ($emails as $em) {
-                        $q->orWhereRaw('LOWER(email) = ?', [$em]);
-                    }
-                })->first();
+                $candidate = Candidate::with(['clientRequirement.billing', 'client.billing'])
+                    ->where(function ($q) use ($emails) {
+                        foreach ($emails as $em) {
+                            $q->orWhereRaw('LOWER(email) = ?', [$em]);
+                        }
+                    })->first();
             }
 
             if (!$candidate && !empty($this->employee_name)) {
                 $candName = mb_strtolower(trim($this->employee_name));
-                $candidate = Candidate::whereRaw('LOWER(candidate_name) = ?', [$candName])->first();
+                $candidate = Candidate::with(['clientRequirement.billing', 'client.billing'])
+                    ->whereRaw('LOWER(candidate_name) = ?', [$candName])->first();
             }
 
             if (!$candidate && !empty($this->contact_no)) {
                 $cleanPhone = preg_replace('/[^0-9]/', '', (string) $this->contact_no);
                 if (strlen($cleanPhone) >= 10) {
                     $last10 = substr($cleanPhone, -10);
-                    $candidate = Candidate::whereRaw("REPLACE(REPLACE(REPLACE(contact_no, ' ', ''), '-', ''), '+', '') LIKE ?", ['%' . $last10])->first();
+                    $candidate = Candidate::with(['clientRequirement.billing', 'client.billing'])
+                        ->whereRaw("REPLACE(REPLACE(REPLACE(contact_no, ' ', ''), '-', ''), '+', '') LIKE ?", ['%' . $last10])->first();
                 }
             }
 
+            $this->matchingCandidateLoaded = true;
+            $this->cachedMatchingCandidate = $candidate;
             return $candidate;
         } catch (\Throwable $e) {
+            $this->matchingCandidateLoaded = true;
+            $this->cachedMatchingCandidate = null;
             return null;
         }
+    }
+
+    /**
+     * Get the client requirement billing percentage for this employee.
+     * Maps through Candidate -> ClientRequirement -> Billing.
+     */
+    public function getClientRequirementBillingPercentage(): ?float
+    {
+        $candidate = $this->getMatchingCandidate();
+        if ($candidate && $candidate->clientRequirement && $candidate->clientRequirement->billing) {
+            $val = $candidate->clientRequirement->billing->value;
+            if ($val !== null && is_numeric($val) && (float) $val > 0) {
+                return (float) $val;
+            }
+        }
+
+        // Fallback: candidate client billing or employee client billing
+        if ($candidate && $candidate->client && $candidate->client->billing) {
+            $val = $candidate->client->billing->value;
+            if ($val !== null && is_numeric($val) && (float) $val > 0) {
+                return (float) $val;
+            }
+        }
+
+        $client = $this->relationLoaded('client') ? $this->getRelation('client') : null;
+        if (!$client && !empty($this->client_id) && static::getConnectionResolver()) {
+            try {
+                $client = $this->client;
+            } catch (\Throwable $e) {
+                $client = null;
+            }
+        }
+
+        if ($client && $client->billing) {
+            $val = $client->billing->value;
+            if ($val !== null && is_numeric($val) && (float) $val > 0) {
+                return (float) $val;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Accessor for client requirement billing percentage.
+     */
+    public function getRequirementBillingPercentageAttribute(): ?float
+    {
+        return $this->getClientRequirementBillingPercentage();
     }
 
     /**

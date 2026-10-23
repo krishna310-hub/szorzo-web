@@ -240,7 +240,7 @@ class InvesterDeploymentController extends Controller
         $excludedEmployeeIds = InvesterDeployment::getDeployedEmployeeIds($investerId, $deploymentId);
 
         // External contract employees ONLY for the selected client(s) and not chosen on another investor
-        $employees = Employee::with('client')
+        $employees = Employee::with(['client.billing'])
             ->whereIn('client_id', $clientIds)
             ->whereNotIn('id', $excludedEmployeeIds)
             ->where(function ($q) {
@@ -255,7 +255,9 @@ class InvesterDeploymentController extends Controller
                 $salaryData = $emp->getContractReportSalary();
                 $salary = (float) $salaryData['salary'];
                 $durationInfo = $emp->getContractDurationInfo();
-                $durLabel = $durationInfo['duration'] ? ' [' . $durationInfo['duration'] . ']' : '';
+                $durLabel = !empty($durationInfo['duration']) ? ' [' . $durationInfo['duration'] . ']' : '';
+                $billingPct = $emp->getClientRequirementBillingPercentage();
+                $billingLabel = $billingPct !== null ? ' [' . $billingPct . '% Billing]' : '';
 
                 return [
                     'id' => $emp->id,
@@ -276,8 +278,9 @@ class InvesterDeploymentController extends Controller
                     'contract_duration_detail' => $durationInfo['detail'],
                     'contract_from' => $durationInfo['from_date'],
                     'contract_to' => $durationInfo['to_date'],
+                    'billing_percentage' => $billingPct,
                     'salary_formatted' => number_format($salary, 2),
-                    'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . $durLabel . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
+                    'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . $billingLabel . $durLabel . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
                 ];
             });
 
@@ -286,10 +289,7 @@ class InvesterDeploymentController extends Controller
             'clients' => $clients->map(fn ($c) => [
                 'id' => $c->id,
                 'name' => $c->client,
-                'billing_percentage' => $c->billing ? (float) $c->billing->value : null,
             ]),
-            'billing_percentage' => $totalBilling > 0 ? $totalBilling : null,
-            'billing_percentages_map' => $billingPercentages,
             'tds_percentage' => 10.00,
             'employees' => $employees,
             'total_external_employees' => $employees->count(),
@@ -342,7 +342,26 @@ class InvesterDeploymentController extends Controller
         $data['mode_of_engagement'] = !empty($data['mode_of_engagement']) ? $data['mode_of_engagement'] : 'Contract';
         $data['employee_ctc'] = (float) ($data['employee_ctc'] ?? 0);
         $data['approved_rate_card'] = (float) ($data['approved_rate_card'] ?? $data['employee_ctc']);
-        $data['billing_percentage'] = isset($data['billing_percentage']) && $data['billing_percentage'] !== '' ? (float) $data['billing_percentage'] : null;
+
+        // Auto-compute billing percentage from chosen employees' client requirements if not explicitly provided
+        if (!isset($data['billing_percentage']) || $data['billing_percentage'] === '' || $data['billing_percentage'] === null) {
+            if (!empty($data['employee_ids'])) {
+                $selectedEmps = Employee::with(['client.billing'])->whereIn('id', $data['employee_ids'])->get();
+                $sumBilling = 0;
+                foreach ($selectedEmps as $emp) {
+                    $bVal = $emp->getClientRequirementBillingPercentage();
+                    if ($bVal !== null && $bVal > 0) {
+                        $sumBilling += $bVal;
+                    }
+                }
+                if ($sumBilling > 0) {
+                    $data['billing_percentage'] = round($sumBilling, 2);
+                }
+            }
+        } else {
+            $data['billing_percentage'] = (float) $data['billing_percentage'];
+        }
+
         $data['margin_percentage'] = isset($data['margin_percentage']) && $data['margin_percentage'] !== ''
             ? (float) $data['margin_percentage']
             : ($data['billing_percentage'] ?? 15.0);

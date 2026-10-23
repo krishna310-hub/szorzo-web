@@ -159,6 +159,101 @@
                 </div>
             </div>
 
+            <!-- Investor Capital Spend & Balance Summary (4 Cards) -->
+            <div class="row g-3 mb-4">
+                <!-- Card 1: Total Mapped Talent -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-top border-3 border-primary shadow-sm h-100 mb-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">Mapped Talent Count</span>
+                                    <h4 class="fw-bold text-dark mt-2 mb-0">{{ $invester->total_mapped_employees }} <span class="fs-13 fw-normal text-muted">Employees</span></h4>
+                                    <small class="text-primary mt-1 d-block"><i class="ri-user-shared-line me-1"></i> External Staff Funded</small>
+                                </div>
+                                <div class="avatar-sm rounded bg-primary-subtle text-primary d-flex align-items-center justify-content-center fs-3">
+                                    <i class="ri-team-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Monthly Employee Cost / Salary -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-top border-3 border-info shadow-sm h-100 mb-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">Monthly Employee Cost</span>
+                                    <h4 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($invester->monthly_employee_cost, 2) }}</h4>
+                                    <small class="text-muted mt-1 d-block"><i class="ri-calendar-check-line me-1"></i> Monthly Salary Spend</small>
+                                </div>
+                                <div class="avatar-sm rounded bg-info-subtle text-info d-flex align-items-center justify-content-center fs-3">
+                                    <i class="ri-calendar-todo-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Total Employee Spend (Paid) -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-top border-3 border-warning shadow-sm h-100 mb-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">Total Employee Spend</span>
+                                    <h4 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($invester->total_spend_to_date, 2) }}</h4>
+                                    <small class="text-muted mt-1 d-block"><i class="ri-funds-line me-1"></i> Cumulative Paid to Date</small>
+                                </div>
+                                <div class="avatar-sm rounded bg-warning-subtle text-warning d-flex align-items-center justify-content-center fs-3">
+                                    <i class="ri-exchange-dollar-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Balance Investment (Minus if spend exceeds capital) -->
+                <div class="col-xl-3 col-md-6">
+                    @php
+                        $bal = $invester->balance_investment;
+                    @endphp
+                    @if($bal < 0)
+                        <div class="card border-top border-3 border-danger shadow-sm h-100 mb-0" style="background: #fff5f5;">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="text-danger text-uppercase fw-bold fs-11">Balance Investment</span>
+                                        <h4 class="fw-bold text-danger mt-2 mb-0">- ₹ {{ number_format(abs($bal), 2) }}</h4>
+                                        <small class="text-danger mt-1 d-block fw-semibold"><i class="ri-error-warning-fill me-1"></i> Capital Exceeded by ₹ {{ number_format(abs($bal), 2) }}</small>
+                                    </div>
+                                    <div class="avatar-sm rounded bg-danger text-white d-flex align-items-center justify-content-center fs-3 shadow-sm">
+                                        <i class="ri-alert-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="card border-top border-3 border-success shadow-sm h-100 mb-0" style="background: #f0fdf4;">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="text-success text-uppercase fw-bold fs-11">Balance Investment</span>
+                                        <h4 class="fw-bold text-success mt-2 mb-0">₹ {{ number_format($bal, 2) }}</h4>
+                                        <small class="text-success mt-1 d-block fw-medium"><i class="ri-checkbox-circle-fill me-1"></i> Capital Buffer Available</small>
+                                    </div>
+                                    <div class="avatar-sm rounded bg-success-subtle text-success d-flex align-items-center justify-content-center fs-3">
+                                        <i class="ri-wallet-3-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             <!-- Scope Tabs & Associated Masters -->
             <div class="row">
                 <!-- 1. Team & Management Scope -->

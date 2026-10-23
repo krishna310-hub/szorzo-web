@@ -27,6 +27,8 @@
         $salary = (float) $salaryData['salary'];
         $durInfo = $emp->getContractDurationInfo();
         $durLabel = !empty($durInfo['duration']) ? ' [' . $durInfo['duration'] . ']' : '';
+        $billingPct = $emp->getClientRequirementBillingPercentage();
+        $billingLabel = $billingPct !== null ? ' [' . $billingPct . '% Billing]' : '';
 
         return [
             'id' => (int) $emp->id,
@@ -47,8 +49,9 @@
             'contract_duration_detail' => $durInfo['detail'] ?? '',
             'contract_from' => $durInfo['from_date'] ?? null,
             'contract_to' => $durInfo['to_date'] ?? null,
+            'billing_percentage' => $billingPct,
             'salary_formatted' => number_format($salary, 2),
-            'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . $durLabel . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
+            'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . $billingLabel . $durLabel . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
         ];
     })->values();
 @endphp
@@ -121,27 +124,23 @@
                             <label class="form-label fw-semibold mb-0" for="client_ids">
                                 Deployed To (Client Name) <span class="text-danger">*</span>
                             </label>
-                            <span class="badge bg-primary-subtle text-primary fs-11" id="client_billing_badge">
-                                <i class="ri-percent-line me-1"></i> Auto-fetch Billing %
+                            <span class="badge bg-info-subtle text-info fs-11" id="client_count_badge">
+                                0 Clients Selected
                             </span>
                         </div>
                         <select class="form-select @error('client_ids') is-invalid @enderror @error('client_id') is-invalid @enderror" 
                             name="client_ids[]" id="client_ids" multiple required>
                             @foreach($clients as $cli)
                                 @php
-                                    $billingVal = $cli->billing ? (float) $cli->billing->value : null;
                                     $isSelected = in_array((int)$cli->id, $selectedClientIds, true);
                                 @endphp
-                                <option value="{{ $cli->id }}" 
-                                    data-billing="{{ $billingVal !== null ? $billingVal : '' }}" 
-                                    {{ $isSelected ? 'selected' : '' }}>
-                                    {{ $cli->client }} @if($billingVal !== null)({{ $billingVal }}% Billing)@endif
+                                <option value="{{ $cli->id }}" {{ $isSelected ? 'selected' : '' }}>
+                                    {{ $cli->client }}
                                 </option>
                             @endforeach
                         </select>
                         <div class="d-flex justify-content-between align-items-center mt-1">
-                            <small class="text-muted"><i class="ri-information-line me-1"></i> Multi-select client(s). External staff and billing rate will auto-update.</small>
-                            <span id="client_count_badge" class="badge bg-light text-dark fs-11"></span>
+                            <small class="text-muted"><i class="ri-information-line me-1"></i> Multi-select client(s). External staff will auto-filter.</small>
                         </div>
                         @error('client_ids')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -157,9 +156,12 @@
                             <label class="form-label fw-semibold mb-0" for="employee_ids">
                                 Employee Name (External Staff Only) <span class="text-danger">*</span>
                             </label>
-                            <span class="badge bg-success-subtle text-success fs-11" id="employee_selected_badge">
-                                0 External Employees Selected
-                            </span>
+                            <div>
+                                <span class="badge bg-success-subtle text-success fs-11" id="employee_selected_badge">
+                                    0 External Employees Selected
+                                </span>
+                                <span class="badge bg-primary-subtle text-primary fs-11 ms-1" id="employee_billing_sum_badge" style="display:none;"></span>
+                            </div>
                         </div>
                         <select class="form-select @error('employee_ids') is-invalid @enderror @error('employee_id') is-invalid @enderror" 
                             name="employee_ids[]" id="employee_ids" multiple required>
@@ -167,7 +169,10 @@
                         </select>
                         <div class="d-flex justify-content-between align-items-center mt-1">
                             <small class="text-muted"><i class="ri-user-shared-line me-1"></i> Strictly external contract employees only (excludes employees on other investors).</small>
-                            <span id="employee_ctc_sum_badge" class="badge bg-light text-primary fs-11"></span>
+                            <div>
+                                <span id="employee_billing_detail_badge" class="badge bg-light text-primary fs-11 me-1"></span>
+                                <span id="employee_ctc_sum_badge" class="badge bg-light text-primary fs-11"></span>
+                            </div>
                         </div>
                         @error('employee_ids')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -227,16 +232,18 @@
                     <div class="col-md-6 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="form-label fw-semibold mb-0" for="billing_percentage">Client Billing %</label>
-                            <span class="badge bg-primary-subtle text-primary fs-11">Auto-fetched</span>
+                            <span class="badge bg-primary-subtle text-primary fs-11" id="billing_source_badge">
+                                <i class="ri-file-list-3-line me-1"></i> Requirement Mapped
+                            </span>
                         </div>
                         <div class="input-group">
                             <input type="number" step="0.01" min="0" max="100" class="form-control @error('billing_percentage') is-invalid @enderror" 
                                 name="billing_percentage" id="billing_percentage"
                                 value="{{ old('billing_percentage', isset($deployment) && $deployment->billing_percentage !== null ? (float)$deployment->billing_percentage : '') }}" 
-                                placeholder="Total Client Billing %">
+                                placeholder="Total Client Requirement Billing %">
                             <span class="input-group-text">%</span>
                         </div>
-                        <small class="text-muted">Total sum of billing % from selected client(s)</small>
+                        <small class="text-muted" id="billing_percentage_hint">Sum of billing % from selected employee(s) mapped client requirements</small>
                         @error('billing_percentage')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -406,6 +413,7 @@
     const contractDurationHint = document.getElementById('contract_duration_hint');
     const resetDurationBtn = document.getElementById('reset_contract_duration_btn');
     const billingPctInput = document.getElementById('billing_percentage');
+    const billingHint = document.getElementById('billing_percentage_hint');
     const marginPctInput = document.getElementById('margin_percentage');
     const tdsPctInput = document.getElementById('tds_percentage');
     const tdsAmtInput = document.getElementById('tds_amount');
@@ -414,9 +422,10 @@
     const invPctInput = document.getElementById('investor_share_percentage');
     const szDisplay = document.getElementById('sz_calc_display');
     const invDisplay = document.getElementById('inv_calc_display');
-    const clientBillingBadge = document.getElementById('client_billing_badge');
     const clientCountBadge = document.getElementById('client_count_badge');
     const employeeSelectedBadge = document.getElementById('employee_selected_badge');
+    const employeeBillingSumBadge = document.getElementById('employee_billing_sum_badge');
+    const employeeBillingDetailBadge = document.getElementById('employee_billing_detail_badge');
     const employeeCtcSumBadge = document.getElementById('employee_ctc_sum_badge');
     const ctcHint = document.getElementById('employee_ctc_hint');
 
@@ -455,7 +464,8 @@
                     presentDays: emp.present_days,
                     absentDays: emp.absent_days,
                     contractDuration: emp.contract_duration,
-                    contractDurationDetail: emp.contract_duration_detail
+                    contractDurationDetail: emp.contract_duration_detail,
+                    billingPercentage: emp.billing_percentage
                 }
             }));
             employeeChoices.setChoices(choiceList, 'value', 'label', true);
@@ -473,6 +483,7 @@
                 opt.dataset.absentDays = emp.absent_days;
                 opt.dataset.contractDuration = emp.contract_duration || '';
                 opt.dataset.contractDurationDetail = emp.contract_duration_detail || '';
+                opt.dataset.billingPercentage = emp.billing_percentage !== undefined ? emp.billing_percentage : '';
                 if (keepSet.has(emp.id)) {
                     opt.selected = true;
                 }
@@ -483,7 +494,7 @@
         updateEmployeeSelectionSummary();
     }
 
-    // Update Employee Selection Count & Aggregated Contract Report Salary & Contract Duration
+    // Update Employee Selection Count & Aggregated Contract Report Salary & Contract Duration & Requirement Billing %
     function updateEmployeeSelectionSummary() {
         const selectedEmpIds = getSelectedValues(employeeSelect, employeeChoices);
         const selectedEmployees = allExternalEmployees.filter(emp => selectedEmpIds.includes(emp.id));
@@ -503,6 +514,51 @@
         // Auto-update Employee CTC input if not manually overwritten
         if (employeeCtcInput && !employeeCtcInput.dataset.manuallyEdited) {
             employeeCtcInput.value = totalSalary > 0 ? totalSalary.toFixed(2) : '';
+        }
+
+        // Aggregate Client Requirement Billing % from selected employees (Plus all selected employees' client requirement billing)
+        const billingPercentages = selectedEmployees
+            .map(e => parseFloat(e.billing_percentage) || 0)
+            .filter(v => v > 0);
+        const totalBilling = billingPercentages.length > 0
+            ? Math.round(billingPercentages.reduce((a, b) => a + b, 0) * 100) / 100
+            : 0;
+
+        if (billingPctInput && !billingPctInput.dataset.manuallyEdited) {
+            billingPctInput.value = totalBilling > 0 ? totalBilling.toFixed(2) : '';
+        }
+
+        if (marginPctInput && (!marginPctInput.dataset.manuallyEdited || parseFloat(marginPctInput.value) === 0)) {
+            marginPctInput.value = totalBilling > 0 ? totalBilling.toFixed(2) : '';
+        }
+
+        if (employeeBillingSumBadge) {
+            if (totalBilling > 0) {
+                employeeBillingSumBadge.style.display = 'inline-block';
+                employeeBillingSumBadge.innerHTML = '<i class="ri-percent-line me-1"></i> Billing Total: ' + totalBilling.toFixed(2) + '%';
+            } else {
+                employeeBillingSumBadge.style.display = 'none';
+            }
+        }
+
+        if (employeeBillingDetailBadge) {
+            if (totalBilling > 0) {
+                employeeBillingDetailBadge.textContent = 'Req Billing: ' + totalBilling.toFixed(2) + '%';
+            } else {
+                employeeBillingDetailBadge.textContent = '';
+            }
+        }
+
+        if (billingHint) {
+            if (selectedEmployees.length > 0) {
+                const details = selectedEmployees.map(e => {
+                    const bp = parseFloat(e.billing_percentage) || 0;
+                    return e.name + ': ' + (bp > 0 ? (bp.toFixed(2) + '%') : 'No req billing');
+                }).join(', ');
+                billingHint.innerHTML = '<i class="ri-calculator-line text-primary me-1"></i> Employee Req Billing: ' + details + (totalBilling > 0 ? (' = <strong>' + totalBilling.toFixed(2) + '%</strong>') : '');
+            } else {
+                billingHint.textContent = 'Sum of billing % from selected employee(s) mapped client requirements';
+            }
         }
 
         // Auto-update Contract Duration from Employee module
@@ -564,38 +620,14 @@
         recalculateFromPercentage();
     }
 
-    // Update client billing percentage & badges
+    // Update client choices and sync employees (Billing % is derived from employees, NOT clients)
     function onClientsChanged() {
         const selectedClientIds = getSelectedValues(clientSelect, clientChoices);
         
         if (clientCountBadge) {
             clientCountBadge.textContent = selectedClientIds.length > 0 
                 ? (selectedClientIds.length + ' client' + (selectedClientIds.length > 1 ? 's' : '') + ' selected')
-                : 'No clients selected';
-        }
-
-        // Calculate auto-fetched TOTAL billing % from selected clients (Sum of all selected client billing percentages)
-        const selectedClients = clientsData.filter(c => selectedClientIds.includes(c.id));
-        const billingValues = selectedClients.map(c => c.billing).filter(v => v !== null && !isNaN(v) && v > 0);
-
-        if (billingValues.length > 0) {
-            const totalBilling = Math.round(billingValues.reduce((a, b) => a + b, 0) * 100) / 100;
-            if (billingPctInput && !billingPctInput.dataset.manuallyEdited) {
-                billingPctInput.value = totalBilling.toFixed(2);
-            }
-            if (marginPctInput && (!marginPctInput.dataset.manuallyEdited || parseFloat(marginPctInput.value) === 0)) {
-                marginPctInput.value = totalBilling.toFixed(2);
-            }
-            if (clientBillingBadge) {
-                clientBillingBadge.innerHTML = '<i class="ri-check-line me-1"></i> Client Billing Total: ' + totalBilling.toFixed(2) + '%';
-            }
-        } else {
-            if (billingPctInput && !billingPctInput.dataset.manuallyEdited) {
-                billingPctInput.value = '';
-            }
-            if (clientBillingBadge) {
-                clientBillingBadge.innerHTML = '<i class="ri-percent-line me-1"></i> Auto-fetch Billing %';
-            }
+                : '0 Clients Selected';
         }
 
         // Auto-fetch TDS (Statutory 10.00% under Section 194J)
@@ -635,22 +667,6 @@
             .then(res => res.json())
             .then(data => {
                 if (data && data.status) {
-                    // Update client billing percentage if returned from server
-                    if (data.billing_percentage !== null && data.billing_percentage !== undefined) {
-                        const totalB = parseFloat(data.billing_percentage) || 0;
-                        if (billingPctInput && !billingPctInput.dataset.manuallyEdited) {
-                            billingPctInput.value = totalB > 0 ? totalB.toFixed(2) : '';
-                        }
-                        if (marginPctInput && (!marginPctInput.dataset.manuallyEdited || parseFloat(marginPctInput.value) === 0)) {
-                            marginPctInput.value = totalB > 0 ? totalB.toFixed(2) : '';
-                        }
-                        if (clientBillingBadge) {
-                            clientBillingBadge.innerHTML = totalB > 0 
-                                ? ('<i class="ri-check-line me-1"></i> Client Billing Total: ' + totalB.toFixed(2) + '%')
-                                : '<i class="ri-percent-line me-1"></i> Auto-fetch Billing %';
-                        }
-                    }
-
                     // Exclude any employees deployed on another investor
                     if (Array.isArray(data.employees)) {
                         const serverEmpMap = new Map(data.employees.map(e => [e.id, e]));

@@ -182,11 +182,113 @@
                 </div>
             </div>
 
-            <!-- Top Metric Cards (Reflecting Image & Core Financials) -->
+            <!-- Row 1: Capital Spend, Balance & Mapped Talent (4 New Cards) -->
+            <div class="row g-3 mb-3">
+                <!-- Card 1: Total Employees Count -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card inv-stat-card border-top border-3 border-primary shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">Total Employees Count</span>
+                                    <h3 class="fw-bold text-dark mt-2 mb-0">{{ $metrics['total_employees'] }} <span class="fs-14 fw-normal text-muted">Talent</span></h3>
+                                    <small class="text-primary fw-medium mt-1 d-block">
+                                        <i class="ri-user-shared-line me-1"></i> Mapped External Employees
+                                    </small>
+                                </div>
+                                <div class="inv-stat-icon bg-primary-subtle text-primary">
+                                    <i class="ri-team-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Monthly Employee Cost / Spend -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card inv-stat-card border-top border-3 border-info shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">Monthly Employee Cost</span>
+                                    <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['monthly_employee_cost'], 2) }}</h3>
+                                    <small class="text-muted mt-1 d-block">
+                                        <i class="ri-calendar-check-line me-1"></i> Monthly Salary Commitment
+                                    </small>
+                                </div>
+                                <div class="inv-stat-icon bg-info-subtle text-info">
+                                    <i class="ri-calendar-todo-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Total Spend for Mapped Employees -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card inv-stat-card border-top border-3 border-warning shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">Total Employee Spend</span>
+                                    <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['total_spend_to_date'], 2) }}</h3>
+                                    <small class="text-muted mt-1 d-block">
+                                        <i class="ri-funds-line me-1"></i> Cumulative Paid Across {{ $metrics['months_paid_count'] }} Month(s)
+                                    </small>
+                                </div>
+                                <div class="inv-stat-icon bg-warning-subtle text-warning">
+                                    <i class="ri-exchange-dollar-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Balance Investment (Shows - minus when spend exceeds investment) -->
+                <div class="col-xl-3 col-md-6">
+                    @if($metrics['balance_investment'] < 0)
+                        <div class="card inv-stat-card border-top border-3 border-danger shadow-sm h-100" style="background: #fff5f5;">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="text-danger text-uppercase fw-bold fs-11">Balance Investment</span>
+                                        <h3 class="fw-bold text-danger mt-2 mb-0">- ₹ {{ number_format(abs($metrics['balance_investment']), 2) }}</h3>
+                                        <small class="text-danger mt-1 d-block fw-semibold">
+                                            <i class="ri-error-warning-fill me-1"></i> Capital Exceeded by ₹ {{ number_format(abs($metrics['balance_investment']), 2) }}
+                                        </small>
+                                    </div>
+                                    <div class="inv-stat-icon bg-danger text-white shadow-sm">
+                                        <i class="ri-alert-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="card inv-stat-card border-top border-3 border-success shadow-sm h-100" style="background: #f0fdf4;">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="text-success text-uppercase fw-bold fs-11">Balance Investment</span>
+                                        <h3 class="fw-bold text-success mt-2 mb-0">₹ {{ number_format($metrics['balance_investment'], 2) }}</h3>
+                                        <small class="text-success mt-1 d-block fw-medium">
+                                            <i class="ri-checkbox-circle-fill me-1"></i> Capital Buffer Available
+                                        </small>
+                                    </div>
+                                    <div class="inv-stat-icon bg-success-subtle text-success">
+                                        <i class="ri-wallet-3-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Row 2: Investment Capital & Deal Economics (Existing Metrics) -->
             <div class="row g-3 mb-4">
                 <!-- Overall Investment (Right side of photo) -->
                 <div class="col-xl-3 col-md-6">
-                    <div class="card inv-stat-card border-top border-3 border-danger">
+                    <div class="card inv-stat-card border-top border-3 border-secondary">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
@@ -194,7 +296,7 @@
                                     <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['overall_investment'], 2) }}</h3>
                                     <small class="text-muted mt-1 d-block">{{ $allFinancials->count() }} Tranches Recorded</small>
                                 </div>
-                                <div class="inv-stat-icon bg-danger-subtle text-danger">
+                                <div class="inv-stat-icon bg-secondary-subtle text-secondary">
                                     <i class="ri-bank-card-line"></i>
                                 </div>
                             </div>
@@ -284,6 +386,150 @@
                 </div>
             </div>
 
+            <!-- Monthly Capital Spend & Earnings Ledger (Point 1: Monthly list for spend and earned) -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border">
+                        <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+                            <div>
+                                <h5 class="card-title mb-0">
+                                    <i class="ri-calendar-todo-line me-1 text-primary"></i> Monthly Spend & Earned Ledger
+                                </h5>
+                                <small class="text-muted">Month-by-month list tracking mapped external talent salaries funded (spend), profit sharing earned, and remaining investment balance.</small>
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <span class="badge bg-light text-dark border fs-12">
+                                    Overall Capital: <strong>₹ {{ number_format($metrics['overall_investment'], 2) }}</strong>
+                                </span>
+                                @if($metrics['balance_investment'] < 0)
+                                    <span class="badge bg-danger text-white fs-12">
+                                        <i class="ri-alert-line me-1"></i> Balance: - ₹ {{ number_format(abs($metrics['balance_investment']), 2) }} (Exceeded)
+                                    </span>
+                                @else
+                                    <span class="badge bg-success-subtle text-success fs-12">
+                                        <i class="ri-checkbox-circle-line me-1"></i> Balance: ₹ {{ number_format($metrics['balance_investment'], 2) }}
+                                    </span>
+                                @endif
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()" title="Print Ledger">
+                                    <i class="ri-printer-line me-1"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered align-middle mb-0" id="monthlyLedgerTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 50px;">#</th>
+                                            <th>Month & Year</th>
+                                            <th>Mapped External Employees</th>
+                                            <th>Monthly Spend (Salary Paid)</th>
+                                            <th>Gross Margin Generated</th>
+                                            <th>Monthly Earned (Investor Share)</th>
+                                            <th>Cumulative Spend</th>
+                                            <th>Cumulative Earned</th>
+                                            <th class="table-warning">Balance Investment</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($monthlyLedger as $row)
+                                            <tr class="{{ $row['is_current'] ? 'table-primary-subtle' : '' }}">
+                                                <td class="fw-semibold text-muted text-center">{{ $row['month_index'] }}</td>
+                                                <td>
+                                                    <strong>{{ $row['month_label'] }}</strong>
+                                                    @if($row['is_current'])
+                                                        <span class="badge bg-primary text-white ms-1 fs-10">Current</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-primary-subtle text-primary">
+                                                        <i class="ri-team-line me-1"></i> {{ $row['employees_count'] }} Employees
+                                                    </span>
+                                                    @if(!empty($row['employees_detail']))
+                                                        <div class="small text-muted mt-1">
+                                                            @foreach(array_slice($row['employees_detail'], 0, 3) as $ed)
+                                                                <span class="d-inline-block me-2">• {{ $ed['name'] }} (₹{{ number_format($ed['salary'], 2) }})</span>
+                                                            @endforeach
+                                                            @if(count($row['employees_detail']) > 3)
+                                                                <span class="text-muted">+{{ count($row['employees_detail']) - 3 }} more</span>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="fw-bold text-dark">₹ {{ number_format($row['spend'], 2) }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-dark">₹ {{ number_format($row['gross_margin'], 2) }}</span>
+                                                    <small class="text-muted d-block fs-11">SZ: ₹ {{ number_format($row['szorzo_earned'], 2) }}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-bold text-success fs-6">₹ {{ number_format($row['investor_earned'], 2) }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-semibold text-dark">₹ {{ number_format($row['cumulative_spend'], 2) }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-semibold text-success">₹ {{ number_format($row['cumulative_investor_earned'], 2) }}</span>
+                                                </td>
+                                                <td class="table-warning">
+                                                    @if($row['balance_investment'] < 0)
+                                                        <span class="fw-bold text-danger fs-6">- ₹ {{ number_format(abs($row['balance_investment']), 2) }}</span>
+                                                        <span class="badge bg-danger text-white ms-1 fs-10">Exceeded</span>
+                                                    @else
+                                                        <span class="fw-bold text-success fs-6">₹ {{ number_format($row['balance_investment'], 2) }}</span>
+                                                        <span class="badge bg-success-subtle text-success ms-1 fs-10">Funded</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-{{ $row['status_class'] }}-subtle text-{{ $row['status_class'] }}">
+                                                        {{ $row['status_label'] }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="10" class="text-center text-muted py-4">
+                                                    <i class="ri-information-line fs-18 d-block mb-1"></i>
+                                                    No monthly spend or earnings data recorded yet. Deploy employees to start tracking monthly salary spend and profit share.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                    @if($monthlyLedger->isNotEmpty())
+                                        <tfoot class="table-light fw-bold">
+                                            <tr>
+                                                <td colspan="3" class="text-end">Ledger Totals:</td>
+                                                <td class="text-dark">₹ {{ number_format($monthlyLedgerSummary['total_projected_spend'], 2) }}</td>
+                                                <td class="text-dark">₹ {{ number_format($monthlyLedgerSummary['total_gross_margin'], 2) }}</td>
+                                                <td class="text-success">₹ {{ number_format($monthlyLedgerSummary['total_projected_investor_earned'], 2) }}</td>
+                                                <td class="text-dark">₹ {{ number_format($monthlyLedgerSummary['total_spend_to_date'], 2) }} (To Date)</td>
+                                                <td class="text-success">₹ {{ number_format($monthlyLedgerSummary['total_investor_earned'], 2) }}</td>
+                                                <td class="table-warning">
+                                                    @if($metrics['balance_investment'] < 0)
+                                                        <span class="text-danger fs-6">- ₹ {{ number_format(abs($metrics['balance_investment']), 2) }}</span>
+                                                    @else
+                                                        <span class="text-success fs-6">₹ {{ number_format($metrics['balance_investment'], 2) }}</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($metrics['balance_investment'] < 0)
+                                                        <span class="badge bg-danger text-white">Deficit</span>
+                                                    @else
+                                                        <span class="badge bg-success text-white">Surplus</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    @endif
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- If Admin is viewing Consolidated Overview: Show Investers Breakdown Table (Point 5) -->
             @if($isSuperAdmin && !$selectedInvesterId && $investorBreakdown->isNotEmpty())
                 <div class="row mb-4">
@@ -304,10 +550,12 @@
                                                 <th>Investor Name</th>
                                                 <th>Investor Type</th>
                                                 <th>Capital Invested</th>
-                                                <th>Deployments</th>
+                                                <th>Mapped Talent</th>
+                                                <th>Monthly Cost</th>
+                                                <th>Total Spend</th>
+                                                <th>Balance Investment</th>
                                                 <th>Margin Generated</th>
                                                 <th>Investor Share (30%)</th>
-                                                <th>Szorzo Share (70%)</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -322,10 +570,19 @@
                                                     </td>
                                                     <td><span class="badge bg-secondary-subtle text-secondary">{{ $ib['investor_type'] ?: 'Angel Investor' }}</span></td>
                                                     <td class="fw-bold text-dark">₹ {{ number_format($ib['capital_invested'], 2) }}</td>
-                                                    <td><span class="badge bg-primary-subtle text-primary">{{ $ib['deployments_count'] }} Employees</span></td>
+                                                    <td><span class="badge bg-primary-subtle text-primary">{{ $ib['employees_count'] ?? $ib['deployments_count'] }} Employees</span></td>
+                                                    <td class="fw-bold text-info-emphasis">₹ {{ number_format($ib['monthly_cost'] ?? 0, 2) }}</td>
+                                                    <td class="fw-bold text-dark">₹ {{ number_format($ib['total_spend'] ?? 0, 2) }}</td>
+                                                    <td>
+                                                        @if(!empty($ib['balance_is_negative']))
+                                                            <span class="fw-bold text-danger">- ₹ {{ number_format(abs($ib['balance_investment']), 2) }}</span>
+                                                            <span class="badge bg-danger text-white ms-1 fs-10">Exceeded</span>
+                                                        @else
+                                                            <span class="fw-bold text-success">₹ {{ number_format($ib['balance_investment'] ?? 0, 2) }}</span>
+                                                        @endif
+                                                    </td>
                                                     <td class="fw-bold text-warning-emphasis">₹ {{ number_format($ib['total_margin'], 2) }}</td>
                                                     <td class="fw-bold text-success">₹ {{ number_format($ib['investor_earnings'], 2) }}</td>
-                                                    <td class="fw-bold text-primary">₹ {{ number_format($ib['szorzo_earnings'], 2) }}</td>
                                                     <td>
                                                         <a href="{{ route('admin.investers.dashboard') }}?invester_id={{ $ib['id'] }}" class="btn btn-sm btn-outline-primary" title="View Specific Dashboard">
                                                             <i class="ri-dashboard-2-line me-1"></i> Dashboard

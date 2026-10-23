@@ -2,6 +2,9 @@
 
 namespace Tests\Unit;
 
+use App\Models\Billing;
+use App\Models\Candidate;
+use App\Models\ClientRequirement;
 use App\Models\Employee;
 use App\Models\Invester;
 use App\Models\InvesterDeployment;
@@ -410,6 +413,128 @@ class InvesterWorkflowTest extends TestCase
         $infoEmpty = $empEmpty->getContractDurationInfo();
         $this->assertSame('', $infoEmpty['duration']);
         $this->assertSame('', $empEmpty->contract_duration);
+    }
+
+    public function test_client_billing_percentage_calculated_from_employee_client_requirement(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+
+        // 1. Form view no longer has client_billing_badge on Deployed To (Client Name)
+        $formContent = file_get_contents($baseDir . '/resources/views/backend/invester-deployments/form.blade.php');
+        $this->assertStringNotContainsString('id="client_billing_badge"', $formContent);
+        $this->assertStringContainsString('id="employee_billing_sum_badge"', $formContent);
+        $this->assertStringContainsString('id="billing_percentage_hint"', $formContent);
+
+        // 2. Test employee client requirement billing calculation
+        $billing15 = new Billing(['value' => '15.00']);
+        $req1 = new ClientRequirement(['billing_id' => 1]);
+        $req1->setRelation('billing', $billing15);
+
+        $cand1 = new Candidate(['candidate_name' => 'Zaheer Staff', 'email' => 'zaheer@example.com']);
+        $cand1->setRelation('clientRequirement', $req1);
+
+        $emp1 = new Employee(['employee_name' => 'Zaheer Staff', 'official_mail' => 'zaheer@example.com']);
+        // Inject cached matching candidate
+        $refProp = new \ReflectionProperty(Employee::class, 'cachedMatchingCandidate');
+        $refProp->setValue($emp1, $cand1);
+        $refLoaded = new \ReflectionProperty(Employee::class, 'matchingCandidateLoaded');
+        $refLoaded->setValue($emp1, true);
+
+        $this->assertEquals(15.00, $emp1->getClientRequirementBillingPercentage());
+
+        // 3. Second employee with 20.00% requirement billing
+        $billing20 = new Billing(['value' => '20.00']);
+        $req2 = new ClientRequirement(['billing_id' => 2]);
+        $req2->setRelation('billing', $billing20);
+
+        $cand2 = new Candidate(['candidate_name' => 'Farsham Staff', 'email' => 'farsham@example.com']);
+        $cand2->setRelation('clientRequirement', $req2);
+
+        $emp2 = new Employee(['employee_name' => 'Farsham Staff', 'official_mail' => 'farsham@example.com']);
+        $refProp->setValue($emp2, $cand2);
+        $refLoaded->setValue($emp2, true);
+
+        $this->assertEquals(20.00, $emp2->getClientRequirementBillingPercentage());
+
+        // 4. Combined billing percentage for multiple employees (15% + 20% = 35%)
+        $employees = collect([$emp1, $emp2]);
+        $combinedBilling = $employees->sum(fn ($e) => (float) $e->getClientRequirementBillingPercentage());
+        $this->assertEquals(35.00, $combinedBilling);
+    }
+
+    public function test_parse_duration_months(): void
+    {
+        $this->assertEquals(6, \App\Http\Controllers\backend\InvesterDashboardController::parseDurationMonths('6 Months'));
+        $this->assertEquals(3, \App\Http\Controllers\backend\InvesterDashboardController::parseDurationMonths('3 Months'));
+        $this->assertEquals(12, \App\Http\Controllers\backend\InvesterDashboardController::parseDurationMonths('1 Year'));
+        $this->assertEquals(24, \App\Http\Controllers\backend\InvesterDashboardController::parseDurationMonths('2 Years'));
+        $this->assertEquals(6, \App\Http\Controllers\backend\InvesterDashboardController::parseDurationMonths(null));
+        $this->assertEquals(6, \App\Http\Controllers\backend\InvesterDashboardController::parseDurationMonths(''));
+    }
+
+    public function test_invester_spend_balance_negative_when_exceeded(): void
+    {
+        // Example from user request:
+        // Investor invests 1,000,000. Monthly employee salary paid 4 lakhs (400,000).
+        // Month 1: 400,000 paid -> Balance = 600,000.
+        // Month 2: 400,000 paid (800,000 total) -> Balance = 200,000.
+        // Month 3: 400,000 paid (1,200,000 total) -> Balance = -200,000.
+        // Month 4: 400,000 paid (1,600,000 total) -> Balance = -600,000 (negative value!)
+        $capitalInvested = 1000000.0;
+        $monthlySalary = 400000.0;
+
+        // Month 1
+        $spend1 = $monthlySalary * 1;
+        $balance1 = $capitalInvested - $spend1;
+        $this->assertEquals(600000.0, $balance1);
+        $this->assertFalse($balance1 < 0);
+
+        // Month 2
+        $spend2 = $monthlySalary * 2;
+        $balance2 = $capitalInvested - $spend2;
+        $this->assertEquals(200000.0, $balance2);
+        $this->assertFalse($balance2 < 0);
+
+        // Month 3 (Exceeds capital!)
+        $spend3 = $monthlySalary * 3;
+        $balance3 = $capitalInvested - $spend3;
+        $this->assertEquals(-200000.0, $balance3);
+        $this->assertTrue($balance3 < 0);
+
+        // Month 4 (Exceeds capital by 6 lakhs!)
+        $spend4 = $monthlySalary * 4;
+        $balance4 = $capitalInvested - $spend4;
+        $this->assertEquals(-600000.0, $balance4);
+        $this->assertTrue($balance4 < 0);
+    }
+
+    public function test_dashboard_view_contains_4_cards_and_monthly_ledger(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/invester-dashboard/index.blade.php');
+
+        // Check for 4 new cards in dashboard
+        $this->assertStringContainsString('Total Employees Count', $dashboardContent);
+        $this->assertStringContainsString('Monthly Employee Cost', $dashboardContent);
+        $this->assertStringContainsString('Total Employee Spend', $dashboardContent);
+        $this->assertStringContainsString('Balance Investment', $dashboardContent);
+
+        // Check for Monthly Spend & Earned Ledger table
+        $this->assertStringContainsString('Monthly Spend & Earned Ledger', $dashboardContent);
+        $this->assertStringContainsString('id="monthlyLedgerTable"', $dashboardContent);
+        $this->assertStringContainsString('Monthly Spend (Salary Paid)', $dashboardContent);
+        $this->assertStringContainsString('Monthly Earned (Investor Share)', $dashboardContent);
+        $this->assertStringContainsString('Cumulative Spend', $dashboardContent);
+
+        // Check for negative balance display styling (- ₹)
+        $this->assertStringContainsString('- ₹ {{ number_format(abs($metrics[\'balance_investment\'])', $dashboardContent);
+
+        // Check show view as well
+        $showContent = file_get_contents($baseDir . '/resources/views/backend/investers/show.blade.php');
+        $this->assertStringContainsString('Mapped Talent Count', $showContent);
+        $this->assertStringContainsString('Monthly Employee Cost', $showContent);
+        $this->assertStringContainsString('Total Employee Spend', $showContent);
+        $this->assertStringContainsString('Balance Investment', $showContent);
     }
 }
 

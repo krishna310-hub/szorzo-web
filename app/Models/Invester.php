@@ -152,6 +152,72 @@ class Invester extends Model
     }
 
     /**
+     * Total unique external employees mapped across active deployments.
+     */
+    public function getTotalMappedEmployeesAttribute(): int
+    {
+        return $this->deployments()->where('status', true)->get()->flatMap(function ($d) {
+            $ids = $d->employee_ids;
+            if (is_string($ids)) {
+                $ids = json_decode($ids, true);
+            }
+            if (empty($ids) && $d->employee_id) {
+                $ids = [$d->employee_id];
+            }
+            return (array) $ids;
+        })->filter()->unique()->count();
+    }
+
+    /**
+     * Monthly payroll commitment (sum of employee CTC) across active deployments.
+     */
+    public function getMonthlyEmployeeCostAttribute(): float
+    {
+        return (float) $this->deployments()->where('status', true)->sum('employee_ctc');
+    }
+
+    /**
+     * Total cumulative employee salary spend across elapsed active months.
+     */
+    public function getTotalSpendToDateAttribute(): float
+    {
+        $activeDeps = $this->deployments()->where('status', true)->get();
+        if ($activeDeps->isEmpty()) {
+            return 0.0;
+        }
+
+        $now = \Carbon\CarbonImmutable::now()->startOfMonth();
+        $totalSpend = 0.0;
+
+        foreach ($activeDeps as $dep) {
+            $start = $dep->start_date ? \Carbon\CarbonImmutable::parse($dep->start_date)->startOfMonth() : \Carbon\CarbonImmutable::parse($dep->created_at)->startOfMonth();
+            $monthsElapsed = max(1, $start->diffInMonths($now) + 1);
+            $durMonths = \App\Http\Controllers\backend\InvesterDashboardController::parseDurationMonths($dep->contract_duration);
+            $monthsCount = min($monthsElapsed, $durMonths);
+            $totalSpend += ((float) $dep->employee_ctc) * $monthsCount;
+        }
+
+        return round($totalSpend, 2);
+    }
+
+    /**
+     * Remaining Investment Balance (Overall Investment - Total Spend To Date).
+     * If total spend exceeds investment, returns a negative value.
+     */
+    public function getBalanceInvestmentAttribute(): float
+    {
+        return round($this->total_overall_investment - $this->total_spend_to_date, 2);
+    }
+
+    /**
+     * Check if investment balance is negative (spend exceeds capital).
+     */
+    public function getIsBalanceNegativeAttribute(): bool
+    {
+        return $this->balance_investment < 0;
+    }
+
+    /**
      * Total Gross Margin Generated across active deployments.
      */
     public function getTotalMarginGeneratedAttribute(): float
