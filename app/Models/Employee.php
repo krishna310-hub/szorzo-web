@@ -582,4 +582,115 @@ class Employee extends Model
         }
         return '#f06548'; // danger red
     }
+
+    /**
+     * Get monthly salary from Contract Report (calculated based on working/present days).
+     *
+     * @param \Carbon\CarbonInterface|null $month
+     * @return array
+     */
+    public function getContractReportSalary(?\Carbon\CarbonInterface $month = null): array
+    {
+        $month = $month ?: \Carbon\CarbonImmutable::now();
+        $salaryMonth = $month->startOfMonth();
+
+        // 1. Locate matching Candidate by email or name
+        $emails = array_values(array_filter([
+            $this->official_mail ? mb_strtolower(trim($this->official_mail)) : null,
+            $this->personal_mail ? mb_strtolower(trim($this->personal_mail)) : null,
+        ]));
+
+        $candidate = null;
+        try {
+            if (!empty($emails)) {
+                $candidate = Candidate::where(function ($q) use ($emails) {
+                    foreach ($emails as $em) {
+                        $q->orWhereRaw('LOWER(email) = ?', [$em]);
+                    }
+                })->first();
+            }
+
+            if (!$candidate && !empty($this->employee_name)) {
+                $candName = mb_strtolower(trim($this->employee_name));
+                $candidate = Candidate::whereRaw('LOWER(candidate_name) = ?', [$candName])->first();
+            }
+
+            if (!$candidate && !empty($this->contact_no)) {
+                $cleanPhone = preg_replace('/[^0-9]/', '', (string) $this->contact_no);
+                if (strlen($cleanPhone) >= 10) {
+                    $last10 = substr($cleanPhone, -10);
+                    $candidate = Candidate::whereRaw("REPLACE(REPLACE(REPLACE(contact_no, ' ', ''), '-', ''), '+', '') LIKE ?", ['%' . $last10])->first();
+                }
+            }
+        } catch (\Throwable $e) {
+            $candidate = null;
+        }
+
+        $salary = 0.0;
+        $presentDays = (int) $month->daysInMonth;
+        $absentDays = 0;
+        $source = 'None';
+        $reportMonthStr = null;
+
+        if ($candidate) {
+            $report = null;
+            try {
+                // Check contract report for current month first
+                $report = ContractReport::where('candidate_id', $candidate->id)
+                    ->whereDate('salary_month', $salaryMonth->toDateString())
+                    ->first();
+
+                // If not found for current month, retrieve latest contract report
+                if (!$report) {
+                    $report = ContractReport::where('candidate_id', $candidate->id)
+                        ->latest('salary_month')
+                        ->first();
+                }
+            } catch (\Throwable $e) {
+                $report = null;
+            }
+
+            if ($report) {
+                $daysInMonth = $report->salary_month ? $report->salary_month->daysInMonth : $month->daysInMonth;
+                $presentDays = (int) ($report->present_days ?? $daysInMonth);
+                $absentDays = (int) ($report->absent_days ?? 0);
+                $payable = (float) $report->payable_salary;
+                $takeHome = (float) $report->monthly_take_home;
+
+                if ($report->is_hourly) {
+                    $salary = $payable > 0 ? $payable : round((float) $report->hourly_salary * (float) ($report->worked_hours ?? 0), 2);
+                } else {
+                    if ($payable > 0) {
+                        $salary = $payable;
+                    } elseif ($takeHome > 0) {
+                        $salary = round(max(0, $takeHome - ($takeHome / $daysInMonth) * $absentDays), 2);
+                    }
+                }
+
+                $reportMonthStr = $report->salary_month ? $report->salary_month->format('M Y') : null;
+                $source = 'Contract Report (' . ($reportMonthStr ?: 'Monthly') . ')';
+            } elseif ($candidate->onboarding_ctc > 0) {
+                $salary = round((float) $candidate->onboarding_ctc / 12, 2);
+                $source = 'Candidate Onboarding CTC';
+            } elseif ($candidate->take_home > 0) {
+                $salary = (float) $candidate->take_home;
+                $source = 'Candidate Take Home';
+            }
+        }
+
+        // Fallback to employee monthly_gross if available
+        if ($salary <= 0 && (float) $this->monthly_gross > 0) {
+            $salary = (float) $this->monthly_gross;
+            $source = 'Employee Monthly Gross';
+        }
+
+        return [
+            'salary' => round($salary, 2),
+            'present_days' => $presentDays,
+            'absent_days' => $absentDays,
+            'days_in_month' => (int) $month->daysInMonth,
+            'source' => $source,
+            'report_month' => $reportMonthStr,
+        ];
+    }
 }

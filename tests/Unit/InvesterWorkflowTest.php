@@ -8,7 +8,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Policies\InvesterDeploymentPolicy;
 use Illuminate\Support\Facades\Route;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class InvesterWorkflowTest extends TestCase
 {
@@ -207,6 +207,117 @@ class InvesterWorkflowTest extends TestCase
         $sidebarContent = file_get_contents(dirname(__DIR__, 2) . '/resources/views/backend/layouts/sidebar.blade.php');
         $this->assertStringContainsString("route('admin.investers.dashboard')", $sidebarContent);
         $this->assertStringContainsString("route('admin.invester-deployments.index')", $sidebarContent);
+    }
+
+    public function test_form_removes_default_staffing_8_33_and_hardcoded_defaults(): void
+    {
+        $formContent = file_get_contents(dirname(__DIR__, 2) . '/resources/views/backend/invester-deployments/form.blade.php');
+
+        // 1. "Default Staffing: 8.33%" badge must be completely removed
+        $this->assertStringNotContainsString('Default Staffing: 8.33%', $formContent);
+
+        // 2. No hardcoded '8.33' default on billing_percentage
+        $this->assertStringNotContainsString("?? '8.33'", $formContent);
+
+        // 3. No hardcoded '200000' default on approved_rate_card
+        $this->assertStringNotContainsString("?? '200000'", $formContent);
+
+        // 4. No hardcoded '1790000' default on employee_ctc
+        $this->assertStringNotContainsString("?? '1790000'", $formContent);
+
+        // 5. Contract Report hints and calculations present
+        $this->assertStringContainsString('Contract Report', $formContent);
+        $this->assertStringContainsString('getContractReportSalary', $formContent);
+    }
+
+    public function test_get_deployed_employee_ids_helper_structure(): void
+    {
+        $this->assertTrue(method_exists(InvesterDeployment::class, 'getDeployedEmployeeIds'));
+
+        $reflection = new \ReflectionMethod(InvesterDeployment::class, 'getDeployedEmployeeIds');
+        $this->assertTrue($reflection->isStatic());
+        $this->assertTrue($reflection->isPublic());
+    }
+
+    public function test_employee_contract_report_salary_method_structure(): void
+    {
+        $this->assertTrue(method_exists(\App\Models\Employee::class, 'getContractReportSalary'));
+
+        $employee = new \App\Models\Employee([
+            'employee_name' => 'Demo External',
+            'monthly_gross' => 45000.00,
+        ]);
+
+        $salaryData = $employee->getContractReportSalary();
+        $this->assertIsArray($salaryData);
+        $this->assertArrayHasKey('salary', $salaryData);
+        $this->assertArrayHasKey('present_days', $salaryData);
+        $this->assertArrayHasKey('absent_days', $salaryData);
+        $this->assertArrayHasKey('days_in_month', $salaryData);
+        $this->assertArrayHasKey('source', $salaryData);
+        $this->assertEquals(45000.00, (float) $salaryData['salary']);
+    }
+
+    public function test_form_view_compilation(): void
+    {
+        $investers = collect([
+            new Invester(['id' => 1, 'name' => 'Alpha Capital', 'invester_id' => 'SZ INV 0001', 'status' => 1]),
+        ]);
+        $client = new \App\Models\Client(['id' => 1, 'client' => 'Client One', 'status' => 1]);
+        $clients = collect([$client]);
+        $employee = new \App\Models\Employee([
+            'id' => 1,
+            'employee_name' => 'Test Employee',
+            'employee_no' => 'SZ001',
+            'client_id' => 1,
+            'monthly_gross' => 50000,
+            'designation' => 'Developer',
+            'employment_type' => \App\Models\Employee::EMPLOYMENT_TYPE_EXTERNAL,
+        ]);
+        $employee->setRelation('client', $client);
+        $employees = collect([$employee]);
+
+        $viewHtml = view('backend.invester-deployments.form', [
+            'investers' => $investers,
+            'clients' => $clients,
+            'employees' => $employees,
+            'preselectedInvesterId' => 1,
+            'errors' => new \Illuminate\Support\ViewErrorBag(),
+        ])->render();
+
+        $this->assertNotEmpty($viewHtml);
+        $this->assertStringContainsString('Alpha Capital', $viewHtml);
+        $this->assertStringContainsString('Client One', $viewHtml);
+        $this->assertStringNotContainsString('Default Staffing: 8.33%', $viewHtml);
+        $this->assertStringContainsString('Contract Report', $viewHtml);
+
+        // Also test edit mode rendering with existing deployment
+        $deployment = new InvesterDeployment([
+            'id' => 99,
+            'invester_id' => 1,
+            'client_ids' => [1],
+            'employee_ids' => [1],
+            'mode_of_engagement' => 'Contract',
+            'contract_duration' => '6 Months',
+            'approved_rate_card' => 200000,
+            'employee_ctc' => 50000,
+            'billing_percentage' => 12.50,
+            'margin_percentage' => 12.50,
+            'status' => 1,
+        ]);
+        $deployment->setRelation('invester', $investers->first());
+
+        $editViewHtml = view('backend.invester-deployments.form', [
+            'deployment' => $deployment,
+            'investers' => $investers,
+            'clients' => $clients,
+            'employees' => $employees,
+            'errors' => new \Illuminate\Support\ViewErrorBag(),
+        ])->render();
+
+        $this->assertNotEmpty($editViewHtml);
+        $this->assertStringContainsString('12.5', $editViewHtml);
+        $this->assertStringNotContainsString('Default Staffing: 8.33%', $editViewHtml);
     }
 }
 

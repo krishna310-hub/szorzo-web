@@ -129,5 +129,64 @@ class InvesterModuleTest extends TestCase
         $this->assertTrue(method_exists($invester, 'getAssignedAccountManagersAttribute'));
         $this->assertTrue(method_exists($invester, 'getAccountManagerNamesAttribute'));
     }
+
+    public function test_invester_manual_account_manager_and_portal_fields(): void
+    {
+        $invester = new Invester([
+            'account_manager_name' => 'Sarah Connor',
+            'account_manager_email' => 'sarah@example.com',
+            'account_manager_contact' => '+91 9988776655',
+            'account_manager_role' => 'Key Account Director',
+            'portal_username' => 'investor_alpha',
+            'portal_password' => 'AlphaSecure@2026',
+        ]);
+
+        $this->assertSame('Sarah Connor', $invester->account_manager_name);
+        $this->assertSame('sarah@example.com', $invester->account_manager_email);
+        $this->assertSame('+91 9988776655', $invester->account_manager_contact);
+        $this->assertSame('Key Account Director', $invester->account_manager_role);
+        $this->assertSame('investor_alpha', $invester->portal_username);
+        $this->assertSame('AlphaSecure@2026', $invester->portal_password);
+        $this->assertSame('Sarah Connor', $invester->account_manager_names);
+    }
+
+    public function test_invester_form_view_fields(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $formContent = file_get_contents($baseDir . '/resources/views/backend/investers/form.blade.php');
+        
+        // 1. Account manager text fields instead of dropdown
+        $this->assertStringContainsString('name="account_manager_name"', $formContent);
+        $this->assertStringContainsString('name="account_manager_role"', $formContent);
+        $this->assertStringContainsString('name="account_manager_email"', $formContent);
+        $this->assertStringContainsString('name="account_manager_contact"', $formContent);
+        $this->assertStringNotContainsString('id="account_manager_ids"', $formContent);
+        $this->assertStringNotContainsString('Select External Employees', $formContent);
+
+        // 2. Status radio buttons in Basic Information
+        $basicInfoPos = strpos($formContent, 'Basic Information');
+        $statusPos = strpos($formContent, 'name="status"');
+        $relationshipPos = strpos($formContent, 'Relationship Management & Notes');
+        $this->assertTrue($statusPos > $basicInfoPos && $statusPos < $relationshipPos, 'Status should be located inside Basic Information section');
+
+        // 3. Username and password
+        $this->assertStringContainsString('name="user_name"', $formContent);
+        $this->assertStringContainsString('name="user_password"', $formContent);
+        $this->assertStringContainsString('portal_password', $formContent);
+
+        // 4. Number of Shares / Units Held removed
+        $this->assertStringNotContainsString('name="shares_units_held"', $formContent);
+        $this->assertStringNotContainsString('Number of Shares / Units Held', $formContent);
+    }
+
+    public function test_invester_show_view_fields(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $showContent = file_get_contents($baseDir . '/resources/views/backend/investers/show.blade.php');
+        
+        $this->assertStringContainsString('account_manager_name', $showContent);
+        $this->assertStringContainsString('portal_password', $showContent);
+        $this->assertStringNotContainsString('Shares / Units Held', $showContent);
+    }
 }
 

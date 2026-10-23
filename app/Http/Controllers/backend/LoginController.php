@@ -50,27 +50,31 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => ['required', 'email'],
+            'email'    => ['required', 'string'],
             'password' => ['required'],
         ]);
 
+        $loginInput = trim((string) $request->email);
         $user = User::with('role')
-            ->where('email', $request->email)
+            ->where(function ($q) use ($loginInput) {
+                $q->where('email', $loginInput)
+                  ->orWhere('name', $loginInput);
+            })
             ->first();
-            
-        if ((int) $user->is_active !== 1) {
-            return back()->with([
-                'error' => 'Your account is inactive. Please contact the administrator.'
-            ])->withErrors([
-                'email' => 'Your account is inactive. Please contact the administrator.'
-            ])->onlyInput('email');
-        }
 
         if (!$user || !password_verify($request->password, $user->password)) {
             return back()->with([
                 'error' => 'The provided credentials do not match our records.'
             ])->withErrors([
                 'email' => 'The provided credentials do not match our records.'
+            ])->onlyInput('email');
+        }
+
+        if ((int) $user->is_active !== 1) {
+            return back()->with([
+                'error' => 'Your account is inactive. Please contact the administrator.'
+            ])->withErrors([
+                'email' => 'Your account is inactive. Please contact the administrator.'
             ])->onlyInput('email');
         }
 

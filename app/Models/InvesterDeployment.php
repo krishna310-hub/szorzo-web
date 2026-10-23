@@ -207,5 +207,51 @@ class InvesterDeployment extends Model
     {
         return $query->where('invester_id', $investerId);
     }
+
+    /**
+     * Retrieve array of employee IDs already chosen on other investors.
+     *
+     * @param int|null $excludeInvesterId Current investor ID whose employees should remain available
+     * @param int|null $excludeDeploymentId Current deployment ID (if editing)
+     * @return array<int>
+     */
+    public static function getDeployedEmployeeIds(?int $excludeInvesterId = null, ?int $excludeDeploymentId = null): array
+    {
+        try {
+            $query = static::query();
+
+            if ($excludeDeploymentId) {
+                $query->where('id', '!=', $excludeDeploymentId);
+            }
+
+            if ($excludeInvesterId) {
+                $query->where('invester_id', '!=', $excludeInvesterId);
+            }
+
+            $deployments = $query->get(['id', 'invester_id', 'employee_id', 'employee_ids']);
+
+            $deployedIds = [];
+            foreach ($deployments as $dep) {
+                $ids = $dep->employee_ids;
+                if (is_string($ids)) {
+                    $ids = json_decode($ids, true);
+                }
+                if (is_array($ids)) {
+                    foreach ($ids as $id) {
+                        if ($id) {
+                            $deployedIds[] = (int) $id;
+                        }
+                    }
+                }
+                if (!empty($dep->employee_id)) {
+                    $deployedIds[] = (int) $dep->employee_id;
+                }
+            }
+
+            return array_values(array_unique($deployedIds));
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
 }
 

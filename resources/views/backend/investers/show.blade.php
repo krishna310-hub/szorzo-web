@@ -87,12 +87,26 @@
                                 </div>
                                 <div class="col-md-3">
                                     <span class="text-muted d-block small">Account Manager / Internal POC</span>
-                                    @php
-                                        $assignedManagers = $invester->assigned_account_managers;
-                                    @endphp
-                                    @if($assignedManagers->isNotEmpty())
+                                    @if(!empty($invester->account_manager_name))
+                                        <span class="fw-semibold text-primary d-block">
+                                            <i class="ri-user-star-line me-1"></i> {{ $invester->account_manager_name }}
+                                        </span>
+                                        @if(!empty($invester->account_manager_role))
+                                            <span class="badge bg-secondary-subtle text-secondary fs-7 mt-1">{{ $invester->account_manager_role }}</span>
+                                        @endif
+                                        @if(!empty($invester->account_manager_email) || !empty($invester->account_manager_contact))
+                                            <div class="text-muted small mt-1">
+                                                @if(!empty($invester->account_manager_email))
+                                                    <div><i class="ri-mail-line me-1"></i> {{ $invester->account_manager_email }}</div>
+                                                @endif
+                                                @if(!empty($invester->account_manager_contact))
+                                                    <div><i class="ri-phone-line me-1"></i> {{ $invester->account_manager_contact }}</div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    @elseif($invester->assigned_account_managers->isNotEmpty())
                                         <div class="d-flex flex-wrap gap-1 mt-1">
-                                            @foreach($assignedManagers as $mgr)
+                                            @foreach($invester->assigned_account_managers as $mgr)
                                                 <span class="badge bg-primary-subtle text-primary fs-7">
                                                     <i class="ri-user-star-line me-1"></i>
                                                     {{ $mgr->employee_name }}
@@ -116,11 +130,21 @@
                                     <span class="text-muted d-block small">Portal Login Account (Role ID 6)</span>
                                     @php $linkedUser = $invester->linkedUser(); @endphp
                                     @if($linkedUser)
-                                        <span class="badge bg-success-subtle text-success fs-12">
-                                            <i class="ri-checkbox-circle-line me-1"></i> {{ $linkedUser->email }}
-                                        </span>
+                                        <div class="d-flex flex-column gap-1 mt-1">
+                                            <div>
+                                                <span class="badge bg-success-subtle text-success fs-12">
+                                                    <i class="ri-checkbox-circle-line me-1"></i> {{ $linkedUser->email }}
+                                                </span>
+                                            </div>
+                                            <div class="small text-muted">
+                                                <span>Username: <strong>{{ $invester->portal_username ?: $linkedUser->name }}</strong></span>
+                                                @if(!empty($invester->portal_password))
+                                                    <span class="ms-2">| Password: <code class="text-dark">{{ $invester->portal_password }}</code></span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     @else
-                                        <span class="badge bg-warning-subtle text-warning fs-12">
+                                        <span class="badge bg-warning-subtle text-warning fs-12 mt-1">
                                             <i class="ri-alert-line me-1"></i> Not Created
                                         </span>
                                     @endif
@@ -215,7 +239,6 @@
                                         <tr>
                                             <th>Total Investment / Committed Capital</th>
                                             <th>Equity Ownership %</th>
-                                            <th>Shares / Units Held</th>
                                             <th>Date of Investment</th>
                                             <th>Status</th>
                                             <th>Actions</th>
@@ -228,7 +251,6 @@
                                                     {{ $financial->investment_amount !== null ? number_format((float) $financial->investment_amount, 2) : '-' }}
                                                 </td>
                                                 <td>{{ $financial->equity_percentage !== null ? number_format((float) $financial->equity_percentage, 2) . '%' : '-' }}</td>
-                                                <td>{{ $financial->shares_units_held ?: '-' }}</td>
                                                 <td>{{ $financial->investment_date ? $financial->investment_date->format('Y-m-d') : '-' }}</td>
                                                 <td>
                                                     @if($financial->status)

@@ -32,7 +32,7 @@
         @enderror
     </div>
 
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <label class="form-label">Equity Ownership Percentage (%)</label>
         <div class="input-group">
             <input type="number" step="0.01" min="0" max="100" class="form-control @error('equity_percentage') is-invalid @enderror" 
@@ -46,18 +46,7 @@
         @enderror
     </div>
 
-    <div class="col-md-4 mb-3">
-        <label class="form-label">Number of Shares / Units Held</label>
-        <input type="text" class="form-control @error('shares_units_held') is-invalid @enderror" 
-            name="shares_units_held" 
-            value="{{ old('shares_units_held', $financialDetail->shares_units_held ?? '') }}" 
-            placeholder="e.g. 150000 Shares">
-        @error('shares_units_held')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <label class="form-label">Date of Investment</label>
         <input type="date" class="form-control @error('investment_date') is-invalid @enderror" 
             name="investment_date" 

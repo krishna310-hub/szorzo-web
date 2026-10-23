@@ -80,7 +80,7 @@
                 @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label class="form-label">Profile Picture</label>
                 <input type="file" class="form-control @error('profile_picture') is-invalid @enderror" 
                     name="profile_picture" accept="image/*">
@@ -95,7 +95,26 @@
                 @endif
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Status <span class="text-danger">*</span></label>
+                <div class="d-flex align-items-center gap-4 mt-2">
+                    <div class="form-check form-radio-success">
+                        <input class="form-check-input" type="radio" name="status" id="statusActive" value="1" 
+                            {{ old('status', $invester->status ?? 1) == 1 ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="statusActive">Active</label>
+                    </div>
+                    <div class="form-check form-radio-danger">
+                        <input class="form-check-input" type="radio" name="status" id="statusInactive" value="0" 
+                            {{ old('status', $invester->status ?? 1) == 0 ? 'checked' : '' }} required>
+                        <label class="form-check-label" for="statusInactive">Inactive</label>
+                    </div>
+                </div>
+                @error('status')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-4 mb-3">
                 <label class="form-label">Residential / Office Address</label>
                 <textarea class="form-control @error('address') is-invalid @enderror" 
                     name="address" rows="2" placeholder="Full address details...">{{ old('address', $invester->address ?? '') }}</textarea>
@@ -114,52 +133,64 @@
     </div>
     <div class="card-body">
         <div class="row">
-            @php
-                $selectedAccountManagers = array_map('intval', (array) old(
-                    'account_manager_ids',
-                    $invester->account_manager_ids ?? (isset($invester->account_manager_id) && $invester->account_manager_id ? [$invester->account_manager_id] : [])
-                ));
-            @endphp
             <div class="col-md-6 mb-3">
-                <label class="form-label" for="account_manager_ids">Account Manager / Internal Point of Contact</label>
-                <select class="form-select @error('account_manager_ids') is-invalid @enderror @error('account_manager_ids.*') is-invalid @enderror" 
-                    id="account_manager_ids" 
-                    name="account_manager_ids[]" 
-                    multiple>
-                    @foreach($accountManagers as $employee)
-                        @php
-                            $empName = $employee->employee_name ?: ($employee->name ?? 'Unknown');
-                            $empMail = $employee->official_mail ?: ($employee->personal_mail ?: '');
-                            $empLabel = $empMail ? $empName . ' (' . $empMail . ')' : $empName . ' (' . ($employee->employee_no ?: 'SZ' . str_pad($employee->id, 3, '0', STR_PAD_LEFT)) . ')';
-                        @endphp
-                        <option value="{{ $employee->id }}" {{ in_array((int) $employee->id, $selectedAccountManagers, true) ? 'selected' : '' }}>
-                            {{ $empLabel }}
-                        </option>
-                    @endforeach
-                </select>
-                <small class="text-muted">Search and select one or more external employees.</small>
-                @error('account_manager_ids')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-                @error('account_manager_ids.*')
+                <label class="form-label" for="account_manager_name">Account Manager / Internal Point of Contact</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="ri-user-star-line"></i></span>
+                    <input type="text" class="form-control @error('account_manager_name') is-invalid @enderror" 
+                        id="account_manager_name" 
+                        name="account_manager_name" 
+                        value="{{ old('account_manager_name', $invester->account_manager_name ?? '') }}" 
+                        placeholder="Enter Account Manager / POC Name">
+                </div>
+                @error('account_manager_name')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="col-md-6 mb-3">
-                <label class="form-label">Status <span class="text-danger">*</span></label>
-                <div class="d-flex align-items-center gap-4 mt-2">
-                    <div class="form-check form-radio-success">
-                        <input class="form-check-input" type="radio" name="status" id="statusActive" value="1" 
-                            {{ old('status', $invester->status ?? 1) == 1 ? 'checked' : '' }}>
-                        <label class="form-check-label" for="statusActive">Active</label>
-                    </div>
-                    <div class="form-check form-radio-danger">
-                        <input class="form-check-input" type="radio" name="status" id="statusInactive" value="0" 
-                            {{ old('status', $invester->status ?? 1) == 0 ? 'checked' : '' }}>
-                        <label class="form-check-label" for="statusInactive">Inactive</label>
-                    </div>
+                <label class="form-label" for="account_manager_role">Role</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="ri-briefcase-line"></i></span>
+                    <input type="text" class="form-control @error('account_manager_role') is-invalid @enderror" 
+                        id="account_manager_role" 
+                        name="account_manager_role" 
+                        value="{{ old('account_manager_role', $invester->account_manager_role ?? '') }}" 
+                        placeholder="Enter Role (e.g. Portfolio Manager, Key Account Manager)">
                 </div>
+                @error('account_manager_role')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label" for="account_manager_email">Mail</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="ri-mail-line"></i></span>
+                    <input type="email" class="form-control @error('account_manager_email') is-invalid @enderror" 
+                        id="account_manager_email" 
+                        name="account_manager_email" 
+                        value="{{ old('account_manager_email', $invester->account_manager_email ?? '') }}" 
+                        placeholder="Enter Mail (e.g. manager@example.com)">
+                </div>
+                @error('account_manager_email')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label" for="account_manager_contact">Contact</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="ri-phone-line"></i></span>
+                    <input type="text" class="form-control @error('account_manager_contact') is-invalid @enderror" 
+                        id="account_manager_contact" 
+                        name="account_manager_contact" 
+                        value="{{ old('account_manager_contact', $invester->account_manager_contact ?? '') }}" 
+                        placeholder="Enter Contact Number (e.g. +91 9876543210)">
+                </div>
+                @error('account_manager_contact')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="col-md-12 mb-3">
@@ -187,6 +218,7 @@
     <div class="card-body">
         @php
             $linkedUser = isset($invester) ? $invester->linkedUser() : null;
+            $currentPasswordVal = old('user_password', $invester->portal_password ?? '');
         @endphp
         @if($linkedUser)
             <div class="alert alert-success d-flex align-items-center mb-3 py-2" role="alert">
@@ -213,13 +245,13 @@
             </div>
 
             <div class="col-md-4 mb-3 login-account-box">
-                <label class="form-label">Username / Display Name</label>
+                <label class="form-label" for="user_name">Username</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="ri-user-line"></i></span>
                     <input type="text" class="form-control @error('user_name') is-invalid @enderror" 
-                        name="user_name" id="user_name"
-                        value="{{ old('user_name', $linkedUser->name ?? ($invester->name ?? '')) }}" 
-                        placeholder="e.g. Investor Name">
+                        name="user_name" id="user_name" autocomplete="off"
+                        value="{{ old('user_name', $invester->portal_username ?? ($linkedUser->name ?? '')) }}" 
+                        placeholder="Enter Username">
                 </div>
                 @error('user_name')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -227,11 +259,11 @@
             </div>
 
             <div class="col-md-4 mb-3 login-account-box">
-                <label class="form-label">Login Email <span class="text-danger">*</span></label>
+                <label class="form-label" for="user_email">Login Email <span class="text-danger">*</span></label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="ri-mail-line"></i></span>
                     <input type="email" class="form-control @error('user_email') is-invalid @enderror" 
-                        name="user_email" id="user_email"
+                        name="user_email" id="user_email" autocomplete="off"
                         value="{{ old('user_email', $linkedUser->email ?? ($invester->primary_email ?? '')) }}" 
                         placeholder="investor@example.com">
                 </div>
@@ -241,19 +273,18 @@
             </div>
 
             <div class="col-md-4 mb-3 login-account-box">
-                <label class="form-label">
-                    {{ $linkedUser ? 'Set New Password (leave blank to keep current)' : 'Password' }}
-                </label>
+                <label class="form-label" for="user_password">Password</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="ri-lock-line"></i></span>
                     <input type="password" class="form-control @error('user_password') is-invalid @enderror" 
-                        name="user_password" id="user_password"
-                        placeholder="{{ $linkedUser ? 'Enter new password if changing' : 'Enter login password (default: Investor@123)' }}">
-                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('user_password', 'user_password_eye')">
+                        name="user_password" id="user_password" autocomplete="new-password"
+                        value="{{ $currentPasswordVal }}"
+                        placeholder="{{ $currentPasswordVal ? 'Enter password' : 'Enter login password (default: Investor@123)' }}">
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('user_password', 'user_password_eye')" title="Show / Hide Password">
                         <i class="ri-eye-line" id="user_password_eye"></i>
                     </button>
                 </div>
-                <small class="text-muted">Role ID 6 will be automatically assigned.</small>
+                <small class="text-muted">Role ID 6 will be automatically assigned. Click eye icon to show/hide password.</small>
                 @error('user_password')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -311,19 +342,15 @@
         <div id="collapseFinancial" class="accordion-collapse collapse" aria-labelledby="headingFinancial" data-bs-parent="#investerInitialSections">
             <div class="accordion-body">
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Total Investment Amount / Committed Capital (INR / Currency)</label>
                         <input type="number" step="0.01" class="form-control" name="investment_amount" value="{{ old('investment_amount') }}" placeholder="e.g. 5000000.00">
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Equity Ownership Percentage (%)</label>
                         <input type="number" step="0.01" min="0" max="100" class="form-control" name="equity_percentage" value="{{ old('equity_percentage') }}" placeholder="e.g. 5.25">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Number of Shares / Units Held</label>
-                        <input type="text" class="form-control" name="shares_units_held" value="{{ old('shares_units_held') }}" placeholder="e.g. 100000">
-                    </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Date of Investment</label>
                         <input type="date" class="form-control" name="investment_date" value="{{ old('investment_date') }}">
                     </div>
@@ -395,60 +422,5 @@ function toggleUserAccountFields(enabled) {
         inputs.forEach(input => input.disabled = !enabled);
     });
 }
-
-(function() {
-    function initAccountManagerChoices() {
-        const el = document.getElementById('account_manager_ids');
-        if (el && !el.dataset.choicesInitialized && typeof Choices !== 'undefined') {
-            new Choices(el, {
-                removeItemButton: true,
-                searchEnabled: true,
-                shouldSort: false,
-                duplicateItemsAllowed: false,
-                itemSelectText: '',
-                noResultsText: 'No matching employees found',
-                noChoicesText: 'All external employees selected',
-                placeholder: true,
-                placeholderValue: 'Select External Employees'
-            });
-            el.dataset.choicesInitialized = 'true';
-        }
-    }
-
-    // Auto-sync investor name and email to user credentials if untouched
-    const nameInput = document.querySelector('input[name="name"]');
-    const emailInput = document.querySelector('input[name="primary_email"]');
-    const userNameInput = document.getElementById('user_name');
-    const userEmailInput = document.getElementById('user_email');
-
-    if (nameInput && userNameInput) {
-        nameInput.addEventListener('input', function() {
-            if (!userNameInput.dataset.dirty) {
-                userNameInput.value = this.value;
-            }
-        });
-        userNameInput.addEventListener('input', function() {
-            this.dataset.dirty = 'true';
-        });
-    }
-
-    if (emailInput && userEmailInput) {
-        emailInput.addEventListener('input', function() {
-            if (!userEmailInput.dataset.dirty) {
-                userEmailInput.value = this.value;
-            }
-        });
-        userEmailInput.addEventListener('input', function() {
-            this.dataset.dirty = 'true';
-        });
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAccountManagerChoices);
-    } else {
-        initAccountManagerChoices();
-    }
-})();
 </script>
 @endpush
-

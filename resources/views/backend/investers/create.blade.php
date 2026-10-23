@@ -31,7 +31,7 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('admin.investers.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('admin.investers.store') }}" method="POST" enctype="multipart/form-data" autocomplete="off">
                                 @csrf
                                 @include('backend.investers.form')
                                 <div class="mt-4 d-flex gap-2">

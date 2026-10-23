@@ -23,18 +23,26 @@
     // External employees lookup map (External contract employees only)
     $employeesJson = $employees->map(function ($emp) {
         $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
-        $monthly = (float) ($emp->monthly_gross ?? 0);
-        $ctc = $monthly > 0 ? round($monthly * 12, 2) : 0;
+        $salaryData = $emp->getContractReportSalary();
+        $salary = (float) $salaryData['salary'];
+
         return [
             'id' => (int) $emp->id,
             'client_id' => (int) $emp->client_id,
             'client_name' => $emp->client?->client ?? '',
             'name' => $emp->employee_name,
+            'employee_name' => $emp->employee_name,
             'employee_no' => $no,
             'designation' => $emp->designation ?? '',
-            'monthly_gross' => $monthly,
-            'ctc' => $ctc,
-            'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($emp->client ? ' - ' . $emp->client->client : ''),
+            'monthly_gross' => (float) ($emp->monthly_gross ?? 0),
+            'salary' => $salary,
+            'ctc' => $salary,
+            'present_days' => $salaryData['present_days'],
+            'absent_days' => $salaryData['absent_days'],
+            'days_in_month' => $salaryData['days_in_month'],
+            'source' => $salaryData['source'],
+            'salary_formatted' => number_format($salary, 2),
+            'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
         ];
     })->values();
 @endphp
@@ -149,10 +157,10 @@
                         </div>
                         <select class="form-select @error('employee_ids') is-invalid @enderror @error('employee_id') is-invalid @enderror" 
                             name="employee_ids[]" id="employee_ids" multiple required>
-                            <!-- Populated dynamically via JS / AJAX based on selected clients -->
+                            <!-- Populated dynamically via JS / AJAX based on selected clients and investor -->
                         </select>
                         <div class="d-flex justify-content-between align-items-center mt-1">
-                            <small class="text-muted"><i class="ri-user-shared-line me-1"></i> Strictly external contract employees only.</small>
+                            <small class="text-muted"><i class="ri-user-shared-line me-1"></i> Strictly external contract employees only (excludes employees on other investors).</small>
                             <span id="employee_ctc_sum_badge" class="badge bg-light text-primary fs-11"></span>
                         </div>
                         @error('employee_ids')
@@ -199,8 +207,8 @@
                             <span class="input-group-text">₹</span>
                             <input type="number" step="0.01" min="0" class="form-control @error('approved_rate_card') is-invalid @enderror" 
                                 name="approved_rate_card" id="approved_rate_card"
-                                value="{{ old('approved_rate_card', $deployment->approved_rate_card ?? '200000') }}" 
-                                placeholder="200000" required>
+                                value="{{ old('approved_rate_card', isset($deployment) && $deployment->approved_rate_card !== null ? (float)$deployment->approved_rate_card : '') }}" 
+                                placeholder="Enter Rate Card (e.g. 200000)" required>
                         </div>
                         <small class="text-muted">Total billing rate agreed with client</small>
                         @error('approved_rate_card')
@@ -211,16 +219,16 @@
                     <div class="col-md-4 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="form-label fw-semibold mb-0">Employee CTC (₹)</label>
-                            <span class="badge bg-info-subtle text-info fs-11">Auto-calculated</span>
+                            <span class="badge bg-info-subtle text-info fs-11">Contract Report</span>
                         </div>
                         <div class="input-group">
                             <span class="input-group-text">₹</span>
                             <input type="number" step="0.01" min="0" class="form-control @error('employee_ctc') is-invalid @enderror" 
                                 name="employee_ctc" id="employee_ctc"
-                                value="{{ old('employee_ctc', $deployment->employee_ctc ?? '1790000') }}" 
-                                placeholder="1790000">
+                                value="{{ old('employee_ctc', isset($deployment) && $deployment->employee_ctc !== null ? (float)$deployment->employee_ctc : '') }}" 
+                                placeholder="Total salary from Contract Report">
                         </div>
-                        <small class="text-muted" id="employee_ctc_hint">Aggregated annual cost of selected external staff</small>
+                        <small class="text-muted" id="employee_ctc_hint">Total payable salary from Contract Report (based on days worked this month)</small>
                         @error('employee_ctc')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -234,11 +242,11 @@
                         <div class="input-group">
                             <input type="number" step="0.01" min="0" max="100" class="form-control @error('billing_percentage') is-invalid @enderror" 
                                 name="billing_percentage" id="billing_percentage"
-                                value="{{ old('billing_percentage', $deployment->billing_percentage ?? '8.33') }}" 
-                                placeholder="e.g. 8.33">
+                                value="{{ old('billing_percentage', isset($deployment) && $deployment->billing_percentage !== null ? (float)$deployment->billing_percentage : '') }}" 
+                                placeholder="Total Client Billing %">
                             <span class="input-group-text">%</span>
                         </div>
-                        <small class="text-muted">Auto-fetched from client module (e.g. 8.33%)</small>
+                        <small class="text-muted">Total sum of billing % from selected client(s)</small>
                         @error('billing_percentage')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -286,8 +294,8 @@
                             <span class="input-group-text">₹</span>
                             <input type="number" step="0.01" min="0" class="form-control bg-light @error('tds_amount') is-invalid @enderror" 
                                 name="tds_amount" id="tds_amount"
-                                value="{{ old('tds_amount', $deployment->tds_amount ?? '20000.00') }}" 
-                                placeholder="20000.00" readonly>
+                                value="{{ old('tds_amount', isset($deployment) && $deployment->tds_amount !== null ? (float)$deployment->tds_amount : '') }}" 
+                                placeholder="Auto-calculated" readonly>
                         </div>
                         <small class="text-muted">Gross TDS: Rate Card × TDS %</small>
                         @error('tds_amount')
@@ -311,7 +319,7 @@
                                         <input type="number" step="0.01" min="0" 
                                             class="form-control form-control-lg fw-bolder fs-4 text-dark bg-white @error('margin_amount') is-invalid @enderror" 
                                             name="margin_amount" id="margin_amount"
-                                            value="{{ old('margin_amount', $deployment->margin_amount ?? '30000') }}" 
+                                            value="{{ old('margin_amount', isset($deployment) && $deployment->margin_amount !== null ? (float)$deployment->margin_amount : '') }}" 
                                             placeholder="Margin In Rupees">
                                     </div>
                                     @error('margin_amount')
@@ -395,12 +403,14 @@
 <script>
 (function() {
     const clientsData = @json($clientsJson);
-    const allExternalEmployees = @json($employeesJson);
+    let allExternalEmployees = @json($employeesJson);
     const initialSelectedClientIds = @json($selectedClientIds);
     const initialSelectedEmployeeIds = @json($selectedEmployeeIds);
+    const deploymentId = {{ isset($deployment) ? (int)$deployment->id : 'null' }};
 
     const clientSelect = document.getElementById('client_ids');
     const employeeSelect = document.getElementById('employee_ids');
+    const investerSelect = document.getElementById('invester_id');
     const rateCardInput = document.getElementById('approved_rate_card');
     const employeeCtcInput = document.getElementById('employee_ctc');
     const billingPctInput = document.getElementById('billing_percentage');
@@ -416,6 +426,7 @@
     const clientCountBadge = document.getElementById('client_count_badge');
     const employeeSelectedBadge = document.getElementById('employee_selected_badge');
     const employeeCtcSumBadge = document.getElementById('employee_ctc_sum_badge');
+    const ctcHint = document.getElementById('employee_ctc_hint');
 
     let clientChoices = null;
     let employeeChoices = null;
@@ -445,9 +456,12 @@
                 label: emp.label,
                 selected: keepSet.has(emp.id),
                 customProperties: {
+                    salary: emp.salary,
                     ctc: emp.ctc,
                     monthly: emp.monthly_gross,
-                    clientId: emp.client_id
+                    clientId: emp.client_id,
+                    presentDays: emp.present_days,
+                    absentDays: emp.absent_days
                 }
             }));
             employeeChoices.setChoices(choiceList, 'value', 'label', true);
@@ -457,9 +471,12 @@
                 const opt = document.createElement('option');
                 opt.value = emp.id;
                 opt.textContent = emp.label;
+                opt.dataset.salary = emp.salary;
                 opt.dataset.ctc = emp.ctc;
                 opt.dataset.monthly = emp.monthly_gross;
                 opt.dataset.clientId = emp.client_id;
+                opt.dataset.presentDays = emp.present_days;
+                opt.dataset.absentDays = emp.absent_days;
                 if (keepSet.has(emp.id)) {
                     opt.selected = true;
                 }
@@ -468,6 +485,45 @@
         }
 
         updateEmployeeSelectionSummary();
+    }
+
+    // Update Employee Selection Count & Aggregated Contract Report Salary
+    function updateEmployeeSelectionSummary() {
+        const selectedEmpIds = getSelectedValues(employeeSelect, employeeChoices);
+        const selectedEmployees = allExternalEmployees.filter(emp => selectedEmpIds.includes(emp.id));
+
+        if (employeeSelectedBadge) {
+            employeeSelectedBadge.textContent = selectedEmployees.length + ' External Employee' + (selectedEmployees.length !== 1 ? 's' : '') + ' Selected';
+        }
+
+        // Aggregate Salary from Contract Report (calculated based on working days this month)
+        const totalSalary = selectedEmployees.reduce((sum, emp) => sum + (Number(emp.salary !== undefined ? emp.salary : emp.ctc) || 0), 0);
+        if (employeeCtcSumBadge) {
+            employeeCtcSumBadge.textContent = totalSalary > 0 
+                ? ('Total Salary: ' + formatCurrency(totalSalary)) 
+                : '';
+        }
+
+        // Auto-update Employee CTC input if not manually overwritten
+        if (employeeCtcInput && !employeeCtcInput.dataset.manuallyEdited) {
+            employeeCtcInput.value = totalSalary > 0 ? totalSalary.toFixed(2) : '';
+        }
+
+        // Auto-update hint with calculation breakdown
+        if (ctcHint) {
+            if (selectedEmployees.length > 0) {
+                const details = selectedEmployees.map(e => {
+                    const sal = Number(e.salary || 0).toLocaleString('en-IN');
+                    const days = e.present_days !== undefined ? (e.present_days + ' days') : 'Contract Report';
+                    return e.name + ': ₹' + sal + ' (' + days + ')';
+                }).join(', ');
+                ctcHint.innerHTML = '<i class="ri-calculator-line text-primary me-1"></i> Contract Report: ' + details;
+            } else {
+                ctcHint.textContent = 'Total payable salary from Contract Report (based on days worked this month)';
+            }
+        }
+
+        recalculateFromPercentage();
     }
 
     // Update client billing percentage & badges
@@ -480,24 +536,27 @@
                 : 'No clients selected';
         }
 
-        // Calculate auto-fetched billing % from selected clients
+        // Calculate auto-fetched TOTAL billing % from selected clients (Sum of all selected client billing percentages)
         const selectedClients = clientsData.filter(c => selectedClientIds.includes(c.id));
-        const billingValues = selectedClients.map(c => c.billing).filter(v => v !== null && !isNaN(v));
+        const billingValues = selectedClients.map(c => c.billing).filter(v => v !== null && !isNaN(v) && v > 0);
 
         if (billingValues.length > 0) {
-            const avgBilling = Math.round((billingValues.reduce((a, b) => a + b, 0) / billingValues.length) * 100) / 100;
-            if (billingPctInput) {
-                billingPctInput.value = avgBilling.toFixed(2);
+            const totalBilling = Math.round(billingValues.reduce((a, b) => a + b, 0) * 100) / 100;
+            if (billingPctInput && !billingPctInput.dataset.manuallyEdited) {
+                billingPctInput.value = totalBilling.toFixed(2);
             }
             if (marginPctInput && (!marginPctInput.dataset.manuallyEdited || parseFloat(marginPctInput.value) === 0)) {
-                marginPctInput.value = avgBilling.toFixed(2);
+                marginPctInput.value = totalBilling.toFixed(2);
             }
             if (clientBillingBadge) {
-                clientBillingBadge.innerHTML = '<i class="ri-check-line me-1"></i> Auto-fetched: ' + avgBilling.toFixed(2) + '%';
+                clientBillingBadge.innerHTML = '<i class="ri-check-line me-1"></i> Client Billing Total: ' + totalBilling.toFixed(2) + '%';
             }
         } else {
+            if (billingPctInput && !billingPctInput.dataset.manuallyEdited) {
+                billingPctInput.value = '';
+            }
             if (clientBillingBadge) {
-                clientBillingBadge.innerHTML = '<i class="ri-percent-line me-1"></i> Default Staffing: 8.33%';
+                clientBillingBadge.innerHTML = '<i class="ri-percent-line me-1"></i> Auto-fetch Billing %';
             }
         }
 
@@ -506,44 +565,79 @@
             tdsPctInput.value = '10.00';
         }
 
-        // Re-filter external employees for selected clients
-        const currentSelectedEmpIds = getSelectedValues(employeeSelect, employeeChoices);
-        updateEmployeeOptions(selectedClientIds, currentSelectedEmpIds.length > 0 ? currentSelectedEmpIds : initialSelectedEmployeeIds);
-
-        // Recalculate financial figures
-        recalculateFromPercentage();
+        syncEmployeesAndOptions();
     }
 
-    // Update Employee Selection Count & Aggregated CTC
-    function updateEmployeeSelectionSummary() {
-        const selectedEmpIds = getSelectedValues(employeeSelect, employeeChoices);
-        const selectedEmployees = allExternalEmployees.filter(emp => selectedEmpIds.includes(emp.id));
+    // Synchronize available employees from server and exclude any employee already chosen on another investor
+    function syncEmployeesAndOptions() {
+        const selectedClientIds = getSelectedValues(clientSelect, clientChoices);
+        const selectedInvesterId = investerSelect ? investerSelect.value : '';
+        const currentSelectedEmpIds = getSelectedValues(employeeSelect, employeeChoices);
+        const keepIds = currentSelectedEmpIds.length > 0 ? currentSelectedEmpIds : initialSelectedEmployeeIds;
 
-        if (employeeSelectedBadge) {
-            employeeSelectedBadge.textContent = selectedEmployees.length + ' External Employee' + (selectedEmployees.length !== 1 ? 's' : '') + ' Selected';
-        }
+        // Immediate local render first
+        updateEmployeeOptions(selectedClientIds, keepIds);
 
-        // Aggregate CTC
-        const totalCtc = selectedEmployees.reduce((sum, emp) => sum + (Number(emp.ctc) || 0), 0);
-        if (employeeCtcSumBadge) {
-            employeeCtcSumBadge.textContent = totalCtc > 0 ? ('Total CTC: ' + formatCurrency(totalCtc)) : '';
-        }
-
-        // Auto-update Employee CTC input if not manually overwritten
-        if (selectedEmployees.length > 0 && employeeCtcInput && !employeeCtcInput.dataset.manuallyEdited) {
-            employeeCtcInput.value = totalCtc > 0 ? totalCtc.toFixed(2) : '';
-        }
-
-        // If rate card is empty, prefill with total CTC or standard billing
-        if (rateCardInput && (!rateCardInput.value || parseFloat(rateCardInput.value) <= 0) && totalCtc > 0) {
-            // Suggest monthly billing rate (CTC / 12 * 1.15) or standard
-            const monthlyBilling = Math.round((totalCtc / 12) * 100) / 100;
-            if (monthlyBilling > 0) {
-                rateCardInput.value = monthlyBilling.toFixed(2);
+        if (selectedClientIds.length > 0) {
+            const params = new URLSearchParams();
+            selectedClientIds.forEach(id => params.append('client_ids[]', id));
+            if (selectedInvesterId) {
+                params.append('invester_id', selectedInvesterId);
             }
-        }
+            if (deploymentId) {
+                params.append('deployment_id', deploymentId);
+            }
 
-        recalculateFromPercentage();
+            fetch('{{ route('admin.invester-deployments.client-employees') }}?' + params.toString(), {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.status) {
+                    // Update client billing percentage if returned from server
+                    if (data.billing_percentage !== null && data.billing_percentage !== undefined) {
+                        const totalB = parseFloat(data.billing_percentage) || 0;
+                        if (billingPctInput && !billingPctInput.dataset.manuallyEdited) {
+                            billingPctInput.value = totalB > 0 ? totalB.toFixed(2) : '';
+                        }
+                        if (marginPctInput && (!marginPctInput.dataset.manuallyEdited || parseFloat(marginPctInput.value) === 0)) {
+                            marginPctInput.value = totalB > 0 ? totalB.toFixed(2) : '';
+                        }
+                        if (clientBillingBadge) {
+                            clientBillingBadge.innerHTML = totalB > 0 
+                                ? ('<i class="ri-check-line me-1"></i> Client Billing Total: ' + totalB.toFixed(2) + '%')
+                                : '<i class="ri-percent-line me-1"></i> Auto-fetch Billing %';
+                        }
+                    }
+
+                    // Exclude any employees deployed on another investor
+                    if (Array.isArray(data.employees)) {
+                        const serverEmpMap = new Map(data.employees.map(e => [e.id, e]));
+
+                        // Update or filter allExternalEmployees:
+                        // Replace or update employees for selected clients with server-validated list
+                        allExternalEmployees = allExternalEmployees
+                            .filter(emp => !selectedClientIds.includes(emp.client_id) || serverEmpMap.has(emp.id))
+                            .map(emp => serverEmpMap.has(emp.id) ? { ...emp, ...serverEmpMap.get(emp.id) } : emp);
+
+                        data.employees.forEach(emp => {
+                            if (!allExternalEmployees.some(e => e.id === emp.id)) {
+                                allExternalEmployees.push(emp);
+                            }
+                        });
+
+                        // Re-render employee options with server validated list
+                        updateEmployeeOptions(selectedClientIds, keepIds);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Error synchronizing client employees:', err);
+            });
+        }
     }
 
     // Financial Calculation Logic:
@@ -557,19 +651,19 @@
     function recalculateFromPercentage() {
         const rateCard = parseFloat(rateCardInput?.value) || 0;
         const billingPct = parseFloat(billingPctInput?.value) || 0;
-        const marginPct = parseFloat(marginPctInput?.value) || (billingPct > 0 ? billingPct : 15);
+        const marginPct = parseFloat(marginPctInput?.value) || (billingPct > 0 ? billingPct : 0);
         const tdsPct = parseFloat(tdsPctInput?.value) || 10;
 
         // Auto calculate Margin In Rupees
         const marginAmt = Math.round(rateCard * (marginPct / 100) * 100) / 100;
         if (marginAmtInput) {
-            marginAmtInput.value = marginAmt > 0 ? marginAmt.toFixed(2) : '0.00';
+            marginAmtInput.value = marginAmt > 0 ? marginAmt.toFixed(2) : (rateCard > 0 ? '0.00' : '');
         }
 
         // Auto calculate TDS Deduction Amount
         const tdsAmt = Math.round(rateCard * (tdsPct / 100) * 100) / 100;
         if (tdsAmtInput) {
-            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : '0.00';
+            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (rateCard > 0 ? '0.00' : '');
         }
 
         recalculateSplits();
@@ -592,7 +686,7 @@
         // TDS amount
         const tdsAmt = Math.round(rateCard * (tdsPct / 100) * 100) / 100;
         if (tdsAmtInput) {
-            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : '0.00';
+            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (rateCard > 0 ? '0.00' : '');
         }
 
         recalculateSplits();
@@ -648,6 +742,11 @@
             if (employeeSelect) employeeSelect.addEventListener('change', updateEmployeeSelectionSummary);
         }
 
+        // When investor selection changes, re-sync employees to exclude any already chosen on another investor
+        if (investerSelect) {
+            investerSelect.addEventListener('change', syncEmployeesAndOptions);
+        }
+
         // Initial setup
         const activeClientIds = initialSelectedClientIds.length > 0
             ? initialSelectedClientIds
@@ -663,6 +762,7 @@
     }
     if (billingPctInput) {
         billingPctInput.addEventListener('input', function() {
+            this.dataset.manuallyEdited = 'true';
             if (marginPctInput && (!marginPctInput.dataset.manuallyEdited || parseFloat(marginPctInput.value) === 0)) {
                 marginPctInput.value = this.value;
             }

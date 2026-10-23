@@ -57,7 +57,6 @@
                                             <th>Invester</th>
                                             <th>Total Investment Amount / Committed Capital</th>
                                             <th>Equity Ownership %</th>
-                                            <th>Shares / Units Held</th>
                                             <th>Date of Investment</th>
                                             <th>Status</th>
                                             <th>Action</th>
@@ -92,7 +91,6 @@ $(document).ready(function () {
             { data: 'invester_name', name: 'invester.name' },
             { data: 'investment_amount', name: 'investment_amount' },
             { data: 'equity_percentage', name: 'equity_percentage' },
-            { data: 'shares_units_held', name: 'shares_units_held' },
             { data: 'investment_date', name: 'investment_date' },
             { data: 'status', name: 'status', orderable: false, searchable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false }

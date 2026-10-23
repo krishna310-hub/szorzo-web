@@ -105,9 +105,16 @@ class InvesterController extends Controller
             'primary_email' => 'nullable|email|max:150',
             'alternate_email' => 'nullable|email|max:150',
             'address' => 'nullable|string',
+            'account_manager_name' => 'nullable|string|max:255',
+            'account_manager_email' => 'nullable|email|max:150',
+            'account_manager_contact' => 'nullable|string|max:50',
+            'account_manager_role' => 'nullable|string|max:100',
             'account_manager_id' => 'nullable|exists:employees,id',
             'account_manager_ids' => 'nullable|array',
             'account_manager_ids.*' => 'integer|exists:employees,id',
+            'user_name' => 'nullable|string|max:255',
+            'user_email' => 'nullable|email|max:150',
+            'user_password' => 'nullable|string|max:255',
             'internal_notes' => 'nullable|string',
             'status' => 'required|in:0,1',
 
@@ -148,8 +155,14 @@ class InvesterController extends Controller
             'primary_email' => $validated['primary_email'] ?? null,
             'alternate_email' => $validated['alternate_email'] ?? null,
             'address' => $validated['address'] ?? null,
+            'account_manager_name' => $request->input('account_manager_name'),
+            'account_manager_email' => $request->input('account_manager_email'),
+            'account_manager_contact' => $request->input('account_manager_contact'),
+            'account_manager_role' => $request->input('account_manager_role'),
             'account_manager_id' => $primaryManagerId,
             'account_manager_ids' => !empty($managerIds) ? $managerIds : null,
+            'portal_username' => $request->input('user_name'),
+            'portal_password' => $request->input('user_password'),
             'internal_notes' => $validated['internal_notes'] ?? null,
             'status' => (bool) $validated['status'],
         ];
@@ -215,7 +228,7 @@ class InvesterController extends Controller
         }
 
         // Create or link User Account with Role ID 6 (Invester)
-        if ($request->boolean('create_user_account') || $request->filled('user_email') || $request->filled('user_password')) {
+        if ($request->boolean('create_user_account') || $request->filled('user_email') || $request->filled('user_password') || $request->filled('user_name')) {
             $userEmail = trim($request->input('user_email') ?: ($invester->primary_email ?? ''));
             $userName = trim($request->input('user_name') ?: $invester->name);
             $userPass = $request->input('user_password');
@@ -235,11 +248,8 @@ class InvesterController extends Controller
                     'is_active' => $invester->status ? 1 : 0,
                 ];
 
-                if (!empty($userPass)) {
-                    $userData['password'] = Hash::make($userPass);
-                } else {
-                    $userData['password'] = Hash::make('Investor@123');
-                }
+                $plainPass = !empty($userPass) ? $userPass : 'Investor@123';
+                $userData['password'] = Hash::make($plainPass);
 
                 $user = User::where('email', $userEmail)->first();
                 if ($user) {
@@ -248,7 +258,11 @@ class InvesterController extends Controller
                     $user = User::create($userData);
                 }
 
-                $invester->update(['user_id' => $user->id]);
+                $invester->update([
+                    'user_id' => $user->id,
+                    'portal_username' => $userName,
+                    'portal_password' => $plainPass,
+                ]);
             }
         }
 
@@ -320,9 +334,16 @@ class InvesterController extends Controller
             'primary_email' => 'nullable|email|max:150',
             'alternate_email' => 'nullable|email|max:150',
             'address' => 'nullable|string',
+            'account_manager_name' => 'nullable|string|max:255',
+            'account_manager_email' => 'nullable|email|max:150',
+            'account_manager_contact' => 'nullable|string|max:50',
+            'account_manager_role' => 'nullable|string|max:100',
             'account_manager_id' => 'nullable|exists:employees,id',
             'account_manager_ids' => 'nullable|array',
             'account_manager_ids.*' => 'integer|exists:employees,id',
+            'user_name' => 'nullable|string|max:255',
+            'user_email' => 'nullable|email|max:150',
+            'user_password' => 'nullable|string|max:255',
             'internal_notes' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
@@ -346,6 +367,10 @@ class InvesterController extends Controller
             'primary_email' => $validated['primary_email'] ?? null,
             'alternate_email' => $validated['alternate_email'] ?? null,
             'address' => $validated['address'] ?? null,
+            'account_manager_name' => $request->input('account_manager_name'),
+            'account_manager_email' => $request->input('account_manager_email'),
+            'account_manager_contact' => $request->input('account_manager_contact'),
+            'account_manager_role' => $request->input('account_manager_role'),
             'account_manager_id' => $primaryManagerId,
             'account_manager_ids' => !empty($managerIds) ? $managerIds : null,
             'internal_notes' => $validated['internal_notes'] ?? null,
@@ -367,12 +392,10 @@ class InvesterController extends Controller
             $data['profile_picture'] = 'uploads/investers/profiles/' . $filename;
         }
 
-        $invester->update($data);
-
         // Update or create linked User Account (Role ID 6)
-        if ($request->boolean('create_user_account') || $request->filled('user_email') || $request->filled('user_password')) {
+        if ($request->boolean('create_user_account') || $request->filled('user_email') || $request->filled('user_password') || $request->filled('user_name')) {
             $userEmail = trim($request->input('user_email') ?: ($invester->primary_email ?? ''));
-            $userName = trim($request->input('user_name') ?: $invester->name);
+            $userName = trim($request->input('user_name') ?: ($invester->portal_username ?: $invester->name));
             $userPass = $request->input('user_password');
 
             if (!empty($userEmail)) {
@@ -394,21 +417,28 @@ class InvesterController extends Controller
 
                 if (!empty($userPass)) {
                     $userData['password'] = Hash::make($userPass);
+                    $data['portal_password'] = $userPass;
                 }
+
+                $data['portal_username'] = $userName;
 
                 if ($existingUser) {
                     $existingUser->update($userData);
                     $user = $existingUser;
                 } else {
                     if (empty($userData['password'])) {
-                        $userData['password'] = Hash::make('Investor@123');
+                        $defaultPass = 'Investor@123';
+                        $userData['password'] = Hash::make($defaultPass);
+                        $data['portal_password'] = $defaultPass;
                     }
                     $user = User::create($userData);
                 }
 
-                $invester->update(['user_id' => $user->id]);
+                $data['user_id'] = $user->id;
             }
         }
+
+        $invester->update($data);
 
         return redirect()->route('admin.investers.index')->with('success', 'Investor ' . $invester->name . ' updated successfully.');
     }

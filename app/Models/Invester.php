@@ -15,6 +15,8 @@ class Invester extends Model
     protected $fillable = [
         'invester_id',
         'user_id',
+        'portal_username',
+        'portal_password',
         'name',
         'profile_picture',
         'investor_type',
@@ -24,6 +26,10 @@ class Invester extends Model
         'address',
         'account_manager_id',
         'account_manager_ids',
+        'account_manager_name',
+        'account_manager_email',
+        'account_manager_contact',
+        'account_manager_role',
         'internal_notes',
         'status',
     ];
@@ -61,6 +67,9 @@ class Invester extends Model
      */
     public function getAccountManagerNamesAttribute(): string
     {
+        if (!empty($this->account_manager_name)) {
+            return (string) $this->account_manager_name;
+        }
         $managers = $this->assigned_account_managers;
         if ($managers->isNotEmpty()) {
             return $managers->pluck('employee_name')->filter()->join(', ');
@@ -95,6 +104,13 @@ class Invester extends Model
 
         if (!empty($this->invester_id)) {
             $u = User::where('ref', $this->invester_id)->first();
+            if ($u) {
+                return $u;
+            }
+        }
+
+        if (!empty($this->portal_username)) {
+            $u = User::where('name', $this->portal_username)->first();
             if ($u) {
                 return $u;
             }

@@ -36,7 +36,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('admin.investers.update', $invester->id) }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('admin.investers.update', $invester->id) }}" method="POST" enctype="multipart/form-data" autocomplete="off">
                                 @csrf
                                 @method('PUT')
                                 @include('backend.investers.form')

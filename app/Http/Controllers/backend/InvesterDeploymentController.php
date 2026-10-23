@@ -133,9 +133,13 @@ class InvesterDeploymentController extends Controller
 
         $investers = Invester::where('status', true)->orderBy('name')->get();
         $clients = Client::with('billing')->where('status', true)->orderBy('client')->get();
+        $preselectedInvesterId = $request->query('invester_id') ? (int) $request->query('invester_id') : null;
+
+        // Exclude employees already deployed on another investor
+        $excludedEmployeeIds = InvesterDeployment::getDeployedEmployeeIds($preselectedInvesterId);
+
         $allEmployees = Employee::with('client')->orderBy('employee_name')->get();
-        $employees = $allEmployees->filter(fn ($emp) => $emp->isExternal())->values();
-        $preselectedInvesterId = $request->query('invester_id');
+        $employees = $allEmployees->filter(fn ($emp) => $emp->isExternal() && !in_array($emp->id, $excludedEmployeeIds, true))->values();
 
         return view('backend.invester-deployments.create', compact('investers', 'employees', 'clients', 'preselectedInvesterId'));
     }
@@ -161,8 +165,12 @@ class InvesterDeploymentController extends Controller
         $deployment = InvesterDeployment::findOrFail($id);
         $investers = Invester::where('status', true)->orderBy('name')->get();
         $clients = Client::with('billing')->where('status', true)->orderBy('client')->get();
+
+        // Exclude employees already deployed on another investor (keep current deployment employees available)
+        $excludedEmployeeIds = InvesterDeployment::getDeployedEmployeeIds($deployment->invester_id, $deployment->id);
+
         $allEmployees = Employee::with('client')->orderBy('employee_name')->get();
-        $employees = $allEmployees->filter(fn ($emp) => $emp->isExternal())->values();
+        $employees = $allEmployees->filter(fn ($emp) => $emp->isExternal() && !in_array($emp->id, $excludedEmployeeIds, true))->values();
 
         return view('backend.invester-deployments.edit', compact('deployment', 'investers', 'employees', 'clients'));
     }
@@ -209,6 +217,8 @@ class InvesterDeploymentController extends Controller
         }
 
         $clientIds = array_map('intval', array_values($clientIds));
+        $investerId = $request->filled('invester_id') ? (int) $request->invester_id : null;
+        $deploymentId = $request->filled('deployment_id') ? (int) $request->deployment_id : null;
 
         $clients = Client::with('billing')->whereIn('id', $clientIds)->get();
 
@@ -220,13 +230,18 @@ class InvesterDeploymentController extends Controller
             }
         }
 
-        $defaultBilling = count($billingPercentages) > 0
-            ? round(array_sum($billingPercentages) / count($billingPercentages), 2)
-            : 8.33;
+        // Sum the billing value percentages of all selected clients
+        $totalBilling = count($billingPercentages) > 0
+            ? round(array_sum($billingPercentages), 2)
+            : 0;
 
-        // External contract employees ONLY for the selected client(s)
+        // Exclude employees already chosen on another investor
+        $excludedEmployeeIds = InvesterDeployment::getDeployedEmployeeIds($investerId, $deploymentId);
+
+        // External contract employees ONLY for the selected client(s) and not chosen on another investor
         $employees = Employee::with('client')
             ->whereIn('client_id', $clientIds)
+            ->whereNotIn('id', $excludedEmployeeIds)
             ->where(function ($q) {
                 $q->where('employment_type', Employee::EMPLOYMENT_TYPE_EXTERNAL)
                   ->orWhereNull('employment_type');
@@ -236,18 +251,26 @@ class InvesterDeploymentController extends Controller
             ->values()
             ->map(function ($emp) {
                 $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
-                $monthly = (float) ($emp->monthly_gross ?? 0);
-                $ctc = $monthly > 0 ? round($monthly * 12, 2) : 0;
+                $salaryData = $emp->getContractReportSalary();
+                $salary = (float) $salaryData['salary'];
+
                 return [
                     'id' => $emp->id,
                     'client_id' => $emp->client_id,
                     'client_name' => $emp->client?->client,
+                    'name' => $emp->employee_name,
                     'employee_name' => $emp->employee_name,
                     'employee_no' => $no,
                     'designation' => $emp->designation,
-                    'monthly_gross' => $monthly,
-                    'ctc' => $ctc,
-                    'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($emp->client ? ' - ' . $emp->client->client : ''),
+                    'monthly_gross' => (float) ($emp->monthly_gross ?? 0),
+                    'salary' => $salary,
+                    'ctc' => $salary,
+                    'present_days' => $salaryData['present_days'],
+                    'absent_days' => $salaryData['absent_days'],
+                    'days_in_month' => $salaryData['days_in_month'],
+                    'source' => $salaryData['source'],
+                    'salary_formatted' => number_format($salary, 2),
+                    'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
                 ];
             });
 
@@ -258,7 +281,7 @@ class InvesterDeploymentController extends Controller
                 'name' => $c->client,
                 'billing_percentage' => $c->billing ? (float) $c->billing->value : null,
             ]),
-            'billing_percentage' => $defaultBilling,
+            'billing_percentage' => $totalBilling > 0 ? $totalBilling : null,
             'billing_percentages_map' => $billingPercentages,
             'tds_percentage' => 10.00,
             'employees' => $employees,
