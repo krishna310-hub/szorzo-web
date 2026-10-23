@@ -335,7 +335,6 @@
                                         <tr>
                                             <th>Employee Name</th>
                                             <th>Deployed To (Client)</th>
-                                            <th>Mode of Engagement</th>
                                             <th>Duration</th>
                                             <th>Approved Rate Card</th>
                                             <th>Employee CTC</th>
@@ -387,9 +386,6 @@
                                                         <span class="text-muted">-</span>
                                                     @endif
                                                 </td>
-                                                <td>
-                                                    <span class="badge bg-info-subtle text-info">{{ $dep->mode_of_engagement ?: 'Contract' }}</span>
-                                                </td>
                                                 <td>{{ $dep->contract_duration ?: '-' }}</td>
                                                 <td class="fw-semibold">₹ {{ number_format((float) $dep->approved_rate_card, 2) }}</td>
                                                 <td>₹ {{ number_format((float) $dep->employee_ctc, 2) }}</td>
@@ -418,7 +414,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="11" class="text-center text-muted py-4">
+                                                <td colspan="10" class="text-center text-muted py-4">
                                                     No deployment records linked yet. Click "Add Deployment / Invest Module" to link employee employment details.
                                                 </td>
                                             </tr>

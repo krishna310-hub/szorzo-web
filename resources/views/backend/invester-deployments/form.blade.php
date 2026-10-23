@@ -171,23 +171,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-semibold">Mode of Engagement <span class="text-danger">*</span></label>
-                        @php
-                            $engagementModes = ['Contract', 'Contract to Hire', 'Permanent', 'Subcontract', 'Fixed Term'];
-                            $currentMode = old('mode_of_engagement', $deployment->mode_of_engagement ?? 'Contract');
-                        @endphp
-                        <select class="form-select @error('mode_of_engagement') is-invalid @enderror" name="mode_of_engagement" required>
-                            @foreach($engagementModes as $m)
-                                <option value="{{ $m }}" {{ $currentMode == $m ? 'selected' : '' }}>{{ $m }}</option>
-                            @endforeach
-                        </select>
-                        @error('mode_of_engagement')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-12 mb-3">
                         <label class="form-label fw-semibold">Contract Duration</label>
                         <input type="text" class="form-control @error('contract_duration') is-invalid @enderror" 
                             name="contract_duration" 

@@ -145,7 +145,7 @@
                                         </div>
                                     @endif
 
-                                    <div class="col-md-3">
+                                    <div class="col-md-{{ $currentInvester ? '4' : '3' }}">
                                         <label class="form-label fw-semibold small">Filter by Client</label>
                                         <select name="client_id" class="form-select">
                                             <option value="">All Deployed Clients</option>
@@ -157,22 +157,12 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-md-2">
-                                        <label class="form-label fw-semibold small">Mode of Engagement</label>
-                                        <select name="mode_of_engagement" class="form-select">
-                                            <option value="">All Modes</option>
-                                            <option value="Contract" {{ $selectedMode === 'Contract' ? 'selected' : '' }}>Contract</option>
-                                            <option value="Contract to Hire" {{ $selectedMode === 'Contract to Hire' ? 'selected' : '' }}>Contract to Hire</option>
-                                            <option value="Permanent" {{ $selectedMode === 'Permanent' ? 'selected' : '' }}>Permanent</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-2">
+                                    <div class="col-md-{{ $currentInvester ? '4' : '3' }}">
                                         <label class="form-label fw-semibold small">From Date</label>
                                         <input type="date" name="dashboard_from_date" class="form-control" value="{{ $selectedFromDate }}">
                                     </div>
 
-                                    <div class="col-md-2">
+                                    <div class="col-md-{{ $currentInvester ? '4' : '3' }}">
                                         <label class="form-label fw-semibold small">To Date</label>
                                         <input type="date" name="dashboard_to_date" class="form-control" value="{{ $selectedToDate }}">
                                     </div>
@@ -375,7 +365,6 @@
                                                 <th>Investor</th>
                                             @endif
                                             <th>Deployed To (Client)</th>
-                                            <th>Engagement Mode</th>
                                             <th>Contract Duration</th>
                                             <th>Approved Rate Card</th>
                                             <th>Employee CTC</th>
@@ -434,9 +423,6 @@
                                                         <span class="fw-semibold text-dark">{{ $dep->client?->client ?? 'Unassigned' }}</span>
                                                     @endif
                                                 </td>
-                                                <td>
-                                                    <span class="badge bg-info-subtle text-info">{{ $dep->mode_of_engagement ?: 'Contract' }}</span>
-                                                </td>
                                                 <td>{{ $dep->contract_duration ?: '-' }}</td>
                                                 <td class="fw-semibold">₹ {{ number_format((float) $dep->approved_rate_card, 2) }}</td>
                                                 <td>₹ {{ number_format((float) $dep->employee_ctc, 2) }}</td>
@@ -460,7 +446,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="12" class="text-center text-muted py-4">
+                                                <td colspan="11" class="text-center text-muted py-4">
                                                     No deployed employees found matching the selected filters.
                                                 </td>
                                             </tr>

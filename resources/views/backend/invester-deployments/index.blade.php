@@ -40,7 +40,7 @@
                         <div class="card-body py-3">
                             <div class="row g-2 align-items-end">
                                 @if(!$isInvestorUser)
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <label class="form-label small mb-1">Choose Investor</label>
                                         <select id="filter_invester_id" class="form-select form-select-sm">
                                             <option value="">All Investors</option>
@@ -50,7 +50,7 @@
                                         </select>
                                     </div>
                                 @endif
-                                <div class="col-md-3">
+                                <div class="col-md-{{ $isInvestorUser ? '6' : '4' }}">
                                     <label class="form-label small mb-1">Client</label>
                                     <select id="filter_client_id" class="form-select form-select-sm">
                                         <option value="">All Clients</option>
@@ -59,16 +59,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small mb-1">Mode of Engagement</label>
-                                    <select id="filter_mode" class="form-select form-select-sm">
-                                        <option value="">All Modes</option>
-                                        <option value="Contract">Contract</option>
-                                        <option value="Contract to Hire">Contract to Hire</option>
-                                        <option value="Permanent">Permanent</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
+                                <div class="col-md-{{ $isInvestorUser ? '5' : '3' }}">
                                     <label class="form-label small mb-1">Status</label>
                                     <select id="filter_status" class="form-select form-select-sm">
                                         <option value="">All Status</option>
@@ -118,7 +109,6 @@
                                             <th>Invester</th>
                                             <th>Employee</th>
                                             <th>Deployed Client</th>
-                                            <th>Engagement Mode</th>
                                             <th>Rate Card (₹)</th>
                                             <th>Margin In Rupees</th>
                                             <th>Profit Sharing (SZ / Inv)</th>
@@ -152,7 +142,6 @@ $(document).ready(function () {
             data: function (d) {
                 d.invester_id = $('#filter_invester_id').val();
                 d.client_id = $('#filter_client_id').val();
-                d.mode_of_engagement = $('#filter_mode').val();
                 d.status = $('#filter_status').val();
             }
         },
@@ -161,7 +150,6 @@ $(document).ready(function () {
             { data: 'invester_name', name: 'invester.name' },
             { data: 'employee_name', name: 'employee.employee_name' },
             { data: 'client_name', name: 'client.client' },
-            { data: 'mode_badge', name: 'mode_of_engagement' },
             { data: 'rate_card_formatted', name: 'approved_rate_card' },
             { data: 'margin_in_rupees', name: 'margin_amount' },
             { data: 'commission_split', name: 'commission_split', orderable: false, searchable: false },
@@ -170,14 +158,13 @@ $(document).ready(function () {
         ]
     });
 
-    $('#filter_invester_id, #filter_client_id, #filter_mode, #filter_status').on('change', function() {
+    $('#filter_invester_id, #filter_client_id, #filter_status').on('change', function() {
         table.ajax.reload();
     });
 
     $('#btn-reset-filters').on('click', function() {
         $('#filter_invester_id').val('');
         $('#filter_client_id').val('');
-        $('#filter_mode').val('');
         $('#filter_status').val('');
         table.ajax.reload();
     });

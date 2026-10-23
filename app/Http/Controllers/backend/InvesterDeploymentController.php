@@ -299,7 +299,7 @@ class InvesterDeploymentController extends Controller
             'client_id' => 'nullable|exists:clients,id',
             'client_ids' => 'nullable|array',
             'client_ids.*' => 'nullable|exists:clients,id',
-            'mode_of_engagement' => 'required|string|max:100',
+            'mode_of_engagement' => 'nullable|string|max:100',
             'contract_duration' => 'nullable|string|max:100',
             'approved_rate_card' => 'nullable|numeric|min:0',
             'employee_ctc' => 'nullable|numeric|min:0',
@@ -332,6 +332,7 @@ class InvesterDeploymentController extends Controller
         $data['employee_ids'] = !empty($employeeIds) ? array_map('intval', $employeeIds) : null;
         $data['employee_id'] = $employeeIds[0] ?? ($data['employee_id'] ?? null);
 
+        $data['mode_of_engagement'] = !empty($data['mode_of_engagement']) ? $data['mode_of_engagement'] : 'Contract';
         $data['approved_rate_card'] = (float) ($data['approved_rate_card'] ?? 0);
         $data['employee_ctc'] = (float) ($data['employee_ctc'] ?? 0);
         $data['billing_percentage'] = isset($data['billing_percentage']) && $data['billing_percentage'] !== '' ? (float) $data['billing_percentage'] : null;
@@ -368,7 +369,6 @@ class InvesterDeploymentController extends Controller
                 $row->invester?->name ?: '-',
                 $row->employee_names ?: ($row->employee?->employee_name ?: '-'),
                 $row->client_names ?: ($row->client?->client ?: '-'),
-                $row->mode_of_engagement,
                 $row->contract_duration,
                 $row->approved_rate_card,
                 $row->employee_ctc,
@@ -390,7 +390,6 @@ class InvesterDeploymentController extends Controller
             'Invester',
             'Employee Name(s)',
             'Deployed To (Client(s))',
-            'Mode of Engagement',
             'Contract Duration',
             'Approved Rate Card (INR)',
             'Employee CTC (INR)',

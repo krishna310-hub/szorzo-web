@@ -319,5 +319,30 @@ class InvesterWorkflowTest extends TestCase
         $this->assertStringContainsString('12.5', $editViewHtml);
         $this->assertStringNotContainsString('Default Staffing: 8.33%', $editViewHtml);
     }
+
+    public function test_mode_of_engagement_removed_from_views_and_filters(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+
+        // 1. Form view has no Mode of Engagement
+        $formContent = file_get_contents($baseDir . '/resources/views/backend/invester-deployments/form.blade.php');
+        $this->assertStringNotContainsString('Mode of Engagement', $formContent);
+        $this->assertStringNotContainsString('name="mode_of_engagement"', $formContent);
+
+        // 2. Deployment index view has no Mode of Engagement in filter or table
+        $indexContent = file_get_contents($baseDir . '/resources/views/backend/invester-deployments/index.blade.php');
+        $this->assertStringNotContainsString('Mode of Engagement', $indexContent);
+        $this->assertStringNotContainsString('Engagement Mode', $indexContent);
+        $this->assertStringNotContainsString('filter_mode', $indexContent);
+
+        // 3. Investor show view has no Mode of Engagement
+        $showContent = file_get_contents($baseDir . '/resources/views/backend/investers/show.blade.php');
+        $this->assertStringNotContainsString('Mode of Engagement', $showContent);
+
+        // 4. Investor Dashboard has no Mode of Engagement filter or table column
+        $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/invester-dashboard/index.blade.php');
+        $this->assertStringNotContainsString('name="mode_of_engagement"', $dashboardContent);
+        $this->assertStringNotContainsString('<th>Engagement Mode</th>', $dashboardContent);
+    }
 }
 
