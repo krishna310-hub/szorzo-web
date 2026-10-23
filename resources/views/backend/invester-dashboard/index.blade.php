@@ -366,8 +366,7 @@
                                             @endif
                                             <th>Deployed To (Client)</th>
                                             <th>Contract Duration</th>
-                                            <th>Approved Rate Card</th>
-                                            <th>Employee CTC</th>
+                                            <th>Employee CTC (₹)</th>
                                             <th>Margin %</th>
                                             <th class="table-warning">Margin In Rupees</th>
                                             <th>Investor Share (30%)</th>
@@ -424,7 +423,6 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $dep->contract_duration ?: '-' }}</td>
-                                                <td class="fw-semibold">₹ {{ number_format((float) $dep->approved_rate_card, 2) }}</td>
                                                 <td>₹ {{ number_format((float) $dep->employee_ctc, 2) }}</td>
                                                 <td>{{ number_format((float) $dep->margin_percentage, 2) }}%</td>
                                                 <td class="table-warning fw-bold text-dark">
@@ -446,7 +444,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="11" class="text-center text-muted py-4">
+                                                <td colspan="{{ $currentInvester ? 9 : 10 }}" class="text-center text-muted py-4">
                                                     No deployed employees found matching the selected filters.
                                                 </td>
                                             </tr>

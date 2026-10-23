@@ -80,7 +80,7 @@ class InvesterDeployment extends Model
      */
     public function computeCommissions(): void
     {
-        $rateCard = (float) ($this->approved_rate_card ?? 0);
+        $baseAmount = (float) ($this->employee_ctc > 0 ? $this->employee_ctc : ($this->approved_rate_card ?? 0));
         $billingPct = isset($this->billing_percentage) && $this->billing_percentage !== null && $this->billing_percentage !== ''
             ? (float) $this->billing_percentage
             : null;
@@ -97,20 +97,20 @@ class InvesterDeployment extends Model
             ? (float) $this->investor_share_percentage
             : 30.0;
 
-        // If Margin in Rupees was not manually supplied, compute: Rate Card * (Margin % / 100)
+        // If Margin in Rupees was not manually supplied, compute: Base Amount (Employee CTC) * (Margin % / 100)
         if (empty($this->margin_amount) || (float) $this->margin_amount <= 0) {
-            $this->margin_amount = round($rateCard * ($marginPct / 100), 2);
+            $this->margin_amount = round($baseAmount * ($marginPct / 100), 2);
         } else {
-            // If margin amount is supplied and rate card > 0, ensure margin percentage is synced
-            if ($rateCard > 0 && empty($this->margin_percentage)) {
-                $this->margin_percentage = round(((float) $this->margin_amount / $rateCard) * 100, 2);
+            // If margin amount is supplied and base amount > 0, ensure margin percentage is synced
+            if ($baseAmount > 0 && empty($this->margin_percentage)) {
+                $this->margin_percentage = round(((float) $this->margin_amount / $baseAmount) * 100, 2);
             }
         }
 
         $marginAmt = (float) $this->margin_amount;
 
-        // Calculate TDS amount on gross billing (Rate Card * TDS %)
-        $this->tds_amount = round($rateCard * ($tdsPct / 100), 2);
+        // Calculate TDS amount on base (Employee CTC / Rate Card * TDS %)
+        $this->tds_amount = round($baseAmount * ($tdsPct / 100), 2);
 
         // Ensure Profit sharing percentages sum up logically (default 70% SZ / 30% Investor)
         if ($szPct + $invPct !== 100.0 && $szPct > 0) {

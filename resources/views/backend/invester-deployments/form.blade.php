@@ -25,6 +25,8 @@
         $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
         $salaryData = $emp->getContractReportSalary();
         $salary = (float) $salaryData['salary'];
+        $durInfo = $emp->getContractDurationInfo();
+        $durLabel = !empty($durInfo['duration']) ? ' [' . $durInfo['duration'] . ']' : '';
 
         return [
             'id' => (int) $emp->id,
@@ -41,8 +43,12 @@
             'absent_days' => $salaryData['absent_days'],
             'days_in_month' => $salaryData['days_in_month'],
             'source' => $salaryData['source'],
+            'contract_duration' => $durInfo['duration'] ?? '',
+            'contract_duration_detail' => $durInfo['detail'] ?? '',
+            'contract_from' => $durInfo['from_date'] ?? null,
+            'contract_to' => $durInfo['to_date'] ?? null,
             'salary_formatted' => number_format($salary, 2),
-            'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
+            'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . $durLabel . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
         ];
     })->values();
 @endphp
@@ -172,37 +178,37 @@
                     </div>
 
                     <div class="col-md-12 mb-3">
-                        <label class="form-label fw-semibold">Contract Duration</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label fw-semibold mb-0" for="contract_duration">Contract Duration</label>
+                            <div>
+                                <span class="badge bg-secondary-subtle text-secondary fs-11" id="contract_duration_badge">
+                                    <i class="ri-time-line me-1"></i> Employee Module
+                                </span>
+                                <a href="javascript:void(0)" id="reset_contract_duration_btn" class="fs-11 text-decoration-none text-primary ms-2" style="display:none;">
+                                    <i class="ri-refresh-line"></i> Re-fetch from employees
+                                </a>
+                            </div>
+                        </div>
                         <input type="text" class="form-control @error('contract_duration') is-invalid @enderror" 
-                            name="contract_duration" 
-                            value="{{ old('contract_duration', $deployment->contract_duration ?? '6 Months') }}" 
-                            placeholder="e.g. 6 Months, 1 Year, Long-term">
+                            name="contract_duration" id="contract_duration"
+                            value="{{ old('contract_duration', $deployment->contract_duration ?? '') }}" 
+                            placeholder="Auto-fetched based on selected employee(s) contract duration (e.g. 6 Months, 1 Year)">
+                        <div class="small text-muted mt-1" id="contract_duration_hint">
+                            <i class="ri-time-line me-1"></i> Auto-fetched from employee contract dates in Employee module
+                        </div>
                         @error('contract_duration')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
 
                 <!-- Financial Rates, CTC, Billing %, TDS & Margin -->
                 <div class="row pt-2 border-top mt-2">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Approved Rate Card (₹) <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">₹</span>
-                            <input type="number" step="0.01" min="0" class="form-control @error('approved_rate_card') is-invalid @enderror" 
-                                name="approved_rate_card" id="approved_rate_card"
-                                value="{{ old('approved_rate_card', isset($deployment) && $deployment->approved_rate_card !== null ? (float)$deployment->approved_rate_card : '') }}" 
-                                placeholder="Enter Rate Card (e.g. 200000)" required>
-                        </div>
-                        <small class="text-muted">Total billing rate agreed with client</small>
-                        @error('approved_rate_card')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label fw-semibold mb-0">Employee CTC (₹)</label>
+                            <label class="form-label fw-semibold mb-0" for="employee_ctc">
+                                Employee CTC (₹) <span class="text-danger">*</span>
+                            </label>
                             <span class="badge bg-info-subtle text-info fs-11">Contract Report</span>
                         </div>
                         <div class="input-group">
@@ -210,17 +216,17 @@
                             <input type="number" step="0.01" min="0" class="form-control @error('employee_ctc') is-invalid @enderror" 
                                 name="employee_ctc" id="employee_ctc"
                                 value="{{ old('employee_ctc', isset($deployment) && $deployment->employee_ctc !== null ? (float)$deployment->employee_ctc : '') }}" 
-                                placeholder="Total salary from Contract Report">
+                                placeholder="Total salary from Contract Report" required>
                         </div>
                         <small class="text-muted" id="employee_ctc_hint">Total payable salary from Contract Report (based on days worked this month)</small>
                         @error('employee_ctc')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label fw-semibold mb-0">Client Billing %</label>
+                            <label class="form-label fw-semibold mb-0" for="billing_percentage">Client Billing %</label>
                             <span class="badge bg-primary-subtle text-primary fs-11">Auto-fetched</span>
                         </div>
                         <div class="input-group">
@@ -232,12 +238,12 @@
                         </div>
                         <small class="text-muted">Total sum of billing % from selected client(s)</small>
                         @error('billing_percentage')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Target Margin %</label>
+                        <label class="form-label fw-semibold" for="margin_percentage">Target Margin %</label>
                         <div class="input-group">
                             <input type="number" step="0.01" min="0" max="100" class="form-control @error('margin_percentage') is-invalid @enderror" 
                                 name="margin_percentage" id="margin_percentage"
@@ -247,13 +253,13 @@
                         </div>
                         <small class="text-muted">Target margin percentage (editable)</small>
                         @error('margin_percentage')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label fw-semibold mb-0">TDS %</label>
+                            <label class="form-label fw-semibold mb-0" for="tds_percentage">TDS %</label>
                             <span class="badge bg-secondary-subtle text-secondary fs-11">Auto-fetched</span>
                         </div>
                         <div class="input-group">
@@ -265,13 +271,13 @@
                         </div>
                         <small class="text-muted">194J contract staffing standard (10%)</small>
                         @error('tds_percentage')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-4 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label fw-semibold mb-0">TDS Deduction (₹)</label>
+                            <label class="form-label fw-semibold mb-0" for="tds_amount">TDS Deduction (₹)</label>
                             <span class="badge bg-danger-subtle text-danger fs-11">Auto-calculated</span>
                         </div>
                         <div class="input-group">
@@ -281,9 +287,9 @@
                                 value="{{ old('tds_amount', isset($deployment) && $deployment->tds_amount !== null ? (float)$deployment->tds_amount : '') }}" 
                                 placeholder="Auto-calculated" readonly>
                         </div>
-                        <small class="text-muted">Gross TDS: Rate Card × TDS %</small>
+                        <small class="text-muted">Gross TDS: Employee CTC × TDS %</small>
                         @error('tds_amount')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -292,10 +298,10 @@
                         <div class="p-3 rounded-3" style="background: #fff8bd; border: 2px solid #ecd83c;">
                             <div class="row align-items-center">
                                 <div class="col-md-5">
-                                    <label class="form-label fw-bold text-dark fs-5 mb-0">
+                                    <label class="form-label fw-bold text-dark fs-5 mb-0" for="margin_amount">
                                         <i class="ri-money-rupee-circle-fill text-warning me-1"></i> Margin In Rupees
                                     </label>
-                                    <div class="small text-muted">Auto-calculated: Approved Rate Card × Margin % (editable)</div>
+                                    <div class="small text-muted">Auto-calculated: Employee CTC × Margin % (editable)</div>
                                 </div>
                                 <div class="col-md-7">
                                     <div class="input-group input-group-lg">
@@ -395,8 +401,10 @@
     const clientSelect = document.getElementById('client_ids');
     const employeeSelect = document.getElementById('employee_ids');
     const investerSelect = document.getElementById('invester_id');
-    const rateCardInput = document.getElementById('approved_rate_card');
     const employeeCtcInput = document.getElementById('employee_ctc');
+    const contractDurationInput = document.getElementById('contract_duration');
+    const contractDurationHint = document.getElementById('contract_duration_hint');
+    const resetDurationBtn = document.getElementById('reset_contract_duration_btn');
     const billingPctInput = document.getElementById('billing_percentage');
     const marginPctInput = document.getElementById('margin_percentage');
     const tdsPctInput = document.getElementById('tds_percentage');
@@ -445,7 +453,9 @@
                     monthly: emp.monthly_gross,
                     clientId: emp.client_id,
                     presentDays: emp.present_days,
-                    absentDays: emp.absent_days
+                    absentDays: emp.absent_days,
+                    contractDuration: emp.contract_duration,
+                    contractDurationDetail: emp.contract_duration_detail
                 }
             }));
             employeeChoices.setChoices(choiceList, 'value', 'label', true);
@@ -461,6 +471,8 @@
                 opt.dataset.clientId = emp.client_id;
                 opt.dataset.presentDays = emp.present_days;
                 opt.dataset.absentDays = emp.absent_days;
+                opt.dataset.contractDuration = emp.contract_duration || '';
+                opt.dataset.contractDurationDetail = emp.contract_duration_detail || '';
                 if (keepSet.has(emp.id)) {
                     opt.selected = true;
                 }
@@ -471,7 +483,7 @@
         updateEmployeeSelectionSummary();
     }
 
-    // Update Employee Selection Count & Aggregated Contract Report Salary
+    // Update Employee Selection Count & Aggregated Contract Report Salary & Contract Duration
     function updateEmployeeSelectionSummary() {
         const selectedEmpIds = getSelectedValues(employeeSelect, employeeChoices);
         const selectedEmployees = allExternalEmployees.filter(emp => selectedEmpIds.includes(emp.id));
@@ -491,6 +503,48 @@
         // Auto-update Employee CTC input if not manually overwritten
         if (employeeCtcInput && !employeeCtcInput.dataset.manuallyEdited) {
             employeeCtcInput.value = totalSalary > 0 ? totalSalary.toFixed(2) : '';
+        }
+
+        // Auto-update Contract Duration from Employee module
+        const contractDurationsWithNames = selectedEmployees.map(e => ({
+            name: e.name || e.employee_name,
+            duration: (e.contract_duration || '').trim(),
+            detail: (e.contract_duration_detail || '').trim()
+        }));
+
+        const validDurations = contractDurationsWithNames.filter(d => d.duration.length > 0);
+        const uniqueDurationTexts = [...new Set(validDurations.map(d => d.duration))];
+
+        if (contractDurationInput && !contractDurationInput.dataset.manuallyEdited) {
+            if (validDurations.length === 0) {
+                if (!deploymentId) {
+                    contractDurationInput.value = '';
+                }
+            } else if (validDurations.length === 1) {
+                contractDurationInput.value = validDurations[0].duration;
+            } else if (uniqueDurationTexts.length === 1) {
+                // All selected employees share the same duration (e.g. "6 Months")
+                contractDurationInput.value = uniqueDurationTexts[0];
+            } else {
+                // Different durations: "Karun Kumar: 6 Months, Kavya B: 3 Months"
+                contractDurationInput.value = validDurations.map(d => d.name + ': ' + d.duration).join(', ');
+            }
+        }
+
+        // Informative breakdown in hint
+        if (contractDurationHint) {
+            if (selectedEmployees.length === 0) {
+                contractDurationHint.innerHTML = '<i class="ri-time-line me-1"></i> Auto-fetched from employee contract dates in Employee module';
+            } else if (validDurations.length > 0) {
+                const details = validDurations.map(d => d.detail || (d.name + ': ' + d.duration)).join(' &bull; ');
+                contractDurationHint.innerHTML = '<i class="ri-calendar-check-line text-success me-1"></i> <strong>Employee Duration:</strong> ' + details;
+            } else {
+                contractDurationHint.innerHTML = '<i class="ri-information-line text-warning me-1"></i> Selected employee(s) have no contract dates set in Employee module';
+            }
+        }
+
+        if (resetDurationBtn) {
+            resetDurationBtn.style.display = (contractDurationInput && contractDurationInput.dataset.manuallyEdited && validDurations.length > 0) ? 'inline' : 'none';
         }
 
         // Auto-update hint with calculation breakdown
@@ -625,29 +679,29 @@
     }
 
     // Financial Calculation Logic:
-    // Rate Card
+    // Employee CTC
     // Billing % / Margin %
     // TDS %
-    // TDS Amount = Rate Card * (TDS % / 100)
-    // Margin In Rupees = Rate Card * (Margin % / 100)
+    // TDS Amount = Employee CTC * (TDS % / 100)
+    // Margin In Rupees = Employee CTC * (Margin % / 100)
     // SZ Commission = Margin In Rupees * (SZ % / 100)
     // Investor Commission = Margin In Rupees * (Investor % / 100)
     function recalculateFromPercentage() {
-        const rateCard = parseFloat(rateCardInput?.value) || 0;
+        const employeeCtc = parseFloat(employeeCtcInput?.value) || 0;
         const billingPct = parseFloat(billingPctInput?.value) || 0;
         const marginPct = parseFloat(marginPctInput?.value) || (billingPct > 0 ? billingPct : 0);
         const tdsPct = parseFloat(tdsPctInput?.value) || 10;
 
         // Auto calculate Margin In Rupees
-        const marginAmt = Math.round(rateCard * (marginPct / 100) * 100) / 100;
+        const marginAmt = Math.round(employeeCtc * (marginPct / 100) * 100) / 100;
         if (marginAmtInput) {
-            marginAmtInput.value = marginAmt > 0 ? marginAmt.toFixed(2) : (rateCard > 0 ? '0.00' : '');
+            marginAmtInput.value = marginAmt > 0 ? marginAmt.toFixed(2) : (employeeCtc > 0 ? '0.00' : '');
         }
 
         // Auto calculate TDS Deduction Amount
-        const tdsAmt = Math.round(rateCard * (tdsPct / 100) * 100) / 100;
+        const tdsAmt = Math.round(employeeCtc * (tdsPct / 100) * 100) / 100;
         if (tdsAmtInput) {
-            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (rateCard > 0 ? '0.00' : '');
+            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (employeeCtc > 0 ? '0.00' : '');
         }
 
         recalculateSplits();
@@ -655,12 +709,12 @@
 
     // Two-way sync when Margin In Rupees is typed manually
     function recalculateFromAmount() {
-        const rateCard = parseFloat(rateCardInput?.value) || 0;
+        const employeeCtc = parseFloat(employeeCtcInput?.value) || 0;
         const marginAmt = parseFloat(marginAmtInput?.value) || 0;
         const tdsPct = parseFloat(tdsPctInput?.value) || 10;
 
-        if (rateCard > 0) {
-            const marginPct = Math.round((marginAmt / rateCard) * 10000) / 100;
+        if (employeeCtc > 0) {
+            const marginPct = Math.round((marginAmt / employeeCtc) * 10000) / 100;
             if (marginPctInput) {
                 marginPctInput.value = marginPct.toFixed(2);
                 marginPctInput.dataset.manuallyEdited = 'true';
@@ -668,9 +722,9 @@
         }
 
         // TDS amount
-        const tdsAmt = Math.round(rateCard * (tdsPct / 100) * 100) / 100;
+        const tdsAmt = Math.round(employeeCtc * (tdsPct / 100) * 100) / 100;
         if (tdsAmtInput) {
-            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (rateCard > 0 ? '0.00' : '');
+            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (employeeCtc > 0 ? '0.00' : '');
         }
 
         recalculateSplits();
@@ -731,6 +785,11 @@
             investerSelect.addEventListener('change', syncEmployeesAndOptions);
         }
 
+        // Preserve manually entered contract duration when editing an existing deployment
+        if (deploymentId && contractDurationInput && contractDurationInput.value.trim() !== '') {
+            contractDurationInput.dataset.manuallyEdited = 'true';
+        }
+
         // Initial setup
         const activeClientIds = initialSelectedClientIds.length > 0
             ? initialSelectedClientIds
@@ -741,8 +800,25 @@
     }
 
     // Event listeners
-    if (rateCardInput) {
-        rateCardInput.addEventListener('input', recalculateFromPercentage);
+    if (contractDurationInput) {
+        contractDurationInput.addEventListener('input', function() {
+            this.dataset.manuallyEdited = 'true';
+            if (resetDurationBtn) resetDurationBtn.style.display = 'inline';
+        });
+    }
+    if (resetDurationBtn) {
+        resetDurationBtn.addEventListener('click', function() {
+            if (contractDurationInput) {
+                delete contractDurationInput.dataset.manuallyEdited;
+            }
+            updateEmployeeSelectionSummary();
+        });
+    }
+    if (employeeCtcInput) {
+        employeeCtcInput.addEventListener('input', function() {
+            this.dataset.manuallyEdited = 'true';
+            recalculateFromPercentage();
+        });
     }
     if (billingPctInput) {
         billingPctInput.addEventListener('input', function() {
@@ -761,11 +837,6 @@
     }
     if (tdsPctInput) {
         tdsPctInput.addEventListener('input', recalculateFromPercentage);
-    }
-    if (employeeCtcInput) {
-        employeeCtcInput.addEventListener('input', function() {
-            this.dataset.manuallyEdited = 'true';
-        });
     }
     if (marginAmtInput) {
         marginAmtInput.addEventListener('input', recalculateFromAmount);

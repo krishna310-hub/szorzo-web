@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Employee;
 use App\Models\Invester;
 use App\Models\InvesterDeployment;
 use App\Models\Role;
@@ -75,8 +76,7 @@ class InvesterWorkflowTest extends TestCase
             'invester_id' => 1,
             'mode_of_engagement' => 'Contract',
             'contract_duration' => '6 Months',
-            'approved_rate_card' => 200000,
-            'employee_ctc' => 1790000,
+            'employee_ctc' => 200000,
             'margin_percentage' => 15.00,
             'tds_percentage' => 10.00,
             'szorzo_share_percentage' => 70.00,
@@ -171,8 +171,7 @@ class InvesterWorkflowTest extends TestCase
             'employee_ids' => [101, 102, 103],
             'mode_of_engagement' => 'Contract',
             'contract_duration' => '12 Months',
-            'approved_rate_card' => 250000.00,
-            'employee_ctc' => 2200000.00,
+            'employee_ctc' => 250000.00,
             'billing_percentage' => 8.33,
             'margin_percentage' => 8.33,
             'tds_percentage' => 10.00,
@@ -183,7 +182,7 @@ class InvesterWorkflowTest extends TestCase
 
         $deployment->computeCommissions();
 
-        // Rate card: 250000
+        // Base (Employee CTC): 250000
         // TDS amount = 250000 * 10% = 25000
         $this->assertEquals(25000.00, (float) $deployment->tds_amount);
 
@@ -343,6 +342,74 @@ class InvesterWorkflowTest extends TestCase
         $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/invester-dashboard/index.blade.php');
         $this->assertStringNotContainsString('name="mode_of_engagement"', $dashboardContent);
         $this->assertStringNotContainsString('<th>Engagement Mode</th>', $dashboardContent);
+    }
+
+    public function test_approved_rate_card_removed_and_ctc_used_as_base(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+
+        // 1. Form view has no Approved Rate Card input
+        $formContent = file_get_contents($baseDir . '/resources/views/backend/invester-deployments/form.blade.php');
+        $this->assertStringNotContainsString('Approved Rate Card (₹)', $formContent);
+        $this->assertStringNotContainsString('name="approved_rate_card"', $formContent);
+        $this->assertStringContainsString('id="contract_duration"', $formContent);
+        $this->assertStringContainsString('id="employee_ctc"', $formContent);
+
+        // 2. Deployments index table header shows Employee CTC (₹)
+        $indexContent = file_get_contents($baseDir . '/resources/views/backend/invester-deployments/index.blade.php');
+        $this->assertStringContainsString('<th>Employee CTC (₹)</th>', $indexContent);
+        $this->assertStringNotContainsString('<th>Rate Card (₹)</th>', $indexContent);
+
+        // 3. Investor show table has Employee CTC and does not have Approved Rate Card column
+        $showContent = file_get_contents($baseDir . '/resources/views/backend/investers/show.blade.php');
+        $this->assertStringNotContainsString('<th>Approved Rate Card</th>', $showContent);
+        $this->assertStringContainsString('<th>Employee CTC (₹)</th>', $showContent);
+
+        // 4. Investor dashboard table does not have Approved Rate Card column
+        $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/invester-dashboard/index.blade.php');
+        $this->assertStringNotContainsString('<th>Approved Rate Card</th>', $dashboardContent);
+        $this->assertStringContainsString('<th>Employee CTC (₹)</th>', $dashboardContent);
+    }
+
+    public function test_employee_contract_duration_calculation(): void
+    {
+        // 6 Months duration
+        $emp6m = new Employee([
+            'employee_name' => 'Mohammed Zaheer Ali',
+            'contract_from_date' => '2026-06-08',
+            'contract_to_date' => '2026-12-08',
+        ]);
+        $info6m = $emp6m->getContractDurationInfo();
+        $this->assertSame('6 Months', $info6m['duration']);
+        $this->assertSame('6 Months', $emp6m->contract_duration);
+
+        // 3 Months duration
+        $emp3m = new Employee([
+            'employee_name' => 'Apannagary Sowmya',
+            'contract_from_date' => '2026-06-29',
+            'contract_to_date' => '2026-09-29',
+        ]);
+        $info3m = $emp3m->getContractDurationInfo();
+        $this->assertSame('3 Months', $info3m['duration']);
+        $this->assertSame('3 Months', $emp3m->contract_duration);
+
+        // 1 Year duration
+        $emp1y = new Employee([
+            'employee_name' => 'Annual Staff',
+            'contract_from_date' => '2026-04-01',
+            'contract_to_date' => '2027-03-31',
+        ]);
+        $info1y = $emp1y->getContractDurationInfo();
+        $this->assertSame('1 Year', $info1y['duration']);
+        $this->assertSame('1 Year', $emp1y->contract_duration);
+
+        // Graceful handling when dates are not set
+        $empEmpty = new Employee([
+            'employee_name' => 'No Dates Staff',
+        ]);
+        $infoEmpty = $empEmpty->getContractDurationInfo();
+        $this->assertSame('', $infoEmpty['duration']);
+        $this->assertSame('', $empEmpty->contract_duration);
     }
 }
 

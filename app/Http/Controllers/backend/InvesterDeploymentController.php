@@ -84,7 +84,8 @@ class InvesterDeploymentController extends Controller
                     return '<span class="badge bg-info-subtle text-info">' . e($row->mode_of_engagement ?: 'Contract') . '</span>';
                 })
                 ->addColumn('rate_card_formatted', function ($row) {
-                    $html = '₹ ' . number_format((float) $row->approved_rate_card, 2);
+                    $amount = (float) ($row->employee_ctc > 0 ? $row->employee_ctc : $row->approved_rate_card);
+                    $html = '₹ ' . number_format($amount, 2);
                     if ($row->billing_percentage !== null) {
                         $html .= '<br><small class="text-muted">Billing: ' . (float) $row->billing_percentage . '%</small>';
                     }
@@ -117,7 +118,7 @@ class InvesterDeploymentController extends Controller
                     }
                     return $buttons ?: '-';
                 })
-                ->rawColumns(['invester_name', 'employee_name', 'mode_badge', 'margin_in_rupees', 'commission_split', 'status', 'action'])
+                ->rawColumns(['invester_name', 'employee_name', 'mode_badge', 'rate_card_formatted', 'margin_in_rupees', 'commission_split', 'status', 'action'])
                 ->make(true);
         }
 
@@ -253,6 +254,8 @@ class InvesterDeploymentController extends Controller
                 $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
                 $salaryData = $emp->getContractReportSalary();
                 $salary = (float) $salaryData['salary'];
+                $durationInfo = $emp->getContractDurationInfo();
+                $durLabel = $durationInfo['duration'] ? ' [' . $durationInfo['duration'] . ']' : '';
 
                 return [
                     'id' => $emp->id,
@@ -269,8 +272,12 @@ class InvesterDeploymentController extends Controller
                     'absent_days' => $salaryData['absent_days'],
                     'days_in_month' => $salaryData['days_in_month'],
                     'source' => $salaryData['source'],
+                    'contract_duration' => $durationInfo['duration'],
+                    'contract_duration_detail' => $durationInfo['detail'],
+                    'contract_from' => $durationInfo['from_date'],
+                    'contract_to' => $durationInfo['to_date'],
                     'salary_formatted' => number_format($salary, 2),
-                    'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
+                    'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . $durLabel . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
                 ];
             });
 
@@ -333,8 +340,8 @@ class InvesterDeploymentController extends Controller
         $data['employee_id'] = $employeeIds[0] ?? ($data['employee_id'] ?? null);
 
         $data['mode_of_engagement'] = !empty($data['mode_of_engagement']) ? $data['mode_of_engagement'] : 'Contract';
-        $data['approved_rate_card'] = (float) ($data['approved_rate_card'] ?? 0);
         $data['employee_ctc'] = (float) ($data['employee_ctc'] ?? 0);
+        $data['approved_rate_card'] = (float) ($data['approved_rate_card'] ?? $data['employee_ctc']);
         $data['billing_percentage'] = isset($data['billing_percentage']) && $data['billing_percentage'] !== '' ? (float) $data['billing_percentage'] : null;
         $data['margin_percentage'] = isset($data['margin_percentage']) && $data['margin_percentage'] !== ''
             ? (float) $data['margin_percentage']
@@ -343,15 +350,17 @@ class InvesterDeploymentController extends Controller
         $data['szorzo_share_percentage'] = isset($data['szorzo_share_percentage']) && $data['szorzo_share_percentage'] !== '' ? (float) $data['szorzo_share_percentage'] : 70.0;
         $data['investor_share_percentage'] = 100.0 - $data['szorzo_share_percentage'];
 
-        // Compute Margin in Rupees if not manually provided
+        $base = (float) ($data['employee_ctc'] > 0 ? $data['employee_ctc'] : $data['approved_rate_card']);
+
+        // Compute Margin in Rupees if not manually provided: Base (Employee CTC) * (Margin % / 100)
         if (empty($data['margin_amount']) || (float) $data['margin_amount'] <= 0) {
-            $data['margin_amount'] = round($data['approved_rate_card'] * ($data['margin_percentage'] / 100), 2);
+            $data['margin_amount'] = round($base * ($data['margin_percentage'] / 100), 2);
         } else {
             $data['margin_amount'] = (float) $data['margin_amount'];
         }
 
-        // TDS deduction calculation on gross rate card
-        $data['tds_amount'] = round($data['approved_rate_card'] * ($data['tds_percentage'] / 100), 2);
+        // TDS deduction calculation on base (Employee CTC)
+        $data['tds_amount'] = round($base * ($data['tds_percentage'] / 100), 2);
 
         $data['szorzo_commission_amount'] = round($data['margin_amount'] * ($data['szorzo_share_percentage'] / 100), 2);
         $data['investor_commission_amount'] = round($data['margin_amount'] * ($data['investor_share_percentage'] / 100), 2);

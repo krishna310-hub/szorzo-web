@@ -204,6 +204,18 @@
             value="{{ old('contract_to_date', isset($employee) && $employee->contract_to_date ? $employee->contract_to_date->format('Y-m-d') : '') }}">
         @error('contract_to_date')<span class="text-danger small">{{ $message }}</span>@enderror
     </div>
+    <div class="col-md-4 mt-3 contract-date-field">
+        <label class="form-label">Contract Duration</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bx bx-time-five"></i></span>
+            <input type="text" class="form-control bg-light" id="employee_contract_duration_display" 
+                value="{{ isset($employee) && $employee->contract_duration ? $employee->contract_duration : '' }}" 
+                placeholder="Auto-calculated from dates" readonly>
+        </div>
+        <small class="text-muted" id="employee_contract_duration_detail">
+            {{ isset($employee) && $employee->contract_duration_detail ? $employee->contract_duration_detail : '' }}
+        </small>
+    </div>
     @unless($publicEmployeeForm ?? false)
     @foreach(['offer_letter' => 'Offer Letter', 'intent_letter' => 'Intent Letter'] as $field => $label)
         <div class="col-md-4 mt-3">
@@ -913,6 +925,50 @@
         const mode = document.getElementById('mode_id');
         const dateFields = document.querySelectorAll('.contract-date-field');
         const dateInputs = [document.getElementById('contract_from_date'), document.getElementById('contract_to_date')];
+        const durationDisplay = document.getElementById('employee_contract_duration_display');
+        const durationDetail = document.getElementById('employee_contract_duration_detail');
+
+        function updateContractDuration() {
+            const fromVal = dateInputs[0]?.value;
+            const toVal = dateInputs[1]?.value;
+            if (!fromVal || !toVal) {
+                if (durationDisplay) durationDisplay.value = '';
+                if (durationDetail) durationDetail.textContent = '';
+                return;
+            }
+
+            const fromDate = new Date(fromVal);
+            const toDate = new Date(toVal);
+            if (toDate < fromDate) {
+                if (durationDisplay) durationDisplay.value = 'Invalid Date Range';
+                if (durationDetail) durationDetail.textContent = 'To Date cannot be before From Date';
+                return;
+            }
+
+            const diffTime = Math.abs(toDate - fromDate);
+            const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            let duration = '';
+            if (totalDays >= 360 && totalDays <= 370) {
+                duration = '1 Year';
+            } else if (totalDays >= 720 && totalDays <= 740) {
+                duration = '2 Years';
+            } else {
+                const months = Math.max(1, Math.round(totalDays / 30.4375));
+                if (months >= 12 && months % 12 === 0) {
+                    const years = Math.floor(months / 12);
+                    duration = years + ' Year' + (years > 1 ? 's' : '');
+                } else {
+                    duration = months + ' Month' + (months > 1 ? 's' : '');
+                }
+            }
+
+            if (durationDisplay) durationDisplay.value = duration;
+            if (durationDetail) durationDetail.textContent = duration + ' (' + totalDays + ' days)';
+        }
+
+        dateInputs.forEach(input => input?.addEventListener('change', updateContractDuration));
+        updateContractDuration();
 
         function toggleContractDates() {
             const requiresDates = mode && mode.options[mode.selectedIndex]?.dataset.requiresContractDates === '1';

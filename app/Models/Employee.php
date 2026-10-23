@@ -584,24 +584,17 @@ class Employee extends Model
     }
 
     /**
-     * Get monthly salary from Contract Report (calculated based on working/present days).
-     *
-     * @param \Carbon\CarbonInterface|null $month
-     * @return array
+     * Locate matching Candidate by email, name, or contact number.
      */
-    public function getContractReportSalary(?\Carbon\CarbonInterface $month = null): array
+    public function getMatchingCandidate(): ?Candidate
     {
-        $month = $month ?: \Carbon\CarbonImmutable::now();
-        $salaryMonth = $month->startOfMonth();
-
-        // 1. Locate matching Candidate by email or name
-        $emails = array_values(array_filter([
-            $this->official_mail ? mb_strtolower(trim($this->official_mail)) : null,
-            $this->personal_mail ? mb_strtolower(trim($this->personal_mail)) : null,
-        ]));
-
-        $candidate = null;
         try {
+            $emails = array_values(array_filter([
+                $this->official_mail ? mb_strtolower(trim($this->official_mail)) : null,
+                $this->personal_mail ? mb_strtolower(trim($this->personal_mail)) : null,
+            ]));
+
+            $candidate = null;
             if (!empty($emails)) {
                 $candidate = Candidate::where(function ($q) use ($emails) {
                     foreach ($emails as $em) {
@@ -622,9 +615,113 @@ class Employee extends Model
                     $candidate = Candidate::whereRaw("REPLACE(REPLACE(REPLACE(contact_no, ' ', ''), '-', ''), '+', '') LIKE ?", ['%' . $last10])->first();
                 }
             }
+
+            return $candidate;
         } catch (\Throwable $e) {
-            $candidate = null;
+            return null;
         }
+    }
+
+    /**
+     * Retrieve contract duration details based on Employee and linked Candidate contract dates.
+     *
+     * @return array{duration: string, from_date: ?string, to_date: ?string, detail: string, days: int}
+     */
+    public function getContractDurationInfo(): array
+    {
+        $from = $this->contract_from_date;
+        $to = $this->contract_to_date;
+
+        if (!$from || !$to) {
+            $candidate = $this->getMatchingCandidate();
+            if ($candidate) {
+                $from = $from ?: $candidate->contract_from_date;
+                $to = $to ?: $candidate->contract_to_date;
+            }
+        }
+
+        if (!$from || !$to) {
+            return [
+                'duration' => '',
+                'duration_text' => '',
+                'from_date' => null,
+                'to_date' => null,
+                'detail' => '',
+                'days' => 0,
+            ];
+        }
+
+        $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
+        $toDate = \Carbon\Carbon::parse($to)->startOfDay();
+
+        if ($toDate->lt($fromDate)) {
+            return [
+                'duration' => '',
+                'duration_text' => '',
+                'from_date' => $fromDate->format('Y-m-d'),
+                'to_date' => $toDate->format('Y-m-d'),
+                'detail' => '',
+                'days' => 0,
+            ];
+        }
+
+        $totalDays = (int) $fromDate->diffInDays($toDate) + 1;
+        $fromStr = $fromDate->format('d-M-Y');
+        $toStr = $toDate->format('d-M-Y');
+
+        if ($totalDays >= 360 && $totalDays <= 370) {
+            $duration = '1 Year';
+        } elseif ($totalDays >= 720 && $totalDays <= 740) {
+            $duration = '2 Years';
+        } else {
+            $months = max(1, (int) round($totalDays / 30.4375));
+            if ($months >= 12 && $months % 12 === 0) {
+                $years = (int) ($months / 12);
+                $duration = $years . ' Year' . ($years > 1 ? 's' : '');
+            } else {
+                $duration = $months . ' Month' . ($months > 1 ? 's' : '');
+            }
+        }
+
+        return [
+            'duration' => $duration,
+            'duration_text' => $duration,
+            'from_date' => $fromDate->format('Y-m-d'),
+            'to_date' => $toDate->format('Y-m-d'),
+            'detail' => $duration . ' (' . $fromStr . ' to ' . $toStr . ')',
+            'days' => $totalDays,
+        ];
+    }
+
+    /**
+     * Contract duration attribute accessor.
+     */
+    public function getContractDurationAttribute(): string
+    {
+        return $this->getContractDurationInfo()['duration'] ?? '';
+    }
+
+    /**
+     * Contract duration detail attribute accessor.
+     */
+    public function getContractDurationDetailAttribute(): string
+    {
+        return $this->getContractDurationInfo()['detail'] ?? '';
+    }
+
+    /**
+     * Get monthly salary from Contract Report (calculated based on working/present days).
+     *
+     * @param \Carbon\CarbonInterface|null $month
+     * @return array
+     */
+    public function getContractReportSalary(?\Carbon\CarbonInterface $month = null): array
+    {
+        $month = $month ?: \Carbon\CarbonImmutable::now();
+        $salaryMonth = $month->startOfMonth();
+
+        // 1. Locate matching Candidate by email or name
+        $candidate = $this->getMatchingCandidate();
 
         $salary = 0.0;
         $presentDays = (int) $month->daysInMonth;

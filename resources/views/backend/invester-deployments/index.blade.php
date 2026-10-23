@@ -109,7 +109,7 @@
                                             <th>Invester</th>
                                             <th>Employee</th>
                                             <th>Deployed Client</th>
-                                            <th>Rate Card (₹)</th>
+                                            <th>Employee CTC (₹)</th>
                                             <th>Margin In Rupees</th>
                                             <th>Profit Sharing (SZ / Inv)</th>
                                             <th>Status</th>
@@ -150,7 +150,7 @@ $(document).ready(function () {
             { data: 'invester_name', name: 'invester.name' },
             { data: 'employee_name', name: 'employee.employee_name' },
             { data: 'client_name', name: 'client.client' },
-            { data: 'rate_card_formatted', name: 'approved_rate_card' },
+            { data: 'rate_card_formatted', name: 'employee_ctc' },
             { data: 'margin_in_rupees', name: 'margin_amount' },
             { data: 'commission_split', name: 'commission_split', orderable: false, searchable: false },
             { data: 'status', name: 'status', orderable: false, searchable: false },
