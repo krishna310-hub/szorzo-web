@@ -1100,13 +1100,15 @@
                     auth()->user()->can('read', \App\Models\InvesterLegalCompliance::class)
                 )
                     <li class="menu-title"><i class="ri-more-fill"></i> <span>Investers</span></li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.investers.dashboard') }}"
-                            class="nav-link menu-link {{ request()->is('admin/investers/dashboard*') ? 'active' : '' }}">
-                            <i class="ri-dashboard-2-line"></i>
-                            <span>Invester Dashboard</span>
-                        </a>
-                    </li>
+                    @if(!auth()->user()->isInvestor() && (int) auth()->user()->role_id !== 6)
+                        <li class="nav-item">
+                            <a href="{{ route('admin.investers.dashboard') }}"
+                                class="nav-link menu-link {{ request()->is('admin/investers/dashboard*') ? 'active' : '' }}">
+                                <i class="ri-dashboard-2-line"></i>
+                                <span>Invester Dashboard</span>
+                            </a>
+                        </li>
+                    @endif
                     @can('read', \App\Models\Invester::class)
                         <li class="nav-item">
                             <a href="{{ route('admin.investers.index') }}"

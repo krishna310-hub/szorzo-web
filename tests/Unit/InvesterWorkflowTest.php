@@ -598,5 +598,19 @@ class InvesterWorkflowTest extends TestCase
         $this->assertStringContainsString('Total Employee Spend', $showContent);
         $this->assertStringContainsString('Balance Investment', $showContent);
     }
+
+    public function test_investor_login_sidebar_single_menu_and_hidden_dashboard_sections(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+
+        // 1. Sidebar ensures investor does not have duplicate dashboard menu items
+        $sidebarContent = file_get_contents($baseDir . '/resources/views/backend/layouts/sidebar.blade.php');
+        $this->assertStringContainsString("!auth()->user()->isInvestor() && (int) auth()->user()->role_id !== 6", $sidebarContent);
+
+        // 2. Dashboard hides the 3 redundant sections
+        $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/invester-dashboard/index.blade.php');
+        $this->assertStringContainsString("Sections hidden per user request: Investors Performance Breakdown", $dashboardContent);
+        $this->assertStringContainsString("@if(false)", $dashboardContent);
+    }
 }
 

@@ -535,6 +535,8 @@
                 </div>
             </div>
 
+            <!-- Sections hidden per user request: Investors Performance Breakdown, Deployed Employees Funded by Investor, and Associated Clients / Investment Tranches -->
+            @if(false)
             <!-- If Admin is viewing Consolidated Overview: Show Investers Breakdown Table (Point 5) -->
             @if($isSuperAdmin && !$selectedInvesterId && $investorBreakdown->isNotEmpty())
                 <div class="row mb-4">
@@ -823,6 +825,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
         </div>
     </div>

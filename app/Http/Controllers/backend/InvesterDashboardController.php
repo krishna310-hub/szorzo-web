@@ -177,9 +177,57 @@ class InvesterDashboardController extends Controller
             ];
         })->values();
 
-        // Dropdown data
+        // Dropdown data: only list clients assigned to this investor (or deployed clients in consolidated view)
         $availableInvesters = ($isSuperAdmin) ? Invester::where('status', true)->orderBy('name')->get() : collect();
-        $availableClients = Client::where('status', true)->orderBy('client')->get();
+
+        if ($selectedInvesterId) {
+            $invDeployments = InvesterDeployment::where('invester_id', $selectedInvesterId)->get(['client_id', 'client_ids']);
+            $assignedClientIds = [];
+            foreach ($invDeployments as $dep) {
+                if ($dep->client_id) {
+                    $assignedClientIds[] = (int) $dep->client_id;
+                }
+                $ids = $dep->client_ids;
+                if (is_string($ids)) {
+                    $ids = json_decode($ids, true);
+                }
+                if (is_array($ids)) {
+                    foreach ($ids as $id) {
+                        if ($id) {
+                            $assignedClientIds[] = (int) $id;
+                        }
+                    }
+                }
+            }
+            $assignedClientIds = array_values(array_unique(array_filter($assignedClientIds)));
+            $availableClients = !empty($assignedClientIds)
+                ? Client::whereIn('id', $assignedClientIds)->orderBy('client')->get()
+                : collect();
+        } else {
+            // Consolidated view (All Investors): only list clients that have deployments
+            $allDeploymentsForClients = InvesterDeployment::get(['client_id', 'client_ids']);
+            $assignedClientIds = [];
+            foreach ($allDeploymentsForClients as $dep) {
+                if ($dep->client_id) {
+                    $assignedClientIds[] = (int) $dep->client_id;
+                }
+                $ids = $dep->client_ids;
+                if (is_string($ids)) {
+                    $ids = json_decode($ids, true);
+                }
+                if (is_array($ids)) {
+                    foreach ($ids as $id) {
+                        if ($id) {
+                            $assignedClientIds[] = (int) $id;
+                        }
+                    }
+                }
+            }
+            $assignedClientIds = array_values(array_unique(array_filter($assignedClientIds)));
+            $availableClients = !empty($assignedClientIds)
+                ? Client::whereIn('id', $assignedClientIds)->orderBy('client')->get()
+                : Client::where('status', true)->orderBy('client')->get();
+        }
 
         // Current Invester Details if single investor selected
         $currentInvester = $selectedInvesterId ? Invester::find($selectedInvesterId) : null;
