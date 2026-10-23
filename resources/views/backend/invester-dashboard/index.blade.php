@@ -366,7 +366,7 @@
                         <div class="card-body p-3">
                             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
                                 <h6 class="mb-0 fw-bold"><i class="ri-pie-chart-2-line text-primary me-1"></i> Profit Sharing Model Split (Monthly)</h6>
-                                <span class="badge bg-secondary-subtle text-secondary fs-12">Based on Active Rate Cards & Margins</span>
+                                <span class="badge bg-secondary-subtle text-secondary fs-12">Based on Contract Report Revenue</span>
                             </div>
                             @php
                                 $totalComms = $metrics['total_szorzo_share'] + $metrics['total_investor_share'];
@@ -448,11 +448,11 @@
                                                     </span>
                                                     @if(!empty($row['employees_detail']))
                                                         <div class="small text-muted mt-1">
-                                                            @foreach(array_slice($row['employees_detail'], 0, 3) as $ed)
-                                                                <span class="d-inline-block me-2">• {{ $ed['name'] }} (₹{{ number_format($ed['salary'], 2) }})</span>
+                                                            @foreach(array_slice($row['employees_detail'], 0, 4) as $ed)
+                                                                <span class="d-inline-block me-2">• {{ $ed['name'] }} (₹{{ number_format($ed['salary'], 2) }} @ {{ number_format($ed['billing_percentage'] ?? 15, 1) }}%)</span>
                                                             @endforeach
-                                                            @if(count($row['employees_detail']) > 3)
-                                                                <span class="text-muted">+{{ count($row['employees_detail']) - 3 }} more</span>
+                                                            @if(count($row['employees_detail']) > 4)
+                                                                <span class="text-muted">+{{ count($row['employees_detail']) - 4 }} more</span>
                                                             @endif
                                                         </div>
                                                     @endif

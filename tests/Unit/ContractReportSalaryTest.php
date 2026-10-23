@@ -131,13 +131,13 @@ class ContractReportSalaryTest extends TestCase
     public function test_dashboard_uses_the_contract_report_revenue_calculation(): void
     {
         $monthly = $this->reportWithRequirement(15, 0, false, 0, 48333);
-        $monthly->salary_month = '2026-07-01';
+        $monthly->setRawAttributes(array_merge($monthly->getAttributes(), ['salary_month' => '2026-07-01']));
         $monthly->absent_days = 0;
         $monthly->candidate->onboarding_ctc = 1667496;
         $monthly->candidate->take_home = 48333;
 
         $hourly = $this->reportWithRequirement(35, 400, true, 56);
-        $hourly->salary_month = '2026-07-01';
+        $hourly->setRawAttributes(array_merge($hourly->getAttributes(), ['salary_month' => '2026-07-01']));
         $hourly->candidate->hourly_salary = 400;
 
         $method = new ReflectionMethod(AdminController::class, 'contractReportRevenue');

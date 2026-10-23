@@ -69,24 +69,64 @@ class InvesterDeployment extends Model
     }
 
     /**
-     * Compute Margin in Rupees and Commission Splits based on photo requirements:
-     * - Rate Card
-     * - Billing % (Auto-fetched from client module)
-     * - Margin %
-     * - TDS % (Auto-fetched statutory 10%)
-     * - Margin In Rupees
-     * - TDS Amount (Rate Card * TDS %)
+     * Compute Margin in Rupees and Commission Splits based on Contract Report:
+     * - Employee CTC (Sum of salaries from Contract Report)
+     * - Margin Amount (Sum of Contract Revenues from Contract Report: Salary * Billing %)
      * - Profit Sharing Model: SZ (70%) / Investor (30%)
      */
     public function computeCommissions(): void
     {
+        try {
+            $assignedEmps = $this->assigned_employees;
+        } catch (\Throwable $e) {
+            $assignedEmps = collect();
+        }
+        if ($assignedEmps->isNotEmpty()) {
+            $sumSalary = 0.0;
+            $sumRevenue = 0.0;
+            foreach ($assignedEmps as $emp) {
+                $salData = $emp->getContractReportSalary();
+                $sal = (float) $salData['salary'];
+                $bp = (float) ($salData['billing_percentage'] ?? $emp->getClientRequirementBillingPercentage() ?? 15.0);
+                $rev = (float) ($salData['revenue'] ?? round($sal * ($bp / 100), 2));
+                $sumSalary += $sal;
+                $sumRevenue += $rev;
+            }
+
+            if ($sumSalary > 0 && ((float) $this->employee_ctc <= 0 || empty($this->employee_ctc))) {
+                $this->employee_ctc = round($sumSalary, 2);
+            }
+
+            if ($sumRevenue > 0) {
+                // If margin amount is empty or was legacy calculated on rate card
+                if (empty($this->margin_amount) || (float) $this->margin_amount <= 0 || ((float) $this->approved_rate_card > 0 && (float) $this->margin_amount == round((float) $this->approved_rate_card * ((float) $this->margin_percentage / 100), 2))) {
+                    $this->margin_amount = round($sumRevenue, 2);
+                }
+            }
+
+            $baseAmount = (float) ($this->employee_ctc > 0 ? $this->employee_ctc : $sumSalary);
+            if ($baseAmount > 0 && (float) $this->margin_amount > 0) {
+                $this->margin_percentage = round(((float) $this->margin_amount / $baseAmount) * 100, 2);
+                $this->billing_percentage = $this->margin_percentage;
+            }
+        } else {
+            $baseAmount = (float) ($this->employee_ctc > 0 ? $this->employee_ctc : ($this->approved_rate_card ?? 0));
+            $billingPct = isset($this->billing_percentage) && $this->billing_percentage !== null && $this->billing_percentage !== ''
+                ? (float) $this->billing_percentage
+                : null;
+            $marginPct = isset($this->margin_percentage) && $this->margin_percentage !== null && $this->margin_percentage !== ''
+                ? (float) $this->margin_percentage
+                : ($billingPct ?? 15.0);
+
+            if (empty($this->margin_amount) || (float) $this->margin_amount <= 0) {
+                $this->margin_amount = round($baseAmount * ($marginPct / 100), 2);
+            }
+        }
+
         $baseAmount = (float) ($this->employee_ctc > 0 ? $this->employee_ctc : ($this->approved_rate_card ?? 0));
-        $billingPct = isset($this->billing_percentage) && $this->billing_percentage !== null && $this->billing_percentage !== ''
-            ? (float) $this->billing_percentage
-            : null;
-        $marginPct = isset($this->margin_percentage) && $this->margin_percentage !== null && $this->margin_percentage !== ''
-            ? (float) $this->margin_percentage
-            : ($billingPct ?? 15.0);
+        $this->approved_rate_card = $baseAmount;
+        $marginAmt = (float) $this->margin_amount;
+
         $tdsPct = isset($this->tds_percentage) && $this->tds_percentage !== null && $this->tds_percentage !== ''
             ? (float) $this->tds_percentage
             : 10.0;
@@ -97,19 +137,7 @@ class InvesterDeployment extends Model
             ? (float) $this->investor_share_percentage
             : 30.0;
 
-        // If Margin in Rupees was not manually supplied, compute: Base Amount (Employee CTC) * (Margin % / 100)
-        if (empty($this->margin_amount) || (float) $this->margin_amount <= 0) {
-            $this->margin_amount = round($baseAmount * ($marginPct / 100), 2);
-        } else {
-            // If margin amount is supplied and base amount > 0, ensure margin percentage is synced
-            if ($baseAmount > 0 && empty($this->margin_percentage)) {
-                $this->margin_percentage = round(((float) $this->margin_amount / $baseAmount) * 100, 2);
-            }
-        }
-
-        $marginAmt = (float) $this->margin_amount;
-
-        // Calculate TDS amount on base (Employee CTC / Rate Card * TDS %)
+        // Calculate TDS amount on base (Employee CTC * TDS %)
         $this->tds_amount = round($baseAmount * ($tdsPct / 100), 2);
 
         // Ensure Profit sharing percentages sum up logically (default 70% SZ / 30% Investor)
@@ -118,9 +146,69 @@ class InvesterDeployment extends Model
             $this->investor_share_percentage = $invPct;
         }
 
-        // Calculate commissions
+        // Calculate commissions on Gross Margin
         $this->szorzo_commission_amount = round($marginAmt * ($szPct / 100), 2);
         $this->investor_commission_amount = round($marginAmt * ($invPct / 100), 2);
+    }
+
+    /**
+     * Get real-time financial metrics for this deployment from Contract Report.
+     *
+     * @param \Carbon\CarbonInterface|null $month
+     * @return array
+     */
+    public function getContractReportMetrics(?\Carbon\CarbonInterface $month = null): array
+    {
+        try {
+            $assignedEmps = $this->assigned_employees;
+        } catch (\Throwable $e) {
+            $assignedEmps = collect();
+        }
+        $totalSalary = 0.0;
+        $totalRevenue = 0.0;
+        $empDetails = [];
+
+        if ($assignedEmps->isNotEmpty()) {
+            foreach ($assignedEmps as $emp) {
+                $m = $emp->getContractReportSalary($month);
+                $sal = (float) $m['salary'];
+                $bp = (float) ($m['billing_percentage'] ?? $emp->getClientRequirementBillingPercentage() ?? 15.0);
+                $rev = (float) ($m['revenue'] ?? round($sal * ($bp / 100), 2));
+                $totalSalary += $sal;
+                $totalRevenue += $rev;
+                $empDetails[] = [
+                    'id' => $emp->id,
+                    'name' => $emp->employee_name,
+                    'salary' => $sal,
+                    'billing_percentage' => $bp,
+                    'revenue' => $rev,
+                ];
+            }
+        } else {
+            $totalSalary = (float) $this->employee_ctc;
+            $bp = (float) ($this->billing_percentage ?: 15.0);
+            $totalRevenue = (float) $this->margin_amount > 0 ? (float) $this->margin_amount : round($totalSalary * ($bp / 100), 2);
+        }
+
+        if ($totalSalary <= 0 && (float) $this->employee_ctc > 0) {
+            $totalSalary = (float) $this->employee_ctc;
+            $totalRevenue = (float) $this->margin_amount > 0 ? (float) $this->margin_amount : round($totalSalary * 0.15, 2);
+        }
+
+        $invPct = (float) ($this->investor_share_percentage ?: 30.0);
+        $szPct = (float) ($this->szorzo_share_percentage ?: 70.0);
+
+        $investorEarned = round($totalRevenue * ($invPct / 100), 2);
+        $szorzoEarned = round($totalRevenue * ($szPct / 100), 2);
+
+        return [
+            'total_salary' => round($totalSalary, 2),
+            'total_revenue' => round($totalRevenue, 2),
+            'investor_earned' => $investorEarned,
+            'szorzo_earned' => $szorzoEarned,
+            'effective_billing_percentage' => $totalSalary > 0 ? round(($totalRevenue / $totalSalary) * 100, 2) : 0.0,
+            'employees' => $empDetails,
+        ];
     }
 
     /**
@@ -138,7 +226,11 @@ class InvesterDeployment extends Model
         if (empty($ids)) {
             return collect();
         }
-        return Client::whereIn('id', (array) $ids)->get();
+        try {
+            return Client::whereIn('id', (array) $ids)->get();
+        } catch (\Throwable $e) {
+            return collect();
+        }
     }
 
     /**
@@ -156,7 +248,11 @@ class InvesterDeployment extends Model
         if (empty($ids)) {
             return collect();
         }
-        return Employee::whereIn('id', (array) $ids)->get();
+        try {
+            return Employee::whereIn('id', (array) $ids)->get();
+        } catch (\Throwable $e) {
+            return collect();
+        }
     }
 
     /**

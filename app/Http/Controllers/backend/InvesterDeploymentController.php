@@ -84,23 +84,30 @@ class InvesterDeploymentController extends Controller
                     return '<span class="badge bg-info-subtle text-info">' . e($row->mode_of_engagement ?: 'Contract') . '</span>';
                 })
                 ->addColumn('rate_card_formatted', function ($row) {
-                    $amount = (float) ($row->employee_ctc > 0 ? $row->employee_ctc : $row->approved_rate_card);
+                    $metrics = $row->getContractReportMetrics();
+                    $amount = $metrics['total_salary'] > 0 ? $metrics['total_salary'] : (float) ($row->employee_ctc > 0 ? $row->employee_ctc : $row->approved_rate_card);
+                    $effBilling = $metrics['effective_billing_percentage'] > 0 ? $metrics['effective_billing_percentage'] : (float) $row->billing_percentage;
                     $html = '₹ ' . number_format($amount, 2);
-                    if ($row->billing_percentage !== null) {
-                        $html .= '<br><small class="text-muted">Billing: ' . (float) $row->billing_percentage . '%</small>';
+                    if ($effBilling > 0) {
+                        $html .= '<br><small class="text-muted">Billing: ' . number_format($effBilling, 2) . '%</small>';
                     }
                     return $html;
                 })
                 ->addColumn('margin_in_rupees', function ($row) {
-                    $html = '<span class="badge bg-warning text-dark fs-12 fw-bold">₹ ' . number_format((float) $row->margin_amount, 2) . '</span>';
+                    $metrics = $row->getContractReportMetrics();
+                    $marginAmt = $metrics['total_revenue'] > 0 ? $metrics['total_revenue'] : (float) $row->margin_amount;
+                    $html = '<span class="badge bg-warning text-dark fs-12 fw-bold">₹ ' . number_format((float) $marginAmt, 2) . '</span>';
                     if ($row->tds_amount > 0) {
                         $html .= '<br><small class="text-muted">TDS (' . (float) $row->tds_percentage . '%): ₹' . number_format((float) $row->tds_amount, 2) . '</small>';
                     }
                     return $html;
                 })
                 ->addColumn('commission_split', function ($row) {
-                    $sz = 'SZ (' . (float) $row->szorzo_share_percentage . '%): ₹' . number_format((float) $row->szorzo_commission_amount, 2);
-                    $inv = 'Investor (' . (float) $row->investor_share_percentage . '%): ₹' . number_format((float) $row->investor_commission_amount, 2);
+                    $metrics = $row->getContractReportMetrics();
+                    $szAmt = $metrics['szorzo_earned'] > 0 ? $metrics['szorzo_earned'] : (float) $row->szorzo_commission_amount;
+                    $invAmt = $metrics['investor_earned'] > 0 ? $metrics['investor_earned'] : (float) $row->investor_commission_amount;
+                    $sz = 'SZ (' . (float) ($row->szorzo_share_percentage ?: 70) . '%): ₹' . number_format((float) $szAmt, 2);
+                    $inv = 'Investor (' . (float) ($row->investor_share_percentage ?: 30) . '%): ₹' . number_format((float) $invAmt, 2);
                     return '<small class="d-block text-primary fw-medium">' . e($sz) . '</small><small class="d-block text-success fw-bold">' . e($inv) . '</small>';
                 })
                 ->addColumn('status', function ($row) {
@@ -279,6 +286,7 @@ class InvesterDeploymentController extends Controller
                     'contract_from' => $durationInfo['from_date'],
                     'contract_to' => $durationInfo['to_date'],
                     'billing_percentage' => $billingPct,
+                    'revenue' => (float) ($salaryData['revenue'] ?? round($salary * (($billingPct ?? 15.0) / 100), 2)),
                     'salary_formatted' => number_format($salary, 2),
                     'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . $billingLabel . $durLabel . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
                 ];
@@ -341,46 +349,61 @@ class InvesterDeploymentController extends Controller
 
         $data['mode_of_engagement'] = !empty($data['mode_of_engagement']) ? $data['mode_of_engagement'] : 'Contract';
         $data['employee_ctc'] = (float) ($data['employee_ctc'] ?? 0);
-        $data['approved_rate_card'] = (float) ($data['approved_rate_card'] ?? $data['employee_ctc']);
 
-        // Auto-compute billing percentage from chosen employees' client requirements if not explicitly provided
-        if (!isset($data['billing_percentage']) || $data['billing_percentage'] === '' || $data['billing_percentage'] === null) {
-            if (!empty($data['employee_ids'])) {
-                $selectedEmps = Employee::with(['client.billing'])->whereIn('id', $data['employee_ids'])->get();
-                $sumBilling = 0;
-                foreach ($selectedEmps as $emp) {
-                    $bVal = $emp->getClientRequirementBillingPercentage();
-                    if ($bVal !== null && $bVal > 0) {
-                        $sumBilling += $bVal;
-                    }
-                }
-                if ($sumBilling > 0) {
-                    $data['billing_percentage'] = round($sumBilling, 2);
-                }
-            }
-        } else {
-            $data['billing_percentage'] = (float) $data['billing_percentage'];
+        // Fetch selected employees to calculate real Contract Report salary and revenue
+        $selectedEmps = !empty($data['employee_ids'])
+            ? Employee::with(['client.billing'])->whereIn('id', $data['employee_ids'])->get()
+            : collect();
+
+        $calcSalary = 0.0;
+        $calcRevenue = 0.0;
+
+        foreach ($selectedEmps as $emp) {
+            $salData = $emp->getContractReportSalary();
+            $sal = (float) $salData['salary'];
+            $bp = (float) ($salData['billing_percentage'] ?? $emp->getClientRequirementBillingPercentage() ?? 15.0);
+            $rev = (float) ($salData['revenue'] ?? round($sal * ($bp / 100), 2));
+            $calcSalary += $sal;
+            $calcRevenue += $rev;
         }
 
-        $data['margin_percentage'] = isset($data['margin_percentage']) && $data['margin_percentage'] !== ''
-            ? (float) $data['margin_percentage']
-            : ($data['billing_percentage'] ?? 15.0);
-        $data['tds_percentage'] = isset($data['tds_percentage']) && $data['tds_percentage'] !== '' ? (float) $data['tds_percentage'] : 10.0;
-        $data['szorzo_share_percentage'] = isset($data['szorzo_share_percentage']) && $data['szorzo_share_percentage'] !== '' ? (float) $data['szorzo_share_percentage'] : 70.0;
-        $data['investor_share_percentage'] = 100.0 - $data['szorzo_share_percentage'];
+        if ($data['employee_ctc'] <= 0 && $calcSalary > 0) {
+            $data['employee_ctc'] = round($calcSalary, 2);
+        }
 
-        $base = (float) ($data['employee_ctc'] > 0 ? $data['employee_ctc'] : $data['approved_rate_card']);
+        $base = (float) $data['employee_ctc'];
+        $data['approved_rate_card'] = $base;
 
-        // Compute Margin in Rupees if not manually provided: Base (Employee CTC) * (Margin % / 100)
+        // Auto-compute Margin in Rupees from Contract Report (sum of employee revenues: salary * billing %)
         if (empty($data['margin_amount']) || (float) $data['margin_amount'] <= 0) {
-            $data['margin_amount'] = round($base * ($data['margin_percentage'] / 100), 2);
+            if ($calcRevenue > 0) {
+                $data['margin_amount'] = round($calcRevenue, 2);
+            } else {
+                $marginPct = isset($data['margin_percentage']) && $data['margin_percentage'] !== '' ? (float) $data['margin_percentage'] : 15.0;
+                $data['margin_amount'] = round($base * ($marginPct / 100), 2);
+            }
         } else {
             $data['margin_amount'] = (float) $data['margin_amount'];
         }
 
+        // Effective billing / margin % (Contract Revenue / Total Salary)
+        if ($base > 0) {
+            $effectiveBillingPct = round(((float) $data['margin_amount'] / $base) * 100, 2);
+            $data['billing_percentage'] = $effectiveBillingPct;
+            $data['margin_percentage'] = $effectiveBillingPct;
+        } else {
+            $data['billing_percentage'] = 15.0;
+            $data['margin_percentage'] = 15.0;
+        }
+
+        $data['tds_percentage'] = isset($data['tds_percentage']) && $data['tds_percentage'] !== '' ? (float) $data['tds_percentage'] : 10.0;
+        $data['szorzo_share_percentage'] = isset($data['szorzo_share_percentage']) && $data['szorzo_share_percentage'] !== '' ? (float) $data['szorzo_share_percentage'] : 70.0;
+        $data['investor_share_percentage'] = 100.0 - $data['szorzo_share_percentage'];
+
         // TDS deduction calculation on base (Employee CTC)
         $data['tds_amount'] = round($base * ($data['tds_percentage'] / 100), 2);
 
+        // Commission amounts on Margin Amount (Contract Report revenue)
         $data['szorzo_commission_amount'] = round($data['margin_amount'] * ($data['szorzo_share_percentage'] / 100), 2);
         $data['investor_commission_amount'] = round($data['margin_amount'] * ($data['investor_share_percentage'] / 100), 2);
         $data['status'] = (bool) $data['status'];
@@ -393,22 +416,29 @@ class InvesterDeploymentController extends Controller
         $this->authorize('read', InvesterDeployment::class);
 
         $rows = InvesterDeployment::with(['invester', 'employee', 'client'])->get()->map(function ($row) {
+            $metrics = $row->getContractReportMetrics();
+            $salary = $metrics['total_salary'] > 0 ? $metrics['total_salary'] : $row->employee_ctc;
+            $billingPct = $metrics['effective_billing_percentage'] > 0 ? $metrics['effective_billing_percentage'] : $row->billing_percentage;
+            $revenue = $metrics['total_revenue'] > 0 ? $metrics['total_revenue'] : $row->margin_amount;
+            $szAmt = $metrics['szorzo_earned'] > 0 ? $metrics['szorzo_earned'] : $row->szorzo_commission_amount;
+            $invAmt = $metrics['investor_earned'] > 0 ? $metrics['investor_earned'] : $row->investor_commission_amount;
+
             return [
                 $row->invester?->name ?: '-',
                 $row->employee_names ?: ($row->employee?->employee_name ?: '-'),
                 $row->client_names ?: ($row->client?->client ?: '-'),
                 $row->contract_duration,
-                $row->approved_rate_card,
-                $row->employee_ctc,
-                $row->billing_percentage !== null ? $row->billing_percentage : '-',
+                $salary,
+                $salary,
+                $billingPct !== null ? $billingPct : '-',
                 $row->margin_percentage,
                 $row->tds_percentage,
                 $row->tds_amount,
-                $row->margin_amount,
+                $revenue,
                 $row->szorzo_share_percentage,
-                $row->szorzo_commission_amount,
+                $szAmt,
                 $row->investor_share_percentage,
-                $row->investor_commission_amount,
+                $invAmt,
                 $row->status ? 'Active' : 'Inactive',
                 $row->created_at ? $row->created_at->format('Y-m-d') : '-',
             ];

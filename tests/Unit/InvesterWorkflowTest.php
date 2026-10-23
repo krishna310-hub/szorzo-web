@@ -462,6 +462,58 @@ class InvesterWorkflowTest extends TestCase
         $this->assertEquals(35.00, $combinedBilling);
     }
 
+    public function test_contract_report_exact_revenue_and_profit_sharing(): void
+    {
+        // Kavya B from user Image 2:
+        // Monthly Billing Payment: ₹74,100.00 | Billing: 15.00% | Total Salary: ₹74,100.00 | Total Revenue: ₹11,115.00
+        $billing15 = new Billing(['value' => '15.00']);
+        $req = new ClientRequirement(['billing_id' => 1]);
+        $req->setRelation('billing', $billing15);
+
+        $candKavya = new Candidate(['candidate_name' => 'Kavya B', 'email' => 'kavya.basvaraju@gmail.com', 'take_home' => '74100.00']);
+        $candKavya->setRelation('clientRequirement', $req);
+
+        $empKavya = new Employee(['employee_name' => 'Kavya B', 'official_mail' => 'kavya.basvaraju@gmail.com']);
+        $refProp = new \ReflectionProperty(Employee::class, 'cachedMatchingCandidate');
+        $refProp->setValue($empKavya, $candKavya);
+        $refLoaded = new \ReflectionProperty(Employee::class, 'matchingCandidateLoaded');
+        $refLoaded->setValue($empKavya, true);
+
+        $metricsKavya = $empKavya->getContractReportSalary();
+        $this->assertEquals(74100.00, $metricsKavya['salary']);
+        $this->assertEquals(15.00, $metricsKavya['billing_percentage']);
+        $this->assertEquals(11115.00, $metricsKavya['revenue']);
+
+        // Karun Kumar:
+        // Monthly Salary: ₹50,050.00 | Billing: 15.00% | Total Revenue: ₹7,507.50
+        $candKarun = new Candidate(['candidate_name' => 'Karun Kumar', 'email' => 'karun@example.com', 'take_home' => '50050.00']);
+        $candKarun->setRelation('clientRequirement', $req);
+
+        $empKarun = new Employee(['employee_name' => 'Karun Kumar', 'official_mail' => 'karun@example.com']);
+        $refProp->setValue($empKarun, $candKarun);
+        $refLoaded->setValue($empKarun, true);
+
+        $metricsKarun = $empKarun->getContractReportSalary();
+        $this->assertEquals(50050.00, $metricsKarun['salary']);
+        $this->assertEquals(15.00, $metricsKarun['billing_percentage']);
+        $this->assertEquals(7507.50, $metricsKarun['revenue']);
+
+        // When combined in an InvesterDeployment:
+        // Total Spend: 50,050 + 74,100 = 124,150.00
+        // Total Gross Margin (Contract Revenue): 7,507.50 + 11,115.00 = 18,622.50
+        // Investor Share (30%): 18,622.50 * 0.30 = 5,586.75
+        // Szorzo Share (70%): 18,622.50 * 0.70 = 13,035.75
+        $totalSpend = $metricsKavya['salary'] + $metricsKarun['salary'];
+        $totalMargin = $metricsKavya['revenue'] + $metricsKarun['revenue'];
+        $investorEarned = round($totalMargin * 0.30, 2);
+        $szorzoEarned = round($totalMargin * 0.70, 2);
+
+        $this->assertEquals(124150.00, $totalSpend);
+        $this->assertEquals(18622.50, $totalMargin);
+        $this->assertEquals(5586.75, $investorEarned);
+        $this->assertEquals(13035.75, $szorzoEarned);
+    }
+
     public function test_parse_duration_months(): void
     {
         $this->assertEquals(6, \App\Http\Controllers\backend\InvesterDashboardController::parseDurationMonths('6 Months'));

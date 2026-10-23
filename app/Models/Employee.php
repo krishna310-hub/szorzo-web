@@ -847,13 +847,26 @@ class Employee extends Model
             $source = 'Employee Monthly Gross';
         }
 
+        $billingPct = (float) ($this->getClientRequirementBillingPercentage() ?? 0.0);
+        $revenue = round($salary * ($billingPct / 100), 2);
+
         return [
             'salary' => round($salary, 2),
+            'revenue' => $revenue,
+            'billing_percentage' => $billingPct,
             'present_days' => $presentDays,
             'absent_days' => $absentDays,
             'days_in_month' => (int) $month->daysInMonth,
             'source' => $source,
             'report_month' => $reportMonthStr,
         ];
+    }
+
+    /**
+     * Get monthly revenue from Contract Report (salary * billing percentage).
+     */
+    public function getContractReportRevenue(?\Carbon\CarbonInterface $month = null): float
+    {
+        return (float) ($this->getContractReportSalary($month)['revenue'] ?? 0.0);
     }
 }

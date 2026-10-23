@@ -392,10 +392,9 @@
                             <!-- Quick totals -->
                             @php
                                 $activeDeployments = $invester->deployments->where('status', true);
-                                $totalRateCard = $activeDeployments->sum('approved_rate_card');
-                                $totalMargin = $activeDeployments->sum('margin_amount');
-                                $totalSzShare = $activeDeployments->sum('szorzo_commission_amount');
-                                $totalInvShare = $activeDeployments->sum('investor_commission_amount');
+                                $totalMargin = (float) $invester->total_margin_generated;
+                                $totalSzShare = (float) $invester->total_szorzo_earnings;
+                                $totalInvShare = (float) $invester->total_investor_earnings;
                             @endphp
                             <div class="row g-2 mb-3">
                                 <div class="col-md-3">
@@ -480,18 +479,26 @@
                                                         <span class="text-muted">-</span>
                                                     @endif
                                                 </td>
+                                                @php
+                                                    $depMetrics = $dep->getContractReportMetrics();
+                                                    $depSalary = $depMetrics['total_salary'] > 0 ? $depMetrics['total_salary'] : (float) $dep->employee_ctc;
+                                                    $depMargin = $depMetrics['total_revenue'] > 0 ? $depMetrics['total_revenue'] : (float) $dep->margin_amount;
+                                                    $depEffBilling = $depMetrics['effective_billing_percentage'] > 0 ? $depMetrics['effective_billing_percentage'] : (float) $dep->billing_percentage;
+                                                    $depSzAmt = $depMetrics['szorzo_earned'] > 0 ? $depMetrics['szorzo_earned'] : (float) $dep->szorzo_commission_amount;
+                                                    $depInvAmt = $depMetrics['investor_earned'] > 0 ? $depMetrics['investor_earned'] : (float) $dep->investor_commission_amount;
+                                                @endphp
                                                 <td>{{ $dep->contract_duration ?: '-' }}</td>
-                                                <td>₹ {{ number_format((float) $dep->employee_ctc, 2) }}</td>
-                                                <td>{{ number_format((float) $dep->margin_percentage, 2) }}%</td>
+                                                <td>₹ {{ number_format((float) $depSalary, 2) }}</td>
+                                                <td>{{ number_format((float) $depEffBilling, 2) }}%</td>
                                                 <td class="table-warning fw-bold text-dark">
-                                                    ₹ {{ number_format((float) $dep->margin_amount, 2) }}
+                                                    ₹ {{ number_format((float) $depMargin, 2) }}
                                                 </td>
                                                 <td>
                                                     <div class="small">
-                                                        <span class="text-primary fw-semibold">SZ ({{ number_format((float) $dep->szorzo_share_percentage, 0) }}%):</span> ₹ {{ number_format((float) $dep->szorzo_commission_amount, 2) }}
+                                                        <span class="text-primary fw-semibold">SZ ({{ number_format((float) ($dep->szorzo_share_percentage ?: 70), 0) }}%):</span> ₹ {{ number_format((float) $depSzAmt, 2) }}
                                                     </div>
                                                     <div class="small">
-                                                        <span class="text-success fw-semibold">Inv ({{ number_format((float) $dep->investor_share_percentage, 0) }}%):</span> ₹ {{ number_format((float) $dep->investor_commission_amount, 2) }}
+                                                        <span class="text-success fw-semibold">Inv ({{ number_format((float) ($dep->investor_share_percentage ?: 30), 0) }}%):</span> ₹ {{ number_format((float) $depInvAmt, 2) }}
                                                     </div>
                                                 </td>
                                                 <td>

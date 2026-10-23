@@ -92,7 +92,7 @@ class InvesterDashboardController extends Controller
         }
         $allFinancials = $financialsQuery->get();
 
-        // Metrics calculations
+        // Base metrics calculations
         $metrics = [
             'overall_investment' => (float) $allFinancials->sum('investment_amount'),
             'total_deployments' => $activeDeployments->count(),
@@ -123,7 +123,7 @@ class InvesterDashboardController extends Controller
             'total_investor_share' => (float) $activeDeployments->sum('investor_commission_amount'),
         ];
 
-        // Build month-by-month spend, earnings, and balance investment ledger
+        // Build month-by-month spend, earnings, and balance investment ledger directly from Contract Report
         $monthlyLedgerData = $this->buildMonthlyLedger(
             $activeDeployments,
             $allFinancials,
@@ -132,7 +132,20 @@ class InvesterDashboardController extends Controller
             $selectedToDate
         );
 
-        $metrics['monthly_employee_cost'] = (float) $activeDeployments->sum('employee_ctc');
+        $currentMonthRow = $monthlyLedgerData['ledger']->firstWhere('is_current', true) ?: $monthlyLedgerData['ledger']->first();
+
+        // Reconcile top metrics with Contract Report exact calculations
+        if ($currentMonthRow) {
+            $metrics['total_employee_ctc'] = (float) $currentMonthRow['spend'];
+            $metrics['total_rate_card'] = (float) $currentMonthRow['spend'];
+            $metrics['total_margin'] = (float) $currentMonthRow['gross_margin'];
+            $metrics['total_investor_share'] = (float) $currentMonthRow['investor_earned'];
+            $metrics['total_szorzo_share'] = (float) $currentMonthRow['szorzo_earned'];
+            $metrics['monthly_employee_cost'] = (float) $currentMonthRow['spend'];
+        } else {
+            $metrics['monthly_employee_cost'] = (float) $activeDeployments->sum('employee_ctc');
+        }
+
         $metrics['total_spend_to_date'] = $monthlyLedgerData['total_spend_to_date'];
         $metrics['balance_investment'] = $monthlyLedgerData['balance_investment'];
         $metrics['balance_is_negative'] = $monthlyLedgerData['balance_is_negative'];
@@ -407,13 +420,16 @@ class InvesterDashboardController extends Controller
 
                 $assignedEmps = $dep->assigned_employees;
                 $depSpend = 0.0;
+                $depMargin = 0.0;
 
                 if ($assignedEmps->isNotEmpty()) {
                     foreach ($assignedEmps as $emp) {
                         $cand = $emp->getMatchingCandidate();
                         $candSalary = 0.0;
+                        $candBillingPct = 0.0;
 
                         if ($cand) {
+                            $candBillingPct = (float) ($cand->clientRequirement?->billing?->value ?? $cand->client?->billing?->value ?? 0.0);
                             $lookupKey = $cand->id . '_' . $monthKey;
                             if (isset($reportsByCandAndMonth[$lookupKey])) {
                                 $report = $reportsByCandAndMonth[$lookupKey]->first();
@@ -421,35 +437,50 @@ class InvesterDashboardController extends Controller
                             }
                         }
 
+                        if ($candBillingPct <= 0) {
+                            $candBillingPct = (float) ($emp->getClientRequirementBillingPercentage() ?? 15.0);
+                        }
+
                         if ($candSalary <= 0) {
                             $salData = $emp->getContractReportSalary($monthCursor);
                             $candSalary = (float) $salData['salary'];
+                            $candBillingPct = (float) ($salData['billing_percentage'] ?? $candBillingPct);
                         }
 
                         if ($candSalary <= 0 && $dep->employee_ctc > 0) {
                             $candSalary = round((float) $dep->employee_ctc / $assignedEmps->count(), 2);
                         }
 
+                        // Contract Revenue formula from ContractReport: Total Salary * Billing %
+                        $candRevenue = round($candSalary * ($candBillingPct / 100), 2);
+
                         $depSpend += $candSalary;
+                        $depMargin += $candRevenue;
+
                         $monthEmployees->push([
                             'id' => $emp->id,
                             'name' => $emp->employee_name,
                             'salary' => $candSalary,
+                            'billing_percentage' => $candBillingPct,
+                            'revenue' => $candRevenue,
                         ]);
                     }
                 } else {
                     $depSpend = (float) $dep->employee_ctc;
+                    $marginPct = (float) ($dep->margin_percentage ?: 15.0);
+                    $depMargin = (float) $dep->margin_amount > 0 ? (float) $dep->margin_amount : round($depSpend * ($marginPct / 100), 2);
                 }
 
                 if ($depSpend <= 0 && (float) $dep->employee_ctc > 0) {
                     $depSpend = (float) $dep->employee_ctc;
                 }
+                if ($depMargin <= 0 && (float) $dep->margin_amount > 0) {
+                    $depMargin = (float) $dep->margin_amount;
+                }
 
-                $marginPct = (float) ($dep->margin_percentage ?: 15.0);
                 $szPct = (float) ($dep->szorzo_share_percentage ?: 70.0);
                 $invPct = (float) ($dep->investor_share_percentage ?: 30.0);
 
-                $depMargin = round($depSpend * ($marginPct / 100), 2);
                 $depInvEarned = round($depMargin * ($invPct / 100), 2);
                 $depSzEarned = round($depMargin * ($szPct / 100), 2);
 

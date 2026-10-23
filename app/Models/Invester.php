@@ -218,27 +218,36 @@ class Invester extends Model
     }
 
     /**
-     * Total Gross Margin Generated across active deployments.
+     * Total Gross Margin Generated across active deployments (from Contract Report).
      */
     public function getTotalMarginGeneratedAttribute(): float
     {
-        return (float) $this->deployments()->where('status', true)->sum('margin_amount');
+        return (float) $this->deployments()->where('status', true)->get()->sum(function ($d) {
+            $m = $d->getContractReportMetrics();
+            return $m['total_revenue'] > 0 ? $m['total_revenue'] : (float) $d->margin_amount;
+        });
     }
 
     /**
-     * Total Investor Commission Earnings (e.g. 30% share).
+     * Total Investor Commission Earnings (e.g. 30% share from Contract Report).
      */
     public function getTotalInvestorEarningsAttribute(): float
     {
-        return (float) $this->deployments()->where('status', true)->sum('investor_commission_amount');
+        return (float) $this->deployments()->where('status', true)->get()->sum(function ($d) {
+            $m = $d->getContractReportMetrics();
+            return $m['investor_earned'] > 0 ? $m['investor_earned'] : (float) $d->investor_commission_amount;
+        });
     }
 
     /**
-     * Total Szorzo Commission Earnings (e.g. 70% share).
+     * Total Szorzo Commission Earnings (e.g. 70% share from Contract Report).
      */
     public function getTotalSzorzoEarningsAttribute(): float
     {
-        return (float) $this->deployments()->where('status', true)->sum('szorzo_commission_amount');
+        return (float) $this->deployments()->where('status', true)->get()->sum(function ($d) {
+            $m = $d->getContractReportMetrics();
+            return $m['szorzo_earned'] > 0 ? $m['szorzo_earned'] : (float) $d->szorzo_commission_amount;
+        });
     }
 
     /**

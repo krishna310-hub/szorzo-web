@@ -50,6 +50,7 @@
             'contract_from' => $durInfo['from_date'] ?? null,
             'contract_to' => $durInfo['to_date'] ?? null,
             'billing_percentage' => $billingPct,
+            'revenue' => (float) ($salaryData['revenue'] ?? round($salary * (($billingPct ?? 15.0) / 100), 2)),
             'salary_formatted' => number_format($salary, 2),
             'label' => $emp->employee_name . ' (' . $no . ($emp->designation ? ' - ' . $emp->designation : '') . ')' . ($salary > 0 ? ' - ₹' . number_format($salary, 2) . '/mo' : '') . $billingLabel . $durLabel . ($emp->client ? ' [' . $emp->client->client . ']' : ''),
         ];
@@ -516,34 +517,46 @@
             employeeCtcInput.value = totalSalary > 0 ? totalSalary.toFixed(2) : '';
         }
 
-        // Aggregate Client Requirement Billing % from selected employees (Plus all selected employees' client requirement billing)
-        const billingPercentages = selectedEmployees
-            .map(e => parseFloat(e.billing_percentage) || 0)
-            .filter(v => v > 0);
-        const totalBilling = billingPercentages.length > 0
-            ? Math.round(billingPercentages.reduce((a, b) => a + b, 0) * 100) / 100
+        // Aggregate Contract Revenue from selected employees directly from Contract Report (salary * billing %)
+        let totalRevenue = 0;
+        selectedEmployees.forEach(e => {
+            const sal = Number(e.salary !== undefined ? e.salary : e.ctc) || 0;
+            const bp = parseFloat(e.billing_percentage) || 0;
+            const rev = Number(e.revenue !== undefined ? e.revenue : Math.round(sal * (bp / 100) * 100) / 100) || 0;
+            totalRevenue += rev;
+        });
+        totalRevenue = Math.round(totalRevenue * 100) / 100;
+
+        // Effective Billing % = (Total Revenue / Total Salary) * 100
+        const effectiveBilling = totalSalary > 0 
+            ? Math.round((totalRevenue / totalSalary) * 10000) / 100 
             : 0;
 
         if (billingPctInput && !billingPctInput.dataset.manuallyEdited) {
-            billingPctInput.value = totalBilling > 0 ? totalBilling.toFixed(2) : '';
+            billingPctInput.value = effectiveBilling > 0 ? effectiveBilling.toFixed(2) : '';
         }
 
         if (marginPctInput && (!marginPctInput.dataset.manuallyEdited || parseFloat(marginPctInput.value) === 0)) {
-            marginPctInput.value = totalBilling > 0 ? totalBilling.toFixed(2) : '';
+            marginPctInput.value = effectiveBilling > 0 ? effectiveBilling.toFixed(2) : '';
+        }
+
+        // Auto-update Margin In Rupees from Contract Report Total Revenue
+        if (marginAmtInput && !marginAmtInput.dataset.manuallyEdited) {
+            marginAmtInput.value = totalRevenue > 0 ? totalRevenue.toFixed(2) : '';
         }
 
         if (employeeBillingSumBadge) {
-            if (totalBilling > 0) {
+            if (totalRevenue > 0) {
                 employeeBillingSumBadge.style.display = 'inline-block';
-                employeeBillingSumBadge.innerHTML = '<i class="ri-percent-line me-1"></i> Billing Total: ' + totalBilling.toFixed(2) + '%';
+                employeeBillingSumBadge.innerHTML = '<i class="ri-money-rupee-circle-line me-1"></i> Contract Revenue: ' + formatCurrency(totalRevenue) + ' (' + effectiveBilling.toFixed(2) + '%)';
             } else {
                 employeeBillingSumBadge.style.display = 'none';
             }
         }
 
         if (employeeBillingDetailBadge) {
-            if (totalBilling > 0) {
-                employeeBillingDetailBadge.textContent = 'Req Billing: ' + totalBilling.toFixed(2) + '%';
+            if (totalRevenue > 0) {
+                employeeBillingDetailBadge.textContent = 'Revenue: ' + formatCurrency(totalRevenue);
             } else {
                 employeeBillingDetailBadge.textContent = '';
             }
@@ -552,12 +565,14 @@
         if (billingHint) {
             if (selectedEmployees.length > 0) {
                 const details = selectedEmployees.map(e => {
+                    const sal = Number(e.salary !== undefined ? e.salary : e.ctc) || 0;
                     const bp = parseFloat(e.billing_percentage) || 0;
-                    return e.name + ': ' + (bp > 0 ? (bp.toFixed(2) + '%') : 'No req billing');
+                    const rev = Number(e.revenue !== undefined ? e.revenue : Math.round(sal * (bp / 100) * 100) / 100) || 0;
+                    return e.name + ': ₹' + Number(sal).toLocaleString('en-IN') + ' × ' + bp.toFixed(1) + '% = ₹' + Number(rev).toLocaleString('en-IN');
                 }).join(', ');
-                billingHint.innerHTML = '<i class="ri-calculator-line text-primary me-1"></i> Employee Req Billing: ' + details + (totalBilling > 0 ? (' = <strong>' + totalBilling.toFixed(2) + '%</strong>') : '');
+                billingHint.innerHTML = '<i class="ri-calculator-line text-primary me-1"></i> <strong>Contract Report Revenue:</strong> ' + details + ' = <strong class="text-success">₹' + totalRevenue.toLocaleString('en-IN') + ' (' + effectiveBilling.toFixed(2) + '%)</strong>';
             } else {
-                billingHint.textContent = 'Sum of billing % from selected employee(s) mapped client requirements';
+                billingHint.textContent = 'Auto-fetched revenue & billing % from selected employee(s) mapped client requirements in Contract Report';
             }
         }
 
