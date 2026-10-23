@@ -139,11 +139,17 @@ class InvesterDashboardController extends Controller
             $metrics['total_employee_ctc'] = (float) $currentMonthRow['spend'];
             $metrics['total_rate_card'] = (float) $currentMonthRow['spend'];
             $metrics['total_margin'] = (float) $currentMonthRow['gross_margin'];
+            $metrics['total_tds'] = (float) ($currentMonthRow['tds'] ?? 0);
+            $metrics['total_tds_percentage'] = (float) ($currentMonthRow['tds_percentage'] ?? 10.0);
+            $metrics['total_net_margin'] = (float) ($currentMonthRow['net_margin'] ?? 0);
             $metrics['total_investor_share'] = (float) $currentMonthRow['investor_earned'];
             $metrics['total_szorzo_share'] = (float) $currentMonthRow['szorzo_earned'];
             $metrics['monthly_employee_cost'] = (float) $currentMonthRow['spend'];
         } else {
             $metrics['monthly_employee_cost'] = (float) $activeDeployments->sum('employee_ctc');
+            $metrics['total_tds'] = 0.0;
+            $metrics['total_tds_percentage'] = 10.0;
+            $metrics['total_net_margin'] = 0.0;
         }
 
         $metrics['total_spend_to_date'] = $monthlyLedgerData['total_spend_to_date'];
@@ -399,6 +405,8 @@ class InvesterDashboardController extends Controller
 
             $monthSpend = 0.0;
             $monthMargin = 0.0;
+            $monthTds = 0.0;
+            $monthNetMargin = 0.0;
             $monthInvestorEarned = 0.0;
             $monthSzorzoEarned = 0.0;
             $monthEmployees = collect();
@@ -480,12 +488,21 @@ class InvesterDashboardController extends Controller
 
                 $szPct = (float) ($dep->szorzo_share_percentage ?: 70.0);
                 $invPct = (float) ($dep->investor_share_percentage ?: 30.0);
+                $tdsPct = isset($dep->tds_percentage) && $dep->tds_percentage !== null && $dep->tds_percentage !== ''
+                    ? (float) $dep->tds_percentage
+                    : 10.0;
 
-                $depInvEarned = round($depMargin * ($invPct / 100), 2);
-                $depSzEarned = round($depMargin * ($szPct / 100), 2);
+                // Deduct TDS from Gross Margin (less TDS)
+                $depTds = round($depMargin * ($tdsPct / 100), 2);
+                $depNetMargin = max(0.0, round($depMargin - $depTds, 2));
+
+                $depInvEarned = round($depNetMargin * ($invPct / 100), 2);
+                $depSzEarned = round($depNetMargin * ($szPct / 100), 2);
 
                 $monthSpend += $depSpend;
                 $monthMargin += $depMargin;
+                $monthTds += $depTds;
+                $monthNetMargin += $depNetMargin;
                 $monthInvestorEarned += $depInvEarned;
                 $monthSzorzoEarned += $depSzEarned;
             }
@@ -516,6 +533,9 @@ class InvesterDashboardController extends Controller
                 'employees_detail' => $monthEmployees->unique('id')->values()->all(),
                 'spend' => $monthSpend,
                 'gross_margin' => $monthMargin,
+                'tds_percentage' => $monthMargin > 0 ? round(($monthTds / $monthMargin) * 100, 2) : 10.0,
+                'tds' => $monthTds,
+                'net_margin' => $monthNetMargin,
                 'investor_earned' => $monthInvestorEarned,
                 'szorzo_earned' => $monthSzorzoEarned,
                 'cumulative_spend' => $cumulativeSpend,

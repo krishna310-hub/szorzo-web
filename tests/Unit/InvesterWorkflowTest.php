@@ -92,11 +92,15 @@ class InvesterWorkflowTest extends TestCase
         // Margin in Rupees = 200000 * 15% = 30000
         $this->assertEquals(30000.00, (float) $deployment->margin_amount);
 
-        // SZ Share (70%) = 30000 * 70% = 21000
-        $this->assertEquals(21000.00, (float) $deployment->szorzo_commission_amount);
+        // TDS amount = 30000 * 10% = 3000
+        $this->assertEquals(3000.00, (float) $deployment->tds_amount);
 
-        // Investor Share (30%) = 30000 * 30% = 9000
-        $this->assertEquals(9000.00, (float) $deployment->investor_commission_amount);
+        // Net margin after TDS = 30000 - 3000 = 27000
+        // SZ Share (70%) = 27000 * 70% = 18900
+        $this->assertEquals(18900.00, (float) $deployment->szorzo_commission_amount);
+
+        // Investor Share (30%) = 27000 * 30% = 8100
+        $this->assertEquals(8100.00, (float) $deployment->investor_commission_amount);
     }
 
     public function test_invester_deployment_policy_structure(): void
@@ -185,18 +189,18 @@ class InvesterWorkflowTest extends TestCase
 
         $deployment->computeCommissions();
 
-        // Base (Employee CTC): 250000
-        // TDS amount = 250000 * 10% = 25000
-        $this->assertEquals(25000.00, (float) $deployment->tds_amount);
-
         // Margin In Rupees = 250000 * 8.33% = 20825.00
         $this->assertEquals(20825.00, (float) $deployment->margin_amount);
 
-        // SZ Share (70%) = 20825 * 0.70 = 14577.50
-        $this->assertEquals(14577.50, (float) $deployment->szorzo_commission_amount);
+        // TDS amount (less TDS from Margin In Rupees) = 20825 * 10% = 2082.50
+        $this->assertEquals(2082.50, (float) $deployment->tds_amount);
 
-        // Investor Share (30%) = 20825 * 0.30 = 6247.50
-        $this->assertEquals(6247.50, (float) $deployment->investor_commission_amount);
+        // Net Margin after TDS = 20825 - 2082.50 = 18742.50
+        // SZ Share (70%) = 18742.50 * 0.70 = 13119.75
+        $this->assertEquals(13119.75, (float) $deployment->szorzo_commission_amount);
+
+        // Investor Share (30%) = 18742.50 * 0.30 = 5622.75
+        $this->assertEquals(5622.75, (float) $deployment->investor_commission_amount);
 
         // JSON array serialization
         $this->assertSame([10, 12], $deployment->client_ids);
@@ -501,17 +505,23 @@ class InvesterWorkflowTest extends TestCase
         // When combined in an InvesterDeployment:
         // Total Spend: 50,050 + 74,100 = 124,150.00
         // Total Gross Margin (Contract Revenue): 7,507.50 + 11,115.00 = 18,622.50
-        // Investor Share (30%): 18,622.50 * 0.30 = 5,586.75
-        // Szorzo Share (70%): 18,622.50 * 0.70 = 13,035.75
+        // Less TDS (10% standard): 18,622.50 * 10% = 1,862.25
+        // Net Distributable Margin: 18,622.50 - 1,862.25 = 16,760.25
+        // Investor Share (30%): 16,760.25 * 0.30 = 5,028.08
+        // Szorzo Share (70%): 16,760.25 * 0.70 = 11,732.18
         $totalSpend = $metricsKavya['salary'] + $metricsKarun['salary'];
         $totalMargin = $metricsKavya['revenue'] + $metricsKarun['revenue'];
-        $investorEarned = round($totalMargin * 0.30, 2);
-        $szorzoEarned = round($totalMargin * 0.70, 2);
+        $tdsAmount = round($totalMargin * 0.10, 2);
+        $netMargin = max(0.0, round($totalMargin - $tdsAmount, 2));
+        $investorEarned = round($netMargin * 0.30, 2);
+        $szorzoEarned = round($netMargin * 0.70, 2);
 
         $this->assertEquals(124150.00, $totalSpend);
         $this->assertEquals(18622.50, $totalMargin);
-        $this->assertEquals(5586.75, $investorEarned);
-        $this->assertEquals(13035.75, $szorzoEarned);
+        $this->assertEquals(1862.25, $tdsAmount);
+        $this->assertEquals(16760.25, $netMargin);
+        $this->assertEquals(5028.08, $investorEarned);
+        $this->assertEquals(11732.18, $szorzoEarned);
     }
 
     public function test_parse_duration_months(): void

@@ -295,7 +295,7 @@
                                 value="{{ old('tds_amount', isset($deployment) && $deployment->tds_amount !== null ? (float)$deployment->tds_amount : '') }}" 
                                 placeholder="Auto-calculated" readonly>
                         </div>
-                        <small class="text-muted">Gross TDS: Employee CTC × TDS %</small>
+                        <small class="text-muted">TDS Deduction: Margin In Rupees × TDS % (less TDS before profit split)</small>
                         @error('tds_amount')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -335,7 +335,7 @@
                         <h6 class="fw-bold text-dark mb-1">
                             <i class="ri-pie-chart-2-line me-1 text-primary"></i> Profit Sharing Model
                         </h6>
-                        <small class="text-muted">Commissions split dynamically between Szorzo (SZ) and Investor</small>
+                        <small class="text-muted">Commissions split dynamically between Szorzo (SZ 70%) and Investor (30%) after TDS deduction</small>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -350,7 +350,7 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                <span class="text-muted small">SZ Commission Amount:</span>
+                                <span class="text-muted small">SZ Commission (70% after TDS):</span>
                                 <span class="fw-bold text-primary fs-5" id="sz_calc_display">₹ 0.00</span>
                             </div>
                         </div>
@@ -368,7 +368,7 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                <span class="text-muted small">Investor Commission Amount:</span>
+                                <span class="text-muted small">Investor Commission (30% after TDS):</span>
                                 <span class="fw-bold text-success fs-5" id="inv_calc_display">₹ 0.00</span>
                             </div>
                         </div>
@@ -724,15 +724,18 @@
         const tdsPct = parseFloat(tdsPctInput?.value) || 10;
 
         // Auto calculate Margin In Rupees
-        const marginAmt = Math.round(employeeCtc * (marginPct / 100) * 100) / 100;
-        if (marginAmtInput) {
-            marginAmtInput.value = marginAmt > 0 ? marginAmt.toFixed(2) : (employeeCtc > 0 ? '0.00' : '');
+        let marginAmt = parseFloat(marginAmtInput?.value) || 0;
+        if (!marginAmtInput?.dataset.manuallyEdited && employeeCtc > 0 && marginPct > 0) {
+            marginAmt = Math.round(employeeCtc * (marginPct / 100) * 100) / 100;
+            if (marginAmtInput) {
+                marginAmtInput.value = marginAmt > 0 ? marginAmt.toFixed(2) : '0.00';
+            }
         }
 
-        // Auto calculate TDS Deduction Amount
-        const tdsAmt = Math.round(employeeCtc * (tdsPct / 100) * 100) / 100;
+        // Auto calculate TDS Deduction Amount on Margin In Rupees (less TDS)
+        const tdsAmt = Math.round(marginAmt * (tdsPct / 100) * 100) / 100;
         if (tdsAmtInput) {
-            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (employeeCtc > 0 ? '0.00' : '');
+            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (marginAmt > 0 ? '0.00' : '');
         }
 
         recalculateSplits();
@@ -752,10 +755,10 @@
             }
         }
 
-        // TDS amount
-        const tdsAmt = Math.round(employeeCtc * (tdsPct / 100) * 100) / 100;
+        // TDS amount on Margin In Rupees (less TDS)
+        const tdsAmt = Math.round(marginAmt * (tdsPct / 100) * 100) / 100;
         if (tdsAmtInput) {
-            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (employeeCtc > 0 ? '0.00' : '');
+            tdsAmtInput.value = tdsAmt > 0 ? tdsAmt.toFixed(2) : (marginAmt > 0 ? '0.00' : '');
         }
 
         recalculateSplits();
@@ -763,11 +766,15 @@
 
     function recalculateSplits() {
         const marginAmt = parseFloat(marginAmtInput?.value) || 0;
+        const tdsPct = parseFloat(tdsPctInput?.value) || 10;
+        const tdsAmt = parseFloat(tdsAmtInput?.value) || (Math.round(marginAmt * (tdsPct / 100) * 100) / 100);
+        const netMargin = Math.max(0, Math.round((marginAmt - tdsAmt) * 100) / 100);
+
         const szPct = parseFloat(szPctInput?.value) || 70;
         const invPct = parseFloat(invPctInput?.value) || 30;
 
-        const szAmt = Math.round(marginAmt * (szPct / 100) * 100) / 100;
-        const invAmt = Math.round(marginAmt * (invPct / 100) * 100) / 100;
+        const szAmt = Math.round(netMargin * (szPct / 100) * 100) / 100;
+        const invAmt = Math.round(netMargin * (invPct / 100) * 100) / 100;
 
         if (szDisplay) szDisplay.textContent = formatCurrency(szAmt);
         if (invDisplay) invDisplay.textContent = formatCurrency(invAmt);

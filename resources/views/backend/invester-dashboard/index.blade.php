@@ -330,7 +330,9 @@
                                 <div>
                                     <span class="text-dark text-uppercase fw-bold fs-11">Margin In Rupees</span>
                                     <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['total_margin'], 2) }}</h3>
-                                    <small class="text-dark-50 mt-1 d-block">Monthly Total Margin</small>
+                                    <small class="text-dark-50 mt-1 d-block">
+                                        Less TDS: -₹ {{ number_format($metrics['total_tds'] ?? 0, 2) }} &bull; Net: ₹ {{ number_format($metrics['total_net_margin'] ?? ($metrics['total_margin'] - ($metrics['total_tds'] ?? 0)), 2) }}
+                                    </small>
                                 </div>
                                 <div class="inv-stat-icon bg-white text-dark shadow-sm">
                                     <i class="ri-money-rupee-circle-fill"></i>
@@ -348,7 +350,7 @@
                                 <div>
                                     <span class="text-success text-uppercase fw-bold fs-11">Investor Share (30%)</span>
                                     <h3 class="fw-bold text-success mt-2 mb-0">₹ {{ number_format($metrics['total_investor_share'], 2) }}</h3>
-                                    <small class="text-muted mt-1 d-block">SZ Share (70%): ₹ {{ number_format($metrics['total_szorzo_share'], 2) }}</small>
+                                    <small class="text-muted mt-1 d-block">SZ Share (70%): ₹ {{ number_format($metrics['total_szorzo_share'], 2) }} (after TDS)</small>
                                 </div>
                                 <div class="inv-stat-icon bg-success text-white shadow-sm">
                                     <i class="ri-hand-coin-line"></i>
@@ -366,7 +368,7 @@
                         <div class="card-body p-3">
                             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
                                 <h6 class="mb-0 fw-bold"><i class="ri-pie-chart-2-line text-primary me-1"></i> Profit Sharing Model Split (Monthly)</h6>
-                                <span class="badge bg-secondary-subtle text-secondary fs-12">Based on Contract Report Revenue</span>
+                                <span class="badge bg-secondary-subtle text-secondary fs-12">Split 70% / 30% after TDS deduction</span>
                             </div>
                             @php
                                 $totalComms = $metrics['total_szorzo_share'] + $metrics['total_investor_share'];
@@ -461,11 +463,14 @@
                                                     <span class="fw-bold text-dark">₹ {{ number_format($row['spend'], 2) }}</span>
                                                 </td>
                                                 <td>
-                                                    <span class="text-dark">₹ {{ number_format($row['gross_margin'], 2) }}</span>
-                                                    <small class="text-muted d-block fs-11">SZ: ₹ {{ number_format($row['szorzo_earned'], 2) }}</small>
+                                                    <span class="text-dark fw-bold">₹ {{ number_format($row['gross_margin'], 2) }}</span>
+                                                    <small class="text-danger d-block fs-11">Less TDS ({{ number_format($row['tds_percentage'] ?? 10, 1) }}%): -₹ {{ number_format($row['tds'] ?? 0, 2) }}</small>
+                                                    <small class="text-muted d-block fs-11">Net: ₹ {{ number_format($row['net_margin'] ?? ($row['gross_margin'] - ($row['tds'] ?? 0)), 2) }}</small>
+                                                    <small class="text-primary d-block fs-11 mt-1">SZ (70%): ₹ {{ number_format($row['szorzo_earned'], 2) }}</small>
                                                 </td>
                                                 <td>
                                                     <span class="fw-bold text-success fs-6">₹ {{ number_format($row['investor_earned'], 2) }}</span>
+                                                    <small class="text-muted d-block fs-11">30% after TDS</small>
                                                 </td>
                                                 <td>
                                                     <span class="fw-semibold text-dark">₹ {{ number_format($row['cumulative_spend'], 2) }}</span>

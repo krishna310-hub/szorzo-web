@@ -96,10 +96,13 @@ class InvesterDeploymentController extends Controller
                 ->addColumn('margin_in_rupees', function ($row) {
                     $metrics = $row->getContractReportMetrics();
                     $marginAmt = $metrics['total_revenue'] > 0 ? $metrics['total_revenue'] : (float) $row->margin_amount;
+                    $tdsPct = (float) ($metrics['tds_percentage'] ?? ($row->tds_percentage ?: 10.0));
+                    $tdsAmt = (float) ($metrics['tds_amount'] ?? ($row->tds_amount > 0 ? $row->tds_amount : round($marginAmt * ($tdsPct / 100), 2)));
+                    $netMargin = max(0.0, round($marginAmt - $tdsAmt, 2));
+
                     $html = '<span class="badge bg-warning text-dark fs-12 fw-bold">₹ ' . number_format((float) $marginAmt, 2) . '</span>';
-                    if ($row->tds_amount > 0) {
-                        $html .= '<br><small class="text-muted">TDS (' . (float) $row->tds_percentage . '%): ₹' . number_format((float) $row->tds_amount, 2) . '</small>';
-                    }
+                    $html .= '<br><small class="text-danger">Less TDS (' . $tdsPct . '%): -₹' . number_format($tdsAmt, 2) . '</small>';
+                    $html .= '<br><small class="text-muted fw-semibold">Net: ₹' . number_format($netMargin, 2) . '</small>';
                     return $html;
                 })
                 ->addColumn('commission_split', function ($row) {
@@ -400,12 +403,13 @@ class InvesterDeploymentController extends Controller
         $data['szorzo_share_percentage'] = isset($data['szorzo_share_percentage']) && $data['szorzo_share_percentage'] !== '' ? (float) $data['szorzo_share_percentage'] : 70.0;
         $data['investor_share_percentage'] = 100.0 - $data['szorzo_share_percentage'];
 
-        // TDS deduction calculation on base (Employee CTC)
-        $data['tds_amount'] = round($base * ($data['tds_percentage'] / 100), 2);
+        // TDS deduction calculation on Margin Amount (Contract Report revenue less TDS)
+        $data['tds_amount'] = round((float) $data['margin_amount'] * ($data['tds_percentage'] / 100), 2);
+        $netMargin = max(0.0, round((float) $data['margin_amount'] - $data['tds_amount'], 2));
 
-        // Commission amounts on Margin Amount (Contract Report revenue)
-        $data['szorzo_commission_amount'] = round($data['margin_amount'] * ($data['szorzo_share_percentage'] / 100), 2);
-        $data['investor_commission_amount'] = round($data['margin_amount'] * ($data['investor_share_percentage'] / 100), 2);
+        // Commission amounts on Net Margin after TDS: SZ 70% / Investor 30%
+        $data['szorzo_commission_amount'] = round($netMargin * ($data['szorzo_share_percentage'] / 100), 2);
+        $data['investor_commission_amount'] = round($netMargin * ($data['investor_share_percentage'] / 100), 2);
         $data['status'] = (bool) $data['status'];
 
         return $data;

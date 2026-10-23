@@ -492,6 +492,8 @@
                                                 <td>{{ number_format((float) $depEffBilling, 2) }}%</td>
                                                 <td class="table-warning fw-bold text-dark">
                                                     ₹ {{ number_format((float) $depMargin, 2) }}
+                                                    <small class="text-danger d-block fs-11">Less TDS ({{ (float)($depMetrics['tds_percentage'] ?? ($dep->tds_percentage ?: 10)) }}%): -₹ {{ number_format((float)($depMetrics['tds_amount'] ?? 0), 2) }}</small>
+                                                    <small class="text-muted d-block fs-11">Net: ₹ {{ number_format((float)($depMetrics['net_revenue'] ?? ($depMargin - ($depMetrics['tds_amount'] ?? 0))), 2) }}</small>
                                                 </td>
                                                 <td>
                                                     <div class="small">

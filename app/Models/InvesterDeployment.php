@@ -137,8 +137,9 @@ class InvesterDeployment extends Model
             ? (float) $this->investor_share_percentage
             : 30.0;
 
-        // Calculate TDS amount on base (Employee CTC * TDS %)
-        $this->tds_amount = round($baseAmount * ($tdsPct / 100), 2);
+        // Calculate TDS amount on Margin Amount (less TDS)
+        $this->tds_amount = round($marginAmt * ($tdsPct / 100), 2);
+        $netMargin = max(0.0, round($marginAmt - (float) $this->tds_amount, 2));
 
         // Ensure Profit sharing percentages sum up logically (default 70% SZ / 30% Investor)
         if ($szPct + $invPct !== 100.0 && $szPct > 0) {
@@ -146,9 +147,9 @@ class InvesterDeployment extends Model
             $this->investor_share_percentage = $invPct;
         }
 
-        // Calculate commissions on Gross Margin
-        $this->szorzo_commission_amount = round($marginAmt * ($szPct / 100), 2);
-        $this->investor_commission_amount = round($marginAmt * ($invPct / 100), 2);
+        // Calculate commissions after less TDS: SZ 70% / Investor 30%
+        $this->szorzo_commission_amount = round($netMargin * ($szPct / 100), 2);
+        $this->investor_commission_amount = round($netMargin * ($invPct / 100), 2);
     }
 
     /**
@@ -197,13 +198,22 @@ class InvesterDeployment extends Model
 
         $invPct = (float) ($this->investor_share_percentage ?: 30.0);
         $szPct = (float) ($this->szorzo_share_percentage ?: 70.0);
+        $tdsPct = isset($this->tds_percentage) && $this->tds_percentage !== null && $this->tds_percentage !== ''
+            ? (float) $this->tds_percentage
+            : 10.0;
 
-        $investorEarned = round($totalRevenue * ($invPct / 100), 2);
-        $szorzoEarned = round($totalRevenue * ($szPct / 100), 2);
+        $tdsAmount = round($totalRevenue * ($tdsPct / 100), 2);
+        $netRevenue = max(0.0, round($totalRevenue - $tdsAmount, 2));
+
+        $investorEarned = round($netRevenue * ($invPct / 100), 2);
+        $szorzoEarned = round($netRevenue * ($szPct / 100), 2);
 
         return [
             'total_salary' => round($totalSalary, 2),
             'total_revenue' => round($totalRevenue, 2),
+            'tds_percentage' => $tdsPct,
+            'tds_amount' => $tdsAmount,
+            'net_revenue' => $netRevenue,
             'investor_earned' => $investorEarned,
             'szorzo_earned' => $szorzoEarned,
             'effective_billing_percentage' => $totalSalary > 0 ? round(($totalRevenue / $totalSalary) * 100, 2) : 0.0,
