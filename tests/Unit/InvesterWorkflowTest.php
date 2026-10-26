@@ -612,5 +612,31 @@ class InvesterWorkflowTest extends TestCase
         $this->assertStringContainsString("Sections hidden per user request: Investors Performance Breakdown", $dashboardContent);
         $this->assertStringContainsString("@if(false)", $dashboardContent);
     }
+
+    public function test_investor_login_dashboard_removes_start_time_without_error(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+
+        // 1. Verify attendance navbar widget blade suppresses start time for investor and investor dashboard
+        $widgetContent = file_get_contents($baseDir . '/resources/views/backend/layouts/attendance-navbar-widget.blade.php');
+        $this->assertStringContainsString('$isInvestorUser = $user && ($user->isInvestor() || (int) $user->role_id === 6);', $widgetContent);
+        $this->assertStringContainsString('$isInvestorDashboard = request()->routeIs(\'admin.investers.*\')', $widgetContent);
+        $this->assertStringContainsString('$showPersonalTimer = $user && !$isSuperAdmin && !$isInvestorContext;', $widgetContent);
+        $this->assertStringContainsString('@if($showPersonalTimer || $isAdmin)', $widgetContent);
+        $this->assertStringContainsString('if (!isPersonalTimerActive) return;', $widgetContent);
+
+        // 2. Verify AttendanceTimerController has investor checks
+        $userInvestor = new \App\Models\User(['name' => 'Test Investor', 'role_id' => 6]);
+        $this->assertTrue($userInvestor->isInvestor());
+
+        $controller = new \App\Http\Controllers\backend\AttendanceTimerController();
+        $refMethod = new \ReflectionMethod($controller, 'isInvestorUser');
+        $refMethod->setAccessible(true);
+        $this->assertTrue($refMethod->invoke($controller, $userInvestor));
+
+        $adminCheck = new \ReflectionMethod($controller, 'isAdminUser');
+        $adminCheck->setAccessible(true);
+        $this->assertFalse($adminCheck->invoke($controller, $userInvestor));
+    }
 }
 

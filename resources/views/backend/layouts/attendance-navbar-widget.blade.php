@@ -4,13 +4,20 @@
         $user->id === 1 ||
         ($user->role && str_contains(strtolower(str_replace('_', '-', (string)$user->role->access_level)), 'super-admin'))
     );
-    $isAdmin = auth()->check() && (
+    $isInvestorUser = $user && ($user->isInvestor() || (int) $user->role_id === 6);
+    $isInvestorDashboard = request()->routeIs('admin.investers.*')
+        || request()->is('admin/investers*')
+        || request()->is('investers*');
+    $isInvestorContext = $isInvestorUser || $isInvestorDashboard;
+
+    $isAdmin = auth()->check() && !$isInvestorUser && (
         $isSuperAdmin ||
         auth()->user()->can('edit', \App\Models\Attendance::class) ||
         auth()->user()->can('create', \App\Models\Attendance::class)
     );
-    // Personal timer is only shown for other roles (NOT Super Admin)
-    $showPersonalTimer = $user && !$isSuperAdmin;
+    // Personal timer (start time & working clock) is only shown for internal staff/employee roles
+    // NOT Super Admin, NOT Investor, and NOT on Investor Login Dashboard
+    $showPersonalTimer = $user && !$isSuperAdmin && !$isInvestorContext;
 
     $todayAtt = $showPersonalTimer ? $user->todayAttendance() : null;
     $initialTimerStatus = $todayAtt?->timer_status ?? 'not_started';
@@ -50,6 +57,7 @@
     }
 @endphp
 
+@if($showPersonalTimer || $isAdmin)
 <!-- Attendance Navbar Widget -->
 <div class="header-item d-flex align-items-center ms-1 ms-md-2" id="attendance-navbar-widget">
     <style>
@@ -250,6 +258,7 @@
         </button>
     @endif
 </div>
+@endif
 
 <!-- Admin Employee Attendance Management Modal -->
 @if($isAdmin)
@@ -595,18 +604,22 @@ window.attendanceTimer = (function() {
 
     // Public User Actions
     function start() {
+        if (!isPersonalTimerActive) return;
         sendAction("{{ route('admin.attendance.timer.start') }}");
     }
 
     function pause(type = 'break') {
+        if (!isPersonalTimerActive) return;
         sendAction("{{ route('admin.attendance.timer.pause') }}", { type });
     }
 
     function resume() {
+        if (!isPersonalTimerActive) return;
         sendAction("{{ route('admin.attendance.timer.resume') }}");
     }
 
     function stopDay() {
+        if (!isPersonalTimerActive) return;
         if (confirm("Are you sure you want to end today's attendance (Clock Out)?")) {
             sendAction("{{ route('admin.attendance.timer.stop') }}");
         }

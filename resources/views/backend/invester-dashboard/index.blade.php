@@ -195,7 +195,7 @@
                                 <div>
                                     <span class="text-muted text-uppercase fw-bold fs-11">Overall Investment</span>
                                     <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['overall_investment'], 2) }}</h3>
-                                    <small class="text-muted mt-1 d-block">{{ $allFinancials->count() }} Tranches Recorded</small>
+                                    {{-- <small class="text-muted mt-1 d-block">{{ $allFinancials->count() }} Tranches Recorded</small> --}}
                                 </div>
                                 <div class="inv-stat-icon bg-secondary-subtle text-secondary">
                                     <i class="ri-bank-card-line"></i>
@@ -205,7 +205,27 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Total Employee Spend -->
+                <!-- Card 2: Total Employees Count -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card inv-stat-card border-top border-3 border-info shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">Total Employees Count</span>
+                                    <h3 class="fw-bold text-dark mt-2 mb-0">{{ $metrics['total_employees'] }} <span class="fs-14 fw-normal text-muted">Talent</span></h3>
+                                    <small class="text-info-emphasis fw-medium mt-1 d-block">
+                                        <i class="ri-user-shared-line me-1"></i> Mapped External Employees
+                                    </small>
+                                </div>
+                                <div class="inv-stat-icon bg-info-subtle text-info">
+                                    <i class="ri-team-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Total Employee Spend -->
                 <div class="col-xl-3 col-md-6">
                     <div class="card inv-stat-card border-top border-3 border-warning shadow-sm h-100">
                         <div class="card-body">
@@ -225,7 +245,7 @@
                     </div>
                 </div>
 
-                <!-- Card 3: Balance Investment (Shows - minus when spend exceeds investment) -->
+                <!-- Card 4: Balance Investment (Shows - minus when spend exceeds investment) -->
                 <div class="col-xl-3 col-md-6">
                     @if($metrics['balance_investment'] < 0)
                         <div class="card inv-stat-card border-top border-3 border-danger shadow-sm h-100" style="background: #fff5f5;">
@@ -263,8 +283,69 @@
                         </div>
                     @endif
                 </div>
+            </div>
 
-                <!-- Card 4: Investor Profit Share (30%) -->
+            <!-- Row 2: Deployments, Employees, Monthly Payroll Cost & Monthly Margin -->
+            <div class="row g-3 mb-4">
+                <!-- Card 5: Active Deployments -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card inv-stat-card border-top border-3 border-primary shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">No of Clients Engaged</span>
+                                    <h3 class="fw-bold text-dark mt-2 mb-0">{{ $metrics['total_deployments'] }}</h3>
+                                    {{-- <small class="text-primary fw-medium mt-1 d-block">{{ $metrics['total_clients'] }} Clients Deployed To</small> --}}
+                                </div>
+                                <div class="inv-stat-icon bg-primary-subtle text-primary">
+                                    <i class="ri-building-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6: Monthly Employee Cost -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card inv-stat-card border-top border-3 border-primary shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted text-uppercase fw-bold fs-11">Monthly Employee Cost</span>
+                                    <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['monthly_employee_cost'], 2) }}</h3>
+                                    <small class="text-muted mt-1 d-block">
+                                        <i class="ri-calendar-check-line me-1"></i> Monthly Salary Commitment
+                                    </small>
+                                </div>
+                                <div class="inv-stat-icon bg-primary-subtle text-primary">
+                                    <i class="ri-calendar-todo-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 7: Gross Margin Generated (Yellow Box) -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card inv-stat-card border-top border-3 border-warning shadow-sm h-100">
+                        <div class="card-body margin-highlight-box rounded-3 h-100">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-dark text-uppercase fw-bold fs-11">Margin In Rupees</span>
+                                    <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['total_margin'], 2) }}</h3>
+                                    <small class="text-dark-50 mt-1 d-block">
+                                        Less TDS: -₹ {{ number_format($metrics['total_tds'] ?? 0, 2) }} &bull; Net: ₹ {{ number_format($metrics['total_net_margin'] ?? ($metrics['total_margin'] - ($metrics['total_tds'] ?? 0)), 2) }}
+                                    </small>
+                                </div>
+                                <div class="inv-stat-icon bg-white text-dark shadow-sm">
+                                    <i class="ri-money-rupee-circle-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 8: Investor Profit Share (30%) -->
                 <div class="col-xl-3 col-md-6">
                     <div class="card inv-stat-card border-top border-3 border-success shadow-sm h-100">
                         <div class="card-body" style="background: #e8f5e9;">
@@ -287,94 +368,13 @@
                 </div>
             </div>
 
-            <!-- Row 2: Deployments, Employees, Monthly Payroll Cost & Monthly Margin -->
-            <div class="row g-3 mb-4">
-                <!-- Card 5: Active Deployments -->
-                <div class="col-xl-3 col-md-6">
-                    <div class="card inv-stat-card border-top border-3 border-primary shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <span class="text-muted text-uppercase fw-bold fs-11">Active Deployments</span>
-                                    <h3 class="fw-bold text-dark mt-2 mb-0">{{ $metrics['total_deployments'] }}</h3>
-                                    <small class="text-primary fw-medium mt-1 d-block">{{ $metrics['total_clients'] }} Clients Deployed To</small>
-                                </div>
-                                <div class="inv-stat-icon bg-primary-subtle text-primary">
-                                    <i class="ri-building-line"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 6: Total Employees Count -->
-                <div class="col-xl-3 col-md-6">
-                    <div class="card inv-stat-card border-top border-3 border-info shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <span class="text-muted text-uppercase fw-bold fs-11">Total Employees Count</span>
-                                    <h3 class="fw-bold text-dark mt-2 mb-0">{{ $metrics['total_employees'] }} <span class="fs-14 fw-normal text-muted">Talent</span></h3>
-                                    <small class="text-info-emphasis fw-medium mt-1 d-block">
-                                        <i class="ri-user-shared-line me-1"></i> Mapped External Employees
-                                    </small>
-                                </div>
-                                <div class="inv-stat-icon bg-info-subtle text-info">
-                                    <i class="ri-team-line"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 7: Monthly Employee Cost -->
-                <div class="col-xl-3 col-md-6">
-                    <div class="card inv-stat-card border-top border-3 border-primary shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <span class="text-muted text-uppercase fw-bold fs-11">Monthly Employee Cost</span>
-                                    <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['monthly_employee_cost'], 2) }}</h3>
-                                    <small class="text-muted mt-1 d-block">
-                                        <i class="ri-calendar-check-line me-1"></i> Monthly Salary Commitment
-                                    </small>
-                                </div>
-                                <div class="inv-stat-icon bg-primary-subtle text-primary">
-                                    <i class="ri-calendar-todo-line"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 8: Gross Margin Generated (Yellow Box) -->
-                <div class="col-xl-3 col-md-6">
-                    <div class="card inv-stat-card border-top border-3 border-warning shadow-sm h-100">
-                        <div class="card-body margin-highlight-box rounded-3 h-100">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <span class="text-dark text-uppercase fw-bold fs-11">Margin In Rupees</span>
-                                    <h3 class="fw-bold text-dark mt-2 mb-0">₹ {{ number_format($metrics['total_margin'], 2) }}</h3>
-                                    <small class="text-dark-50 mt-1 d-block">
-                                        Less TDS: -₹ {{ number_format($metrics['total_tds'] ?? 0, 2) }} &bull; Net: ₹ {{ number_format($metrics['total_net_margin'] ?? ($metrics['total_margin'] - ($metrics['total_tds'] ?? 0)), 2) }}
-                                    </small>
-                                </div>
-                                <div class="inv-stat-icon bg-white text-dark shadow-sm">
-                                    <i class="ri-money-rupee-circle-fill"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Profit Sharing Model Visual Card -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card border">
                         <div class="card-body p-3">
                             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-                                <h6 class="mb-0 fw-bold"><i class="ri-pie-chart-2-line text-primary me-1"></i> Profit Sharing Model Split (Monthly)</h6>
+                                <h6 class="mb-0 fw-bold"><i class="ri-pie-chart-2-line text-primary me-1"></i> Profit Sharing Model Split</h6>
                                 <span class="badge bg-secondary-subtle text-secondary fs-12">Split 70% / 30% after TDS deduction</span>
                             </div>
                             @php

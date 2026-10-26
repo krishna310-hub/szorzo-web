@@ -22,12 +22,13 @@ class AttendanceTimerController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
         }
 
-        if ($this->isSuperAdminUser($user)) {
+        if ($this->isSuperAdminUser($user) || $this->isInvestorUser($user)) {
             return response()->json([
                 'success' => true,
                 'show_timer' => false,
-                'is_admin' => true,
-                'is_super_admin' => true,
+                'is_admin' => $this->isSuperAdminUser($user),
+                'is_super_admin' => $this->isSuperAdminUser($user),
+                'is_investor' => $this->isInvestorUser($user),
                 'server_time' => now()->toIso8601String(),
             ]);
         }
@@ -48,10 +49,12 @@ class AttendanceTimerController extends Controller
     public function start(Request $request): JsonResponse
     {
         $user = $request->user();
-        if ($this->isSuperAdminUser($user)) {
+        if ($this->isSuperAdminUser($user) || $this->isInvestorUser($user)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Super Admin does not record personal attendance. Please use Emp Attendance to manage employee attendance.',
+                'message' => $this->isInvestorUser($user)
+                    ? 'Attendance timer is not enabled for investor accounts.'
+                    : 'Super Admin does not record personal attendance. Please use Emp Attendance to manage employee attendance.',
             ], 403);
         }
 
@@ -91,8 +94,13 @@ class AttendanceTimerController extends Controller
     public function pause(Request $request): JsonResponse
     {
         $user = $request->user();
-        if ($this->isSuperAdminUser($user)) {
-            return response()->json(['success' => false, 'message' => 'Super Admin does not record personal attendance.'], 403);
+        if ($this->isSuperAdminUser($user) || $this->isInvestorUser($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => $this->isInvestorUser($user)
+                    ? 'Attendance timer is not enabled for investor accounts.'
+                    : 'Super Admin does not record personal attendance.',
+            ], 403);
         }
 
         $employee = $user->getOrCreateEmployee();
@@ -135,8 +143,13 @@ class AttendanceTimerController extends Controller
     public function resume(Request $request): JsonResponse
     {
         $user = $request->user();
-        if ($this->isSuperAdminUser($user)) {
-            return response()->json(['success' => false, 'message' => 'Super Admin does not record personal attendance.'], 403);
+        if ($this->isSuperAdminUser($user) || $this->isInvestorUser($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => $this->isInvestorUser($user)
+                    ? 'Attendance timer is not enabled for investor accounts.'
+                    : 'Super Admin does not record personal attendance.',
+            ], 403);
         }
 
         $employee = $user->getOrCreateEmployee();
@@ -184,8 +197,13 @@ class AttendanceTimerController extends Controller
     public function stop(Request $request): JsonResponse
     {
         $user = $request->user();
-        if ($this->isSuperAdminUser($user)) {
-            return response()->json(['success' => false, 'message' => 'Super Admin does not record personal attendance.'], 403);
+        if ($this->isSuperAdminUser($user) || $this->isInvestorUser($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => $this->isInvestorUser($user)
+                    ? 'Attendance timer is not enabled for investor accounts.'
+                    : 'Super Admin does not record personal attendance.',
+            ], 403);
         }
 
         $employee = $user->getOrCreateEmployee();
@@ -524,10 +542,22 @@ class AttendanceTimerController extends Controller
     }
 
     /**
+     * Check if user belongs to the Investor role group.
+     */
+    protected function isInvestorUser(User $user): bool
+    {
+        return $user->isInvestor() || (int) $user->role_id === 6;
+    }
+
+    /**
      * Check if a user has admin privileges to manage attendance.
      */
     protected function isAdminUser(User $user): bool
     {
+        if ($this->isInvestorUser($user)) {
+            return false;
+        }
+
         return $this->isSuperAdminUser($user)
             || $user->can('edit', Attendance::class)
             || $user->can('create', Attendance::class);
