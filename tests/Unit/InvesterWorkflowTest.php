@@ -638,5 +638,29 @@ class InvesterWorkflowTest extends TestCase
         $adminCheck->setAccessible(true);
         $this->assertFalse($adminCheck->invoke($controller, $userInvestor));
     }
+
+    public function test_investor_login_invest_modules_szorzo_share_hidden_and_mapped_clients_and_popup_employees(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+
+        // 1. Verify invester-deployments index blade hides SZ share and shows mapped clients & employees modal
+        $deploymentsIndexContent = file_get_contents($baseDir . '/resources/views/backend/invester-deployments/index.blade.php');
+        $this->assertStringContainsString("@if(\$isInvestorUser) Investor Share (30%) @else Profit Sharing (SZ / Inv) @endif", $deploymentsIndexContent);
+        $this->assertStringContainsString("{{ \$isInvestorUser ? 'All Mapped Clients' : 'All Clients' }}", $deploymentsIndexContent);
+        $this->assertStringContainsString('id="deploymentEmployeesModal"', $deploymentsIndexContent);
+        $this->assertStringContainsString('view-deployment-emps-btn', $deploymentsIndexContent);
+
+        // 2. Verify controller hides SZ share for investor and maps clients
+        $controllerContent = file_get_contents($baseDir . '/app/Http/Controllers/backend/InvesterDeploymentController.php');
+        $this->assertStringContainsString('if ($isInvestorUser) {', $controllerContent);
+        $this->assertStringContainsString('return \'<strong class="d-block text-success fs-13">\' . e($inv) . \'</strong><small class="text-muted fs-11">Net profit share after TDS</small>\';', $controllerContent);
+        $this->assertStringContainsString('view-deployment-emps-btn', $controllerContent);
+
+        // 3. Verify investor dashboard monthly ledger has icon and modal for employees list popup
+        $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/invester-dashboard/index.blade.php');
+        $this->assertStringContainsString('view-ledger-employees-btn', $dashboardContent);
+        $this->assertStringContainsString('id="ledgerEmployeesModal"', $dashboardContent);
+        $this->assertStringContainsString('ri-eye-line', $dashboardContent);
+    }
 }
 

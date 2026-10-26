@@ -452,16 +452,29 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <span class="badge bg-primary-subtle text-primary">
-                                                        <i class="ri-team-line me-1"></i> {{ $row['employees_count'] }} Employees
-                                                    </span>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-soft-primary py-1 px-2 d-inline-flex align-items-center view-ledger-employees-btn"
+                                                                data-month="{{ $row['month_label'] }}"
+                                                                data-employees="{{ json_encode($row['employees_detail']) }}"
+                                                                title="Click icon to open popup and list employees">
+                                                            <i class="ri-team-line me-1"></i>
+                                                            <span>{{ $row['employees_count'] }} Employees</span>
+                                                            <i class="ri-eye-line ms-1 text-primary"></i>
+                                                        </button>
+                                                    </div>
                                                     @if(!empty($row['employees_detail']))
                                                         <div class="small text-muted mt-1">
-                                                            @foreach(array_slice($row['employees_detail'], 0, 4) as $ed)
-                                                                <span class="d-inline-block me-2">• {{ $ed['name'] }} (₹{{ number_format($ed['salary'], 2) }} @ {{ number_format($ed['billing_percentage'] ?? 15, 1) }}%)</span>
+                                                            @foreach(array_slice($row['employees_detail'], 0, 2) as $ed)
+                                                                <span class="d-inline-block me-1">• {{ $ed['name'] }} (₹{{ number_format($ed['salary'], 2) }})</span>
                                                             @endforeach
-                                                            @if(count($row['employees_detail']) > 4)
-                                                                <span class="text-muted">+{{ count($row['employees_detail']) - 4 }} more</span>
+                                                            @if(count($row['employees_detail']) > 2)
+                                                                <a href="javascript:void(0);" 
+                                                                   class="view-ledger-employees-btn text-primary fw-medium"
+                                                                   data-month="{{ $row['month_label'] }}"
+                                                                   data-employees="{{ json_encode($row['employees_detail']) }}">
+                                                                    +{{ count($row['employees_detail']) - 2 }} more <i class="ri-external-link-line"></i>
+                                                                </a>
                                                             @endif
                                                         </div>
                                                     @endif
@@ -836,8 +849,106 @@
             </div>
             @endif
 
+            <!-- Mapped Employees List Modal -->
+            <div class="modal fade" id="ledgerEmployeesModal" tabindex="-1" aria-labelledby="ledgerEmployeesModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-primary text-white py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="ri-team-line fs-20"></i>
+                                <div>
+                                    <h5 class="modal-title text-white mb-0" id="ledgerEmployeesModalLabel">Mapped External Employees</h5>
+                                    <small class="text-white-50" id="ledgerEmployeesModalSub">—</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle mb-0" id="ledgerEmployeesTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 40px;">#</th>
+                                            <th>Employee Name</th>
+                                            <th>Employee ID</th>
+                                            <th>Designation</th>
+                                            <th>Deployed Client</th>
+                                            <th class="text-end">Salary / Spend (₹)</th>
+                                            <th class="text-center">Billing %</th>
+                                            <th class="text-end">Margin Generated (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ledgerEmployeesTbody"></tbody>
+                                    <tfoot class="table-light fw-bold" id="ledgerEmployeesTfoot"></tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light py-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+$(document).ready(function() {
+    $(document).on('click', '.view-ledger-employees-btn', function() {
+        var month = $(this).data('month') || '';
+        var emps = $(this).data('employees');
+        if (typeof emps === 'string') {
+            try { emps = JSON.parse(emps); } catch(e) { emps = []; }
+        }
+        if (!Array.isArray(emps)) emps = [];
+
+        $('#ledgerEmployeesModalSub').text(month ? 'Month: ' + month + ' (' + emps.length + ' Employees)' : emps.length + ' Employees');
+        
+        var tbody = '';
+        var totalSalary = 0;
+        var totalMargin = 0;
+
+        emps.forEach(function(emp, idx) {
+            var sal = parseFloat(emp.salary) || 0;
+            var rev = parseFloat(emp.revenue) || 0;
+            var bPct = parseFloat(emp.billing_percentage) || 15.0;
+            totalSalary += sal;
+            totalMargin += rev;
+
+            tbody += '<tr>' +
+                '<td class="text-center text-muted">' + (idx + 1) + '</td>' +
+                '<td class="fw-bold text-dark">' + (emp.name || '—') + '</td>' +
+                '<td><span class="badge bg-light text-dark border">' + (emp.employee_no || ('SZ' + String(emp.id).padStart(3, '0'))) + '</span></td>' +
+                '<td>' + (emp.designation || 'Staff') + '</td>' +
+                '<td>' + (emp.client || '—') + '</td>' +
+                '<td class="text-end fw-semibold text-dark">₹ ' + sal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+                '<td class="text-center"><span class="badge bg-info-subtle text-info">' + bPct.toFixed(1) + '%</span></td>' +
+                '<td class="text-end fw-bold text-success">₹ ' + rev.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+            '</tr>';
+        });
+
+        if (emps.length === 0) {
+            tbody = '<tr><td colspan="8" class="text-center text-muted py-3">No employee details available.</td></tr>';
+            $('#ledgerEmployeesTfoot').html('');
+        } else {
+            var tfoot = '<tr>' +
+                '<td colspan="5" class="text-end">Total (' + emps.length + ' Employees):</td>' +
+                '<td class="text-end text-dark">₹ ' + totalSalary.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+                '<td></td>' +
+                '<td class="text-end text-success">₹ ' + totalMargin.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+            '</tr>';
+            $('#ledgerEmployeesTfoot').html(tfoot);
+        }
+
+        $('#ledgerEmployeesTbody').html(tbody);
+        var modal = new bootstrap.Modal(document.getElementById('ledgerEmployeesModal'));
+        modal.show();
+    });
+});
+</script>
 @endsection
 

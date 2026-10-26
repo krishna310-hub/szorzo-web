@@ -22,8 +22,8 @@ class InvesterDeploymentController extends Controller
         $this->authorize('read', InvesterDeployment::class);
 
         $user = auth()->user();
-        $isInvestorUser = $user->isInvestor() || (int) $user->role_id === 6;
-        $linkedInvester = $isInvestorUser ? $user->linkedInvester() : null;
+        $isInvestorUser = $user && ($user->isInvestor() || (int) $user->role_id === 6);
+        $linkedInvester = $isInvestorUser ? ($user->linkedInvester() ?? Invester::where('user_id', $user->id)->first()) : null;
 
         if ($request->ajax()) {
             $query = InvesterDeployment::with(['invester', 'employee', 'client'])->latest();
@@ -35,7 +35,12 @@ class InvesterDeploymentController extends Controller
             }
 
             if ($request->filled('client_id')) {
-                $query->where('client_id', $request->client_id);
+                $clientId = (int) $request->client_id;
+                $query->where(function ($q) use ($clientId) {
+                    $q->where('client_id', $clientId)
+                      ->orWhereJsonContains('client_ids', (string) $clientId)
+                      ->orWhereJsonContains('client_ids', $clientId);
+                });
             }
 
             if ($request->filled('mode_of_engagement')) {
@@ -57,15 +62,67 @@ class InvesterDeploymentController extends Controller
                 })
                 ->addColumn('employee_name', function ($row) {
                     $assigned = $row->assigned_employees;
-                    if ($assigned->count() > 1) {
-                        return '<div><span class="badge bg-primary-subtle text-primary mb-1">' . $assigned->count() . ' External Employees</span><br><small class="text-muted">' . e($assigned->pluck('employee_name')->take(2)->implode(', ')) . ($assigned->count() > 2 ? ' +' . ($assigned->count() - 2) . ' more' : '') . '</small></div>';
-                    } elseif ($assigned->count() === 1) {
-                        $emp = $assigned->first();
-                        $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
-                        return '<div><strong>' . e($emp->employee_name) . '</strong><br><small class="text-muted">' . e($no) . '</small></div>';
+                    if ($assigned->isNotEmpty()) {
+                        $empsList = $assigned->map(function ($e) use ($row) {
+                            $salData = $e->getContractReportSalary();
+                            $candSalary = (float) ($salData['salary'] > 0 ? $salData['salary'] : $e->monthly_salary);
+                            $candBillingPct = (float) ($salData['billing_percentage'] ?? $e->getClientRequirementBillingPercentage() ?? 15.0);
+                            $candRevenue = round($candSalary * ($candBillingPct / 100), 2);
+                            return [
+                                'id' => $e->id,
+                                'name' => $e->employee_name,
+                                'employee_no' => $e->employee_no ?: ('SZ' . str_pad($e->id, 3, '0', STR_PAD_LEFT)),
+                                'designation' => $e->designation ?: 'Staff',
+                                'client' => $row->client_names ?: ($row->client?->client ?: '-'),
+                                'salary' => $candSalary,
+                                'billing_percentage' => $candBillingPct,
+                                'revenue' => $candRevenue,
+                            ];
+                        })->values()->all();
+
+                        $empsJson = htmlspecialchars(json_encode($empsList), ENT_QUOTES, 'UTF-8');
+                        $modalTitle = htmlspecialchars($row->client_names ?: ($row->client?->client ?: 'Mapped Employees'), ENT_QUOTES, 'UTF-8');
+
+                        if ($assigned->count() > 1) {
+                            return '<div>' .
+                                '<button type="button" class="btn btn-sm btn-soft-primary py-1 px-2 d-inline-flex align-items-center view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . $modalTitle . '" title="Click to view employees list in popup">' .
+                                    '<i class="ri-team-line me-1"></i> ' . $assigned->count() . ' External Employees <i class="ri-eye-line ms-1 text-primary"></i>' .
+                                '</button>' .
+                                '<small class="text-muted d-block mt-1">' . e($assigned->pluck('employee_name')->take(2)->implode(', ')) . ($assigned->count() > 2 ? ' +' . ($assigned->count() - 2) . ' more' : '') . '</small>' .
+                            '</div>';
+                        } else {
+                            $emp = $assigned->first();
+                            $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                            return '<div class="d-flex align-items-center justify-content-between gap-1">' .
+                                '<div><strong>' . e($emp->employee_name) . '</strong><br><small class="text-muted">' . e($no) . ' &bull; ' . e($emp->designation ?: 'Staff') . '</small></div>' .
+                                '<button type="button" class="btn btn-sm btn-icon btn-ghost-primary rounded-circle view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . htmlspecialchars($emp->employee_name, ENT_QUOTES, 'UTF-8') . '" title="View Employee Details in Popup">' .
+                                    '<i class="ri-eye-line fs-15"></i>' .
+                                '</button>' .
+                            '</div>';
+                        }
                     } elseif ($row->employee) {
                         $no = $row->employee->employee_no ?: ('SZ' . str_pad($row->employee->id, 3, '0', STR_PAD_LEFT));
-                        return '<div><strong>' . e($row->employee->employee_name) . '</strong><br><small class="text-muted">' . e($no) . '</small></div>';
+                        $salData = $row->employee->getContractReportSalary();
+                        $candSalary = (float) ($salData['salary'] > 0 ? $salData['salary'] : $row->employee->monthly_salary);
+                        $candBillingPct = (float) ($salData['billing_percentage'] ?? $row->employee->getClientRequirementBillingPercentage() ?? 15.0);
+                        $candRevenue = round($candSalary * ($candBillingPct / 100), 2);
+                        $singleList = [[
+                            'id' => $row->employee->id,
+                            'name' => $row->employee->employee_name,
+                            'employee_no' => $no,
+                            'designation' => $row->employee->designation ?: 'Staff',
+                            'client' => $row->client_names ?: ($row->client?->client ?: '-'),
+                            'salary' => $candSalary,
+                            'billing_percentage' => $candBillingPct,
+                            'revenue' => $candRevenue,
+                        ]];
+                        $empsJson = htmlspecialchars(json_encode($singleList), ENT_QUOTES, 'UTF-8');
+                        return '<div class="d-flex align-items-center justify-content-between gap-1">' .
+                            '<div><strong>' . e($row->employee->employee_name) . '</strong><br><small class="text-muted">' . e($no) . '</small></div>' .
+                            '<button type="button" class="btn btn-sm btn-icon btn-ghost-primary rounded-circle view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . htmlspecialchars($row->employee->employee_name, ENT_QUOTES, 'UTF-8') . '" title="View Employee Details in Popup">' .
+                                '<i class="ri-eye-line fs-15"></i>' .
+                            '</button>' .
+                        '</div>';
                     }
                     return '<span class="text-muted">Unassigned</span>';
                 })
@@ -105,12 +162,19 @@ class InvesterDeploymentController extends Controller
                     $html .= '<br><small class="text-muted fw-semibold">Net: ₹' . number_format($netMargin, 2) . '</small>';
                     return $html;
                 })
-                ->addColumn('commission_split', function ($row) {
+                ->addColumn('commission_split', function ($row) use ($isInvestorUser) {
                     $metrics = $row->getContractReportMetrics();
-                    $szAmt = $metrics['szorzo_earned'] > 0 ? $metrics['szorzo_earned'] : (float) $row->szorzo_commission_amount;
                     $invAmt = $metrics['investor_earned'] > 0 ? $metrics['investor_earned'] : (float) $row->investor_commission_amount;
-                    $sz = 'SZ (' . (float) ($row->szorzo_share_percentage ?: 70) . '%): ₹' . number_format((float) $szAmt, 2);
-                    $inv = 'Investor (' . (float) ($row->investor_share_percentage ?: 30) . '%): ₹' . number_format((float) $invAmt, 2);
+                    $invPct = (float) ($row->investor_share_percentage ?: 30);
+                    $inv = 'Investor (' . number_format($invPct, 1) . '%): ₹' . number_format((float) $invAmt, 2);
+
+                    if ($isInvestorUser) {
+                        return '<strong class="d-block text-success fs-13">' . e($inv) . '</strong><small class="text-muted fs-11">Net profit share after TDS</small>';
+                    }
+
+                    $szAmt = $metrics['szorzo_earned'] > 0 ? $metrics['szorzo_earned'] : (float) $row->szorzo_commission_amount;
+                    $szPct = (float) ($row->szorzo_share_percentage ?: 70);
+                    $sz = 'sz (' . number_format($szPct, 1) . '%): ₹' . number_format((float) $szAmt, 2);
                     return '<small class="d-block text-primary fw-medium">' . e($sz) . '</small><small class="d-block text-success fw-bold">' . e($inv) . '</small>';
                 })
                 ->addColumn('status', function ($row) {
@@ -133,7 +197,35 @@ class InvesterDeploymentController extends Controller
         }
 
         $investers = Invester::where('status', true)->orderBy('name')->get();
-        $clients = Client::where('status', true)->orderBy('client')->get();
+
+        if ($isInvestorUser) {
+            $mappedClientIds = [];
+            if ($linkedInvester) {
+                $deploymentsForClients = InvesterDeployment::where('invester_id', $linkedInvester->id)->get(['client_id', 'client_ids']);
+                foreach ($deploymentsForClients as $dep) {
+                    if ($dep->client_id) {
+                        $mappedClientIds[] = (int) $dep->client_id;
+                    }
+                    $cids = $dep->client_ids;
+                    if (is_string($cids)) {
+                        $cids = json_decode($cids, true);
+                    }
+                    if (is_array($cids)) {
+                        foreach ($cids as $cid) {
+                            if ($cid) {
+                                $mappedClientIds[] = (int) $cid;
+                            }
+                        }
+                    }
+                }
+            }
+            $mappedClientIds = array_values(array_unique(array_filter($mappedClientIds)));
+            $clients = !empty($mappedClientIds)
+                ? Client::whereIn('id', $mappedClientIds)->orderBy('client')->get()
+                : collect();
+        } else {
+            $clients = Client::where('status', true)->orderBy('client')->get();
+        }
 
         return view('backend.invester-deployments.index', compact('investers', 'clients', 'isInvestorUser', 'linkedInvester'));
     }
@@ -419,7 +511,16 @@ class InvesterDeploymentController extends Controller
     {
         $this->authorize('read', InvesterDeployment::class);
 
-        $rows = InvesterDeployment::with(['invester', 'employee', 'client'])->get()->map(function ($row) {
+        $user = auth()->user();
+        $isInvestorUser = $user && ($user->isInvestor() || (int) $user->role_id === 6);
+        $linkedInvester = $isInvestorUser ? ($user->linkedInvester() ?? Invester::where('user_id', $user->id)->first()) : null;
+
+        $query = InvesterDeployment::with(['invester', 'employee', 'client'])->latest();
+        if ($isInvestorUser && $linkedInvester) {
+            $query->where('invester_id', $linkedInvester->id);
+        }
+
+        $rows = $query->get()->map(function ($row) use ($isInvestorUser) {
             $metrics = $row->getContractReportMetrics();
             $salary = $metrics['total_salary'] > 0 ? $metrics['total_salary'] : $row->employee_ctc;
             $billingPct = $metrics['effective_billing_percentage'] > 0 ? $metrics['effective_billing_percentage'] : $row->billing_percentage;
@@ -427,7 +528,7 @@ class InvesterDeploymentController extends Controller
             $szAmt = $metrics['szorzo_earned'] > 0 ? $metrics['szorzo_earned'] : $row->szorzo_commission_amount;
             $invAmt = $metrics['investor_earned'] > 0 ? $metrics['investor_earned'] : $row->investor_commission_amount;
 
-            return [
+            $record = [
                 $row->invester?->name ?: '-',
                 $row->employee_names ?: ($row->employee?->employee_name ?: '-'),
                 $row->client_names ?: ($row->client?->client ?: '-'),
@@ -439,13 +540,18 @@ class InvesterDeploymentController extends Controller
                 $row->tds_percentage,
                 $row->tds_amount,
                 $revenue,
-                $row->szorzo_share_percentage,
-                $szAmt,
-                $row->investor_share_percentage,
-                $invAmt,
-                $row->status ? 'Active' : 'Inactive',
-                $row->created_at ? $row->created_at->format('Y-m-d') : '-',
             ];
+
+            if (!$isInvestorUser) {
+                $record[] = $row->szorzo_share_percentage;
+                $record[] = $szAmt;
+            }
+
+            $record[] = $row->investor_share_percentage;
+            $record[] = $invAmt;
+            $record[] = $row->status ? 'Active' : 'Inactive';
+            $record[] = $row->created_at ? $row->created_at->format('Y-m-d') : '-';
+            return $record;
         })->toArray();
 
         $headings = [
@@ -460,13 +566,17 @@ class InvesterDeploymentController extends Controller
             'TDS %',
             'TDS Amount (INR)',
             'Margin In Rupees',
-            'SZ Share %',
-            'SZ Commission (INR)',
-            'Investor Share %',
-            'Investor Commission (INR)',
-            'Status',
-            'Created Date',
         ];
+
+        if (!$isInvestorUser) {
+            $headings[] = 'SZ Share %';
+            $headings[] = 'SZ Commission (INR)';
+        }
+
+        $headings[] = 'Investor Share %';
+        $headings[] = 'Investor Commission (INR)';
+        $headings[] = 'Status';
+        $headings[] = 'Created Date';
 
         return Excel::download(new MasterDataExport($headings, $rows), 'invest-deployments-export-' . date('Y-m-d') . '.xlsx');
     }

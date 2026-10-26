@@ -203,6 +203,9 @@ class InvesterDashboardController extends Controller
             $availableClients = !empty($assignedClientIds)
                 ? Client::whereIn('id', $assignedClientIds)->orderBy('client')->get()
                 : collect();
+        } elseif ($isInvestorUser && !$isSuperAdmin) {
+            // Investor user with no linked profile: never show all clients
+            $availableClients = collect();
         } else {
             // Consolidated view (All Investors): only list clients that have deployments
             $allDeploymentsForClients = InvesterDeployment::get(['client_id', 'client_ids']);
@@ -516,6 +519,9 @@ class InvesterDashboardController extends Controller
                         $monthEmployees->push([
                             'id' => $emp->id,
                             'name' => $emp->employee_name,
+                            'employee_no' => $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT)),
+                            'designation' => $emp->designation ?: 'Staff',
+                            'client' => $dep->client_names ?: ($dep->client?->client ?: '-'),
                             'salary' => $candSalary,
                             'billing_percentage' => $candBillingPct,
                             'revenue' => $candRevenue,
@@ -525,6 +531,18 @@ class InvesterDashboardController extends Controller
                     $depSpend = (float) $dep->employee_ctc;
                     $marginPct = (float) ($dep->margin_percentage ?: 15.0);
                     $depMargin = (float) $dep->margin_amount > 0 ? (float) $dep->margin_amount : round($depSpend * ($marginPct / 100), 2);
+                    if ($dep->employee) {
+                        $monthEmployees->push([
+                            'id' => $dep->employee->id,
+                            'name' => $dep->employee->employee_name,
+                            'employee_no' => $dep->employee->employee_no ?: ('SZ' . str_pad($dep->employee->id, 3, '0', STR_PAD_LEFT)),
+                            'designation' => $dep->employee->designation ?: 'Staff',
+                            'client' => $dep->client_names ?: ($dep->client?->client ?: '-'),
+                            'salary' => $depSpend,
+                            'billing_percentage' => $marginPct,
+                            'revenue' => $depMargin,
+                        ]);
+                    }
                 }
 
                 if ($depSpend <= 0 && (float) $dep->employee_ctc > 0) {

@@ -53,7 +53,7 @@
                                 <div class="col-md-{{ $isInvestorUser ? '6' : '4' }}">
                                     <label class="form-label small mb-1">Client</label>
                                     <select id="filter_client_id" class="form-select form-select-sm">
-                                        <option value="">All Clients</option>
+                                        <option value="">{{ $isInvestorUser ? 'All Mapped Clients' : 'All Clients' }}</option>
                                         @foreach($clients as $cli)
                                             <option value="{{ $cli->id }}">{{ $cli->client }}</option>
                                         @endforeach
@@ -85,7 +85,7 @@
                         <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                             <div>
                                 <h5 class="card-title mb-0">Employment Details & Profit Sharing Records</h5>
-                                <small class="text-muted">Rate Card, CTC, Margin % and Profit Share split (SZ 70% / Investor 30%)</small>
+                                <small class="text-muted">Rate Card, CTC, Margin % and @if($isInvestorUser) Investor Profit Share (30%) @else Profit Share split (SZ 70% / Investor 30%) @endif</small>
                             </div>
                             <div class="d-flex flex-wrap gap-2">
                                 @can('read', \App\Models\InvesterDeployment::class)
@@ -111,7 +111,7 @@
                                             <th>Deployed Client</th>
                                             <th>Employee CTC (₹)</th>
                                             <th>Margin In Rupees</th>
-                                            <th>Profit Sharing (SZ / Inv)</th>
+                                            <th>@if($isInvestorUser) Investor Share (30%) @else Profit Sharing (SZ / Inv) @endif</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -119,6 +119,47 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deployment Employees Modal -->
+            <div class="modal fade" id="deploymentEmployeesModal" tabindex="-1" aria-labelledby="deploymentEmployeesModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-primary text-white py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="ri-team-line fs-20"></i>
+                                <div>
+                                    <h5 class="modal-title text-white mb-0" id="deploymentEmployeesModalLabel">Mapped Employees</h5>
+                                    <small class="text-white-50" id="deploymentEmployeesModalSub">—</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 40px;">#</th>
+                                            <th>Employee Name</th>
+                                            <th>Employee ID</th>
+                                            <th>Designation</th>
+                                            <th>Deployed Client</th>
+                                            <th class="text-end">Salary / CTC (₹)</th>
+                                            <th class="text-center">Billing %</th>
+                                            <th class="text-end">Margin Generated (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="deploymentEmployeesTbody"></tbody>
+                                    <tfoot class="table-light fw-bold" id="deploymentEmployeesTfoot"></tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light py-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -167,6 +208,56 @@ $(document).ready(function () {
         $('#filter_client_id').val('');
         $('#filter_status').val('');
         table.ajax.reload();
+    });
+
+    $(document).on('click', '.view-deployment-emps-btn', function () {
+        var title = $(this).data('title') || 'Mapped Employees';
+        var emps = $(this).data('employees');
+        if (typeof emps === 'string') {
+            try { emps = JSON.parse(emps); } catch(e) { emps = []; }
+        }
+        if (!Array.isArray(emps)) emps = [];
+
+        $('#deploymentEmployeesModalSub').text(title + ' (' + emps.length + ' Employees)');
+        var tbody = '';
+        var totalSal = 0;
+        var totalRev = 0;
+
+        emps.forEach(function(emp, idx) {
+            var sal = parseFloat(emp.salary || emp.ctc) || 0;
+            var bPct = parseFloat(emp.billing_percentage) || 15.0;
+            var rev = parseFloat(emp.revenue) || (Math.round(sal * (bPct / 100) * 100) / 100);
+            totalSal += sal;
+            totalRev += rev;
+
+            tbody += '<tr>' +
+                '<td class="text-center text-muted">' + (idx + 1) + '</td>' +
+                '<td class="fw-bold text-dark">' + (emp.name || '—') + '</td>' +
+                '<td><span class="badge bg-light text-dark border">' + (emp.employee_no || ('SZ' + String(emp.id).padStart(3, '0'))) + '</span></td>' +
+                '<td>' + (emp.designation || 'Staff') + '</td>' +
+                '<td>' + (emp.client || '—') + '</td>' +
+                '<td class="text-end fw-semibold text-dark">₹ ' + sal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+                '<td class="text-center"><span class="badge bg-info-subtle text-info">' + bPct.toFixed(1) + '%</span></td>' +
+                '<td class="text-end fw-bold text-success">₹ ' + rev.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+            '</tr>';
+        });
+
+        if (emps.length === 0) {
+            tbody = '<tr><td colspan="8" class="text-center text-muted py-3">No employees found.</td></tr>';
+            $('#deploymentEmployeesTfoot').html('');
+        } else {
+            var tfoot = '<tr>' +
+                '<td colspan="5" class="text-end">Total (' + emps.length + ' Employees):</td>' +
+                '<td class="text-end text-dark">₹ ' + totalSal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+                '<td></td>' +
+                '<td class="text-end text-success">₹ ' + totalRev.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+            '</tr>';
+            $('#deploymentEmployeesTfoot').html(tfoot);
+        }
+
+        $('#deploymentEmployeesTbody').html(tbody);
+        var modal = new bootstrap.Modal(document.getElementById('deploymentEmployeesModal'));
+        modal.show();
     });
 
     $(document).on('click', '.delete-btn', function () {
