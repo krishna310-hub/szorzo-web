@@ -88,15 +88,12 @@ class InvesterDeploymentController extends Controller
                                 '<button type="button" class="btn btn-sm btn-soft-primary py-1 px-2 d-inline-flex align-items-center view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . $modalTitle . '" title="Click to view employees list in popup">' .
                                     '<i class="ri-team-line me-1"></i> ' . $assigned->count() . ' External Employees <i class="ri-eye-line ms-1 text-primary"></i>' .
                                 '</button>' .
-                                '<small class="text-muted d-block mt-1">' . e($assigned->pluck('employee_name')->take(2)->implode(', ')) . ($assigned->count() > 2 ? ' +' . ($assigned->count() - 2) . ' more' : '') . '</small>' .
                             '</div>';
                         } else {
                             $emp = $assigned->first();
-                            $no = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
-                            return '<div class="d-flex align-items-center justify-content-between gap-1">' .
-                                '<div><strong>' . e($emp->employee_name) . '</strong><br><small class="text-muted">' . e($no) . ' &bull; ' . e($emp->designation ?: 'Staff') . '</small></div>' .
-                                '<button type="button" class="btn btn-sm btn-icon btn-ghost-primary rounded-circle view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . htmlspecialchars($emp->employee_name, ENT_QUOTES, 'UTF-8') . '" title="View Employee Details in Popup">' .
-                                    '<i class="ri-eye-line fs-15"></i>' .
+                            return '<div>' .
+                                '<button type="button" class="btn btn-sm btn-soft-primary py-1 px-2 d-inline-flex align-items-center view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . htmlspecialchars($emp->employee_name, ENT_QUOTES, 'UTF-8') . '" title="Click to view employee details in popup">' .
+                                    '<i class="ri-user-line me-1"></i> ' . e($emp->employee_name) . ' <i class="ri-eye-line ms-1 text-primary"></i>' .
                                 '</button>' .
                             '</div>';
                         }
@@ -117,10 +114,9 @@ class InvesterDeploymentController extends Controller
                             'revenue' => $candRevenue,
                         ]];
                         $empsJson = htmlspecialchars(json_encode($singleList), ENT_QUOTES, 'UTF-8');
-                        return '<div class="d-flex align-items-center justify-content-between gap-1">' .
-                            '<div><strong>' . e($row->employee->employee_name) . '</strong><br><small class="text-muted">' . e($no) . '</small></div>' .
-                            '<button type="button" class="btn btn-sm btn-icon btn-ghost-primary rounded-circle view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . htmlspecialchars($row->employee->employee_name, ENT_QUOTES, 'UTF-8') . '" title="View Employee Details in Popup">' .
-                                '<i class="ri-eye-line fs-15"></i>' .
+                        return '<div>' .
+                            '<button type="button" class="btn btn-sm btn-soft-primary py-1 px-2 d-inline-flex align-items-center view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . htmlspecialchars($row->employee->employee_name, ENT_QUOTES, 'UTF-8') . '" title="Click to view employee details in popup">' .
+                                '<i class="ri-user-line me-1"></i> ' . e($row->employee->employee_name) . ' <i class="ri-eye-line ms-1 text-primary"></i>' .
                             '</button>' .
                         '</div>';
                     }

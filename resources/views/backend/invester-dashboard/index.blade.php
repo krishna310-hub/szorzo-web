@@ -452,31 +452,18 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <div class="d-flex align-items-center gap-1">
+                                                    @if($row['employees_count'] > 0)
                                                         <button type="button" 
                                                                 class="btn btn-sm btn-soft-primary py-1 px-2 d-inline-flex align-items-center view-ledger-employees-btn"
                                                                 data-month="{{ $row['month_label'] }}"
                                                                 data-employees="{{ json_encode($row['employees_detail']) }}"
-                                                                title="Click icon to open popup and list employees">
+                                                                title="Click to view employees in popup">
                                                             <i class="ri-team-line me-1"></i>
-                                                            <span>{{ $row['employees_count'] }} Employees</span>
+                                                            <span>{{ $row['employees_count'] }} {{ Str::plural('Employee', $row['employees_count']) }}</span>
                                                             <i class="ri-eye-line ms-1 text-primary"></i>
                                                         </button>
-                                                    </div>
-                                                    @if(!empty($row['employees_detail']))
-                                                        <div class="small text-muted mt-1">
-                                                            @foreach(array_slice($row['employees_detail'], 0, 2) as $ed)
-                                                                <span class="d-inline-block me-1">• {{ $ed['name'] }} (₹{{ number_format($ed['salary'], 2) }})</span>
-                                                            @endforeach
-                                                            @if(count($row['employees_detail']) > 2)
-                                                                <a href="javascript:void(0);" 
-                                                                   class="view-ledger-employees-btn text-primary fw-medium"
-                                                                   data-month="{{ $row['month_label'] }}"
-                                                                   data-employees="{{ json_encode($row['employees_detail']) }}">
-                                                                    +{{ count($row['employees_detail']) - 2 }} more <i class="ri-external-link-line"></i>
-                                                                </a>
-                                                            @endif
-                                                        </div>
+                                                    @else
+                                                        <span class="text-muted fs-12">—</span>
                                                     @endif
                                                 </td>
                                                 <td>
@@ -849,10 +836,27 @@
             </div>
             @endif
 
+            <style>
+            /* High z-index & backdrop stacking fix for Ledger Employees Modal */
+            #ledgerEmployeesModal {
+                z-index: 1080 !important;
+            }
+            #ledgerEmployeesModal .modal-dialog {
+                z-index: 1085 !important;
+                position: relative !important;
+            }
+            #ledgerEmployeesModal .modal-content {
+                background-color: #ffffff !important;
+                position: relative !important;
+                z-index: 1090 !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+            }
+            </style>
+
             <!-- Mapped Employees List Modal -->
-            <div class="modal fade" id="ledgerEmployeesModal" tabindex="-1" aria-labelledby="ledgerEmployeesModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content border-0 shadow">
+            <div class="modal fade" id="ledgerEmployeesModal" tabindex="-1" aria-labelledby="ledgerEmployeesModalLabel" aria-hidden="true" style="z-index: 1080 !important;">
+                <div class="modal-dialog modal-dialog-centered modal-lg" style="z-index: 1085 !important;">
+                    <div class="modal-content border-0 shadow" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important;">
                         <div class="modal-header bg-primary text-white py-3">
                             <div class="d-flex align-items-center gap-2">
                                 <i class="ri-team-line fs-20"></i>
@@ -897,8 +901,19 @@
 
 @section('script')
 <script>
+function ensureLedgerModalInBody() {
+    var modal = document.getElementById('ledgerEmployeesModal');
+    if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+}
+
 $(document).ready(function() {
+    ensureLedgerModalInBody();
+
     $(document).on('click', '.view-ledger-employees-btn', function() {
+        ensureLedgerModalInBody();
+
         var month = $(this).data('month') || '';
         var emps = $(this).data('employees');
         if (typeof emps === 'string') {
@@ -945,8 +960,17 @@ $(document).ready(function() {
         }
 
         $('#ledgerEmployeesTbody').html(tbody);
-        var modal = new bootstrap.Modal(document.getElementById('ledgerEmployeesModal'));
-        modal.show();
+
+        var modalEl = document.getElementById('ledgerEmployeesModal');
+        if (modalEl && window.bootstrap) {
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    });
+
+    $('#ledgerEmployeesModal').on('hidden.bs.modal', function () {
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
     });
 });
 </script>

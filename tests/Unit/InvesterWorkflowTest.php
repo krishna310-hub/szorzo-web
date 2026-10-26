@@ -661,6 +661,14 @@ class InvesterWorkflowTest extends TestCase
         $this->assertStringContainsString('view-ledger-employees-btn', $dashboardContent);
         $this->assertStringContainsString('id="ledgerEmployeesModal"', $dashboardContent);
         $this->assertStringContainsString('ri-eye-line', $dashboardContent);
+
+        // 4. Verify popup z-index stacking fix and list removal
+        $this->assertStringContainsString('ensureLedgerModalInBody()', $dashboardContent);
+        $this->assertStringContainsString('z-index: 1080 !important;', $dashboardContent);
+        $this->assertStringNotContainsString('array_slice($row[\'employees_detail\'], 0, 2)', $dashboardContent);
+
+        $this->assertStringContainsString('ensureDeploymentModalInBody()', $deploymentsIndexContent);
+        $this->assertStringContainsString('z-index: 1080 !important;', $deploymentsIndexContent);
     }
 }
 

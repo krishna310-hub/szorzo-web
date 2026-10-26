@@ -124,10 +124,27 @@
                 </div>
             </div>
 
+            <style>
+            /* High z-index & backdrop stacking fix for Deployment Employees Modal */
+            #deploymentEmployeesModal {
+                z-index: 1080 !important;
+            }
+            #deploymentEmployeesModal .modal-dialog {
+                z-index: 1085 !important;
+                position: relative !important;
+            }
+            #deploymentEmployeesModal .modal-content {
+                background-color: #ffffff !important;
+                position: relative !important;
+                z-index: 1090 !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+            }
+            </style>
+
             <!-- Deployment Employees Modal -->
-            <div class="modal fade" id="deploymentEmployeesModal" tabindex="-1" aria-labelledby="deploymentEmployeesModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content border-0 shadow">
+            <div class="modal fade" id="deploymentEmployeesModal" tabindex="-1" aria-labelledby="deploymentEmployeesModalLabel" aria-hidden="true" style="z-index: 1080 !important;">
+                <div class="modal-dialog modal-dialog-centered modal-lg" style="z-index: 1085 !important;">
+                    <div class="modal-content border-0 shadow" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important;">
                         <div class="modal-header bg-primary text-white py-3">
                             <div class="d-flex align-items-center gap-2">
                                 <i class="ri-team-line fs-20"></i>
@@ -172,7 +189,15 @@
 
 @section('script')
 <script>
+function ensureDeploymentModalInBody() {
+    var modal = document.getElementById('deploymentEmployeesModal');
+    if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+}
+
 $(document).ready(function () {
+    ensureDeploymentModalInBody();
     var table = $('#deployments-datatable').DataTable({
         processing: true,
         serverSide: true,
@@ -256,8 +281,17 @@ $(document).ready(function () {
         }
 
         $('#deploymentEmployeesTbody').html(tbody);
-        var modal = new bootstrap.Modal(document.getElementById('deploymentEmployeesModal'));
-        modal.show();
+        ensureDeploymentModalInBody();
+        var modalEl = document.getElementById('deploymentEmployeesModal');
+        if (modalEl && window.bootstrap) {
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    });
+
+    $('#deploymentEmployeesModal').on('hidden.bs.modal', function () {
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
     });
 
     $(document).on('click', '.delete-btn', function () {
