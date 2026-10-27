@@ -49,6 +49,11 @@ $(function () {
     var table = $('#profile-sourced-table').DataTable({
         processing: true,
         serverSide: true,
+        scrollX: true,
+        scrollCollapse: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
         ajax: { url: '{{ route('admin.profile-sourced.index') }}', data: function (data) { Object.assign(data, filters); } },
         order: [[8, 'desc']],
         columns: [

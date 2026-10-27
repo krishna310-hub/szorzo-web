@@ -14,6 +14,9 @@
                                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#employeeFilterOffcanvas">
                                         <i class="ri-filter-3-line me-1"></i>Filter
                                     </button>
+                                    <a href="{{ route('admin.employees.export') }}" id="employee-export-btn" class="btn btn-sm btn-success">
+                                        <i class="ri-file-excel-2-line me-1"></i>Export
+                                    </a>
                                     @can('create', \App\Models\Employee::class)
                                     @if(in_array($employeeAccess, ['super-admin', 'delivery-lead', 'recruiter-dl'], true))
                                     <form method="POST" action="{{ route('admin.employees.generate-link') }}">@csrf
@@ -441,9 +444,21 @@
                 ]
             });
 
+            var employeeExportBaseUrl = @json(route('admin.employees.export'));
+
+            function updateEmployeeExportUrl() {
+                var params = $('#employee-filter-form').serialize();
+                var search = table.search();
+                if (search) {
+                    params += (params ? '&' : '') + 'search=' + encodeURIComponent(search);
+                }
+                $('#employee-export-btn').attr('href', employeeExportBaseUrl + (params ? '?' + params : ''));
+            }
+
             $('#employee-filter-form').on('submit', function(e) {
                 e.preventDefault();
                 table.ajax.reload();
+                updateEmployeeExportUrl();
                 var offcanvasEl = document.getElementById('employeeFilterOffcanvas');
                 if (offcanvasEl && window.bootstrap) {
                     var bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
@@ -453,7 +468,18 @@
 
             $('#employee-filter-reset').on('click', function() {
                 $('#employee-filter-form')[0].reset();
+                $('#employee-filter-form').find('input, select').val('');
                 table.ajax.reload();
+                updateEmployeeExportUrl();
+                var offcanvasEl = document.getElementById('employeeFilterOffcanvas');
+                if (offcanvasEl && window.bootstrap) {
+                    var bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+                    if (bsOffcanvas) bsOffcanvas.hide();
+                }
+            });
+
+            table.on('search.dt', function() {
+                updateEmployeeExportUrl();
             });
 
             function ensureChecklistModalInBody() {

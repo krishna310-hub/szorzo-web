@@ -17,6 +17,9 @@ class ClientProfileController extends Controller
             return DataTables::of($this->visibleProfiles()->with('assignee')->latest())
                 ->addIndexColumn()
                 ->addColumn('assignee_name', fn ($row) => $row->assignee?->name ?? 'Unassigned')
+                ->filterColumn('assignee_name', function ($query, $keyword) {
+                    $query->whereHas('assignee', fn ($q) => $q->where('name', 'like', "%{$keyword}%"));
+                })
                 ->editColumn('status', fn ($row) => $row->status
                     ? '<span class="badge bg-success-subtle text-success">Active</span>'
                     : '<span class="badge bg-danger-subtle text-danger">Inactive</span>')

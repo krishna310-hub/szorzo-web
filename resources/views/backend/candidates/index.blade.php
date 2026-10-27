@@ -162,6 +162,15 @@
                     @endforeach
                 </select>
             </div>
+            <div>
+                <label for="filter_mode_id" class="form-label">Mode (Contract / FTE)</label>
+                <select class="form-select" id="filter_mode_id" name="mode_id">
+                    <option value="">All modes (Contract / FTE)</option>
+                    @foreach ($modes as $mode)
+                        <option value="{{ $mode->id }}">{{ $mode->mode }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="mt-auto d-flex gap-2 border-top pt-3">
                 <button type="button" class="btn btn-light w-50" id="candidate-filter-reset">Reset</button>
                 <button type="submit" class="btn btn-primary w-50">Apply</button>
@@ -362,11 +371,23 @@
             });
 
             $('#candidate-filter-reset').on('click', function() {
-                $('#candidate-filter-form')[0].reset();
+                var form = $('#candidate-filter-form');
+                form[0].reset();
+                form.find('input[type="date"], input[type="text"]').val('');
+                form.find('select:not([disabled])').val('');
                 interviewLevelFilter.removeActiveItems();
-                currentFilters = {};
+                filterJobRolesByClient();
+                currentFilters = collectFilters();
                 updateExportUrl();
                 table.ajax.reload();
+
+                var offcanvasEl = document.getElementById('candidateFilterOffcanvas');
+                if (offcanvasEl && window.bootstrap) {
+                    var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+                    if (offcanvas) {
+                        offcanvas.hide();
+                    }
+                }
             });
 
             $(document).on('click', '.delete-record', function() {

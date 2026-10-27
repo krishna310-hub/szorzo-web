@@ -111,6 +111,37 @@ class AttendanceController extends Controller
         return view('backend.attendance.monthly',compact('users','days','month','year')+['allUsers'=>User::eligibleForAttendance()->orderBy('name')->get(['id','name'])]);
     }
 
+    public function monthlyExport(Request $request, string $format = 'xlsx')
+    {
+        $this->authorize('export', Attendance::class);
+        abort_unless(in_array($format, ['csv', 'xlsx'], true), 404);
+
+        $validated = $request->validate([
+            'month' => ['nullable', 'integer', 'between:1,12'],
+            'year' => ['nullable', 'integer', 'between:2000,2100'],
+            'user_id' => ['nullable', 'integer'],
+        ]);
+        $month = (int) ($validated['month'] ?? now()->month);
+        $year = (int) ($validated['year'] ?? now()->year);
+        $start = CarbonImmutable::create($year, $month, 1);
+        $days = range(1, $start->daysInMonth);
+
+        $users = User::eligibleForAttendance()
+            ->when($validated['user_id'] ?? null, fn ($q, $id) => $q->whereKey($id))
+            ->with(['attendances' => fn ($q) => $q->whereBetween('attendance_date', [$start, $start->endOfMonth()])])
+            ->orderBy('name')
+            ->get();
+
+        $monthName = date('F', mktime(0, 0, 0, $month, 1));
+        $name = 'monthly-attendance-' . strtolower($monthName) . '-' . $year . '-' . now()->format('Ymd-His');
+
+        return Excel::download(
+            new \App\Exports\AttendanceMonthlyExport($users, $days, $month, $year),
+            $name . '.' . $format,
+            $format === 'csv' ? \Maatwebsite\Excel\Excel::CSV : \Maatwebsite\Excel\Excel::XLSX
+        );
+    }
+
     public function report(Request $request)
     {
         $this->authorize('read', Attendance::class);

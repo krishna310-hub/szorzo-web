@@ -5,9 +5,14 @@
 <div class="main-content atl-shell">
     <div class="page-content">
         <div class="container-fluid">
-            <div class="d-flex justify-content-between mb-3">
-                <h3>Monthly Attendance</h3>
-                <a class="btn btn-outline-dark" href="{{ route('admin.attendance.dashboard') }}">Dashboard</a>
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h3 class="mb-0">Monthly Attendance</h3>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-success" href="{{ route('admin.attendance.monthly.export', ['month' => $month, 'year' => $year, 'user_id' => request('user_id')]) }}">
+                        <i class="ri-file-excel-2-line me-1"></i> Export Excel
+                    </a>
+                    <a class="btn btn-outline-dark" href="{{ route('admin.attendance.dashboard') }}">Dashboard</a>
+                </div>
             </div>
 
             <div class="card atl-card mb-3">

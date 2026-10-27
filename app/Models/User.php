@@ -220,7 +220,13 @@ class User extends Authenticatable
     public function scopeEligibleForAttendance(Builder $query): Builder
     {
         return $query->where('is_active', 1)
-            ->whereHas('role', fn (Builder $role) => $role->where('access_level', '!=', 'super_admin'));
+            ->where(function (Builder $q) {
+                $q->whereNull('role_id')
+                    ->orWhere('role_id', '!=', 6);
+            })
+            ->whereHas('role', fn (Builder $role) => $role
+                ->whereNotIn('access_level', ['super_admin', 'invester', 'investor'])
+                ->whereNotIn('name', ['invester', 'investor']));
     }
 
     /**
@@ -229,7 +235,13 @@ class User extends Authenticatable
      */
     public function scopeEmployedOn(Builder $query, string $date): Builder
     {
-        return $query->whereHas('role', fn (Builder $role) => $role->where('access_level', '!=', 'super_admin'))
+        return $query->where(function (Builder $q) {
+                $q->whereNull('role_id')
+                    ->orWhere('role_id', '!=', 6);
+            })
+            ->whereHas('role', fn (Builder $role) => $role
+                ->whereNotIn('access_level', ['super_admin', 'invester', 'investor'])
+                ->whereNotIn('name', ['invester', 'investor']))
             ->whereExists(function ($employee) use ($date) {
                 $employee->selectRaw('1')->from('employees')
                     ->whereNull('employees.deleted_at')

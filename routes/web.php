@@ -136,6 +136,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::post('/', 'store')->name('store');
         Route::put('/{attendance}', 'update')->name('update');
         Route::get('/monthly/view', 'monthly')->name('monthly');
+        Route::get('/monthly/export/{format?}', 'monthlyExport')->name('monthly.export');
         Route::get('/reports/view', 'report')->name('report');
         Route::get('/reports/export/{format}', 'export')->name('export');
     });
@@ -301,6 +302,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
 
         Route::prefix('employees')->name('employees.')->controller(EmployeeController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/export', 'export')->name('export');
             Route::post('/generate-link', 'generateLink')->name('generate-link');
             Route::post('/{id}/activate', 'activate')->name('activate');
             Route::get('/{id}/checklist', 'checklist')->name('checklist');

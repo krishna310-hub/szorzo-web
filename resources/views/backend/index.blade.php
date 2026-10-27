@@ -1806,17 +1806,21 @@
                         </div>
                     </div>
                 @endif
-                {{-- <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
-                    <label for="dashboardChartYear" class="form-label mb-0 fw-semibold">Financial Year</label>
-                    <select id="dashboardChartYear" class="form-select form-select-sm" style="width: 150px"
-                        data-url="{{ route('admin.dashboard.year-charts') }}"
-                        data-recruiter="{{ $selectedRecruiterId }}" data-client="{{ $selectedClientId }}">
-                        @for($year = $chartYear + 1; $year >= $chartYear - 9; $year--)
-                            <option value="{{ $year }}" {{ $year === $chartYear ? 'selected' : '' }}>{{ $year }}-{{ $year + 1 }}</option>
-                        @endfor
-                    </select>
-                    <span id="dashboardChartLoading" class="spinner-border spinner-border-sm text-primary d-none" role="status" aria-label="Loading"></span>
-                </div> --}}
+                <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
+                    <div class="d-flex align-items-center bg-white px-3 py-2 rounded-3 border shadow-sm">
+                        <label for="dashboardChartYear" class="form-label mb-0 fw-semibold me-2 text-muted fs-12">
+                            <i class="ri-calendar-line text-primary me-1"></i> Financial Year:
+                        </label>
+                        <select id="dashboardChartYear" class="form-select form-select-sm border-0 fw-bold text-primary" style="width: 140px; background-color: #f8fafc;"
+                            data-url="{{ route('admin.dashboard.year-charts') }}"
+                            data-recruiter="{{ $selectedRecruiterId }}" data-client="{{ $selectedClientId }}">
+                            @for($year = $chartYear + 1; $year >= $chartYear - 9; $year--)
+                                <option value="{{ $year }}" {{ $year === $chartYear ? 'selected' : '' }}>FY {{ $year }}-{{ $year + 1 }}</option>
+                            @endfor
+                        </select>
+                        <span id="dashboardChartLoading" class="spinner-border spinner-border-sm text-primary ms-2 d-none" role="status" aria-label="Loading"></span>
+                    </div>
+                </div>
                 <div id="yearWiseDashboardCharts">
                 <div class="row g-4 mb-4">
                     @can('read', \App\Models\Candidate::class)

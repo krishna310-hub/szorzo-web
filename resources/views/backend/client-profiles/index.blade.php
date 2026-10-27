@@ -48,7 +48,13 @@
 <script>
 $(document).ready(function () {
     var table = $('#datatable').DataTable({
-        processing: true, serverSide: true, scrollX: true,
+        processing: true,
+        serverSide: true,
+        scrollX: true,
+        scrollCollapse: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
         ajax: { url: '{{ route('admin.client-profiles.index') }}', type: 'GET' },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },

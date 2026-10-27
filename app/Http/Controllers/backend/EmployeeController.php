@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\backend;
 
+use App\Exports\EmployeeExport;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Employee;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class EmployeeController extends Controller
@@ -159,6 +161,51 @@ class EmployeeController extends Controller
         $clients = Client::orderBy('client', 'asc')->get(['id', 'client']);
 
         return view('backend.employees.index', compact('clients'));
+    }
+
+    public function export(Request $request)
+    {
+        $this->authorize('read', Employee::class);
+
+        $query = Employee::with(['client', 'mode'])->orderBy('employee_no', 'asc');
+
+        if ($request->filled('doj_from')) {
+            $query->whereDate('date_of_joining', '>=', $request->input('doj_from'));
+        }
+        if ($request->filled('doj_to')) {
+            $query->whereDate('date_of_joining', '<=', $request->input('doj_to'));
+        }
+        if ($request->filled('employment_type')) {
+            $query->where('employment_type', $request->input('employment_type'));
+        }
+        if ($request->filled('salary_slip')) {
+            $query->where('salary_slip', $request->input('salary_slip'));
+        }
+        if ($request->filled('client_id')) {
+            $query->where('client_id', $request->input('client_id'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', (int) $request->input('status'));
+        }
+
+        $search = trim((string) $request->input('search'));
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('employee_no', 'like', "%{$search}%")
+                    ->orWhere('employee_name', 'like', "%{$search}%")
+                    ->orWhere('designation', 'like', "%{$search}%")
+                    ->orWhere('employment_type', 'like', "%{$search}%")
+                    ->orWhere('salary_slip', 'like', "%{$search}%")
+                    ->orWhereHas('client', function ($clientQ) use ($search) {
+                        $clientQ->where('client', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $employees = $query->get();
+        $fileName = 'employees-export-' . now()->format('Ymd-His') . '.xlsx';
+
+        return Excel::download(new EmployeeExport($employees), $fileName);
     }
 
     public function create()
