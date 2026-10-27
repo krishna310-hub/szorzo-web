@@ -368,16 +368,15 @@
                 </div>
             </div>
 
-            <!-- Profit Sharing Model Visual Card (Modern UI Redesign) -->
+            <!-- Profit Sharing Model Visual Card (Modern UI Redesign) (Circle UI Design) -->
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card shadow-sm border border-light-subtle rounded-3">
-                        <div class="card-body p-3 p-md-4">
-                            <!-- Card Header -->
-                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2 border-bottom border-light">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-xs d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle me-2">
-                                        <i class="ri-pie-chart-2-line fs-17"></i>
+                    <div class="card shadow-sm border border-light-subtle rounded-4 overflow-hidden">
+                        <div class="card-header bg-white border-bottom border-light py-3 px-3 px-md-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-sm d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle shadow-sm" style="width: 38px; height: 38px;">
+                                        <i class="ri-pie-chart-2-line fs-18"></i>
                                     </div>
                                     <div>
                                         <h6 class="mb-0 fw-bold fs-15 text-dark">
@@ -397,7 +396,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-12 px-3 py-1 rounded-pill">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-12 px-3 py-1 rounded-pill shadow-sm">
                                         <i class="ri-scales-3-line me-1"></i>
                                         @if($isInvestor)
                                             30% Profit Split (After TDS)
@@ -407,111 +406,254 @@
                                     </span>
                                 </div>
                             </div>
+                        </div>
 
+                        <div class="card-body p-3 p-md-4 bg-light-subtle">
                             @if(!$isInvestor)
-                                <!-- Admin / Management View: 3 Stat Cards + Segmented Gradient Track -->
+                                <!-- Admin / Management View: Circular Donut Chart + Circular Metric Cards -->
                                 @php
                                     $netMarginVal = $metrics['total_net_margin'] ?? ($metrics['total_margin'] - ($metrics['total_tds'] ?? 0));
                                     $totalComms = $metrics['total_szorzo_share'] + $metrics['total_investor_share'];
                                     $szPct = $totalComms > 0 ? round(($metrics['total_szorzo_share'] / $totalComms) * 100) : 70;
                                     $invPct = 100 - $szPct;
                                 @endphp
-                                <div class="row g-3 mb-3">
-                                    <!-- Net Margin Base -->
-                                    <div class="col-lg-4 col-md-12">
-                                        <div class="p-3 rounded-3 border bg-light h-100">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="text-muted text-uppercase fw-semibold fs-11">Net Margin (After TDS)</span>
-                                                <span class="badge bg-warning-subtle text-warning fs-11">Base Pool</span>
-                                            </div>
-                                            <h4 class="fw-bold text-dark mb-1">₹ {{ number_format($netMarginVal, 2) }}</h4>
-                                            <small class="text-muted fs-11">
-                                                Gross: ₹ {{ number_format($metrics['total_margin'], 2) }} &bull; Less TDS (10%): -₹ {{ number_format($metrics['total_tds'] ?? 0, 2) }}
-                                            </small>
-                                        </div>
-                                    </div>
 
-                                    <!-- Szorzo Share (70%) -->
-                                    <div class="col-lg-4 col-md-6">
-                                        <div class="p-3 rounded-3 border h-100" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #bfdbfe !important;">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="text-primary text-uppercase fw-bold fs-12">
-                                                    <i class="ri-building-line me-1"></i> Szorzo Share (70%)
+                                <div class="row align-items-stretch g-3 g-xl-4">
+                                    <!-- Left Column: Circular Donut Split Chart -->
+                                    <div class="col-lg-4 col-md-5">
+                                        <div class="p-3 rounded-4 border bg-white shadow-sm h-100 d-flex flex-column justify-content-between align-items-center text-center" style="background: radial-gradient(circle at center, #ffffff 65%, #f8fafc 100%); min-height: 280px;">
+                                            <div class="d-flex align-items-center justify-content-between w-100 mb-1">
+                                                <span class="fs-11 fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">
+                                                    <i class="ri-donut-chart-line text-primary me-1"></i> Allocation Circle
                                                 </span>
-                                                <span class="badge bg-primary text-white fs-11 fw-semibold">70.0% Allocation</span>
-                                            </div>
-                                            <h4 class="fw-bold text-primary mb-1">₹ {{ number_format($metrics['total_szorzo_share'], 2) }}</h4>
-                                            <small class="text-primary-emphasis fs-11">Company retained operations & management share</small>
-                                        </div>
-                                    </div>
-
-                                    <!-- Investor Share (30%) -->
-                                    <div class="col-lg-4 col-md-6">
-                                        <div class="p-3 rounded-3 border h-100" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0 !important;">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="text-success text-uppercase fw-bold fs-12">
-                                                    <i class="ri-user-star-line me-1"></i> Investor Share (30%)
+                                                <span class="badge bg-light text-dark border rounded-pill fs-11">
+                                                    70 : 30 Ratio
                                                 </span>
-                                                <span class="badge bg-success text-white fs-11 fw-semibold">30.0% Allocation</span>
                                             </div>
-                                            <h4 class="fw-bold text-success mb-1">₹ {{ number_format($metrics['total_investor_share'], 2) }}</h4>
-                                            <small class="text-success-emphasis fs-11">Net profit share payable to investor</small>
+
+                                            <!-- ApexCharts Container -->
+                                            <div id="profit-sharing-donut-chart" class="apex-charts w-100 my-auto" style="min-height: 220px;"></div>
+
+                                            <!-- Sleek Circular Legend Badges -->
+                                            <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap w-100 pt-2 border-top border-light">
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 fs-11 rounded-pill d-inline-flex align-items-center">
+                                                    <span class="rounded-circle me-1" style="width: 8px; height: 8px; background-color: #2563eb; display: inline-block;"></span>
+                                                    SZ: {{ $szPct }}% (₹ {{ number_format($metrics['total_szorzo_share'], 2) }})
+                                                </span>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-11 rounded-pill d-inline-flex align-items-center">
+                                                    <span class="rounded-circle me-1" style="width: 8px; height: 8px; background-color: #10b981; display: inline-block;"></span>
+                                                    Inv: {{ $invPct }}% (₹ {{ number_format($metrics['total_investor_share'], 2) }})
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Progress Visual Track with Labels -->
-                                <div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1 fs-12 fw-semibold">
-                                        <span class="text-primary">
-                                            <i class="ri-checkbox-blank-circle-fill fs-10 me-1"></i> Szorzo Split: {{ $szPct }}% (₹ {{ number_format($metrics['total_szorzo_share'], 2) }})
-                                        </span>
-                                        <span class="text-success">
-                                            <i class="ri-checkbox-blank-circle-fill fs-10 me-1"></i> Investor Split: {{ $invPct }}% (₹ {{ number_format($metrics['total_investor_share'], 2) }})
-                                        </span>
-                                    </div>
-                                    <div class="progress" style="height: 12px; border-radius: 6px; background-color: #e2e8f0; overflow: hidden;">
-                                        <div class="progress-bar" role="progressbar" style="width: {{ $szPct }}%; background: linear-gradient(90deg, #2563eb, #3b82f6);" aria-valuenow="{{ $szPct }}" aria-valuemin="0" aria-valuemax="100" title="Szorzo: {{ $szPct }}%"></div>
-                                        <div class="progress-bar" role="progressbar" style="width: {{ $invPct }}%; background: linear-gradient(90deg, #10b981, #059669);" aria-valuenow="{{ $invPct }}" aria-valuemin="0" aria-valuemax="100" title="Investor: {{ $invPct }}%"></div>
+                                    <!-- Right Column: 3 Circular Financial Cards -->
+                                    <div class="col-lg-8 col-md-7">
+                                        <div class="d-flex flex-column gap-3 h-100 justify-content-between">
+                                            <!-- Card 1: Net Margin Base Pool (Full Width) -->
+                                            <div class="p-3 rounded-4 border bg-white shadow-sm">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="avatar-sm rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 36px; height: 36px;">
+                                                            <i class="ri-scales-3-line fs-18"></i>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-muted text-uppercase fw-bold fs-11 d-block" style="letter-spacing: 0.5px;">Net Margin Base Pool</span>
+                                                            <span class="fs-12 text-muted">Distributable pool after statutory deductions</span>
+                                                        </div>
+                                                    </div>
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2 py-1 fs-11 fw-semibold">
+                                                        <i class="ri-checkbox-blank-circle-fill fs-8 me-1 text-warning"></i> 100% Base Pool
+                                                    </span>
+                                                </div>
+
+                                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top border-light">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="flex-shrink-0" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                                                            <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform: rotate(-90deg);">
+                                                                <path stroke="#fef3c7" stroke-width="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                                <path stroke="#f59e0b" stroke-width="3.5" stroke-dasharray="100, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="fw-bold text-dark mb-0">₹ {{ number_format($netMarginVal, 2) }}</h3>
+                                                            <small class="text-muted fs-11">Net profit after 10% TDS deduction</small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-flex flex-column align-items-end fs-12 text-muted">
+                                                        <span>Gross Margin: <strong class="text-dark">₹ {{ number_format($metrics['total_margin'], 2) }}</strong></span>
+                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-0 fs-11 mt-1">
+                                                            Less TDS (10%): -₹ {{ number_format($metrics['total_tds'] ?? 0, 2) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Cards 2 & 3: Side by Side (Szorzo 70% & Investor 30%) -->
+                                            <div class="row g-3">
+                                                <!-- Szorzo Share (70%) -->
+                                                <div class="col-md-6">
+                                                    <div class="p-3 rounded-4 border h-100 shadow-sm" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #bfdbfe !important;">
+                                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                                            <div class="avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
+                                                                <i class="ri-building-line fs-18"></i>
+                                                            </div>
+                                                            <span class="badge bg-primary text-white rounded-pill px-2 py-1 fs-11 fw-semibold shadow-sm">
+                                                                <i class="ri-checkbox-blank-circle-fill fs-8 me-1 text-white"></i> {{ $szPct }}% Share
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="d-flex align-items-center justify-content-between gap-2">
+                                                            <div>
+                                                                <span class="text-primary text-uppercase fw-bold fs-11 d-block" style="letter-spacing: 0.5px;">Szorzo Operations Share</span>
+                                                                <h4 class="fw-bold text-primary mb-0">₹ {{ number_format($metrics['total_szorzo_share'], 2) }}</h4>
+                                                                <small class="text-primary-emphasis fs-11 d-block mt-1">Company retained operations & talent management</small>
+                                                            </div>
+
+                                                            <div class="flex-shrink-0" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                                                                <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform: rotate(-90deg);">
+                                                                    <path stroke="#bfdbfe" stroke-width="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                                    <path stroke="#2563eb" stroke-width="3.5" stroke-dasharray="{{ $szPct }}, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Investor Share (30%) -->
+                                                <div class="col-md-6">
+                                                    <div class="p-3 rounded-4 border h-100 shadow-sm" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0 !important;">
+                                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                                            <div class="avatar-sm rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
+                                                                <i class="ri-user-star-line fs-18"></i>
+                                                            </div>
+                                                            <span class="badge bg-success text-white rounded-pill px-2 py-1 fs-11 fw-semibold shadow-sm">
+                                                                <i class="ri-checkbox-blank-circle-fill fs-8 me-1 text-white"></i> {{ $invPct }}% Share
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="d-flex align-items-center justify-content-between gap-2">
+                                                            <div>
+                                                                <span class="text-success text-uppercase fw-bold fs-11 d-block" style="letter-spacing: 0.5px;">Investor Profit Share</span>
+                                                                <h4 class="fw-bold text-success mb-0">₹ {{ number_format($metrics['total_investor_share'], 2) }}</h4>
+                                                                <small class="text-success-emphasis fs-11 d-block mt-1">Net profit share payable to investor post TDS</small>
+                                                            </div>
+
+                                                            <div class="flex-shrink-0" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                                                                <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform: rotate(-90deg);">
+                                                                    <path stroke="#a7f3d0" stroke-width="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                                    <path stroke="#10b981" stroke-width="3.5" stroke-dasharray="{{ $invPct }}, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             @else
-                                <!-- Investor Login View: Zero Szorzo exposure, elegant 2-card KPI + Yield Progress -->
+                                <!-- Investor Login View: Zero Szorzo exposure, Circular Radial Share Gauge + 2 Cards -->
                                 @php
                                     $netMarginVal = $metrics['total_net_margin'] ?? ($metrics['total_margin'] - ($metrics['total_tds'] ?? 0));
                                 @endphp
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <div class="p-3 rounded-3 border bg-light h-100">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="text-muted text-uppercase fw-semibold fs-11">Net Margin Generated</span>
-                                                <span class="badge bg-secondary-subtle text-secondary fs-11">After 10% TDS</span>
-                                            </div>
-                                            <h4 class="fw-bold text-dark mb-1">₹ {{ number_format($netMarginVal, 2) }}</h4>
-                                            <small class="text-muted fs-11">Across {{ $metrics['total_employees'] }} active mapped talent deployment(s)</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="p-3 rounded-3 border h-100" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0 !important;">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <span class="text-success text-uppercase fw-bold fs-12">
-                                                    <i class="ri-hand-coin-line me-1"></i> Your Net Profit Share (30%)
-                                                </span>
-                                                <span class="badge bg-success text-white fs-11 fw-semibold">30.0% Net Share</span>
-                                            </div>
-                                            <h4 class="fw-bold text-success mb-1">₹ {{ number_format($metrics['total_investor_share'], 2) }}</h4>
-                                            <small class="text-success-emphasis fs-11">Net investor profit yield credited after TDS</small>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1 fs-12 fw-semibold">
-                                        <span class="text-muted">Profit Share Entitlement: <strong>30% of Net Margin</strong></span>
-                                        <span class="text-success fw-bold">Earned: ₹ {{ number_format($metrics['total_investor_share'], 2) }}</span>
+                                <div class="row align-items-stretch g-3 g-xl-4">
+                                    <!-- Left Column: Circular Radial Gauge (30% Share) -->
+                                    <div class="col-lg-4 col-md-5">
+                                        <div class="p-3 rounded-4 border bg-white shadow-sm h-100 d-flex flex-column justify-content-between align-items-center text-center" style="background: radial-gradient(circle at center, #ffffff 65%, #f0fdf4 100%); min-height: 280px;">
+                                            <div class="d-flex align-items-center justify-content-between w-100 mb-1">
+                                                <span class="fs-11 fw-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">
+                                                    <i class="ri-compass-3-line text-success me-1"></i> Profit Share Gauge
+                                                </span>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill fs-11">
+                                                    30% Net Model
+                                                </span>
+                                            </div>
+
+                                            <!-- ApexCharts Radial Container -->
+                                            <div id="investor-radial-chart" class="apex-charts w-100 my-auto" style="min-height: 220px;"></div>
+
+                                            <div class="w-100 pt-2 border-top border-light">
+                                                <span class="badge bg-success text-white px-3 py-1 fs-11 rounded-pill shadow-sm d-inline-flex align-items-center">
+                                                    <i class="ri-checkbox-circle-fill me-1"></i> Fixed 30% Net Profit Share
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="progress" style="height: 10px; border-radius: 5px; background-color: #e2e8f0; overflow: hidden;">
-                                        <div class="progress-bar" role="progressbar" style="width: 100%; background: linear-gradient(90deg, #10b981, #059669);" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+
+                                    <!-- Right Column: 2 Modern Investor Cards -->
+                                    <div class="col-lg-8 col-md-7">
+                                        <div class="d-flex flex-column gap-3 h-100 justify-content-between">
+                                            <!-- Card 1: Net Margin Generated -->
+                                            <div class="p-3 rounded-4 border bg-white shadow-sm">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="avatar-sm rounded-circle bg-secondary-subtle text-secondary d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 36px; height: 36px;">
+                                                            <i class="ri-scales-3-line fs-18"></i>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-muted text-uppercase fw-bold fs-11 d-block" style="letter-spacing: 0.5px;">Net Margin Generated</span>
+                                                            <span class="fs-12 text-muted">Across {{ $metrics['total_employees'] }} active mapped talent deployment(s)</span>
+                                                        </div>
+                                                    </div>
+                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2 py-1 fs-11 fw-semibold">
+                                                        After 10% TDS
+                                                    </span>
+                                                </div>
+
+                                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top border-light">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="flex-shrink-0" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                                                            <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform: rotate(-90deg);">
+                                                                <path stroke="#e2e8f0" stroke-width="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                                <path stroke="#64748b" stroke-width="3.5" stroke-dasharray="100, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="fw-bold text-dark mb-0">₹ {{ number_format($netMarginVal, 2) }}</h3>
+                                                            <small class="text-muted fs-11">Net pool basis after TDS deduction</small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-flex flex-column align-items-end fs-12 text-muted">
+                                                        <span>Gross Margin: <strong class="text-dark">₹ {{ number_format($metrics['total_margin'], 2) }}</strong></span>
+                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-0 fs-11 mt-1">
+                                                            Less TDS (10%): -₹ {{ number_format($metrics['total_tds'] ?? 0, 2) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card 2: Your Net Profit Share (30%) -->
+                                            <div class="p-3 rounded-4 border shadow-sm" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0 !important;">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <div class="avatar-sm rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px;">
+                                                        <i class="ri-hand-coin-line fs-18"></i>
+                                                    </div>
+                                                    <span class="badge bg-success text-white rounded-pill px-3 py-1 fs-11 fw-semibold shadow-sm">
+                                                        <i class="ri-checkbox-blank-circle-fill fs-8 me-1 text-white"></i> 30.0% Allocation
+                                                    </span>
+                                                </div>
+
+                                                <div class="d-flex align-items-center justify-content-between gap-2">
+                                                    <div>
+                                                        <span class="text-success text-uppercase fw-bold fs-11 d-block" style="letter-spacing: 0.5px;">Your Net Profit Share (30%)</span>
+                                                        <h2 class="fw-bold text-success mb-0">₹ {{ number_format($metrics['total_investor_share'], 2) }}</h2>
+                                                        <small class="text-success-emphasis fs-11 d-block mt-1">Net profit share payable directly to your investor account</small>
+                                                    </div>
+
+                                                    <div class="flex-shrink-0" style="width: 50px; height: 50px; display: inline-flex; align-items: center; justify-content: center;">
+                                                        <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform: rotate(-90deg);">
+                                                            <path stroke="#a7f3d0" stroke-width="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                            <path stroke="#10b981" stroke-width="3.5" stroke-dasharray="30, 100" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             @endif
@@ -1302,6 +1444,169 @@ $(document).ready(function() {
             $('body').addClass('modal-open');
         }
     });
+
+    // Profit Sharing Model Circular Chart Initialization
+    @if(!$isInvestor)
+    (function initProfitSharingDonut() {
+        var chartEl = document.querySelector("#profit-sharing-donut-chart");
+        if (!chartEl || typeof ApexCharts === 'undefined') return;
+
+        var szVal = {{ (float) ($metrics['total_szorzo_share'] ?? 0) }};
+        var invVal = {{ (float) ($metrics['total_investor_share'] ?? 0) }};
+        var isZero = (szVal <= 0 && invVal <= 0);
+        var seriesData = isZero ? [70, 30] : [szVal, invVal];
+
+        var options = {
+            series: seriesData,
+            labels: ['Szorzo Share (70%)', 'Investor Share (30%)'],
+            chart: {
+                type: 'donut',
+                height: 220,
+                fontFamily: 'inherit'
+            },
+            colors: isZero ? ['#cbd5e1', '#94a3b8'] : ['#2563eb', '#10b981'],
+            stroke: {
+                width: 3,
+                colors: ['#ffffff']
+            },
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                show: false
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '76%',
+                        labels: {
+                            show: true,
+                            name: {
+                                show: true,
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                color: '#64748b',
+                                offsetY: -4
+                            },
+                            value: {
+                                show: true,
+                                fontSize: '18px',
+                                fontWeight: 700,
+                                color: '#0f172a',
+                                offsetY: 4,
+                                formatter: function (val) {
+                                    return isZero ? '0%' : '₹ ' + Number(val).toLocaleString('en-IN', {maximumFractionDigits: 0});
+                                }
+                            },
+                            total: {
+                                show: true,
+                                showAlways: true,
+                                label: 'NET POOL',
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                color: '#94a3b8',
+                                formatter: function (w) {
+                                    var total = isZero ? 0 : w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0);
+                                    return '₹ ' + Number(total).toLocaleString('en-IN', {maximumFractionDigits: 0});
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                enabled: !isZero,
+                y: {
+                    formatter: function (val) {
+                        return '₹ ' + Number(val).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    }
+                }
+            }
+        };
+
+        var chart = new ApexCharts(chartEl, options);
+        chart.render();
+    })();
+    @else
+    (function initInvestorRadialChart() {
+        var chartEl = document.querySelector("#investor-radial-chart");
+        if (!chartEl || typeof ApexCharts === 'undefined') return;
+
+        var options = {
+            series: [30],
+            chart: {
+                type: 'radialBar',
+                height: 220,
+                sparkline: {
+                    enabled: true
+                }
+            },
+            plotOptions: {
+                radialBar: {
+                    startAngle: -135,
+                    endAngle: 135,
+                    hollow: {
+                        margin: 0,
+                        size: '70%',
+                        background: '#ffffff',
+                        dropShadow: {
+                            enabled: true,
+                            top: 3,
+                            left: 0,
+                            blur: 4,
+                            opacity: 0.08
+                        }
+                    },
+                    track: {
+                        background: '#e2e8f0',
+                        strokeWidth: '100%',
+                        margin: 0
+                    },
+                    dataLabels: {
+                        show: true,
+                        name: {
+                            offsetY: -10,
+                            show: true,
+                            color: '#64748b',
+                            fontSize: '11px',
+                            fontWeight: 600
+                        },
+                        value: {
+                            formatter: function(val) {
+                                return parseInt(val) + "%";
+                            },
+                            color: '#10b981',
+                            fontSize: '24px',
+                            fontWeight: 700,
+                            show: true,
+                            offsetY: 6
+                        }
+                    }
+                }
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'dark',
+                    type: 'horizontal',
+                    shadeIntensity: 0.5,
+                    gradientToColors: ['#059669'],
+                    inverseColors: true,
+                    opacityFrom: 1,
+                    opacityTo: 1,
+                    stops: [0, 100]
+                }
+            },
+            stroke: {
+                lineCap: 'round'
+            },
+            labels: ['YOUR SHARE']
+        };
+
+        var chart = new ApexCharts(chartEl, options);
+        chart.render();
+    })();
+    @endif
 });
 </script>
 @endsection

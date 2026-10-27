@@ -751,5 +751,24 @@ class InvesterWorkflowTest extends TestCase
         $this->assertSame('kavya_offer_letter.pdf', $details['offer_letter_name']);
         $this->assertNotNull($details['offer_letter_url']);
     }
+
+    public function test_profit_sharing_model_circular_ui_design(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/invester-dashboard/index.blade.php');
+
+        // Check for circular donut chart container and radial gauge container
+        $this->assertStringContainsString('id="profit-sharing-donut-chart"', $dashboardContent);
+        $this->assertStringContainsString('id="investor-radial-chart"', $dashboardContent);
+
+        // Check for circular SVG gauges and circular percentage indicators
+        $this->assertStringContainsString('viewBox="0 0 36 36"', $dashboardContent);
+        $this->assertStringContainsString('stroke-dasharray="100, 100"', $dashboardContent);
+        $this->assertStringContainsString('initProfitSharingDonut', $dashboardContent);
+        $this->assertStringContainsString('initInvestorRadialChart', $dashboardContent);
+        $this->assertStringContainsString("type: 'donut'", $dashboardContent);
+        $this->assertStringContainsString("type: 'radialBar'", $dashboardContent);
+    }
 }
+
 
