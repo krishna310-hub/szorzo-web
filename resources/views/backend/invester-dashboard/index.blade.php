@@ -368,28 +368,153 @@
                 </div>
             </div>
 
-            <!-- Profit Sharing Model Visual Card -->
+            <!-- Profit Sharing Model Visual Card (Modern UI Redesign) -->
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card border">
-                        <div class="card-body p-3">
-                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-                                <h6 class="mb-0 fw-bold"><i class="ri-pie-chart-2-line text-primary me-1"></i> Profit Sharing Model Split</h6>
-                                <span class="badge bg-secondary-subtle text-secondary fs-12">Split 70% / 30% after TDS deduction</span>
-                            </div>
-                            @php
-                                $totalComms = $metrics['total_szorzo_share'] + $metrics['total_investor_share'];
-                                $szPct = $totalComms > 0 ? round(($metrics['total_szorzo_share'] / $totalComms) * 100) : 70;
-                                $invPct = 100 - $szPct;
-                            @endphp
-                            <div class="progress" style="height: 18px; border-radius: 9px;">
-                                <div class="progress-bar bg-primary fw-bold" role="progressbar" style="width: {{ $szPct }}%;" aria-valuenow="{{ $szPct }}" aria-valuemin="0" aria-valuemax="100">
-                                    Szorzo (SZ) {{ $szPct }}%@if(!$isInvestor) — ₹ {{ number_format($metrics['total_szorzo_share'], 2) }}@endif
+                    <div class="card shadow-sm border border-light-subtle rounded-3">
+                        <div class="card-body p-3 p-md-4">
+                            <!-- Card Header -->
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2 border-bottom border-light">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-xs d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle me-2">
+                                        <i class="ri-pie-chart-2-line fs-17"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold fs-15 text-dark">
+                                            @if($isInvestor)
+                                                Investor Profit Sharing Model (30% Net)
+                                            @else
+                                                Profit Sharing Model Split (70% / 30%)
+                                            @endif
+                                        </h6>
+                                        <small class="text-muted fs-11">
+                                            @if($isInvestor)
+                                                Fixed 30% profit share calculated from net margin after 10% TDS deduction
+                                            @else
+                                                Fixed profit share distribution (SZ 70% / Investor 30%) calculated on net margin after TDS
+                                            @endif
+                                        </small>
+                                    </div>
                                 </div>
-                                <div class="progress-bar bg-success fw-bold" role="progressbar" style="width: {{ $invPct }}%;" aria-valuenow="{{ $invPct }}" aria-valuemin="0" aria-valuemax="100">
-                                    Investor {{ $invPct }}% — ₹ {{ number_format($metrics['total_investor_share'], 2) }}
+                                <div>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-12 px-3 py-1 rounded-pill">
+                                        <i class="ri-scales-3-line me-1"></i>
+                                        @if($isInvestor)
+                                            30% Profit Split (After TDS)
+                                        @else
+                                            Split 70% / 30% After TDS
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
+
+                            @if(!$isInvestor)
+                                <!-- Admin / Management View: 3 Stat Cards + Segmented Gradient Track -->
+                                @php
+                                    $netMarginVal = $metrics['total_net_margin'] ?? ($metrics['total_margin'] - ($metrics['total_tds'] ?? 0));
+                                    $totalComms = $metrics['total_szorzo_share'] + $metrics['total_investor_share'];
+                                    $szPct = $totalComms > 0 ? round(($metrics['total_szorzo_share'] / $totalComms) * 100) : 70;
+                                    $invPct = 100 - $szPct;
+                                @endphp
+                                <div class="row g-3 mb-3">
+                                    <!-- Net Margin Base -->
+                                    <div class="col-lg-4 col-md-12">
+                                        <div class="p-3 rounded-3 border bg-light h-100">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="text-muted text-uppercase fw-semibold fs-11">Net Margin (After TDS)</span>
+                                                <span class="badge bg-warning-subtle text-warning fs-11">Base Pool</span>
+                                            </div>
+                                            <h4 class="fw-bold text-dark mb-1">₹ {{ number_format($netMarginVal, 2) }}</h4>
+                                            <small class="text-muted fs-11">
+                                                Gross: ₹ {{ number_format($metrics['total_margin'], 2) }} &bull; Less TDS (10%): -₹ {{ number_format($metrics['total_tds'] ?? 0, 2) }}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Szorzo Share (70%) -->
+                                    <div class="col-lg-4 col-md-6">
+                                        <div class="p-3 rounded-3 border h-100" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #bfdbfe !important;">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="text-primary text-uppercase fw-bold fs-12">
+                                                    <i class="ri-building-line me-1"></i> Szorzo Share (70%)
+                                                </span>
+                                                <span class="badge bg-primary text-white fs-11 fw-semibold">70.0% Allocation</span>
+                                            </div>
+                                            <h4 class="fw-bold text-primary mb-1">₹ {{ number_format($metrics['total_szorzo_share'], 2) }}</h4>
+                                            <small class="text-primary-emphasis fs-11">Company retained operations & management share</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Investor Share (30%) -->
+                                    <div class="col-lg-4 col-md-6">
+                                        <div class="p-3 rounded-3 border h-100" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0 !important;">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="text-success text-uppercase fw-bold fs-12">
+                                                    <i class="ri-user-star-line me-1"></i> Investor Share (30%)
+                                                </span>
+                                                <span class="badge bg-success text-white fs-11 fw-semibold">30.0% Allocation</span>
+                                            </div>
+                                            <h4 class="fw-bold text-success mb-1">₹ {{ number_format($metrics['total_investor_share'], 2) }}</h4>
+                                            <small class="text-success-emphasis fs-11">Net profit share payable to investor</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Progress Visual Track with Labels -->
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1 fs-12 fw-semibold">
+                                        <span class="text-primary">
+                                            <i class="ri-checkbox-blank-circle-fill fs-10 me-1"></i> Szorzo Split: {{ $szPct }}% (₹ {{ number_format($metrics['total_szorzo_share'], 2) }})
+                                        </span>
+                                        <span class="text-success">
+                                            <i class="ri-checkbox-blank-circle-fill fs-10 me-1"></i> Investor Split: {{ $invPct }}% (₹ {{ number_format($metrics['total_investor_share'], 2) }})
+                                        </span>
+                                    </div>
+                                    <div class="progress" style="height: 12px; border-radius: 6px; background-color: #e2e8f0; overflow: hidden;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ $szPct }}%; background: linear-gradient(90deg, #2563eb, #3b82f6);" aria-valuenow="{{ $szPct }}" aria-valuemin="0" aria-valuemax="100" title="Szorzo: {{ $szPct }}%"></div>
+                                        <div class="progress-bar" role="progressbar" style="width: {{ $invPct }}%; background: linear-gradient(90deg, #10b981, #059669);" aria-valuenow="{{ $invPct }}" aria-valuemin="0" aria-valuemax="100" title="Investor: {{ $invPct }}%"></div>
+                                    </div>
+                                </div>
+                            @else
+                                <!-- Investor Login View: Zero Szorzo exposure, elegant 2-card KPI + Yield Progress -->
+                                @php
+                                    $netMarginVal = $metrics['total_net_margin'] ?? ($metrics['total_margin'] - ($metrics['total_tds'] ?? 0));
+                                @endphp
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <div class="p-3 rounded-3 border bg-light h-100">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="text-muted text-uppercase fw-semibold fs-11">Net Margin Generated</span>
+                                                <span class="badge bg-secondary-subtle text-secondary fs-11">After 10% TDS</span>
+                                            </div>
+                                            <h4 class="fw-bold text-dark mb-1">₹ {{ number_format($netMarginVal, 2) }}</h4>
+                                            <small class="text-muted fs-11">Across {{ $metrics['total_employees'] }} active mapped talent deployment(s)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 rounded-3 border h-100" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0 !important;">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="text-success text-uppercase fw-bold fs-12">
+                                                    <i class="ri-hand-coin-line me-1"></i> Your Net Profit Share (30%)
+                                                </span>
+                                                <span class="badge bg-success text-white fs-11 fw-semibold">30.0% Net Share</span>
+                                            </div>
+                                            <h4 class="fw-bold text-success mb-1">₹ {{ number_format($metrics['total_investor_share'], 2) }}</h4>
+                                            <small class="text-success-emphasis fs-11">Net investor profit yield credited after TDS</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1 fs-12 fw-semibold">
+                                        <span class="text-muted">Profit Share Entitlement: <strong>30% of Net Margin</strong></span>
+                                        <span class="text-success fw-bold">Earned: ₹ {{ number_format($metrics['total_investor_share'], 2) }}</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; border-radius: 5px; background-color: #e2e8f0; overflow: hidden;">
+                                        <div class="progress-bar" role="progressbar" style="width: 100%; background: linear-gradient(90deg, #10b981, #059669);" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -878,7 +1003,6 @@
                                             <th>Designation</th>
                                             <th>Deployed Client</th>
                                             <th class="text-end">Salary / Spend (₹)</th>
-                                            <th class="text-center">Billing %</th>
                                             <th class="text-end">Margin Generated (₹)</th>
                                         </tr>
                                     </thead>
@@ -941,19 +1065,17 @@ $(document).ready(function() {
                 '<td>' + (emp.designation || 'Staff') + '</td>' +
                 '<td>' + (emp.client || '—') + '</td>' +
                 '<td class="text-end fw-semibold text-dark">₹ ' + sal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
-                '<td class="text-center"><span class="badge bg-info-subtle text-info">' + bPct.toFixed(1) + '%</span></td>' +
                 '<td class="text-end fw-bold text-success">₹ ' + rev.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
             '</tr>';
         });
 
         if (emps.length === 0) {
-            tbody = '<tr><td colspan="8" class="text-center text-muted py-3">No employee details available.</td></tr>';
+            tbody = '<tr><td colspan="7" class="text-center text-muted py-3">No employee details available.</td></tr>';
             $('#ledgerEmployeesTfoot').html('');
         } else {
             var tfoot = '<tr>' +
                 '<td colspan="5" class="text-end">Total (' + emps.length + ' Employees):</td>' +
                 '<td class="text-end text-dark">₹ ' + totalSalary.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
-                '<td></td>' +
                 '<td class="text-end text-success">₹ ' + totalMargin.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
             '</tr>';
             $('#ledgerEmployeesTfoot').html(tfoot);

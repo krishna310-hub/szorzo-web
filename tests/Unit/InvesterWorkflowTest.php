@@ -669,6 +669,20 @@ class InvesterWorkflowTest extends TestCase
 
         $this->assertStringContainsString('ensureDeploymentModalInBody()', $deploymentsIndexContent);
         $this->assertStringContainsString('z-index: 1080 !important;', $deploymentsIndexContent);
+
+        // 5. Verify Billing % is removed from both popups
+        $this->assertStringNotContainsString('<th class="text-center">Billing %</th>', $deploymentsIndexContent);
+        $this->assertStringNotContainsString('<th class="text-center">Billing %</th>', $dashboardContent);
+
+        // 6. Verify Export Excel is hidden for investor user
+        $this->assertStringContainsString('@if(!$isInvestorUser)', $deploymentsIndexContent);
+        $this->assertStringContainsString("route('admin.invester-deployments.export')", $deploymentsIndexContent);
+        $this->assertStringContainsString("if (\$isInvestorUser) {\n            abort(403, 'Export is disabled for investor accounts.');", $controllerContent);
+
+        // 7. Verify modern UI redesign for Profit Sharing Model Split
+        $this->assertStringContainsString('Profit Sharing Model Visual Card (Modern UI Redesign)', $dashboardContent);
+        $this->assertStringContainsString('Investor Profit Sharing Model (30% Net)', $dashboardContent);
+        $this->assertStringContainsString('linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', $dashboardContent);
     }
 }
 

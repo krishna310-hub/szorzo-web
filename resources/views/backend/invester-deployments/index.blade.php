@@ -88,11 +88,13 @@
                                 <small class="text-muted">Rate Card, CTC, Margin % and @if($isInvestorUser) Investor Profit Share (30%) @else Profit Share split (SZ 70% / Investor 30%) @endif</small>
                             </div>
                             <div class="d-flex flex-wrap gap-2">
-                                @can('read', \App\Models\InvesterDeployment::class)
-                                    <a href="{{ route('admin.invester-deployments.export') }}" class="btn btn-sm btn-info">
-                                        <i class="ri-file-excel-2-line align-middle me-1"></i> Export Excel
-                                    </a>
-                                @endcan
+                                @if(!$isInvestorUser)
+                                    @can('read', \App\Models\InvesterDeployment::class)
+                                        <a href="{{ route('admin.invester-deployments.export') }}" class="btn btn-sm btn-info">
+                                            <i class="ri-file-excel-2-line align-middle me-1"></i> Export Excel
+                                        </a>
+                                    @endcan
+                                @endif
                                 @can('create', \App\Models\InvesterDeployment::class)
                                     <a href="{{ route('admin.invester-deployments.create') }}" class="btn btn-sm btn-primary">
                                         <i class="ri-add-line align-middle me-1"></i> Add Deployment / Invest Module
@@ -166,7 +168,6 @@
                                             <th>Designation</th>
                                             <th>Deployed Client</th>
                                             <th class="text-end">Salary / CTC (₹)</th>
-                                            <th class="text-center">Billing %</th>
                                             <th class="text-end">Margin Generated (₹)</th>
                                         </tr>
                                     </thead>
@@ -262,19 +263,17 @@ $(document).ready(function () {
                 '<td>' + (emp.designation || 'Staff') + '</td>' +
                 '<td>' + (emp.client || '—') + '</td>' +
                 '<td class="text-end fw-semibold text-dark">₹ ' + sal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
-                '<td class="text-center"><span class="badge bg-info-subtle text-info">' + bPct.toFixed(1) + '%</span></td>' +
                 '<td class="text-end fw-bold text-success">₹ ' + rev.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
             '</tr>';
         });
 
         if (emps.length === 0) {
-            tbody = '<tr><td colspan="8" class="text-center text-muted py-3">No employees found.</td></tr>';
+            tbody = '<tr><td colspan="7" class="text-center text-muted py-3">No employees found.</td></tr>';
             $('#deploymentEmployeesTfoot').html('');
         } else {
             var tfoot = '<tr>' +
                 '<td colspan="5" class="text-end">Total (' + emps.length + ' Employees):</td>' +
                 '<td class="text-end text-dark">₹ ' + totalSal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
-                '<td></td>' +
                 '<td class="text-end text-success">₹ ' + totalRev.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
             '</tr>';
             $('#deploymentEmployeesTfoot').html(tfoot);

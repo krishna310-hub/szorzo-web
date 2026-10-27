@@ -509,7 +509,11 @@ class InvesterDeploymentController extends Controller
 
         $user = auth()->user();
         $isInvestorUser = $user && ($user->isInvestor() || (int) $user->role_id === 6);
-        $linkedInvester = $isInvestorUser ? ($user->linkedInvester() ?? Invester::where('user_id', $user->id)->first()) : null;
+        if ($isInvestorUser) {
+            abort(403, 'Export is disabled for investor accounts.');
+        }
+
+        $linkedInvester = null;
 
         $query = InvesterDeployment::with(['invester', 'employee', 'client'])->latest();
         if ($isInvestorUser && $linkedInvester) {
