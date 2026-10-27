@@ -869,4 +869,134 @@ class Employee extends Model
     {
         return (float) ($this->getContractReportSalary($month)['revenue'] ?? 0.0);
     }
+
+    /**
+     * Get comprehensive investor-facing profile details for this employee:
+     * - Profile Pic (Avatar URL)
+     * - Name & Employee No
+     * - Client
+     * - Job Role (Designation)
+     * - Salary Breakup (Gross, Basic, HRA, Conveyance, Allowances, PF, ESI, PT, TDS, Other Deductions, Net)
+     * - Job Location
+     * - Date of Joining (DOJ)
+     * - Relieving Date
+     * - Offer Letter (URL & File Name)
+     *
+     * @param float|null $overrideSalary
+     * @param float|null $overrideRevenue
+     * @return array
+     */
+    public function getInvestorProfileDetails(?float $overrideSalary = null, ?float $overrideRevenue = null): array
+    {
+        $salData = $this->getContractReportSalary();
+        $grossSalary = (float) ($overrideSalary !== null ? $overrideSalary : ($salData['salary'] > 0 ? $salData['salary'] : ($this->monthly_gross > 0 ? $this->monthly_gross : $this->monthly_salary)));
+
+        // Salary Earnings
+        $basic = (float) $this->basic_salary;
+        $hra = (float) $this->hra;
+        $conveyance = (float) $this->conveyance;
+        $medical = (float) $this->medical_allowance;
+        $special = (float) $this->special_allowance;
+        $overtime = (float) $this->overtime_amount;
+        $lta = (float) $this->lta;
+        $arrears = (float) $this->arrears;
+
+        if ($basic <= 0 && $grossSalary > 0) {
+            $basic = round($grossSalary * 0.50, 2);
+            $hra = round($grossSalary * 0.30, 2);
+            $special = round($grossSalary * 0.20, 2);
+        }
+        $totalEarnings = $basic + $hra + $conveyance + $medical + $special + $overtime + $lta + $arrears;
+        if ($totalEarnings <= 0 && $grossSalary > 0) {
+            $totalEarnings = $grossSalary;
+        }
+
+        // Salary Deductions
+        $pf = (float) $this->pf_deduction;
+        $esi = (float) $this->esi_deduction;
+        $pt = (float) $this->pt_deduction;
+        $incomeTax = (float) $this->income_tax;
+        $salaryAdvance = (float) $this->salary_advance;
+        $fines = (float) $this->fines;
+        $labourWelfare = (float) $this->labour_welfare_fund;
+        $otherDeductions = (float) $this->other_deductions;
+
+        // Fallback standard TDS (10%) if not explicitly specified on employee record
+        if ($incomeTax <= 0 && $grossSalary > 0) {
+            $incomeTax = round($grossSalary * 0.10, 2);
+        }
+
+        $totalDeductions = $pf + $esi + $pt + $incomeTax + $salaryAdvance + $fines + $labourWelfare + $otherDeductions;
+        $netSalary = max(0.0, round($grossSalary - $totalDeductions, 2));
+
+        // Client & Job Location
+        $clientObj = $this->relationLoaded('client') ? $this->getRelation('client') : $this->client;
+        $clientName = $clientObj?->client ?: '-';
+
+        $location = null;
+        if ($clientObj && $clientObj->location) {
+            $location = $clientObj->location->location;
+        } elseif ($this->current_residential_address) {
+            $location = trim(explode("\n", (string) $this->current_residential_address)[0]);
+        } elseif ($this->permanent_address) {
+            $location = trim(explode("\n", (string) $this->permanent_address)[0]);
+        }
+        if (empty($location)) {
+            $cand = $this->getMatchingCandidate();
+            $location = $cand?->current_location ?: ($cand?->preferred_location ?: 'Bengaluru, India');
+        }
+
+        // Offer Letter URL
+        $offerLetterUrl = null;
+        if (!empty($this->offer_letter)) {
+            $offerLetterUrl = $this->safeAssetUrl('uploads/employees/documents/' . $this->offer_letter);
+        }
+
+        // DOJ & Relieving Date
+        $doj = $this->date_of_joining
+            ? $this->date_of_joining->format('d M Y')
+            : ($this->contract_from_date ? $this->contract_from_date->format('d M Y') : '—');
+
+        $relieving = $this->relieving_date
+            ? $this->relieving_date->format('d M Y')
+            : ($this->contract_to_date ? $this->contract_to_date->format('d M Y') : 'Active / Ongoing');
+
+        return [
+            'id' => $this->id,
+            'name' => $this->employee_name,
+            'employee_no' => $this->employee_no ?: ('SZ' . str_pad($this->id, 3, '0', STR_PAD_LEFT)),
+            'avatar_url' => $this->avatar_url,
+            'designation' => $this->designation ?: 'Staff',
+            'client' => $clientName,
+            'job_location' => $location,
+            'date_of_joining' => $doj,
+            'relieving_date' => $relieving,
+            'offer_letter_name' => $this->offer_letter,
+            'offer_letter_url' => $offerLetterUrl,
+            'salary' => $grossSalary,
+            'revenue' => $overrideRevenue !== null ? $overrideRevenue : (float) ($salData['revenue'] ?? 0.0),
+            'salary_breakup' => [
+                'gross' => $grossSalary,
+                'basic' => $basic,
+                'hra' => $hra,
+                'conveyance' => $conveyance,
+                'medical' => $medical,
+                'special' => $special,
+                'overtime' => $overtime,
+                'lta' => $lta,
+                'arrears' => $arrears,
+                'total_earnings' => $totalEarnings,
+                'pf' => $pf,
+                'esi' => $esi,
+                'pt' => $pt,
+                'tds' => $incomeTax,
+                'salary_advance' => $salaryAdvance,
+                'fines' => $fines,
+                'labour_welfare' => $labourWelfare,
+                'other_deductions' => $otherDeductions,
+                'total_deductions' => $totalDeductions,
+                'net_salary' => $netSalary,
+            ],
+        ];
+    }
 }

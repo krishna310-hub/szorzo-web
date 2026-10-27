@@ -68,16 +68,12 @@ class InvesterDeploymentController extends Controller
                             $candSalary = (float) ($salData['salary'] > 0 ? $salData['salary'] : $e->monthly_salary);
                             $candBillingPct = (float) ($salData['billing_percentage'] ?? $e->getClientRequirementBillingPercentage() ?? 15.0);
                             $candRevenue = round($candSalary * ($candBillingPct / 100), 2);
-                            return [
-                                'id' => $e->id,
-                                'name' => $e->employee_name,
-                                'employee_no' => $e->employee_no ?: ('SZ' . str_pad($e->id, 3, '0', STR_PAD_LEFT)),
-                                'designation' => $e->designation ?: 'Staff',
-                                'client' => $row->client_names ?: ($row->client?->client ?: '-'),
-                                'salary' => $candSalary,
-                                'billing_percentage' => $candBillingPct,
-                                'revenue' => $candRevenue,
-                            ];
+                            $details = $e->getInvestorProfileDetails($candSalary, $candRevenue);
+                            if (!empty($row->client_names)) {
+                                $details['client'] = $row->client_names;
+                            }
+                            $details['billing_percentage'] = $candBillingPct;
+                            return $details;
                         })->values()->all();
 
                         $empsJson = htmlspecialchars(json_encode($empsList), ENT_QUOTES, 'UTF-8');
@@ -98,22 +94,16 @@ class InvesterDeploymentController extends Controller
                             '</div>';
                         }
                     } elseif ($row->employee) {
-                        $no = $row->employee->employee_no ?: ('SZ' . str_pad($row->employee->id, 3, '0', STR_PAD_LEFT));
                         $salData = $row->employee->getContractReportSalary();
                         $candSalary = (float) ($salData['salary'] > 0 ? $salData['salary'] : $row->employee->monthly_salary);
                         $candBillingPct = (float) ($salData['billing_percentage'] ?? $row->employee->getClientRequirementBillingPercentage() ?? 15.0);
                         $candRevenue = round($candSalary * ($candBillingPct / 100), 2);
-                        $singleList = [[
-                            'id' => $row->employee->id,
-                            'name' => $row->employee->employee_name,
-                            'employee_no' => $no,
-                            'designation' => $row->employee->designation ?: 'Staff',
-                            'client' => $row->client_names ?: ($row->client?->client ?: '-'),
-                            'salary' => $candSalary,
-                            'billing_percentage' => $candBillingPct,
-                            'revenue' => $candRevenue,
-                        ]];
-                        $empsJson = htmlspecialchars(json_encode($singleList), ENT_QUOTES, 'UTF-8');
+                        $details = $row->employee->getInvestorProfileDetails($candSalary, $candRevenue);
+                        if (!empty($row->client_names)) {
+                            $details['client'] = $row->client_names;
+                        }
+                        $details['billing_percentage'] = $candBillingPct;
+                        $empsJson = htmlspecialchars(json_encode([$details]), ENT_QUOTES, 'UTF-8');
                         return '<div>' .
                             '<button type="button" class="btn btn-sm btn-soft-primary py-1 px-2 d-inline-flex align-items-center view-deployment-emps-btn" data-employees="' . $empsJson . '" data-title="' . htmlspecialchars($row->employee->employee_name, ENT_QUOTES, 'UTF-8') . '" title="Click to view employee details in popup">' .
                                 '<i class="ri-user-line me-1"></i> ' . e($row->employee->employee_name) . ' <i class="ri-eye-line ms-1 text-primary"></i>' .

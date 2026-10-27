@@ -516,32 +516,24 @@ class InvesterDashboardController extends Controller
                         $depSpend += $candSalary;
                         $depMargin += $candRevenue;
 
-                        $monthEmployees->push([
-                            'id' => $emp->id,
-                            'name' => $emp->employee_name,
-                            'employee_no' => $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT)),
-                            'designation' => $emp->designation ?: 'Staff',
-                            'client' => $dep->client_names ?: ($dep->client?->client ?: '-'),
-                            'salary' => $candSalary,
-                            'billing_percentage' => $candBillingPct,
-                            'revenue' => $candRevenue,
-                        ]);
+                        $empDetails = $emp->getInvestorProfileDetails($candSalary, $candRevenue);
+                        if (!empty($dep->client_names)) {
+                            $empDetails['client'] = $dep->client_names;
+                        }
+                        $empDetails['billing_percentage'] = $candBillingPct;
+                        $monthEmployees->push($empDetails);
                     }
                 } else {
                     $depSpend = (float) $dep->employee_ctc;
                     $marginPct = (float) ($dep->margin_percentage ?: 15.0);
                     $depMargin = (float) $dep->margin_amount > 0 ? (float) $dep->margin_amount : round($depSpend * ($marginPct / 100), 2);
                     if ($dep->employee) {
-                        $monthEmployees->push([
-                            'id' => $dep->employee->id,
-                            'name' => $dep->employee->employee_name,
-                            'employee_no' => $dep->employee->employee_no ?: ('SZ' . str_pad($dep->employee->id, 3, '0', STR_PAD_LEFT)),
-                            'designation' => $dep->employee->designation ?: 'Staff',
-                            'client' => $dep->client_names ?: ($dep->client?->client ?: '-'),
-                            'salary' => $depSpend,
-                            'billing_percentage' => $marginPct,
-                            'revenue' => $depMargin,
-                        ]);
+                        $empDetails = $dep->employee->getInvestorProfileDetails($depSpend, $depMargin);
+                        if (!empty($dep->client_names)) {
+                            $empDetails['client'] = $dep->client_names;
+                        }
+                        $empDetails['billing_percentage'] = $marginPct;
+                        $monthEmployees->push($empDetails);
                     }
                 }
 

@@ -976,11 +976,26 @@
                 z-index: 1090 !important;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
             }
+
+            /* Salary Breakup Modal High z-index */
+            #salaryBreakupModal {
+                z-index: 1095 !important;
+            }
+            #salaryBreakupModal .modal-dialog {
+                z-index: 1100 !important;
+                position: relative !important;
+            }
+            #salaryBreakupModal .modal-content {
+                background-color: #ffffff !important;
+                position: relative !important;
+                z-index: 1105 !important;
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45) !important;
+            }
             </style>
 
             <!-- Mapped Employees List Modal -->
             <div class="modal fade" id="ledgerEmployeesModal" tabindex="-1" aria-labelledby="ledgerEmployeesModalLabel" aria-hidden="true" style="z-index: 1080 !important;">
-                <div class="modal-dialog modal-dialog-centered modal-lg" style="z-index: 1085 !important;">
+                <div class="modal-dialog modal-dialog-centered modal-xl" style="z-index: 1085 !important; max-width: 1250px;">
                     <div class="modal-content border-0 shadow" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important;">
                         <div class="modal-header bg-primary text-white py-3">
                             <div class="d-flex align-items-center gap-2">
@@ -997,12 +1012,13 @@
                                 <table class="table table-bordered table-hover align-middle mb-0" id="ledgerEmployeesTable">
                                     <thead class="table-light">
                                         <tr>
-                                            <th style="width: 40px;">#</th>
-                                            <th>Employee Name</th>
-                                            <th>Employee ID</th>
-                                            <th>Designation</th>
-                                            <th>Deployed Client</th>
-                                            <th class="text-end">Salary / Spend (₹)</th>
+                                            <th style="width: 40px;" class="text-center">#</th>
+                                            <th>Employee</th>
+                                            <th>Client & Job Role</th>
+                                            <th>Job Location</th>
+                                            <th class="text-center">Tenure (DOJ / Relieving)</th>
+                                            <th class="text-end">Salary & Breakup</th>
+                                            <th class="text-center">Offer Letter</th>
                                             <th class="text-end">Margin Generated (₹)</th>
                                         </tr>
                                     </thead>
@@ -1010,6 +1026,30 @@
                                     <tfoot class="table-light fw-bold" id="ledgerEmployeesTfoot"></tfoot>
                                 </table>
                             </div>
+                        </div>
+                        <div class="modal-footer bg-light py-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dedicated Salary Breakup Modal -->
+            <div class="modal fade" id="salaryBreakupModal" tabindex="-1" aria-labelledby="salaryBreakupModalLabel" aria-hidden="true" style="z-index: 1095 !important;">
+                <div class="modal-dialog modal-dialog-centered modal-md" style="z-index: 1100 !important;">
+                    <div class="modal-content border-0 shadow-lg" style="background-color: #ffffff !important; position: relative !important; z-index: 1105 !important;">
+                        <div class="modal-header bg-dark text-white py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="ri-file-list-3-line fs-20 text-info"></i>
+                                <div>
+                                    <h5 class="modal-title text-white mb-0" id="salaryBreakupModalLabel">Salary Breakup & Statutory Details</h5>
+                                    <small class="text-white-50" id="salaryBreakupEmpInfo">—</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-3" id="salaryBreakupModalBody">
+                            <!-- Populated dynamically via JS -->
                         </div>
                         <div class="modal-footer bg-light py-2">
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -1032,8 +1072,108 @@ function ensureLedgerModalInBody() {
     }
 }
 
+function ensureSalaryModalInBody() {
+    var modal = document.getElementById('salaryBreakupModal');
+    if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+}
+
+var currentLedgerEmployees = [];
+
+function showSalaryBreakupModal(emp) {
+    if (!emp) return;
+    var b = emp.salary_breakup || {};
+    var sal = parseFloat(emp.salary) || 0;
+    var basic = parseFloat(b.basic) || (sal * 0.50);
+    var hra = parseFloat(b.hra) || (sal * 0.30);
+    var conveyance = parseFloat(b.conveyance) || 0;
+    var medical = parseFloat(b.medical) || 0;
+    var special = parseFloat(b.special) || (sal * 0.20);
+    var otherEarn = parseFloat(b.overtime || 0) + parseFloat(b.lta || 0) + parseFloat(b.arrears || 0);
+    var gross = parseFloat(b.gross) || sal;
+
+    var pf = parseFloat(b.pf) || 0;
+    var esi = parseFloat(b.esi) || 0;
+    var pt = parseFloat(b.pt) || 0;
+    var tds = parseFloat(b.tds) || (sal * 0.10);
+    var otherDed = parseFloat(b.salary_advance || 0) + parseFloat(b.fines || 0) + parseFloat(b.labour_welfare || 0) + parseFloat(b.other_deductions || 0);
+    var totalDed = pf + esi + pt + tds + otherDed;
+    var net = Math.max(0, gross - totalDed);
+
+    $('#salaryBreakupEmpInfo').html('<strong>' + (emp.name || 'Employee') + '</strong> &bull; ' + (emp.employee_no || '') + ' (' + (emp.designation || 'Staff') + ')');
+
+    var html = `
+        <div class="card border-0 bg-light mb-3">
+            <div class="card-body p-2 d-flex align-items-center gap-3">
+                <img src="${emp.avatar_url || '/admin/images/users/user-dummy-img.jpg'}" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.onerror=null;this.src='/admin/images/users/user-dummy-img.jpg';">
+                <div class="flex-grow-1">
+                    <h6 class="mb-0 fw-bold fs-14 text-dark">${emp.name || '—'}</h6>
+                    <small class="text-muted d-block">${emp.client || '—'} &bull; <i class="ri-map-pin-line text-danger"></i> ${emp.job_location || 'Bengaluru, India'}</small>
+                </div>
+                ${emp.offer_letter_url ? `
+                    <a href="${emp.offer_letter_url}" target="_blank" rel="noopener" class="btn btn-sm btn-soft-primary">
+                        <i class="ri-file-text-line me-1"></i> Offer Letter
+                    </a>
+                ` : ''}
+            </div>
+        </div>
+
+        <div class="row g-2">
+            <!-- Earnings -->
+            <div class="col-6">
+                <div class="border rounded-2 p-2 h-100 bg-white shadow-sm">
+                    <h6 class="fs-11 text-uppercase fw-bold text-primary mb-2 pb-1 border-bottom">Earnings (₹)</h6>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">Basic Salary:</span><span class="fw-semibold">₹ ${basic.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">HRA:</span><span class="fw-semibold">₹ ${hra.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">Conveyance:</span><span class="fw-semibold">₹ ${conveyance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">Medical Allow:</span><span class="fw-semibold">₹ ${medical.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">Special Allow:</span><span class="fw-semibold">₹ ${special.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    ${otherEarn > 0 ? `<div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">Other Earnings:</span><span class="fw-semibold">₹ ${otherEarn.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>` : ''}
+                    <div class="d-flex justify-content-between fs-12 mt-2 pt-1 border-top fw-bold text-dark"><span>Total Gross:</span><span>₹ ${gross.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                </div>
+            </div>
+
+            <!-- Deductions -->
+            <div class="col-6">
+                <div class="border rounded-2 p-2 h-100 bg-white shadow-sm">
+                    <h6 class="fs-11 text-uppercase fw-bold text-danger mb-2 pb-1 border-bottom">Deductions (₹)</h6>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">PF Deduction:</span><span class="text-danger fw-semibold">- ₹ ${pf.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">ESI Deduction:</span><span class="text-danger fw-semibold">- ₹ ${esi.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">Prof. Tax (PT):</span><span class="text-danger fw-semibold">- ₹ ${pt.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    <div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">TDS / Income Tax:</span><span class="text-danger fw-semibold">- ₹ ${tds.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                    ${otherDed > 0 ? `<div class="d-flex justify-content-between fs-12 mb-1"><span class="text-muted">Other Deductions:</span><span class="text-danger fw-semibold">- ₹ ${otherDed.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>` : ''}
+                    <div class="d-flex justify-content-between fs-12 mt-2 pt-1 border-top fw-bold text-danger"><span>Total Deductions:</span><span>- ₹ ${totalDed.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3 p-3 rounded-3 text-center border" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #a7f3d0 !important;">
+            <span class="text-muted text-uppercase fw-semibold fs-11 d-block mb-1">Net Monthly Take-Home (After PF & TDS)</span>
+            <h3 class="fw-bold text-success mb-0">₹ ${net.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+        </div>
+    `;
+
+    $('#salaryBreakupModalBody').html(html);
+    ensureSalaryModalInBody();
+    var modalEl = document.getElementById('salaryBreakupModal');
+    if (modalEl && window.bootstrap) {
+        var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+}
+
 $(document).ready(function() {
     ensureLedgerModalInBody();
+    ensureSalaryModalInBody();
+
+    $(document).on('click', '.view-salary-breakup-btn', function() {
+        var idx = $(this).data('emp-idx');
+        var emp = currentLedgerEmployees[idx];
+        if (emp) {
+            showSalaryBreakupModal(emp);
+        }
+    });
 
     $(document).on('click', '.view-ledger-employees-btn', function() {
         ensureLedgerModalInBody();
@@ -1045,6 +1185,8 @@ $(document).ready(function() {
         }
         if (!Array.isArray(emps)) emps = [];
 
+        currentLedgerEmployees = emps;
+
         $('#ledgerEmployeesModalSub').text(month ? 'Month: ' + month + ' (' + emps.length + ' Employees)' : emps.length + ' Employees');
         
         var tbody = '';
@@ -1054,30 +1196,90 @@ $(document).ready(function() {
         emps.forEach(function(emp, idx) {
             var sal = parseFloat(emp.salary) || 0;
             var rev = parseFloat(emp.revenue) || 0;
-            var bPct = parseFloat(emp.billing_percentage) || 15.0;
             totalSalary += sal;
             totalMargin += rev;
 
-            tbody += '<tr>' +
-                '<td class="text-center text-muted">' + (idx + 1) + '</td>' +
-                '<td class="fw-bold text-dark">' + (emp.name || '—') + '</td>' +
-                '<td><span class="badge bg-light text-dark border">' + (emp.employee_no || ('SZ' + String(emp.id).padStart(3, '0'))) + '</span></td>' +
-                '<td>' + (emp.designation || 'Staff') + '</td>' +
-                '<td>' + (emp.client || '—') + '</td>' +
-                '<td class="text-end fw-semibold text-dark">₹ ' + sal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
-                '<td class="text-end fw-bold text-success">₹ ' + rev.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
-            '</tr>';
+            var avatarImg = emp.avatar_url || '/admin/images/users/user-dummy-img.jpg';
+            var empName = emp.name || '—';
+            var empNo = emp.employee_no || ('SZ' + String(emp.id).padStart(3, '0'));
+            var clientName = emp.client || '—';
+            var roleName = emp.designation || 'Staff';
+            var locationName = emp.job_location || 'Bengaluru, India';
+            var dojStr = emp.date_of_joining || '—';
+            var relievingStr = emp.relieving_date || 'Active';
+            var isRelievingActive = !emp.relieving_date || emp.relieving_date === 'Active' || emp.relieving_date === 'Active / Ongoing';
+
+            var offerLetterHtml = '';
+            if (emp.offer_letter_url) {
+                offerLetterHtml = `
+                    <div class="btn-group btn-group-sm">
+                        <a href="${emp.offer_letter_url}" target="_blank" rel="noopener" class="btn btn-sm btn-soft-primary py-1 px-2 d-inline-flex align-items-center" title="View Offer Letter">
+                            <i class="ri-file-text-line me-1"></i> View
+                        </a>
+                        <a href="${emp.offer_letter_url}" download class="btn btn-sm btn-soft-success py-1 px-2" title="Download Offer Letter">
+                            <i class="ri-download-2-line"></i>
+                        </a>
+                    </div>
+                `;
+            } else {
+                offerLetterHtml = `<span class="badge bg-light text-muted border py-1 px-2 fs-11"><i class="ri-file-forbid-line me-1"></i> Not Uploaded</span>`;
+            }
+
+            tbody += `<tr>
+                <td class="text-center text-muted fw-semibold">${idx + 1}</td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="${avatarImg}" alt="${empName}" class="rounded-circle border shadow-sm flex-shrink-0" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.onerror=null;this.src='/admin/images/users/user-dummy-img.jpg';">
+                        <div>
+                            <span class="fw-bold text-dark d-block fs-13">${empName}</span>
+                            <span class="badge bg-light text-dark border fs-11">${empNo}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="fw-semibold text-primary d-block">
+                        <i class="ri-building-line me-1 text-muted"></i>${clientName}
+                    </span>
+                    <span class="badge bg-primary-subtle text-primary mt-1 fs-11">
+                        <i class="ri-briefcase-line me-1"></i>${roleName}
+                    </span>
+                </td>
+                <td>
+                    <span class="text-dark fs-12 text-nowrap">
+                        <i class="ri-map-pin-2-line text-danger me-1"></i>${locationName}
+                    </span>
+                </td>
+                <td class="text-center text-nowrap fs-12">
+                    <div><span class="text-muted">DOJ:</span> <strong class="text-dark">${dojStr}</strong></div>
+                    <div class="mt-1"><span class="text-muted">Relieving:</span> <span class="badge ${isRelievingActive ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'} fs-11">${relievingStr}</span></div>
+                </td>
+                <td class="text-end">
+                    <span class="fw-bold text-dark fs-14 d-block">₹ ${sal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    <div class="mt-1">
+                        <button type="button" class="btn btn-sm btn-soft-info py-0 px-2 fs-11 view-salary-breakup-btn" data-emp-idx="${idx}" title="View detailed salary breakup including PF, TDS, etc.">
+                            <i class="ri-file-list-3-line me-1"></i> Salary Breakup
+                        </button>
+                    </div>
+                </td>
+                <td class="text-center">
+                    ${offerLetterHtml}
+                </td>
+                <td class="text-end fw-bold text-success fs-14">
+                    ₹ ${rev.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                </td>
+            </tr>`;
         });
 
         if (emps.length === 0) {
-            tbody = '<tr><td colspan="7" class="text-center text-muted py-3">No employee details available.</td></tr>';
+            tbody = '<tr><td colspan="8" class="text-center text-muted py-4">No employee details available.</td></tr>';
             $('#ledgerEmployeesTfoot').html('');
         } else {
-            var tfoot = '<tr>' +
-                '<td colspan="5" class="text-end">Total (' + emps.length + ' Employees):</td>' +
-                '<td class="text-end text-dark">₹ ' + totalSalary.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
-                '<td class="text-end text-success">₹ ' + totalMargin.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
-            '</tr>';
+            var tfoot = `<tr>
+                <td colspan="5" class="text-end">Total (${emps.length} Employees):</td>
+                <td class="text-end text-dark fs-14">₹ ${totalSalary.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td></td>
+                <td class="text-end text-success fs-14">₹ ${totalMargin.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            </tr>`;
             $('#ledgerEmployeesTfoot').html(tfoot);
         }
 
@@ -1093,6 +1295,12 @@ $(document).ready(function() {
     $('#ledgerEmployeesModal').on('hidden.bs.modal', function () {
         $('.modal-backdrop').remove();
         $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
+    });
+
+    $('#salaryBreakupModal').on('hidden.bs.modal', function () {
+        if ($('#ledgerEmployeesModal').hasClass('show')) {
+            $('body').addClass('modal-open');
+        }
     });
 });
 </script>

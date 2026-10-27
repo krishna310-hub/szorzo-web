@@ -683,6 +683,73 @@ class InvesterWorkflowTest extends TestCase
         $this->assertStringContainsString('Profit Sharing Model Visual Card (Modern UI Redesign)', $dashboardContent);
         $this->assertStringContainsString('Investor Profit Sharing Model (30% Net)', $dashboardContent);
         $this->assertStringContainsString('linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', $dashboardContent);
+
+        // 8. Verify the 9 employee details displayed for investors
+        $this->assertStringContainsString('salaryBreakupModal', $dashboardContent);
+        $this->assertStringContainsString('view-salary-breakup-btn', $dashboardContent);
+        $this->assertStringContainsString('Offer Letter', $dashboardContent);
+        $this->assertStringContainsString('job_location', $dashboardContent);
+
+        $this->assertStringContainsString('deploymentSalaryBreakupModal', $deploymentsIndexContent);
+        $this->assertStringContainsString('view-deployment-salary-breakup-btn', $deploymentsIndexContent);
+    }
+
+    public function test_employee_investor_profile_details_structure_and_breakup(): void
+    {
+        $employee = new Employee([
+            'employee_name' => 'Kavya B',
+            'employee_no' => 'SZ017',
+            'employee_image' => 'kavya.jpg',
+            'designation' => 'CAD / BIM Designer',
+            'date_of_joining' => '2026-01-15',
+            'relieving_date' => null,
+            'offer_letter' => 'kavya_offer_letter.pdf',
+            'monthly_gross' => 74100.00,
+            'basic_salary' => 37050.00,
+            'hra' => 22230.00,
+            'special_allowance' => 14820.00,
+            'pf_deduction' => 1800.00,
+            'esi_deduction' => 0.00,
+            'pt_deduction' => 200.00,
+            'income_tax' => 7410.00,
+            'current_residential_address' => 'Bengaluru, Karnataka',
+        ]);
+        $employee->id = 17;
+
+        $client = new \App\Models\Client([
+            'client' => 'Exyte Design & Engineering Services',
+        ]);
+        $client->id = 5;
+        $employee->setRelation('client', $client);
+
+        $details = $employee->getInvestorProfileDetails();
+
+        // 1. Profile Pic
+        $this->assertNotEmpty($details['avatar_url']);
+        // 2. Name
+        $this->assertSame('Kavya B', $details['name']);
+        // 3. Client
+        $this->assertSame('Exyte Design & Engineering Services', $details['client']);
+        // 4. Job role
+        $this->assertSame('CAD / BIM Designer', $details['designation']);
+        // 5. Salary breakup (including pf, tds, and other details)
+        $this->assertIsArray($details['salary_breakup']);
+        $this->assertEquals(74100.00, $details['salary_breakup']['gross']);
+        $this->assertEquals(37050.00, $details['salary_breakup']['basic']);
+        $this->assertEquals(22230.00, $details['salary_breakup']['hra']);
+        $this->assertEquals(1800.00, $details['salary_breakup']['pf']);
+        $this->assertEquals(7410.00, $details['salary_breakup']['tds']);
+        $this->assertEquals(200.00, $details['salary_breakup']['pt']);
+        $this->assertGreaterThan(0, $details['salary_breakup']['net_salary']);
+        // 6. Job location
+        $this->assertNotEmpty($details['job_location']);
+        // 7. DOJ
+        $this->assertSame('15 Jan 2026', $details['date_of_joining']);
+        // 8. Relieving date
+        $this->assertSame('Active / Ongoing', $details['relieving_date']);
+        // 9. Offer letter
+        $this->assertSame('kavya_offer_letter.pdf', $details['offer_letter_name']);
+        $this->assertNotNull($details['offer_letter_url']);
     }
 }
 
