@@ -44,7 +44,7 @@ class EmployeeController extends Controller
     {
         $this->authorize('read', Employee::class);
         if ($request->ajax()) {
-            $query = Employee::with('client')->orderBy('employee_no', 'asc');
+            $query = Employee::withoutInvestors()->with('client')->orderBy('employee_no', 'asc');
 
             if ($request->filled('doj_from')) {
                 $query->whereDate('date_of_joining', '>=', $request->input('doj_from'));
@@ -167,7 +167,7 @@ class EmployeeController extends Controller
     {
         $this->authorize('read', Employee::class);
 
-        $query = Employee::with(['client', 'mode'])->orderBy('employee_no', 'asc');
+        $query = Employee::withoutInvestors()->with(['client', 'mode'])->orderBy('employee_no', 'asc');
 
         if ($request->filled('doj_from')) {
             $query->whereDate('date_of_joining', '>=', $request->input('doj_from'));
@@ -466,7 +466,16 @@ class EmployeeController extends Controller
 
             // Employee Details
             'employee_no' => ['nullable', 'string', 'max:255', Rule::unique('employees', 'employee_no')->ignore($employeeId)->whereNull('deleted_at')],
-            'designation' => 'nullable|string|max:255',
+            'designation' => [
+                'nullable',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if ($value && preg_match('/invest(or|er)/i', (string) $value)) {
+                        $fail('The designation cannot be an investor role. Investors must be created in the Investers module.');
+                    }
+                },
+            ],
             'date_of_joining' => 'nullable|date',
             'relieving_date' => 'nullable|date',
             'employment_type' => ['nullable', 'string', Rule::in(Employee::EMPLOYMENT_TYPES)],

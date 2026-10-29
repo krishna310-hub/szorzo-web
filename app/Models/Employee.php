@@ -23,6 +23,58 @@ class Employee extends Model
         self::SALARY_SLIP_PF,
     ];
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope('excludeInvestors', function ($query) {
+            $query->withoutInvestors();
+        });
+    }
+
+    /**
+     * Exclude any investors or investor roles from employee queries.
+     */
+    public function scopeWithoutInvestors($query)
+    {
+        return $query
+            ->where(function ($q) {
+                $q->whereNull('employees.designation')
+                    ->orWhere(function ($sub) {
+                        $sub->whereRaw('LOWER(employees.designation) NOT LIKE ?', ['%invest%']);
+                    });
+            })
+            ->whereNotExists(function ($sub) {
+                $sub->selectRaw('1')
+                    ->from('investers')
+                    ->where(function ($join) {
+                        $join->whereRaw('LOWER(investers.primary_email) = LOWER(employees.official_mail)')
+                            ->orWhereRaw('LOWER(investers.primary_email) = LOWER(employees.personal_mail)')
+                            ->orWhereRaw('LOWER(investers.alternate_email) = LOWER(employees.official_mail)')
+                            ->orWhereRaw('LOWER(investers.alternate_email) = LOWER(employees.personal_mail)')
+                            ->orWhereColumn('investers.invester_id', 'employees.employee_no');
+                    });
+            })
+            ->whereNotExists(function ($sub) {
+                $sub->selectRaw('1')
+                    ->from('users')
+                    ->where(function ($join) {
+                        $join->whereRaw('LOWER(users.email) = LOWER(employees.official_mail)')
+                            ->orWhereRaw('LOWER(users.email) = LOWER(employees.personal_mail)');
+                    })
+                    ->where(function ($roleQ) {
+                        $roleQ->where('users.role_id', 6)
+                            ->orWhereExists(function ($rq) {
+                                $rq->selectRaw('1')
+                                    ->from('roles')
+                                    ->whereColumn('roles.id', 'users.role_id')
+                                    ->where(function ($r) {
+                                        $r->whereRaw('LOWER(roles.access_level) LIKE ?', ['%invest%'])
+                                            ->orWhereRaw('LOWER(roles.name) LIKE ?', ['%invest%']);
+                                    });
+                            });
+                    });
+            });
+    }
+
     protected $fillable = [
         'employee_name',
         'employee_image',

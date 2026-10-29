@@ -63,6 +63,8 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
         $roles = Role::where('access_level', '!=', 'super_admin')
+             ->whereNotIn('access_level', ['invester', 'investor'])
+             ->whereNotIn('name', ['Invester', 'Investor'])
              ->where('status', 1)
              ->get();
         return view('backend.user.create',compact('roles'));
@@ -97,6 +99,8 @@ class UserController extends Controller
         $this->authorize('edit', User::class);
         $user = User::findOrFail($id);
         $roles = Role::where('access_level', '!=', 'super_admin')
+             ->whereNotIn('access_level', ['invester', 'investor'])
+             ->whereNotIn('name', ['Invester', 'Investor'])
              ->where('status', 1)
              ->get();
         return view('backend.user.edit', compact('user','roles'));

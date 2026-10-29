@@ -260,6 +260,10 @@ class User extends Authenticatable
 
     public function linkedEmployee(): ?Employee
     {
+        if ($this->isInvestor() || (int) $this->role_id === 6) {
+            return null;
+        }
+
         $employee = Employee::where(function ($query) {
             $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($this->email)])
                 ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($this->email)]);
@@ -279,8 +283,12 @@ class User extends Authenticatable
         return Employee::whereRaw('LOWER(employee_name) = ?', [mb_strtolower($this->name)])->first();
     }
 
-    public function getOrCreateEmployee(): Employee
+    public function getOrCreateEmployee(): ?Employee
     {
+        if ($this->isInvestor() || (int) $this->role_id === 6) {
+            return null;
+        }
+
         $employee = $this->linkedEmployee();
         if ($employee) {
             if (empty($employee->official_mail)) {
@@ -309,6 +317,10 @@ class User extends Authenticatable
 
     public function todayAttendance(?string $date = null): ?Attendance
     {
+        if ($this->isInvestor() || (int) $this->role_id === 6) {
+            return null;
+        }
+
         $date = $date ?? now()->toDateString();
         $employee = $this->linkedEmployee();
         
