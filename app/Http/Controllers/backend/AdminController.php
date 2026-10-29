@@ -354,14 +354,31 @@ class AdminController extends Controller
                         ->whereBetween('candidates.created_at', [$yearStart, $yearEnd]);
                 });
             })
-            ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.created_at', 'candidates.updated_at']);
+            ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.created_at as created_at', 'candidates.updated_at as updated_at']);
         $candidateRevenue = fn (Candidate $candidate): float => $this->candidateRevenue($candidate, $declinedLevelIds);
         $monthlyOutcomeRevenue = $revenueOutcomes
-            ->groupBy(fn ($candidate) => in_array((int) $candidate->level_of_interview_id, $offerDeclinedLevelIds, true)
-                ? $candidate->created_at->format('Y-m')
-                : ((int) $candidate->level_of_interview_id === 21
-                    ? $candidate->updated_at->format('Y-m')
-                    : $candidate->onboarding_date->format('Y-m')));
+            ->groupBy(function ($candidate) use ($offerDeclinedLevelIds) {
+                $levelId = (int) $candidate->level_of_interview_id;
+                $date = in_array($levelId, $offerDeclinedLevelIds, true)
+                    ? ($candidate->created_at ?? $candidate->getAttribute('candidates.created_at'))
+                    : ($levelId === 21
+                        ? ($candidate->updated_at ?? $candidate->getAttribute('candidates.updated_at'))
+                        : $candidate->onboarding_date);
+
+                if (!$date) {
+                    return '';
+                }
+
+                if (is_string($date)) {
+                    try {
+                        $date = \Carbon\Carbon::parse($date);
+                    } catch (\Throwable $e) {
+                        return '';
+                    }
+                }
+
+                return $date instanceof \DateTimeInterface ? $date->format('Y-m') : '';
+            });
         $monthlyOnboardedRevenue = $monthlyOutcomeRevenue->map(fn ($rows) => $rows
             ->where('level_of_interview_id', 20)
             ->sum($candidateRevenue));
@@ -542,12 +559,29 @@ class AdminController extends Controller
                             ->whereBetween('candidates.created_at', [$yearStart, $yearEnd]);
                     });
                 })
-                ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.created_at', 'candidates.updated_at'])
-                ->groupBy(fn ($candidate) => in_array((int) $candidate->level_of_interview_id, $offerDeclinedLevelIds, true)
-                    ? $candidate->created_at->format('Y-m')
-                    : ((int) $candidate->level_of_interview_id === 21
-                        ? $candidate->updated_at->format('Y-m')
-                        : $candidate->onboarding_date->format('Y-m')))
+                ->get(['client_id', 'client_requirement_id', 'mode_id', 'level_of_interview_id', 'take_home', 'expected_ctc', 'onboarding_ctc', 'onboarding_date', 'candidates.created_at as created_at', 'candidates.updated_at as updated_at'])
+                ->groupBy(function ($candidate) use ($offerDeclinedLevelIds) {
+                    $levelId = (int) $candidate->level_of_interview_id;
+                    $date = in_array($levelId, $offerDeclinedLevelIds, true)
+                        ? ($candidate->created_at ?? $candidate->getAttribute('candidates.created_at'))
+                        : ($levelId === 21
+                            ? ($candidate->updated_at ?? $candidate->getAttribute('candidates.updated_at'))
+                            : $candidate->onboarding_date);
+
+                    if (!$date) {
+                        return '';
+                    }
+
+                    if (is_string($date)) {
+                        try {
+                            $date = \Carbon\Carbon::parse($date);
+                        } catch (\Throwable $e) {
+                            return '';
+                        }
+                    }
+
+                    return $date instanceof \DateTimeInterface ? $date->format('Y-m') : '';
+                })
             : collect();
         $pipelineCounts = (clone $candidates)
             ->whereBetween('candidates.created_at', [$yearStart, $yearEnd])
@@ -659,7 +693,18 @@ class AdminController extends Controller
             ->get();
 
         return $reports
-            ->groupBy(fn (ContractReport $report) => $report->salary_month->format('Y-m'))
+            ->groupBy(function (ContractReport $report) {
+                $month = $report->salary_month;
+                if (!$month) return '';
+                if (is_string($month)) {
+                    try {
+                        $month = Carbon::parse($month);
+                    } catch (\Throwable $e) {
+                        return '';
+                    }
+                }
+                return $month instanceof \DateTimeInterface ? $month->format('Y-m') : '';
+            })
             ->map(fn ($monthlyReports) => round(
                 $monthlyReports->sum(fn (ContractReport $report) => $this->contractReportRevenue($report)),
                 2

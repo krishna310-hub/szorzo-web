@@ -564,7 +564,7 @@
                             <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Dashboard</span>
                         </a>
                     </li>
-                @endcan
+                @endif
                 @if(auth()->id() === 1 || auth()->user()->isSales() || auth()->user()->role_id == 4)
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/sales-dashboard') ? 'active' : '' }}"
@@ -1100,7 +1100,20 @@
                     auth()->user()->can('read', \App\Models\InvesterLegalCompliance::class)
                 )
                     <li class="menu-title"><i class="ri-more-fill"></i> <span>Investers</span></li>
-                    @if(!auth()->user()->isInvestor() && (int) auth()->user()->role_id !== 6)
+                    @if(auth()->user()->isInvestor() || (int) auth()->user()->role_id === 6)
+                        @php
+                            $userLinkedInvester = auth()->user()->linkedInvester();
+                        @endphp
+                        @if($userLinkedInvester)
+                            <li class="nav-item">
+                                <a href="{{ route('admin.investers.show', $userLinkedInvester->id) }}"
+                                    class="nav-link menu-link {{ request()->is('admin/investers/' . $userLinkedInvester->id . '*') ? 'active' : '' }}">
+                                    <i class="ri-user-line"></i>
+                                    <span>My Profile</span>
+                                </a>
+                            </li>
+                        @endif
+                    @else
                         <li class="nav-item">
                             <a href="{{ route('admin.investers.dashboard') }}"
                                 class="nav-link menu-link {{ request()->is('admin/investers/dashboard*') ? 'active' : '' }}">

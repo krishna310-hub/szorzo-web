@@ -15,6 +15,13 @@ class LoginController extends Controller
     public function index(Request $request, string $portal = 'mgmt')
     {
         if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->isInvestor() || (int) $user->role_id === 6) {
+                return redirect()->route('admin.investers.dashboard');
+            }
+            if ($user->role_id == 4) {
+                return redirect()->route('admin.sales-dashboard.index');
+            }
             return redirect()->route('admin.dashboard');
         }
 

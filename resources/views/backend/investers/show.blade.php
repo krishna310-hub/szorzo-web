@@ -12,8 +12,12 @@
                         <h4 class="mb-sm-0">Investor Profile</h4>
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="{{ route('admin.investers.index') }}">Investers</a></li>
+                                @if(auth()->user()?->isInvestor() || (int)auth()->user()?->role_id === 6)
+                                    <li class="breadcrumb-item"><a href="{{ route('admin.investers.dashboard') }}">Investor Dashboard</a></li>
+                                @else
+                                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="{{ route('admin.investers.index') }}">Investers</a></li>
+                                @endif
                                 <li class="breadcrumb-item active">{{ $invester->name }}</li>
                             </ol>
                         </div>
@@ -63,9 +67,15 @@
                                             <i class="bx bxs-edit align-middle me-1"></i> Edit Investor
                                         </a>
                                     @endcan
-                                    <a href="{{ route('admin.investers.index') }}" class="btn btn-secondary">
-                                        <i class="ri-arrow-left-line align-middle me-1"></i> Back
-                                    </a>
+                                    @if(auth()->user()?->isInvestor() || (int)auth()->user()?->role_id === 6)
+                                        <a href="{{ route('admin.investers.dashboard') }}" class="btn btn-secondary">
+                                            <i class="ri-arrow-left-line align-middle me-1"></i> Back to Dashboard
+                                        </a>
+                                    @else
+                                        <a href="{{ route('admin.investers.index') }}" class="btn btn-secondary">
+                                            <i class="ri-arrow-left-line align-middle me-1"></i> Back
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
 

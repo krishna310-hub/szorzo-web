@@ -262,6 +262,53 @@ $(document).ready(function () {
         icon.toggleClass("ri-eye-fill ri-eye-off-fill");
     });
 
+    // Ensure default sidebar attributes and storage on first login
+    if (!document.documentElement.getAttribute('data-sidebar-size')) {
+        document.documentElement.setAttribute('data-sidebar-size', 'lg');
+    }
+    if (!sessionStorage.getItem('data-sidebar-size')) {
+        sessionStorage.setItem('data-sidebar-size', 'lg');
+    }
+
+    // Dependable handler for topnav hamburger toggle button (handles first login smoothly)
+    $(document).on('click', '#topnav-hamburger-icon', function (e) {
+        var width = document.documentElement.clientWidth;
+        var currentSize = document.documentElement.getAttribute('data-sidebar-size') || 'lg';
+
+        if (width > 1025) {
+            $('body').removeClass('vertical-sidebar-enable');
+            if (currentSize === 'lg') {
+                document.documentElement.setAttribute('data-sidebar-size', 'sm');
+                sessionStorage.setItem('data-sidebar-size', 'sm');
+                $('.hamburger-icon').addClass('open');
+            } else {
+                document.documentElement.setAttribute('data-sidebar-size', 'lg');
+                sessionStorage.setItem('data-sidebar-size', 'lg');
+                $('.hamburger-icon').removeClass('open');
+            }
+        } else if (width > 767) {
+            $('body').removeClass('vertical-sidebar-enable');
+            if (currentSize === 'sm') {
+                document.documentElement.setAttribute('data-sidebar-size', '');
+                sessionStorage.setItem('data-sidebar-size', '');
+                $('.hamburger-icon').removeClass('open');
+            } else {
+                document.documentElement.setAttribute('data-sidebar-size', 'sm');
+                sessionStorage.setItem('data-sidebar-size', 'sm');
+                $('.hamburger-icon').addClass('open');
+            }
+        } else {
+            if ($('body').hasClass('vertical-sidebar-enable')) {
+                $('body').removeClass('vertical-sidebar-enable');
+                $('.hamburger-icon').removeClass('open');
+            } else {
+                $('body').addClass('vertical-sidebar-enable');
+                document.documentElement.setAttribute('data-sidebar-size', 'lg');
+                $('.hamburger-icon').addClass('open');
+            }
+        }
+    });
+
     // Mobile sidebar toggle, close button & overlay helpers
     $(document).on('click', '#sidebar-close-btn, .sidebar-mobile-close-btn', function () {
         $('body').removeClass('vertical-sidebar-enable');

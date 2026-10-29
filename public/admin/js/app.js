@@ -483,7 +483,8 @@
       var e = sessionStorage.getItem('defaultAttribute'),
         e = JSON.parse(e),
         t = document.documentElement.clientWidth
-      'twocolumn' == e['data-layout'] &&
+      e &&
+        'twocolumn' == e['data-layout'] &&
         t < 767 &&
         Array.from(
           document.getElementById('two-column-menu').querySelectorAll('li')

@@ -471,6 +471,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
             Route::get('/export', 'export')->name('export');
+            Route::get('/{id}', 'show')->name('show.direct');
             Route::get('/{id}/show', 'show')->name('show');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}/update', 'update')->name('update');

@@ -45,6 +45,10 @@ class InvesterLegalCompliancePolicy
         if ($user->isSuperAdmin()) {
             return true;
         }
+
+        if (($user->isInvestor() || (int) $user->role_id === 6) && in_array($ability, ['read', 'view'])) {
+            return true;
+        }
     }
 }
 

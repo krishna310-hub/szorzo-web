@@ -327,7 +327,11 @@
                     <div class="dropdown-menu dropdown-menu-end">
                         <!-- item-->
                         <h6 class="dropdown-header">Welcome {{ Auth::user()->name }}!</h6>
-                        <a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
+                        @if(Auth::user()?->isInvestor() || (int) Auth::user()?->role_id === 6)
+                            <a class="dropdown-item" href="{{ Auth::user()->linkedInvester() ? route('admin.investers.show', Auth::user()->linkedInvester()->id) : route('admin.investers.dashboard') }}"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Investor Profile</span></a>
+                        @else
+                            <a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
+                        @endif
                         @if(Auth::user()?->isSuperAdmin())
                         <a class="dropdown-item" href="{{ route('admin.payslip.index') }}"><i class="mdi mdi-file-document-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Payslip</span></a>
                         @endif

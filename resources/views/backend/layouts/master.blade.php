@@ -1,11 +1,19 @@
 <!doctype html>
-<html lang="en" data-layout="vertical" data-topbar="light" data-preloader="disable" data-theme="default" data-theme-colors="blue">
+<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="blue">
 
 <head>
     <meta charset="utf-8" />
     <title>@yield('title', 'Dashboard') | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        if (!sessionStorage.getItem('data-sidebar-size')) {
+            sessionStorage.setItem('data-sidebar-size', 'lg');
+        }
+        if (!sessionStorage.getItem('data-layout')) {
+            sessionStorage.setItem('data-layout', 'vertical');
+        }
+    </script>
     {{-- <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" /> --}}
     <!-- App favicon -->

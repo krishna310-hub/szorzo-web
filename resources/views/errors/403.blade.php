@@ -28,9 +28,9 @@
                         <div class="text-center">
                             <img src="{{ asset('admin/images/error400-cover.png') }}" alt="error img" class="img-fluid">
                             <div class="mt-3">
-                                <h3 class="text-uppercase">Sorry, Page not Found 😭</h3>
-                                <p class="text-muted mb-4">The page you are looking for not available!</p>
-                                <a href="{{ route('admin.dashboard') }}" class="btn btn-success"><i class="mdi mdi-home me-1"></i>Back to home</a>
+                                <h3 class="text-uppercase">Access Denied 🔒</h3>
+                                <p class="text-muted mb-4">You do not have permission to access this page!</p>
+                                <a href="{{ (auth()->check() && (auth()->user()->isInvestor() || (int)auth()->user()->role_id === 6)) ? route('admin.investers.dashboard') : route('admin.dashboard') }}" class="btn btn-success"><i class="mdi mdi-home me-1"></i>Back to home</a>
                             </div>
                         </div>
                     </div><!-- end col -->

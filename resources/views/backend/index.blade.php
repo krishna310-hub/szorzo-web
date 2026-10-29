@@ -2185,38 +2185,36 @@
                     if (!response.ok) throw new Error('Unable to load chart data.');
                     var data = await response.json();
 
-                    await Promise.all([
-                        window.dashboardJoiningChart?.updateOptions({
-                            xaxis: { categories: data.months },
-                            series: [
-                                { name: 'Offer Accepted', data: data.offer_accepted },
-                                { name: 'Offer Declined', data: data.offer_declined }
-                            ]
-                        }),
-                        window.dashboardOnboardingChart?.updateOptions({
-                            xaxis: { categories: data.months },
-                            series: [
-                                { name: 'Onboarded with Client', data: data.onboarded },
-                                { name: 'Joiner Declined', data: data.joiner_declined }
-                            ]
-                        }),
-                        window.dashboardRevenueChart?.updateOptions({
-                            xaxis: { categories: data.months },
-                            series: [
-                                { name: 'Onboarded Revenue', data: data.onboarded_revenue },
-                                { name: 'Declined Revenue', data: data.declined_revenue },
-                                { name: 'Contract Revenue', data: data.contract_revenue }
-                            ]
-                        }),
-                        window.individualCompletionChart?.updateOptions({
-                            xaxis: { categories: data.months },
-                            series: [{ name: 'Completed profiles', data: data.applicants }]
-                        }),
-                        window.individualProfilesSourcedChart?.updateOptions({
-                            xaxis: { categories: data.months },
-                            series: [{ name: 'Profiles sourced', data: data.profiles_sourced }]
-                        })
-                    ]);
+                    if (window.dashboardJoiningChart) {
+                        window.dashboardJoiningChart.updateOptions({ xaxis: { categories: data.months } }, false, false);
+                        window.dashboardJoiningChart.updateSeries([
+                            { name: 'Offer Accepted', data: data.offer_accepted },
+                            { name: 'Offer Declined', data: data.offer_declined }
+                        ]);
+                    }
+                    if (window.dashboardOnboardingChart) {
+                        window.dashboardOnboardingChart.updateOptions({ xaxis: { categories: data.months } }, false, false);
+                        window.dashboardOnboardingChart.updateSeries([
+                            { name: 'Onboarded with Client', data: data.onboarded },
+                            { name: 'Joiner Declined', data: data.joiner_declined }
+                        ]);
+                    }
+                    if (window.dashboardRevenueChart) {
+                        window.dashboardRevenueChart.updateOptions({ xaxis: { categories: data.months } }, false, false);
+                        window.dashboardRevenueChart.updateSeries([
+                            { name: 'Onboarded Revenue', data: data.onboarded_revenue },
+                            { name: 'Declined Revenue', data: data.declined_revenue },
+                            { name: 'Contract Revenue', data: data.contract_revenue }
+                        ]);
+                    }
+                    if (window.individualCompletionChart) {
+                        window.individualCompletionChart.updateOptions({ xaxis: { categories: data.months } }, false, false);
+                        window.individualCompletionChart.updateSeries([{ name: 'Completed profiles', data: data.applicants }]);
+                    }
+                    if (window.individualProfilesSourcedChart) {
+                        window.individualProfilesSourcedChart.updateOptions({ xaxis: { categories: data.months } }, false, false);
+                        window.individualProfilesSourcedChart.updateSeries([{ name: 'Profiles sourced', data: data.profiles_sourced }]);
+                    }
 
                     document.querySelectorAll('.selected-chart-year').forEach(function(label) {
                         label.textContent = data.financial_year;

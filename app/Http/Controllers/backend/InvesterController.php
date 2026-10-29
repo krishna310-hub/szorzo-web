@@ -25,6 +25,11 @@ class InvesterController extends Controller
 
     public function index(Request $request)
     {
+        $user = Auth::user();
+        if ($user && ($user->isInvestor() || (int) $user->role_id === 6) && !$user->isSuperAdmin()) {
+            return redirect()->route('admin.investers.dashboard');
+        }
+
         $this->authorize('read', Invester::class);
 
         if ($request->ajax()) {
@@ -271,6 +276,34 @@ class InvesterController extends Controller
 
     public function show($id)
     {
+        $user = Auth::user();
+        $isInvestorUser = $user && ($user->isInvestor() || (int) $user->role_id === 6);
+        $isSuperAdmin = $user && ((int) $user->id === 1 || $user->isSuperAdmin());
+
+        // For investor users, resolve their own profile
+        if ($isInvestorUser && !$isSuperAdmin) {
+            $linked = $user->linkedInvester();
+            $invester = Invester::with([
+                'accountManager',
+                'teamManagements',
+                'financialDetails',
+                'legalCompliances',
+                'deployments.employee',
+                'deployments.client',
+                'user',
+            ])->where(function ($q) use ($id, $user) {
+                $q->where('id', $id)
+                    ->orWhere('invester_id', $id)
+                    ->orWhere('user_id', $user->id);
+            })->first() ?? $linked;
+
+            if (!$invester) {
+                abort(404, 'Investor profile not found.');
+            }
+
+            return view('backend.investers.show', compact('invester'));
+        }
+
         $this->authorize('read', Invester::class);
 
         $invester = Invester::with([
@@ -281,7 +314,9 @@ class InvesterController extends Controller
             'deployments.employee',
             'deployments.client',
             'user',
-        ])->findOrFail($id);
+        ])->where(function ($q) use ($id) {
+            $q->where('id', $id)->orWhere('invester_id', $id);
+        })->firstOrFail();
 
         return view('backend.investers.show', compact('invester'));
     }
