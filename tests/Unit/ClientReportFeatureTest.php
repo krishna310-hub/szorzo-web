@@ -143,4 +143,20 @@ class ClientReportFeatureTest extends TestCase
         $fullPageContent = file_get_contents($fullPagePath);
         $this->assertStringContainsString('backend.client-requirements.partials.client-report-content', $fullPageContent);
     }
+
+    public function test_client_reports_is_admin_only_in_views_and_controller(): void
+    {
+        $indexPath = dirname(__DIR__, 2) . '/resources/views/backend/client-requirements/index.blade.php';
+        $indexContent = file_get_contents($indexPath);
+
+        // Verify index view wraps client reports tab, pane, modal, and script in $isAdminUser check
+        $this->assertStringContainsString('$isAdminUser = auth()->check() && ((int) auth()->user()->id === 1 || auth()->user()->isAdmin());', $indexContent);
+        $this->assertStringContainsString('@if ($isAdminUser)', $indexContent);
+
+        // Verify controller methods enforce admin check
+        $controllerPath = dirname(__DIR__, 2) . '/app/Http/Controllers/backend/ClientRequirementController.php';
+        $controllerContent = file_get_contents($controllerPath);
+
+        $this->assertStringContainsString("abort_unless(\$user && ((int) \$user->id === 1 || \$user->isAdmin()), 403", $controllerContent);
+    }
 }

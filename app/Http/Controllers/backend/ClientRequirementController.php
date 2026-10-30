@@ -544,6 +544,7 @@ class ClientRequirementController extends Controller
     {
         $this->authorize('read', ClientRequirement::class);
         $user = $request->user();
+        abort_unless($user && ((int) $user->id === 1 || $user->isAdmin()), 403, 'Unauthorized. Client reports are accessible to administrators only.');
 
         $rejectedLevelIds = $this->getRejectedLevelIds();
 
@@ -691,7 +692,10 @@ class ClientRequirementController extends Controller
     public function clientReport(Request $request, int $id)
     {
         $this->authorize('read', ClientRequirement::class);
-        $data = $this->buildClientReportData($id, $request->user());
+        $user = $request->user();
+        abort_unless($user && ((int) $user->id === 1 || $user->isAdmin()), 403, 'Unauthorized. Client reports are accessible to administrators only.');
+
+        $data = $this->buildClientReportData($id, $user);
 
         return view('backend.client-requirements.client-report', $data);
     }
@@ -699,7 +703,10 @@ class ClientRequirementController extends Controller
     public function clientReportData(Request $request, int $id)
     {
         $this->authorize('read', ClientRequirement::class);
-        $data = $this->buildClientReportData($id, $request->user());
+        $user = $request->user();
+        abort_unless($user && ((int) $user->id === 1 || $user->isAdmin()), 403, 'Unauthorized. Client reports are accessible to administrators only.');
+
+        $data = $this->buildClientReportData($id, $user);
 
         $html = view('backend.client-requirements.partials.client-report-content', $data)->render();
 
