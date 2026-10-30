@@ -322,6 +322,9 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/export', 'export')->name('export');
         Route::get('/import-template', 'importTemplate')->name('import-template');
         Route::post('/import', 'import')->name('import');
+        Route::get('/clients-report-data', 'clientsReportData')->name('clients-report-data');
+        Route::get('/client-report/{id}', 'clientReport')->name('client-report');
+        Route::get('/client-report-data/{id}', 'clientReportData')->name('client-report-data');
         Route::get('/create', 'create')->name('create');
         Route::post('/store', 'store')->name('store');
         Route::get('/{id}/job-description', 'jobDescription')->name('job-description');

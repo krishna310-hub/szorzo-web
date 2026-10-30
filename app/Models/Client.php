@@ -50,4 +50,19 @@ class Client extends Model
     {
         return $this->belongsTo(Billing::class);
     }
+
+    public function clientRequirements()
+    {
+        return $this->hasMany(ClientRequirement::class);
+    }
+
+    public function candidates()
+    {
+        return $this->hasMany(Candidate::class);
+    }
+
+    public function revenues()
+    {
+        return $this->hasMany(Revenue::class);
+    }
 }

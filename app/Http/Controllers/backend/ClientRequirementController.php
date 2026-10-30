@@ -5,13 +5,17 @@ namespace App\Http\Controllers\backend;
 use App\Exports\MasterDataExport;
 use App\Http\Controllers\Controller;
 use App\Models\Billing;
+use App\Models\Candidate;
 use App\Models\Client;
 use App\Models\ClientJobRole;
 use App\Models\ClientRequirement;
+use App\Models\InterviewLevel;
 use App\Models\JobRole;
 use App\Models\Location;
 use App\Models\Mode;
 use App\Models\Recruiter;
+use App\Models\Revenue;
+use App\Models\User;
 use App\Support\MasterDataSpreadsheet;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -534,5 +538,420 @@ class ClientRequirementController extends Controller
             'title' => ($requirement->jobRole?->job_role ?? 'Job Description') . ($requirement->client?->client ? ' - ' . $requirement->client->client : ''),
             'content' => $requirement->jobDescription?->job_description ?? '',
         ]);
+    }
+
+    public function clientsReportData(Request $request)
+    {
+        $this->authorize('read', ClientRequirement::class);
+        $user = $request->user();
+
+        $rejectedLevelIds = $this->getRejectedLevelIds();
+
+        // 1. Requirement statistics aggregated by client
+        $reqStats = ClientRequirement::query()
+            ->visibleTo($user)
+            ->selectRaw('client_id, 
+                COUNT(*) as total_reqs, 
+                SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as active_reqs,
+                SUM(COALESCE(number_of_position, 0)) as total_positions,
+                SUM(COALESCE(revenue_amount, 0)) as total_req_revenue')
+            ->groupBy('client_id')
+            ->get()
+            ->keyBy('client_id');
+
+        // 2. Candidate statistics aggregated by client
+        $candidateStats = Candidate::query()
+            ->visibleTo($user)
+            ->selectRaw('client_id,
+                COUNT(*) as total_candidates,
+                SUM(CASE WHEN level_of_interview_id = 20 OR onboarding_date IS NOT NULL THEN 1 ELSE 0 END) as onboarded_count')
+            ->groupBy('client_id')
+            ->get()
+            ->keyBy('client_id');
+
+        // 3. Rejected candidate statistics aggregated by client
+        $rejectedStats = Candidate::query()
+            ->visibleTo($user)
+            ->where(function ($q) use ($rejectedLevelIds) {
+                $q->whereIn('level_of_interview_id', $rejectedLevelIds)
+                    ->orWhereHas('interviewSchedules', fn ($s) => $s->where('status', 'rejected'))
+                    ->orWhere('status', false);
+            })
+            ->where(function ($q) {
+                $q->where(function ($onboardedCheck) {
+                    $onboardedCheck->whereNull('level_of_interview_id')
+                        ->orWhere('level_of_interview_id', '!=', 20);
+                })
+                ->whereNull('onboarding_date');
+            })
+            ->selectRaw('client_id, COUNT(*) as rejected_count')
+            ->groupBy('client_id')
+            ->get()
+            ->keyBy('client_id');
+
+        // 4. Invoiced revenues aggregated by client
+        $revenueStats = Revenue::query()
+            ->selectRaw('client_id, SUM(COALESCE(service_amount, total_amount, 0)) as total_invoiced')
+            ->groupBy('client_id')
+            ->get()
+            ->keyBy('client_id');
+
+        // 5. Calculate placement revenue from onboarded candidates
+        $onboardedCandidates = Candidate::query()
+            ->visibleTo($user)
+            ->with(['clientRequirement.billing', 'client.billing'])
+            ->where(function ($q) {
+                $q->where('level_of_interview_id', 20)
+                    ->orWhereNotNull('onboarding_date');
+            })
+            ->get(['id', 'client_id', 'client_requirement_id', 'onboarding_ctc', 'expected_ctc']);
+
+        $placementRevenueByClient = [];
+        foreach ($onboardedCandidates as $cand) {
+            $cid = $cand->client_id;
+            if (! $cid) {
+                continue;
+            }
+            $pct = (float) ($cand->clientRequirement?->billing?->value ?? $cand->client?->billing?->value ?? 0);
+            $ctc = (float) ($cand->onboarding_ctc ?: $cand->expected_ctc ?: 0);
+            $rev = round(($ctc * $pct) / 100, 2);
+            $placementRevenueByClient[$cid] = ($placementRevenueByClient[$cid] ?? 0) + $rev;
+        }
+
+        $clientsQuery = Client::query()->with(['location', 'division', 'billing'])->latest();
+
+        return DataTables::of($clientsQuery)
+            ->filter(function ($query) use ($request) {
+                $search = trim((string) $request->input('search.value'));
+                if ($search !== '') {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('client', 'like', "%{$search}%")
+                            ->orWhere('poc_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('contact_number', 'like', "%{$search}%")
+                            ->orWhere('mobile_number', 'like', "%{$search}%")
+                            ->orWhereHas('location', fn ($l) => $l->where('location', 'like', "%{$search}%"))
+                            ->orWhereHas('division', fn ($d) => $d->where('name', 'like', "%{$search}%"));
+                    });
+                }
+            })
+            ->addIndexColumn()
+            ->addColumn('client_name', function ($client) {
+                $poc = $client->poc_name ? '<br><small class="text-muted"><i class="ri-user-line me-1"></i>'.e($client->poc_name).'</small>' : '';
+                return '<div><span class="fw-semibold text-primary">'.e($client->client).'</span>'.$poc.'</div>';
+            })
+            ->addColumn('location_division', function ($client) {
+                $loc = $client->location->location ?? '-';
+                $div = $client->division->name ?? '';
+                return '<div><span>'.e($loc).'</span>'.($div ? '<br><small class="text-muted">'.e($div).'</small>' : '').'</div>';
+            })
+            ->addColumn('total_requirements', function ($client) use ($reqStats) {
+                $stats = $reqStats->get($client->id);
+                $total = (int) ($stats->total_reqs ?? 0);
+                $active = (int) ($stats->active_reqs ?? 0);
+                return '<span class="badge bg-primary-subtle text-primary fw-semibold fs-6">'.$total.'</span>' .
+                    ($active > 0 ? ' <span class="badge bg-success-subtle text-success ms-1">'.$active.' Active</span>' : '');
+            })
+            ->addColumn('total_positions', function ($client) use ($reqStats) {
+                $stats = $reqStats->get($client->id);
+                $positions = (int) ($stats->total_positions ?? 0);
+                return '<span class="badge bg-info-subtle text-info fw-semibold fs-6">'.$positions.'</span>';
+            })
+            ->addColumn('onboarded_count', function ($client) use ($candidateStats, $reqStats) {
+                $onboarded = (int) ($candidateStats->get($client->id)->onboarded_count ?? 0);
+                $positions = (int) ($reqStats->get($client->id)->total_positions ?? 0);
+                $badgeClass = ($positions > 0 && $onboarded >= $positions) ? 'bg-success text-white' : 'bg-success-subtle text-success';
+                return '<span class="badge '.$badgeClass.' fw-bold fs-6">'.$onboarded.'</span>';
+            })
+            ->addColumn('rejected_count', function ($client) use ($rejectedStats) {
+                $rejected = (int) ($rejectedStats->get($client->id)->rejected_count ?? 0);
+                return '<span class="badge bg-danger-subtle text-danger fw-semibold fs-6">'.$rejected.'</span>';
+            })
+            ->addColumn('revenue_generated', function ($client) use ($revenueStats, $placementRevenueByClient) {
+                $invoiced = (float) ($revenueStats->get($client->id)->total_invoiced ?? 0);
+                $placement = (float) ($placementRevenueByClient[$client->id] ?? 0);
+                $total = max($invoiced, $placement);
+                return '<span class="fw-bold text-success fs-6">₹'.number_format($total, 2).'</span>';
+            })
+            ->editColumn('status', function ($client) {
+                return $client->status
+                    ? '<span class="badge bg-success-subtle text-success">Active</span>'
+                    : '<span class="badge bg-danger-subtle text-danger">Inactive</span>';
+            })
+            ->addColumn('action', function ($client) {
+                return '<div class="d-flex align-items-center gap-1">' .
+                    '<button type="button" class="btn btn-sm btn-info view-client-report" data-id="'.$client->id.'" data-name="'.e($client->client).'" title="View Detailed Report"><i class="ri-eye-line me-1"></i>View</button>' .
+                    '<a href="'.route('admin.client-requirements.client-report', $client->id).'" class="btn btn-sm btn-outline-secondary" title="Open Full Page Report" target="_blank"><i class="ri-external-link-line"></i></a>' .
+                    '</div>';
+            })
+            ->rawColumns(['client_name', 'location_division', 'total_requirements', 'total_positions', 'onboarded_count', 'rejected_count', 'revenue_generated', 'status', 'action'])
+            ->make(true);
+    }
+
+    public function clientReport(Request $request, int $id)
+    {
+        $this->authorize('read', ClientRequirement::class);
+        $data = $this->buildClientReportData($id, $request->user());
+
+        return view('backend.client-requirements.client-report', $data);
+    }
+
+    public function clientReportData(Request $request, int $id)
+    {
+        $this->authorize('read', ClientRequirement::class);
+        $data = $this->buildClientReportData($id, $request->user());
+
+        $html = view('backend.client-requirements.partials.client-report-content', $data)->render();
+
+        return response()->json([
+            'success' => true,
+            'client' => [
+                'id' => $data['client']->id,
+                'name' => $data['client']->client,
+            ],
+            'html' => $html,
+        ]);
+    }
+
+    private function buildClientReportData(int $clientId, User $user): array
+    {
+        $client = Client::with(['location', 'division', 'billing', 'clientJobRoles.jobRole'])->findOrFail($clientId);
+
+        $modeNames = Mode::pluck('mode', 'id');
+        $locationNames = Location::pluck('location', 'id');
+        $recruiterNames = Recruiter::pluck('recruiter_name', 'id');
+
+        // Requirements for this client visible to the user
+        $requirements = ClientRequirement::query()
+            ->where('client_id', $client->id)
+            ->visibleTo($user)
+            ->with(['jobRole', 'jobDescription', 'mode', 'location', 'billing', 'projectOwner'])
+            ->withCount(['candidates', 'onboardedCandidates'])
+            ->latest()
+            ->get();
+
+        foreach ($requirements as $req) {
+            $req->resolved_modes = collect($req->mode_ids ?: array_filter([$req->mode_id]))
+                ->map(fn ($id) => $modeNames->get((int) $id))->filter()->join(', ') ?: '-';
+            $req->resolved_locations = collect($req->location_ids ?: array_filter([$req->location_id]))
+                ->map(fn ($id) => $locationNames->get((int) $id))->filter()->join(', ') ?: '-';
+            $req->resolved_project_owners = collect($req->project_owner_ids ?: array_filter([$req->project_owner]))
+                ->map(fn ($id) => $recruiterNames->get((int) $id))->filter()->join(', ') ?: '-';
+        }
+
+        // Candidates for this client visible to the user
+        $candidates = Candidate::query()
+            ->where(function ($q) use ($client) {
+                $q->where('client_id', $client->id)
+                    ->orWhereHas('clientRequirement', fn ($cr) => $cr->where('client_id', $client->id));
+            })
+            ->visibleTo($user)
+            ->with([
+                'jobRole',
+                'recruiter',
+                'interviewLevel',
+                'mode',
+                'clientRequirement.billing',
+                'clientRequirement.jobRole',
+                'interviewSchedules',
+            ])
+            ->latest()
+            ->get();
+
+        foreach ($candidates as $cand) {
+            $statusInfo = $this->classifyCandidateStatus($cand);
+            $cand->status_type = $statusInfo['type'];
+            $cand->status_stage = $statusInfo['stage'];
+            $cand->status_category = $statusInfo['category'];
+            $cand->status_badge = $statusInfo['badge'];
+            $cand->status_reason = $statusInfo['reason'];
+
+            $billingPct = (float) (
+                $cand->clientRequirement?->billing?->value
+                ?? $client->billing?->value
+                ?? 0
+            );
+            $ctc = (float) ($cand->onboarding_ctc ?: $cand->expected_ctc ?: 0);
+            $calcRev = round(($ctc * $billingPct) / 100, 2);
+            if ($calcRev <= 0 && $cand->clientRequirement?->revenue_amount) {
+                $calcRev = (float) $cand->clientRequirement->revenue_amount;
+            }
+            $cand->calculated_revenue = $calcRev;
+            $cand->billing_percentage = $billingPct;
+        }
+
+        $onboardedCandidates = $candidates->where('status_type', 'onboarded')->values();
+        $rejectedCandidates = $candidates->where('status_type', 'rejected')->values();
+        $inProgressCandidates = $candidates->where('status_type', 'in_progress')->values();
+
+        // Invoiced revenues for this client
+        $revenues = Revenue::where('client_id', $client->id)
+            ->with(['candidate', 'candidates'])
+            ->latest()
+            ->get();
+
+        $invoicedAmount = (float) $revenues->sum('service_amount');
+        if ($invoicedAmount <= 0) {
+            $invoicedAmount = (float) $revenues->sum('total_amount');
+        }
+
+        $invoicedCandidateIds = $revenues->pluck('candidate_id')->filter()->all();
+        foreach ($revenues as $rev) {
+            if ($rev->candidates && $rev->candidates->isNotEmpty()) {
+                $invoicedCandidateIds = array_merge($invoicedCandidateIds, $rev->candidates->pluck('id')->all());
+            }
+        }
+        $invoicedCandidateIds = array_unique(array_filter($invoicedCandidateIds));
+
+        $uninvoicedPlacementRevenue = $onboardedCandidates
+            ->reject(fn ($c) => in_array($c->id, $invoicedCandidateIds, true))
+            ->sum('calculated_revenue');
+
+        $totalPlacementRevenue = $onboardedCandidates->sum('calculated_revenue');
+        $totalRevenueGenerated = max($invoicedAmount + $uninvoicedPlacementRevenue, $totalPlacementRevenue);
+
+        $rejectionStats = [
+            'screening' => $rejectedCandidates->where('status_category', 'Screening')->count(),
+            'technical' => $rejectedCandidates->where('status_category', 'Technical Interview')->count(),
+            'hr' => $rejectedCandidates->where('status_category', 'HR Round')->count(),
+            'declined' => $rejectedCandidates->whereIn('status_category', ['Offer Drop', 'Onboarding Drop', 'Declined'])->count(),
+            'dropped' => $rejectedCandidates->whereIn('status_category', ['Candidate Dropped', 'Dropped / Inactive', 'Interview Reject'])->count(),
+        ];
+
+        $totalPositions = (int) $requirements->sum('number_of_position');
+        $onboardedCount = $onboardedCandidates->count();
+        $fillRate = $totalPositions > 0 ? round(($onboardedCount / $totalPositions) * 100, 1) : 0;
+
+        $metrics = [
+            'total_requirements' => $requirements->count(),
+            'active_requirements' => $requirements->where('status', true)->count(),
+            'inactive_requirements' => $requirements->where('status', false)->count(),
+            'total_positions' => $totalPositions,
+            'onboarded_positions' => $onboardedCount,
+            'remaining_positions' => max(0, $totalPositions - $onboardedCount),
+            'total_onboarded' => $onboardedCount,
+            'total_rejected' => $rejectedCandidates->count(),
+            'total_candidates' => $candidates->count(),
+            'in_progress_candidates' => $inProgressCandidates->count(),
+            'total_revenue' => $totalRevenueGenerated,
+            'invoiced_revenue' => $invoicedAmount,
+            'placement_revenue' => $totalPlacementRevenue,
+            'requirement_revenue' => (float) $requirements->sum('revenue_amount'),
+            'fill_rate' => $fillRate,
+            'cv_required' => (int) $requirements->sum('cv_required'),
+            'cv_uploaded' => (int) $requirements->sum('cv_uploaded'),
+        ];
+
+        return [
+            'client' => $client,
+            'requirements' => $requirements,
+            'onboardedCandidates' => $onboardedCandidates,
+            'rejectedCandidates' => $rejectedCandidates,
+            'inProgressCandidates' => $inProgressCandidates,
+            'allCandidates' => $candidates,
+            'revenues' => $revenues,
+            'rejectionStats' => $rejectionStats,
+            'metrics' => $metrics,
+        ];
+    }
+
+    private function getRejectedLevelIds(): array
+    {
+        return InterviewLevel::query()
+            ->where(function ($query) {
+                $query->whereRaw('LOWER(level) LIKE ?', ['%reject%'])
+                    ->orWhereRaw('LOWER(level) LIKE ?', ['%decline%'])
+                    ->orWhereRaw('LOWER(level) LIKE ?', ['%not interested%'])
+                    ->orWhereRaw('LOWER(level) LIKE ?', ['%not responding%'])
+                    ->orWhereIn('id', [
+                        InterviewLevel::CANDIDATE_NOT_INTERESTED_ID,
+                        InterviewLevel::CANDIDATE_NOT_RESPONDING_ID,
+                        InterviewLevel::CANDIDATE_POSITION_CLOSED_ID,
+                        InterviewLevel::CANDIDATE_NOT_POSITION_ID,
+                        21, // Joiner Declined
+                        22, // Offer Declined
+                    ]);
+            })
+            ->pluck('id')
+            ->all();
+    }
+
+    private function classifyCandidateStatus($candidate): array
+    {
+        $rawLevelName = $candidate->relationLoaded('interviewLevel')
+            ? ($candidate->interviewLevel?->level ?? '')
+            : '';
+        $levelName = mb_strtolower((string) $rawLevelName);
+
+        $isOnboarded = (int) $candidate->level_of_interview_id === 20
+            || ! empty($candidate->onboarding_date)
+            || str_contains($levelName, 'onboard');
+
+        if ($isOnboarded) {
+            return [
+                'type' => 'onboarded',
+                'stage' => 'Onboarded',
+                'category' => 'Onboarded',
+                'badge' => 'bg-success-subtle text-success',
+                'reason' => 'Successfully Onboarded',
+            ];
+        }
+
+        $levelId = (int) $candidate->level_of_interview_id;
+        $hasRejectedSchedule = $candidate->relationLoaded('interviewSchedules')
+            ? ($candidate->interviewSchedules?->contains(fn ($s) => strtolower((string) $s->status) === 'rejected') ?? false)
+            : false;
+
+        if (str_contains($levelName, 'screen reject') || (str_contains($levelName, 'screen') && str_contains($levelName, 'reject'))) {
+            return ['type' => 'rejected', 'stage' => 'Screen Reject', 'category' => 'Screening', 'badge' => 'bg-danger-subtle text-danger', 'reason' => $rawLevelName ?: 'Screen Reject'];
+        }
+        if (str_contains($levelName, 'l1 reject')) {
+            return ['type' => 'rejected', 'stage' => 'L1 Reject', 'category' => 'Technical Interview', 'badge' => 'bg-danger-subtle text-danger', 'reason' => 'L1 Interview Reject'];
+        }
+        if (str_contains($levelName, 'l2 reject')) {
+            return ['type' => 'rejected', 'stage' => 'L2 Reject', 'category' => 'Technical Interview', 'badge' => 'bg-danger-subtle text-danger', 'reason' => 'L2 Interview Reject'];
+        }
+        if (str_contains($levelName, 'l3 reject')) {
+            return ['type' => 'rejected', 'stage' => 'L3 Reject', 'category' => 'Technical Interview', 'badge' => 'bg-danger-subtle text-danger', 'reason' => 'L3 Interview Reject'];
+        }
+        if (str_contains($levelName, 'l4 reject')) {
+            return ['type' => 'rejected', 'stage' => 'L4 Reject', 'category' => 'Technical Interview', 'badge' => 'bg-danger-subtle text-danger', 'reason' => 'L4 Interview Reject'];
+        }
+        if (str_contains($levelName, 'hr reject')) {
+            return ['type' => 'rejected', 'stage' => 'HR Reject', 'category' => 'HR Round', 'badge' => 'bg-danger-subtle text-danger', 'reason' => 'HR Round Reject'];
+        }
+        if (str_contains($levelName, 'joiner declined') || $levelId === 21) {
+            return ['type' => 'rejected', 'stage' => 'Joiner Declined', 'category' => 'Onboarding Drop', 'badge' => 'bg-warning-subtle text-warning', 'reason' => 'Candidate declined joining'];
+        }
+        if (str_contains($levelName, 'offer declined') || $levelId === 22) {
+            return ['type' => 'rejected', 'stage' => 'Offer Declined', 'category' => 'Offer Drop', 'badge' => 'bg-warning-subtle text-warning', 'reason' => 'Candidate declined offer'];
+        }
+        if (str_contains($levelName, 'not interested') || $levelId === InterviewLevel::CANDIDATE_NOT_INTERESTED_ID) {
+            return ['type' => 'rejected', 'stage' => 'Not Interested', 'category' => 'Candidate Dropped', 'badge' => 'bg-secondary-subtle text-secondary', 'reason' => 'Candidate not interested'];
+        }
+        if (str_contains($levelName, 'not responding') || $levelId === InterviewLevel::CANDIDATE_NOT_RESPONDING_ID) {
+            return ['type' => 'rejected', 'stage' => 'Not Responding', 'category' => 'Candidate Dropped', 'badge' => 'bg-secondary-subtle text-secondary', 'reason' => 'Candidate not responding'];
+        }
+        if (str_contains($levelName, 'reject')) {
+            return ['type' => 'rejected', 'stage' => $rawLevelName ?: 'Rejected', 'category' => 'Interview Reject', 'badge' => 'bg-danger-subtle text-danger', 'reason' => $rawLevelName ?: 'Rejected'];
+        }
+        if (str_contains($levelName, 'declined')) {
+            return ['type' => 'rejected', 'stage' => $rawLevelName ?: 'Declined', 'category' => 'Declined', 'badge' => 'bg-warning-subtle text-warning', 'reason' => $rawLevelName ?: 'Declined'];
+        }
+        if ($hasRejectedSchedule) {
+            $schedule = $candidate->interviewSchedules->firstWhere(fn ($s) => strtolower((string) $s->status) === 'rejected');
+            return ['type' => 'rejected', 'stage' => 'Schedule Rejected', 'category' => 'Interview Reject', 'badge' => 'bg-danger-subtle text-danger', 'reason' => $schedule->remarks ?: 'Interview schedule marked as rejected'];
+        }
+        if ($candidate->status === false) {
+            return ['type' => 'rejected', 'stage' => 'Inactive', 'category' => 'Dropped / Inactive', 'badge' => 'bg-dark-subtle text-dark', 'reason' => $candidate->reason_for_change ?: ($rawLevelName ?: 'Candidate inactive')];
+        }
+
+        return [
+            'type' => 'in_progress',
+            'stage' => $rawLevelName ?: 'In Progress',
+            'category' => 'In Progress',
+            'badge' => 'bg-info-subtle text-info',
+            'reason' => 'Active in recruitment pipeline',
+        ];
     }
 }
