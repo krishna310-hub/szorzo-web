@@ -1428,7 +1428,6 @@
                                                 <i class="ri-shield-keyhole-line me-1"></i>Admin Only
                                             </span>
                                         </div>
-                                        <p class="text-muted small mb-0">Office expense ledger: Auto-reduces available fund as expenses (birthday cakes, printouts, supplies) are recorded.</p>
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
@@ -1459,7 +1458,7 @@
                                                 ₹{{ number_format($pettyCashSummary['balance'] ?? 0, 2) }}
                                             </div>
                                             <p class="small mb-0 mt-1" style="opacity: 0.85;">
-                                                Fund remaining after office debits (e.g. birthday cake, printout, supplies).
+                                                Fund remaining after office debits.
                                             </p>
                                         </div>
                                         <div class="pt-3 mt-2 border-top border-white-50 d-flex justify-content-between align-items-center small" style="opacity: 0.9;">
@@ -2166,7 +2165,7 @@
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-semibold">Reason / Description <span class="text-danger">*</span></label>
-                                    <input type="text" name="title" class="form-control" placeholder="e.g. Birthday cake buying / Office printouts & stationery" required>
+                                    <input type="text" name="title" class="form-control" placeholder="e.g. Office stationery / Team refreshments" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>

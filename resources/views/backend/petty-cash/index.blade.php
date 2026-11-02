@@ -127,7 +127,7 @@
                                 <i class="ri-wallet-3-line text-primary me-2"></i>Petition Amount (Petty Cash Ledger)
                             </h4>
                             <p class="text-muted small mb-0 mt-1">
-                                Track Cash In (Fund Top-up) and Cash Out (Office Expenses like birthday cakes, printouts, supplies) with automatic balance reduction.
+                                Track Cash In (Fund Top-up) and Cash Out (Office Expenses) with automatic balance reduction.
                             </p>
                         </div>
                         <div class="page-title-right d-flex align-items-center gap-2 mt-2 mt-sm-0">
@@ -164,7 +164,7 @@
                                 ₹{{ number_format($stats['balance'], 2) }}
                             </h2>
                             <p class="mb-0 small" style="opacity: 0.85;">
-                                Fund remaining after all office debits (e.g. birthday cake, printout, supplies).
+                                Fund remaining after all office debits.
                             </p>
                         </div>
                         <div class="d-flex gap-2 pt-3 border-top border-white-50 mt-3">
@@ -383,7 +383,7 @@
 
                         <div class="col-12">
                             <label class="form-label fw-semibold">Expense Reason / Description <span class="text-danger">*</span></label>
-                            <input type="text" name="title" class="form-control" placeholder="e.g. Birthday cake buying for Karthik / Xerox printouts" required>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. Office stationery / Team refreshments" required>
                         </div>
 
                         <div class="col-md-6">
