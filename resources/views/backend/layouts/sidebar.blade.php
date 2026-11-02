@@ -487,7 +487,7 @@
     <!-- LOGO -->
     <div class="navbar-brand-box">
         <!-- Dark Logo-->
-        <a href="{{ route('index') }}" class="logo logo-dark">
+        <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
             <span class="logo-sm">
                 <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/rhino-logo.webp') }}"
                     alt="Small Logo" height="22">
@@ -501,7 +501,7 @@
         </a>
 
         <!-- Light Logo-->
-        <a href="{{ route('index') }}" class="logo logo-light">
+        <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
             <span class="logo-sm">
                 <img src="{{ isset($settings['app_logo']) ? asset($settings['app_logo']) : asset('frontend/images/adminlogos.png') }}"
                     alt="Small Logo" height="22">
