@@ -852,6 +852,16 @@
                     </li>
                 @endcan
 
+                @if (auth()->user() && (auth()->user()->id === 1 || (int) auth()->user()->role_id === 1 || auth()->user()->isAdmin() || auth()->user()->isSuperAdmin()))
+                    <li class="nav-item">
+                        <a href="{{ route('admin.petty-cash.index') }}"
+                            class="nav-link menu-link {{ request()->is('admin/petty-cash*') ? 'active' : '' }}">
+                            <i class="ri-wallet-3-line"></i>
+                            <span>Petition Amount</span>
+                        </a>
+                    </li>
+                @endif
+
                 @can('read', \App\Models\Employee::class)
                     <li class="nav-item">
                         <a href="{{ route('admin.employees.index') }}"

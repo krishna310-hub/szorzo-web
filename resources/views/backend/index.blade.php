@@ -1155,6 +1155,21 @@
                 font-size: 30px;
             }
         }
+
+        /* Petty Cash Dashboard Modal Stacking Fix */
+        #dashAddExpenseModal, #dashAddFundsModal {
+            z-index: 1080 !important;
+        }
+        #dashAddExpenseModal .modal-dialog, #dashAddFundsModal .modal-dialog {
+            z-index: 1085 !important;
+            position: relative !important;
+        }
+        #dashAddExpenseModal .modal-content, #dashAddFundsModal .modal-content {
+            background-color: #ffffff !important;
+            position: relative !important;
+            z-index: 1090 !important;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4) !important;
+        }
     </style>
 
     <div class="main-content dashboard-shell">
@@ -1396,6 +1411,127 @@
                     <div class="alert alert-warning border-0 shadow-sm"><i class="ri-alert-line me-2"></i>Your login email is
                         not linked to a recruiter record, so your personal dashboard currently has no records.</div>
                 @endunless
+
+                @if (!empty($showPettyCashCard) && $showPettyCashCard)
+                    <!-- ================= PETITION AMOUNT / PETTY CASH (ADMIN ONLY) ================= -->
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0 !important;">
+                        <div class="card-body p-3 p-lg-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 44px; height: 44px; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-size: 22px;">
+                                        <i class="ri-wallet-3-line"></i>
+                                    </div>
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <h5 class="fw-bold mb-0 text-dark">Petition Amount (Petty Cash Ledger)</h5>
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0 fs-11 fw-semibold">
+                                                <i class="ri-shield-keyhole-line me-1"></i>Admin Only
+                                            </span>
+                                        </div>
+                                        <p class="text-muted small mb-0">Office expense ledger: Auto-reduces available fund as expenses (birthday cakes, printouts, supplies) are recorded.</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#dashAddExpenseModal">
+                                        <i class="ri-subtract-line me-1"></i> - Record Expense
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#dashAddFundsModal">
+                                        <i class="ri-add-circle-line me-1"></i> + Add Funds
+                                    </button>
+                                    <a href="{{ route('admin.petty-cash.index') }}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-semibold">
+                                        <i class="ri-file-list-3-line me-1"></i> View Full Ledger
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Highlighted Balance Display -->
+                                <div class="col-12 col-md-5 col-xl-4">
+                                    <div id="dashPettyCardBg" class="p-3 rounded-4 text-white h-100 d-flex flex-column justify-content-between shadow-sm" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                                        <div>
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <span class="text-uppercase small fw-semibold" style="opacity: 0.9; letter-spacing: 0.5px;">
+                                                    <i class="ri-shield-check-line me-1"></i> Total Available Balance
+                                                </span>
+                                                <span class="badge bg-white text-success rounded-pill px-2 py-0 fw-bold small">Live</span>
+                                            </div>
+                                            <div class="display-6 fw-bold mb-0" id="dashPettyBalanceText">
+                                                ₹{{ number_format($pettyCashSummary['balance'] ?? 0, 2) }}
+                                            </div>
+                                            <p class="small mb-0 mt-1" style="opacity: 0.85;">
+                                                Fund remaining after office debits (e.g. birthday cake, printout, supplies).
+                                            </p>
+                                        </div>
+                                        <div class="pt-3 mt-2 border-top border-white-50 d-flex justify-content-between align-items-center small" style="opacity: 0.9;">
+                                            <span id="dashPettyInText"><i class="ri-arrow-down-line me-1 text-light"></i> Total In: ₹{{ number_format($pettyCashSummary['total_in'] ?? 0, 2) }}</span>
+                                            <span id="dashPettyOutText"><i class="ri-arrow-up-line me-1 text-warning"></i> Total Out: ₹{{ number_format($pettyCashSummary['total_out'] ?? 0, 2) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Monthly & Today Stat Boxes -->
+                                <div class="col-12 col-md-7 col-xl-4">
+                                    <div class="row g-2 h-100">
+                                        <div class="col-6">
+                                            <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
+                                                <div class="text-muted small fw-semibold text-uppercase">This Month Spent</div>
+                                                <div>
+                                                    <h4 class="fw-bold text-dark mb-0" id="dashPettyThisMonthText">₹{{ number_format($pettyCashSummary['this_month_out'] ?? 0, 2) }}</h4>
+                                                    <span class="text-muted small">{{ now()->format('F Y') }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
+                                                <div class="text-muted small fw-semibold text-uppercase">Today's Expenses</div>
+                                                <div>
+                                                    <h4 class="fw-bold text-dark mb-0" id="dashPettyTodayText">₹{{ number_format($pettyCashSummary['today_out'] ?? 0, 2) }}</h4>
+                                                    <span class="text-muted small">{{ now()->format('d M') }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recent Expense Tracker Strip -->
+                                <div class="col-12 col-xl-4">
+                                    <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
+                                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                            <span class="fw-bold text-dark small text-uppercase"><i class="ri-history-line me-1 text-primary"></i> Recent Expense Tracking</span>
+                                            <a href="{{ route('admin.petty-cash.index') }}" class="small text-primary fw-semibold">View All &rarr;</a>
+                                        </div>
+                                        <div style="max-height: 110px; overflow-y: auto;" id="dashPettyRecentList">
+                                            @if ($recentPettyCash->isNotEmpty())
+                                                <ul class="list-unstyled mb-0">
+                                                    @foreach ($recentPettyCash->take(3) as $recent)
+                                                        <li class="d-flex justify-content-between align-items-center py-1 border-bottom-dashed small">
+                                                            <div class="text-truncate me-2">
+                                                                <span class="fw-semibold text-dark">{{ $recent->title }}</span>
+                                                                <span class="text-muted small d-block">{{ $recent->category }} &bull; {{ $recent->transaction_date ? $recent->transaction_date->format('d M') : '' }}</span>
+                                                            </div>
+                                                            <div class="text-end text-nowrap">
+                                                                @if ($recent->transaction_type === 'credit')
+                                                                    <span class="text-success fw-bold">+₹{{ number_format($recent->amount, 2) }}</span>
+                                                                @else
+                                                                    <span class="text-danger fw-bold">-₹{{ number_format($recent->amount, 2) }}</span>
+                                                                @endif
+                                                            </div>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                <div class="text-muted small py-2 text-center">
+                                                    <i class="ri-inbox-line fs-5 d-block mb-1"></i>
+                                                    No expenses recorded yet. Use buttons above to record.
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <div class="row g-3 mb-4">
                     @if ($isRecruiterDashboard || auth()->user()->can('read', \App\Models\ClientRequirement::class))
@@ -2000,6 +2136,163 @@
             </div>
         </div>
     </div>
+
+    @if (!empty($showPettyCashCard) && $showPettyCashCard)
+        <!-- Dashboard Modal 1: Quick Record Expense -->
+        <div class="modal fade" id="dashAddExpenseModal" tabindex="-1" aria-labelledby="dashAddExpenseModalLabel" aria-hidden="true" style="z-index: 1080 !important;">
+            <div class="modal-dialog modal-dialog-centered" style="z-index: 1085 !important;">
+                <div class="modal-content border-0 shadow-lg" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important;">
+                    <form id="dashAddExpenseForm" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="transaction_type" value="debit">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title fw-bold" id="dashAddExpenseModalLabel">
+                                <i class="ri-subtract-line me-1"></i> Record Office Expense
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="alert alert-danger-subtle border border-danger-subtle text-danger small mb-3">
+                                <i class="ri-information-line me-1"></i>
+                                Recording an expense automatically deducts from your available balance.
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Expense Amount (₹) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text fw-bold">₹</span>
+                                        <input type="number" step="0.01" min="0.01" name="amount" class="form-control form-control-lg fw-bold text-danger" placeholder="e.g. 1500.00" required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Reason / Description <span class="text-danger">*</span></label>
+                                    <input type="text" name="title" class="form-control" placeholder="e.g. Birthday cake buying / Office printouts & stationery" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                                    <select name="category" class="form-select" required>
+                                        @foreach ($pettyCashCategories ?? [] as $cKey => $cLabel)
+                                            @if ($cKey !== 'Funds Allocation / Top-up')
+                                                <option value="{{ $cKey }}">{{ $cKey }}</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Payment Mode <span class="text-danger">*</span></label>
+                                    <select name="payment_mode" class="form-select" required>
+                                        @foreach ($pettyCashPaymentModes ?? [] as $m)
+                                            <option value="{{ $m }}">{{ $m }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
+                                    <input type="date" name="transaction_date" class="form-control" value="{{ now()->toDateString() }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Spent By / Paid To</label>
+                                    <input type="text" name="spent_by" class="form-control" placeholder="e.g. Karthik, Bakery, Vendor">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Bill / Reference No</label>
+                                    <input type="text" name="reference_no" class="form-control" placeholder="Optional bill # or UTR">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Upload Receipt (Optional)</label>
+                                    <input type="file" name="receipt_file" class="form-control" accept="image/*,.pdf">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Notes</label>
+                                    <textarea name="notes" rows="2" class="form-control" placeholder="Additional details..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger fw-semibold px-4">
+                                <i class="ri-check-line me-1"></i> Save Expense
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Modal 2: Quick Add Funds (In) -->
+        <div class="modal fade" id="dashAddFundsModal" tabindex="-1" aria-labelledby="dashAddFundsModalLabel" aria-hidden="true" style="z-index: 1080 !important;">
+            <div class="modal-dialog modal-dialog-centered" style="z-index: 1085 !important;">
+                <div class="modal-content border-0 shadow-lg" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important;">
+                    <form id="dashAddFundsForm" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="transaction_type" value="credit">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title fw-bold" id="dashAddFundsModalLabel">
+                                <i class="ri-add-circle-line me-1"></i> Add Funds (Petition Amount Top-up)
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="alert alert-success-subtle border border-success-subtle text-success small mb-3">
+                                <i class="ri-information-line me-1"></i>
+                                Top-up the office fund (e.g. ₹2,00,000 allocation).
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Top-up Amount (₹) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text fw-bold">₹</span>
+                                        <input type="number" step="0.01" min="0.01" name="amount" class="form-control form-control-lg fw-bold text-success" placeholder="e.g. 200000.00" required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Description / Top-up Source <span class="text-danger">*</span></label>
+                                    <input type="text" name="title" class="form-control" placeholder="e.g. Monthly Petty Cash Fund" value="Office Petty Cash Allocation" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                                    <select name="category" class="form-select" required>
+                                        <option value="Funds Allocation / Top-up" selected>Funds Allocation / Top-up</option>
+                                        <option value="Miscellaneous">Miscellaneous</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Payment Mode <span class="text-danger">*</span></label>
+                                    <select name="payment_mode" class="form-select" required>
+                                        @foreach ($pettyCashPaymentModes ?? [] as $m)
+                                            <option value="{{ $m }}" @selected($m === 'Bank Transfer / NEFT' || $m === 'Cash')>{{ $m }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
+                                    <input type="date" name="transaction_date" class="form-control" value="{{ now()->toDateString() }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Deposited By / Source</label>
+                                    <input type="text" name="spent_by" class="form-control" placeholder="e.g. Admin / Director / Bank">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Reference / UTR / Cheque No</label>
+                                    <input type="text" name="reference_no" class="form-control" placeholder="Optional transaction ref">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Upload Voucher / Slip (Optional)</label>
+                                    <input type="file" name="receipt_file" class="form-control" accept="image/*,.pdf">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success fw-semibold px-4">
+                                <i class="ri-check-line me-1"></i> Add Funds
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @section('script')
@@ -2455,6 +2748,129 @@
                     }
                 });
                 window.individualProfilesSourcedChart.render();
+            }
+
+            // Dashboard Petty Cash Quick Actions
+            function ensurePettyModalsInBody() {
+                ['dashAddExpenseModal', 'dashAddFundsModal'].forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el && el.parentElement !== document.body) {
+                        document.body.appendChild(el);
+                    }
+                });
+            }
+            ensurePettyModalsInBody();
+
+            if (window.jQuery) {
+                $('#dashAddExpenseModal, #dashAddFundsModal').on('show.bs.modal', function () {
+                    ensurePettyModalsInBody();
+                });
+                $('#dashAddExpenseModal, #dashAddFundsModal').on('hidden.bs.modal', function () {
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open').css({ overflow: '', paddingRight: '' });
+                });
+            }
+
+            function updateDashboardPettyCashStats(stats) {
+                if (!stats) return;
+                var balanceVal = Number(stats.balance || 0);
+                var formatted = '₹' + balanceVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                var elBalance = document.getElementById('dashPettyBalanceText');
+                if (elBalance) elBalance.textContent = formatted;
+
+                var elIn = document.getElementById('dashPettyInText');
+                if (elIn) elIn.innerHTML = '<i class="ri-arrow-down-line me-1 text-light"></i> Total In: ₹' + Number(stats.total_in || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                var elOut = document.getElementById('dashPettyOutText');
+                if (elOut) elOut.innerHTML = '<i class="ri-arrow-up-line me-1 text-warning"></i> Total Out: ₹' + Number(stats.total_out || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                var elMonth = document.getElementById('dashPettyThisMonthText');
+                if (elMonth) elMonth.textContent = '₹' + Number(stats.this_month_out || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                var elToday = document.getElementById('dashPettyTodayText');
+                if (elToday) elToday.textContent = '₹' + Number(stats.today_out || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            var dashExpenseForm = document.getElementById('dashAddExpenseForm');
+            if (dashExpenseForm) {
+                dashExpenseForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var formData = new FormData(this);
+                    var btn = this.querySelector('button[type="submit"]');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="ri-loader-4-line ri-spin me-1"></i> Saving...';
+
+                    fetch('{{ route('admin.petty-cash.store') }}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            if (window.toastr) toastr.success(data.message);
+                            updateDashboardPettyCashStats(data.stats);
+                            var modalEl = document.getElementById('dashAddExpenseModal');
+                            var modal = bootstrap.Modal.getInstance(modalEl);
+                            if (modal) modal.hide();
+                            dashExpenseForm.reset();
+                            setTimeout(function() { window.location.reload(); }, 1000);
+                        } else {
+                            if (window.toastr) toastr.error(data.message || 'Failed to save expense');
+                        }
+                    })
+                    .catch(function() {
+                        if (window.toastr) toastr.error('An error occurred while saving the expense.');
+                    })
+                    .finally(function() {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="ri-check-line me-1"></i> Save Expense';
+                    });
+                });
+            }
+
+            var dashFundsForm = document.getElementById('dashAddFundsForm');
+            if (dashFundsForm) {
+                dashFundsForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var formData = new FormData(this);
+                    var btn = this.querySelector('button[type="submit"]');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="ri-loader-4-line ri-spin me-1"></i> Adding...';
+
+                    fetch('{{ route('admin.petty-cash.store') }}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            if (window.toastr) toastr.success(data.message);
+                            updateDashboardPettyCashStats(data.stats);
+                            var modalEl = document.getElementById('dashAddFundsModal');
+                            var modal = bootstrap.Modal.getInstance(modalEl);
+                            if (modal) modal.hide();
+                            dashFundsForm.reset();
+                            setTimeout(function() { window.location.reload(); }, 1000);
+                        } else {
+                            if (window.toastr) toastr.error(data.message || 'Failed to add funds');
+                        }
+                    })
+                    .catch(function() {
+                        if (window.toastr) toastr.error('An error occurred while adding funds.');
+                    })
+                    .finally(function() {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="ri-check-line me-1"></i> Add Funds';
+                    });
+                });
             }
         });
     </script>

@@ -424,7 +424,38 @@ class AdminController extends Controller
             )['overallPercentage']];
         });
 
+        $showPettyCashCard = ($isSuperAdmin || (int) $user->role_id === 1 || $user->id === 1 || $user->isAdmin());
+        $pettyCashSummary = [
+            'balance' => 0.0,
+            'total_in' => 0.0,
+            'total_out' => 0.0,
+            'this_month_out' => 0.0,
+            'today_out' => 0.0,
+            'total_transactions' => 0,
+        ];
+        $recentPettyCash = collect();
+
+        if ($showPettyCashCard) {
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('petty_cashes')) {
+                    $pettyCashSummary = \App\Models\PettyCash::getSummaryStats();
+                    $recentPettyCash = \App\Models\PettyCash::with('creator:id,name')
+                        ->orderBy('transaction_date', 'desc')
+                        ->orderBy('id', 'desc')
+                        ->limit(5)
+                        ->get();
+                }
+            } catch (\Throwable $e) {
+                // Keep default zero metrics if table is not migrated yet
+            }
+        }
+
         return view('backend.index', [
+            'showPettyCashCard' => $showPettyCashCard,
+            'pettyCashSummary' => $pettyCashSummary,
+            'recentPettyCash' => $recentPettyCash,
+            'pettyCashCategories' => \App\Models\PettyCash::CATEGORIES,
+            'pettyCashPaymentModes' => \App\Models\PettyCash::PAYMENT_MODES,
             'scopeLabel' => $isCxOperations
                 ? 'Customer Experience and Operations'
                 : ($isRecruiter

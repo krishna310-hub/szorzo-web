@@ -30,6 +30,7 @@ use App\Http\Controllers\backend\TargetController;
 use App\Http\Controllers\backend\AttendanceController;
 use App\Http\Controllers\backend\AttendanceTimerController;
 use App\Http\Controllers\backend\LeaveController;
+use App\Http\Controllers\backend\PettyCashController;
 use App\Http\Controllers\backend\NotificationController;
 use App\Http\Controllers\backend\PayslipController;
 use App\Http\Controllers\frontend\HomeController;
@@ -379,6 +380,17 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/{revenue}/edit', 'edit')->name('edit');
         Route::put('/{revenue}', 'update')->name('update');
         Route::get('/{revenue}/download', 'download')->name('download');
+    });
+
+    Route::prefix('petty-cash')->name('petty-cash.')->controller(PettyCashController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::get('/summary', 'summary')->name('summary');
+        Route::get('/export', 'export')->name('export');
+        Route::get('/receipt/{id}', 'receipt')->name('receipt');
+        Route::get('/{pettyCash}', 'show')->name('show');
+        Route::put('/{pettyCash}', 'update')->name('update');
+        Route::delete('/{pettyCash}', 'destroy')->name('destroy');
     });
 
     Route::prefix('interview-schedules')->name('interview-schedules.')->controller(InterviewScheduleController::class)->group(function () {
