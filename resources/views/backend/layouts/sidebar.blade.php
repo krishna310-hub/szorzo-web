@@ -522,10 +522,10 @@
             <i class="ri-record-circle-line"></i>
         </button>
 
-        <button type="button" class="btn sidebar-mobile-close-btn" id="sidebar-close-btn"
+        {{-- <button type="button" class="btn sidebar-mobile-close-btn" id="sidebar-close-btn"
             aria-label="Close sidebar" title="Close sidebar">
             <i class="ri-close-line fs-20"></i>
-        </button>
+        </button> --}}
     </div>
 
     <div class="dropdown sidebar-user m-1 rounded">
