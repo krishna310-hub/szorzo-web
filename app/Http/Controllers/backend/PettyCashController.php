@@ -29,6 +29,8 @@ class PettyCashController extends Controller
         );
 
         abort_unless($isAuthorized, 403, 'Unauthorized access. The Petty Cash (Petition Amount) module is restricted to administrators only.');
+
+        PettyCash::ensureTableExists();
     }
 
     /**
