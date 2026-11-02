@@ -444,7 +444,35 @@
     }
 
     @media (min-width: 768px) {
-        .sidebar-mobile-close-btn {
+        .navbar-menu .sidebar-mobile-close-btn {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: absolute;
+            right: 12px;
+            top: 14px;
+            z-index: 1050;
+        }
+
+        .navbar-menu .sidebar-mobile-close-btn:hover,
+        .navbar-menu .sidebar-mobile-close-btn:active {
+            background: var(--sz-brand-red) !important;
+            border-color: var(--sz-brand-orange) !important;
+            color: #ffffff !important;
+        }
+
+        /* Hide close button when sidebar is collapsed to icon-only mode */
+        :is([data-sidebar-size="sm"], [data-sidebar-size="sm-hover"]) .navbar-menu .sidebar-mobile-close-btn {
             display: none !important;
         }
     }
@@ -494,8 +522,8 @@
             <i class="ri-record-circle-line"></i>
         </button>
 
-        <button type="button" class="btn sidebar-mobile-close-btn d-md-none" id="sidebar-close-btn"
-            aria-label="Close sidebar">
+        <button type="button" class="btn sidebar-mobile-close-btn" id="sidebar-close-btn"
+            aria-label="Close sidebar" title="Close sidebar">
             <i class="ri-close-line fs-20"></i>
         </button>
     </div>

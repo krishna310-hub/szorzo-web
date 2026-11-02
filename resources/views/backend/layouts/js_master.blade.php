@@ -64,8 +64,10 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        new Choices('#choices-multiple-remove-button', {
-            removeItemButton: true,
-        });
+        if (document.querySelector('#choices-multiple-remove-button')) {
+            new Choices('#choices-multiple-remove-button', {
+                removeItemButton: true,
+            });
+        }
     });
 </script>

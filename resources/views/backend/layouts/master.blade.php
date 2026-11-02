@@ -7,12 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
-        if (!sessionStorage.getItem('data-sidebar-size')) {
-            sessionStorage.setItem('data-sidebar-size', 'lg');
-        }
-        if (!sessionStorage.getItem('data-layout')) {
-            sessionStorage.setItem('data-layout', 'vertical');
-        }
+        (function() {
+            var width = window.innerWidth || document.documentElement.clientWidth;
+            var savedSize = sessionStorage.getItem('data-sidebar-size');
+            if (savedSize) {
+                document.documentElement.setAttribute('data-sidebar-size', savedSize);
+            } else {
+                var defaultSize = (width <= 1025 && width > 767) ? 'sm' : 'lg';
+                document.documentElement.setAttribute('data-sidebar-size', defaultSize);
+                sessionStorage.setItem('data-sidebar-size', defaultSize);
+            }
+            if (!sessionStorage.getItem('data-layout')) {
+                sessionStorage.setItem('data-layout', 'vertical');
+            }
+        })();
     </script>
     {{-- <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" /> --}}
