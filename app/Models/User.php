@@ -229,6 +229,42 @@ class User extends Authenticatable
                 ->whereNotIn('name', ['invester', 'investor']));
     }
 
+    public function scopeInternalEmployees(Builder $query): Builder
+    {
+        return $query->eligibleForAttendance()
+            ->whereDoesntHave('employee', function ($emp) {
+                $emp->where('employment_type', Employee::EMPLOYMENT_TYPE_EXTERNAL);
+            });
+    }
+
+    public function isInternalEmployee(): bool
+    {
+        if ($this->isSuperAdmin() || $this->isInvestor() || (int) $this->role_id === 6) {
+            return false;
+        }
+
+        if (!$this->is_active) {
+            return false;
+        }
+
+        $emp = $this->linkedEmployee();
+        if ($emp) {
+            return $emp->isInternal();
+        }
+
+        $accessLevel = strtolower((string) ($this->role?->access_level ?? ''));
+        if (in_array($accessLevel, ['super_admin', 'invester', 'investor'], true)) {
+            return false;
+        }
+
+        $roleName = strtolower((string) ($this->role?->name ?? ''));
+        if (in_array($roleName, ['super admin', 'super_admin', 'invester', 'investor', 'external', 'client'], true)) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Employees employed on the supplied attendance date, including inactive
      * accounts so historical attendance can still be entered or corrected.
@@ -260,7 +296,15 @@ class User extends Authenticatable
 
     public function linkedEmployee(): ?Employee
     {
+        if ($this->relationLoaded('employee') && $this->employee) {
+            return $this->employee;
+        }
+
         if ($this->isInvestor() || (int) $this->role_id === 6) {
+            return null;
+        }
+
+        if (!static::getConnectionResolver()) {
             return null;
         }
 

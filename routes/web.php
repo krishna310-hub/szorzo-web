@@ -146,6 +146,7 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::get('/create', 'create')->name('create');
         Route::post('/', 'store')->name('store');
         Route::put('/{leave}/review', 'review')->name('review');
+        Route::delete('/{leave}/cancel', 'cancel')->name('cancel');
         Route::get('/{leave}/attachment', 'attachment')->name('attachment');
     });
     // Maintenance Mode

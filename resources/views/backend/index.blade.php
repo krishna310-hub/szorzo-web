@@ -1412,126 +1412,6 @@
                         not linked to a recruiter record, so your personal dashboard currently has no records.</div>
                 @endunless
 
-                @if (!empty($showPettyCashCard) && $showPettyCashCard)
-                    <!-- ================= PETITION AMOUNT / PETTY CASH (ADMIN ONLY) ================= -->
-                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0 !important;">
-                        <div class="card-body p-3 p-lg-4">
-                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 44px; height: 44px; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-size: 22px;">
-                                        <i class="ri-wallet-3-line"></i>
-                                    </div>
-                                    <div>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <h5 class="fw-bold mb-0 text-dark">Petition Amount (Petty Cash Ledger)</h5>
-                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0 fs-11 fw-semibold">
-                                                <i class="ri-shield-keyhole-line me-1"></i>Admin Only
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#dashAddExpenseModal">
-                                        <i class="ri-subtract-line me-1"></i> - Record Expense
-                                    </button>
-                                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#dashAddFundsModal">
-                                        <i class="ri-add-circle-line me-1"></i> + Add Funds
-                                    </button>
-                                    <a href="{{ route('admin.petty-cash.index') }}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-semibold">
-                                        <i class="ri-file-list-3-line me-1"></i> View Full Ledger
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="row g-3">
-                                <!-- Highlighted Balance Display -->
-                                <div class="col-12 col-md-5 col-xl-4">
-                                    <div id="dashPettyCardBg" class="p-3 rounded-4 text-white h-100 d-flex flex-column justify-content-between shadow-sm" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <span class="text-uppercase small fw-semibold" style="opacity: 0.9; letter-spacing: 0.5px;">
-                                                    <i class="ri-shield-check-line me-1"></i> Total Available Balance
-                                                </span>
-                                                <span class="badge bg-white text-success rounded-pill px-2 py-0 fw-bold small">Live</span>
-                                            </div>
-                                            <div class="display-6 fw-bold mb-0" id="dashPettyBalanceText">
-                                                ₹{{ number_format($pettyCashSummary['balance'] ?? 0, 2) }}
-                                            </div>
-                                            <p class="small mb-0 mt-1" style="opacity: 0.85;">
-                                                Fund remaining after office debits.
-                                            </p>
-                                        </div>
-                                        <div class="pt-3 mt-2 border-top border-white-50 d-flex justify-content-between align-items-center small" style="opacity: 0.9;">
-                                            <span id="dashPettyInText"><i class="ri-arrow-down-line me-1 text-light"></i> Total In: ₹{{ number_format($pettyCashSummary['total_in'] ?? 0, 2) }}</span>
-                                            <span id="dashPettyOutText"><i class="ri-arrow-up-line me-1 text-warning"></i> Total Out: ₹{{ number_format($pettyCashSummary['total_out'] ?? 0, 2) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Monthly & Today Stat Boxes -->
-                                <div class="col-12 col-md-7 col-xl-4">
-                                    <div class="row g-2 h-100">
-                                        <div class="col-6">
-                                            <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
-                                                <div class="text-muted small fw-semibold text-uppercase">This Month Spent</div>
-                                                <div>
-                                                    <h4 class="fw-bold text-dark mb-0" id="dashPettyThisMonthText">₹{{ number_format($pettyCashSummary['this_month_out'] ?? 0, 2) }}</h4>
-                                                    <span class="text-muted small">{{ now()->format('F Y') }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
-                                                <div class="text-muted small fw-semibold text-uppercase">Today's Expenses</div>
-                                                <div>
-                                                    <h4 class="fw-bold text-dark mb-0" id="dashPettyTodayText">₹{{ number_format($pettyCashSummary['today_out'] ?? 0, 2) }}</h4>
-                                                    <span class="text-muted small">{{ now()->format('d M') }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Recent Expense Tracker Strip -->
-                                <div class="col-12 col-xl-4">
-                                    <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
-                                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
-                                            <span class="fw-bold text-dark small text-uppercase"><i class="ri-history-line me-1 text-primary"></i> Recent Expense Tracking</span>
-                                            <a href="{{ route('admin.petty-cash.index') }}" class="small text-primary fw-semibold">View All &rarr;</a>
-                                        </div>
-                                        <div style="max-height: 110px; overflow-y: auto;" id="dashPettyRecentList">
-                                            @if ($recentPettyCash->isNotEmpty())
-                                                <ul class="list-unstyled mb-0">
-                                                    @foreach ($recentPettyCash->take(3) as $recent)
-                                                        <li class="d-flex justify-content-between align-items-center py-1 border-bottom-dashed small">
-                                                            <div class="text-truncate me-2">
-                                                                <span class="fw-semibold text-dark">{{ $recent->title }}</span>
-                                                                <span class="text-muted small d-block">{{ $recent->category }} &bull; {{ $recent->transaction_date ? $recent->transaction_date->format('d M') : '' }}</span>
-                                                            </div>
-                                                            <div class="text-end text-nowrap">
-                                                                @if ($recent->transaction_type === 'credit')
-                                                                    <span class="text-success fw-bold">+₹{{ number_format($recent->amount, 2) }}</span>
-                                                                @else
-                                                                    <span class="text-danger fw-bold">-₹{{ number_format($recent->amount, 2) }}</span>
-                                                                @endif
-                                                            </div>
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                            @else
-                                                <div class="text-muted small py-2 text-center">
-                                                    <i class="ri-inbox-line fs-5 d-block mb-1"></i>
-                                                    No expenses recorded yet. Use buttons above to record.
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
                 <div class="row g-3 mb-4">
                     @if ($isRecruiterDashboard || auth()->user()->can('read', \App\Models\ClientRequirement::class))
                         <div class="col-6 col-xl-3">
@@ -2130,6 +2010,126 @@
                                 <div id="monthlyRevenueBarChart" style="min-height: 300px;"></div>
                             </div>
                         </div>
+                @endif
+
+                @if (!empty($showPettyCashCard) && $showPettyCashCard)
+                    <!-- ================= PETITION AMOUNT / PETTY CASH (ADMIN ONLY) ================= -->
+                    <div class="card border-0 shadow-sm mb-4 mt-2" style="border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0 !important;">
+                        <div class="card-body p-3 p-lg-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 44px; height: 44px; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-size: 22px;">
+                                        <i class="ri-wallet-3-line"></i>
+                                    </div>
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <h5 class="fw-bold mb-0 text-dark">Petition Amount (Petty Cash Ledger)</h5>
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0 fs-11 fw-semibold">
+                                                <i class="ri-shield-keyhole-line me-1"></i>Admin Only
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#dashAddExpenseModal">
+                                        <i class="ri-subtract-line me-1"></i> - Record Expense
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#dashAddFundsModal">
+                                        <i class="ri-add-circle-line me-1"></i> + Add Funds
+                                    </button>
+                                    <a href="{{ route('admin.petty-cash.index') }}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-semibold">
+                                        <i class="ri-file-list-3-line me-1"></i> View Full Ledger
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Highlighted Balance Display -->
+                                <div class="col-12 col-md-5 col-xl-4">
+                                    <div id="dashPettyCardBg" class="p-3 rounded-4 text-white h-100 d-flex flex-column justify-content-between shadow-sm" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                                        <div>
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <span class="text-uppercase small fw-semibold" style="opacity: 0.9; letter-spacing: 0.5px;">
+                                                    <i class="ri-shield-check-line me-1"></i> Total Available Balance
+                                                </span>
+                                                <span class="badge bg-white text-success rounded-pill px-2 py-0 fw-bold small">Live</span>
+                                            </div>
+                                            <div class="display-6 fw-bold mb-0" id="dashPettyBalanceText">
+                                                ₹{{ number_format($pettyCashSummary['balance'] ?? 0, 2) }}
+                                            </div>
+                                            <p class="small mb-0 mt-1" style="opacity: 0.85;">
+                                                Fund remaining after office debits.
+                                            </p>
+                                        </div>
+                                        <div class="pt-3 mt-2 border-top border-white-50 d-flex justify-content-between align-items-center small" style="opacity: 0.9;">
+                                            <span id="dashPettyInText"><i class="ri-arrow-down-line me-1 text-light"></i> Total In: ₹{{ number_format($pettyCashSummary['total_in'] ?? 0, 2) }}</span>
+                                            <span id="dashPettyOutText"><i class="ri-arrow-up-line me-1 text-warning"></i> Total Out: ₹{{ number_format($pettyCashSummary['total_out'] ?? 0, 2) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Monthly & Today Stat Boxes -->
+                                <div class="col-12 col-md-7 col-xl-4">
+                                    <div class="row g-2 h-100">
+                                        <div class="col-6">
+                                            <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
+                                                <div class="text-muted small fw-semibold text-uppercase">This Month Spent</div>
+                                                <div>
+                                                    <h4 class="fw-bold text-dark mb-0" id="dashPettyThisMonthText">₹{{ number_format($pettyCashSummary['this_month_out'] ?? 0, 2) }}</h4>
+                                                    <span class="text-muted small">{{ now()->format('F Y') }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
+                                                <div class="text-muted small fw-semibold text-uppercase">Today's Expenses</div>
+                                                <div>
+                                                    <h4 class="fw-bold text-dark mb-0" id="dashPettyTodayText">₹{{ number_format($pettyCashSummary['today_out'] ?? 0, 2) }}</h4>
+                                                    <span class="text-muted small">{{ now()->format('d M') }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recent Expense Tracker Strip -->
+                                <div class="col-12 col-xl-4">
+                                    <div class="border rounded-4 bg-white p-3 h-100 shadow-sm d-flex flex-column justify-content-between">
+                                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                            <span class="fw-bold text-dark small text-uppercase"><i class="ri-history-line me-1 text-primary"></i> Recent Expense Tracking</span>
+                                            <a href="{{ route('admin.petty-cash.index') }}" class="small text-primary fw-semibold">View All &rarr;</a>
+                                        </div>
+                                        <div style="max-height: 110px; overflow-y: auto;" id="dashPettyRecentList">
+                                            @if ($recentPettyCash->isNotEmpty())
+                                                <ul class="list-unstyled mb-0">
+                                                    @foreach ($recentPettyCash->take(3) as $recent)
+                                                        <li class="d-flex justify-content-between align-items-center py-1 border-bottom-dashed small">
+                                                            <div class="text-truncate me-2">
+                                                                <span class="fw-semibold text-dark">{{ $recent->title }}</span>
+                                                                <span class="text-muted small d-block">{{ $recent->category }} &bull; {{ $recent->transaction_date ? $recent->transaction_date->format('d M') : '' }}</span>
+                                                            </div>
+                                                            <div class="text-end text-nowrap">
+                                                                @if ($recent->transaction_type === 'credit')
+                                                                    <span class="text-success fw-bold">+₹{{ number_format($recent->amount, 2) }}</span>
+                                                                @else
+                                                                    <span class="text-danger fw-bold">-₹{{ number_format($recent->amount, 2) }}</span>
+                                                                @endif
+                                                            </div>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                <div class="text-muted small py-2 text-center">
+                                                    <i class="ri-inbox-line fs-5 d-block mb-1"></i>
+                                                    No expenses recorded yet. Use buttons above to record.
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endif
                 </div>
             </div>

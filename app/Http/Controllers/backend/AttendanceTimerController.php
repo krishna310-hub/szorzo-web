@@ -62,6 +62,14 @@ class AttendanceTimerController extends Controller
         $date = now()->toDateString();
         $attendance = $this->resolveAttendance($user, $employee, $date, true);
 
+        if ($attendance->status === 'on_leave') {
+            $leaveType = $attendance->leaveRequest?->leave_type ?? 'Leave';
+            return response()->json([
+                'success' => false,
+                'message' => "You are marked on approved {$leaveType} today. Attendance timer cannot be started.",
+            ], 422);
+        }
+
         // If attendance was already completed today, restarting it reopens check_out
         if ($attendance->timer_status === Attendance::TIMER_COMPLETED) {
             $attendance->check_out = null;

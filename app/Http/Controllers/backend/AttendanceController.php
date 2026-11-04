@@ -60,12 +60,22 @@ class AttendanceController extends Controller
                     $attendance = Attendance::where('user_id', $record['user_id'])->whereDate('attendance_date', $data['attendance_date'])->first();
                 }
 
+                $leaveRequestId = null;
+                if ($values['status'] === 'on_leave') {
+                    $leaveReq = LeaveRequest::where('user_id', $record['user_id'])
+                        ->where('status', 'approved')
+                        ->where('from_date', '<=', $data['attendance_date'])
+                        ->where('to_date', '>=', $data['attendance_date'])
+                        ->first();
+                    $leaveRequestId = $leaveReq?->id ?? ($attendance?->leave_request_id);
+                }
+
                 $saveValues = $values + [
                     'employee_id' => $employeeId,
                     'user_id' => $record['user_id'],
                     'attendance_date' => $data['attendance_date'],
                     'marked_by' => $request->user()->id,
-                    'leave_request_id' => null,
+                    'leave_request_id' => $leaveRequestId,
                 ];
 
                 if (!empty($values['check_out'])) {
@@ -97,7 +107,17 @@ class AttendanceController extends Controller
             $data['timer_status'] = Attendance::TIMER_RUNNING;
         }
 
-        $attendance->update($data+['marked_by'=>$request->user()->id,'leave_request_id'=>$data['status']==='on_leave'?$attendance->leave_request_id:null]);
+        $leaveRequestId = null;
+        if ($data['status'] === 'on_leave') {
+            $leaveReq = LeaveRequest::where('user_id', $attendance->user_id)
+                ->where('status', 'approved')
+                ->where('from_date', '<=', $attendance->attendance_date->toDateString())
+                ->where('to_date', '>=', $attendance->attendance_date->toDateString())
+                ->first();
+            $leaveRequestId = $leaveReq?->id ?? $attendance->leave_request_id;
+        }
+
+        $attendance->update($data + ['marked_by' => $request->user()->id, 'leave_request_id' => $leaveRequestId]);
         return back()->with('success','Attendance updated successfully.');
     }
 

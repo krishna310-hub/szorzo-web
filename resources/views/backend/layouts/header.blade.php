@@ -210,8 +210,16 @@
                                     <div class="text-reset notification-item d-block dropdown-item position-relative py-2 px-3 border-bottom {{ $isUnread ? 'bg-light-subtle' : '' }}" id="notif-item-{{ $notif->id }}">
                                         <div class="d-flex align-items-start">
                                             <div class="avatar-xs me-3 flex-shrink-0 mt-1">
-                                                <span class="avatar-title {{ $status === 'expired' || $status === 'today' ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning' }} rounded-circle fs-16">
-                                                    <i class="bx bx-calendar-event"></i>
+                                                <span class="avatar-title {{ $status === 'approved' || $status === 'success' ? 'bg-success-subtle text-success' : ($status === 'rejected' || $status === 'danger' || $status === 'expired' || $status === 'today' ? 'bg-danger-subtle text-danger' : ($status === 'pending' || ($data['action_type'] ?? '') === 'leave_request' ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning')) }} rounded-circle fs-16">
+                                                    @if($status === 'approved' || $status === 'success')
+                                                        <i class="ri-checkbox-circle-line"></i>
+                                                    @elseif($status === 'rejected' || $status === 'danger' || $status === 'expired')
+                                                        <i class="ri-close-circle-line"></i>
+                                                    @elseif($status === 'pending' || ($data['action_type'] ?? '') === 'leave_request')
+                                                        <i class="ri-calendar-event-line"></i>
+                                                    @else
+                                                        <i class="bx bx-calendar-event"></i>
+                                                    @endif
                                                 </span>
                                             </div>
                                             <div class="flex-grow-1">
