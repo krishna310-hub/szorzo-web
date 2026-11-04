@@ -14,10 +14,13 @@ class StoreLeaveRequest extends FormRequest
         if (!$user) {
             return false;
         }
-        if ($user->isSuperAdmin() || $user->isInvestor()) {
+        if ($user->isInvestor() || (int) $user->role_id === 6) {
             return false;
         }
-        return $user->isInternalEmployee() && $user->can('create', LeaveRequest::class);
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+        return $user->isInternalEmployee() || $user->can('create', LeaveRequest::class);
     }
 
     public function rules(): array

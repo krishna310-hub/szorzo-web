@@ -82,11 +82,11 @@ class LeaveRequestModuleTest extends TestCase
 
     public function test_user_internal_employee_classification(): void
     {
-        // 1. Super admin is not an internal employee
-        $adminRole = new Role(['access_level' => 'super_admin', 'name' => 'Super Admin']);
-        $adminUser = new User(['role_id' => 1, 'is_active' => 1]);
-        $adminUser->setRelation('role', $adminRole);
-        $this->assertFalse($adminUser->isInternalEmployee());
+        // 1. Investor is not an internal employee
+        $investorRole = new Role(['access_level' => 'investor', 'name' => 'Investor']);
+        $investorUser = new User(['role_id' => 6, 'is_active' => 1]);
+        $investorUser->setRelation('role', $investorRole);
+        $this->assertFalse($investorUser->isInternalEmployee());
 
         // 2. Inactive user is not an internal employee
         $staffRole = new Role(['access_level' => 'staff', 'name' => 'Recruiter']);
@@ -121,10 +121,9 @@ class LeaveRequestModuleTest extends TestCase
         $adminUser = new User(['role_id' => 1, 'is_active' => 1]);
         $adminUser->setRelation('role', $adminRole);
 
-        // Super Admin cannot create personal leave
-        $this->assertFalse($policy->create($adminUser));
-        $this->assertFalse($policy->before($adminUser, 'create'));
-        // Super admin can approve
+        // Super Admin has full access without access denied
+        $this->assertTrue($policy->create($adminUser));
+        $this->assertTrue($policy->before($adminUser, 'create'));
         $this->assertTrue($policy->approve($adminUser));
         $this->assertTrue($policy->read($adminUser));
 
@@ -136,6 +135,12 @@ class LeaveRequestModuleTest extends TestCase
         // Internal staff can create and read
         $this->assertTrue($policy->create($staffUser));
         $this->assertTrue($policy->read($staffUser));
+
+        // Investor cannot create leave request
+        $investorRole = new Role(['access_level' => 'investor', 'name' => 'Investor']);
+        $investorUser = new User(['role_id' => 6, 'is_active' => 1]);
+        $investorUser->setRelation('role', $investorRole);
+        $this->assertFalse($policy->create($investorUser));
 
         // External employee cannot create leave request
         $extEmployee = new Employee(['employee_name' => 'Vendor Staff', 'employment_type' => 'External']);

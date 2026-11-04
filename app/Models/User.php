@@ -239,7 +239,7 @@ class User extends Authenticatable
 
     public function isInternalEmployee(): bool
     {
-        if ($this->isSuperAdmin() || $this->isInvestor() || (int) $this->role_id === 6) {
+        if ($this->isInvestor() || (int) $this->role_id === 6) {
             return false;
         }
 
@@ -253,12 +253,12 @@ class User extends Authenticatable
         }
 
         $accessLevel = strtolower((string) ($this->role?->access_level ?? ''));
-        if (in_array($accessLevel, ['super_admin', 'invester', 'investor'], true)) {
+        if (in_array($accessLevel, ['invester', 'investor', 'external', 'client'], true)) {
             return false;
         }
 
         $roleName = strtolower((string) ($this->role?->name ?? ''));
-        if (in_array($roleName, ['super admin', 'super_admin', 'invester', 'investor', 'external', 'client'], true)) {
+        if (in_array($roleName, ['invester', 'investor', 'external', 'client'], true)) {
             return false;
         }
 

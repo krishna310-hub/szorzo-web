@@ -73,7 +73,7 @@ class LeaveController extends Controller
         $this->authorize('create', LeaveRequest::class);
         $user = $request->user();
 
-        if (!$user->isInternalEmployee()) {
+        if (!$user->isSuperAdmin() && !$user->isInternalEmployee()) {
             return redirect()->route('admin.leaves.index')->with('error', 'Leave requests are restricted to internal employees only.');
         }
 
@@ -84,7 +84,7 @@ class LeaveController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->isInternalEmployee()) {
+        if (!$user->isSuperAdmin() && !$user->isInternalEmployee()) {
             return redirect()->route('admin.leaves.index')->with('error', 'Leave requests are restricted to internal employees only.');
         }
 

@@ -13,6 +13,9 @@ class LeaveRequestPolicy
         if ($user->isSuperAdmin()) {
             return true;
         }
+        if ($user->isInvestor() || (int) $user->role_id === 6) {
+            return false;
+        }
         if ($user->isInternalEmployee()) {
             return true;
         }
@@ -21,11 +24,17 @@ class LeaveRequestPolicy
 
     public function create(User $user): bool
     {
-        if ($user->isSuperAdmin() || $user->isInvestor()) {
+        if ($user->isInvestor() || (int) $user->role_id === 6) {
             return false;
         }
-        // Strictly internal employees only
-        return $user->isInternalEmployee();
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+        // Internal employees can create
+        if ($user->isInternalEmployee()) {
+            return true;
+        }
+        return $this->allowed($user, 'Create');
     }
 
     public function approve(User $user): bool
@@ -43,10 +52,6 @@ class LeaveRequestPolicy
 
     public function before(User $user, string $ability): ?bool
     {
-        // Super admin should not create employee leave requests for self
-        if ($ability === 'create') {
-            return false;
-        }
         if ($user->isSuperAdmin()) {
             return true;
         }
@@ -55,6 +60,9 @@ class LeaveRequestPolicy
 
     private function allowed(User $user, string $name): bool
     {
+        if (!Permission::getConnectionResolver()) {
+            return false;
+        }
         $id = Permission::where('page', 'leave')->where('name', $name)->value('id');
         return (bool) ($id && $user->role?->permissions->contains('id', $id));
     }
