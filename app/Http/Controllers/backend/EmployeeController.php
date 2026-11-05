@@ -210,7 +210,7 @@ class EmployeeController extends Controller
         }
 
         $employees = $query->get();
-        $fileName = 'employees-export-' . now()->format('Ymd-His') . '.xlsx';
+        $fileName = 'employees-export-updated-' . now()->format('Ymd-His') . '.xlsx';
 
         return Excel::download(new EmployeeExport($employees), $fileName, \Maatwebsite\Excel\Excel::XLSX, [
             'Cache-Control' => 'no-cache, no-store, must-revalidate',
