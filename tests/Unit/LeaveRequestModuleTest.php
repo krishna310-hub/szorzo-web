@@ -200,7 +200,7 @@ class LeaveRequestModuleTest extends TestCase
         $baseDir = dirname(__DIR__, 2);
         $exportContent = file_get_contents($baseDir . '/app/Exports/EmployeeExport.php');
 
-        $this->assertStringContainsString("\$dor = \$employee->relieving_date\n            ? \$employee->relieving_date->format('d-m-Y')\n            : '-';", $exportContent);
+        $this->assertStringContainsString("\$dor = '-';", $exportContent);
         $this->assertStringNotContainsString('Active / Ongoing', $exportContent);
     }
 

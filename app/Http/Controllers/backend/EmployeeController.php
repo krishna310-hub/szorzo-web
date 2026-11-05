@@ -202,10 +202,21 @@ class EmployeeController extends Controller
             });
         }
 
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate(app_path('Exports/EmployeeExport.php'), true);
+        }
+        if (function_exists('opcache_reset')) {
+            @opcache_reset();
+        }
+
         $employees = $query->get();
         $fileName = 'employees-export-' . now()->format('Ymd-His') . '.xlsx';
 
-        return Excel::download(new EmployeeExport($employees), $fileName);
+        return Excel::download(new EmployeeExport($employees), $fileName, \Maatwebsite\Excel\Excel::XLSX, [
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
     }
 
     public function create()

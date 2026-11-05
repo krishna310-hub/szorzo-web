@@ -80,9 +80,18 @@ class EmployeeExport implements FromCollection, WithHeadings, WithMapping, Shoul
             ? $employee->date_of_joining->format('d-m-Y')
             : ($employee->contract_from_date ? $employee->contract_from_date->format('d-m-Y') : '—');
 
-        $dor = $employee->relieving_date
-            ? $employee->relieving_date->format('d-m-Y')
-            : '-';
+        $dor = '-';
+        if (!empty($employee->relieving_date)) {
+            if ($employee->relieving_date instanceof \DateTimeInterface) {
+                $dor = $employee->relieving_date->format('d-m-Y');
+            } elseif (is_string($employee->relieving_date) && trim($employee->relieving_date) !== '' && trim($employee->relieving_date) !== '0000-00-00') {
+                try {
+                    $dor = \Carbon\Carbon::parse($employee->relieving_date)->format('d-m-Y');
+                } catch (\Throwable $e) {
+                    $dor = '-';
+                }
+            }
+        }
 
         // CTC
         $ctc = (float) ($candidate?->onboarding_ctc > 0
