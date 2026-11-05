@@ -910,7 +910,9 @@
                                             <th>Margin %</th>
                                             <th class="table-warning">Margin In Rupees</th>
                                             <th>Investor Share (30%)</th>
-                                            <th>SZ Share (70%)</th>
+                                            @if(!$isInvestor)
+                                                <th>SZ Share (70%)</th>
+                                            @endif
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -971,9 +973,11 @@
                                                 <td class="fw-bold text-success">
                                                     ₹ {{ number_format((float) $dep->investor_commission_amount, 2) }}
                                                 </td>
-                                                <td class="fw-medium text-primary">
-                                                    ₹ {{ number_format((float) $dep->szorzo_commission_amount, 2) }}
-                                                </td>
+                                                @if(!$isInvestor)
+                                                    <td class="fw-medium text-primary">
+                                                        ₹ {{ number_format((float) $dep->szorzo_commission_amount, 2) }}
+                                                    </td>
+                                                @endif
                                                 <td>
                                                     @if($dep->status)
                                                         <span class="badge bg-success-subtle text-success">Active</span>
@@ -984,7 +988,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="{{ $currentInvester ? 9 : 10 }}" class="text-center text-muted py-4">
+                                                <td colspan="{{ $isInvestor ? ($currentInvester ? 8 : 9) : ($currentInvester ? 9 : 10) }}" class="text-center text-muted py-4">
                                                     No deployed employees found matching the selected filters.
                                                 </td>
                                             </tr>

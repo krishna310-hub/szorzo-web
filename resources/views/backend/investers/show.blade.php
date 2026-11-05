@@ -392,11 +392,13 @@
                                 </h5>
                                 <small class="text-muted">Deployed employees funded by this investor with margin calculation and profit sharing model</small>
                             </div>
+                            @can('create', \App\Models\InvesterDeployment::class)
                             <div class="d-flex flex-wrap gap-2">
                                 <a href="{{ route('admin.invester-deployments.create') }}?invester_id={{ $invester->id }}" class="btn btn-sm btn-primary">
                                     <i class="ri-add-line align-middle me-1"></i> Add Deployment / Invest Module
                                 </a>
                             </div>
+                            @endcan
                         </div>
                         <div class="card-body">
                             <!-- Quick totals -->
@@ -405,29 +407,32 @@
                                 $totalMargin = (float) $invester->total_margin_generated;
                                 $totalSzShare = (float) $invester->total_szorzo_earnings;
                                 $totalInvShare = (float) $invester->total_investor_earnings;
+                                $isInvestor = auth()->user()?->isInvestor() || (int)auth()->user()?->role_id === 6;
                             @endphp
                             <div class="row g-2 mb-3">
-                                <div class="col-md-3">
+                                <div class="{{ $isInvestor ? 'col-md-4' : 'col-md-3' }}">
                                     <div class="p-2 border rounded bg-light text-center">
                                         <div class="text-muted small">Active Deployments</div>
                                         <div class="fw-bold fs-5">{{ $activeDeployments->count() }} Employees</div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="{{ $isInvestor ? 'col-md-4' : 'col-md-3' }}">
                                     <div class="p-2 border rounded bg-light text-center">
                                         <div class="text-muted small">Total Margin Generated</div>
                                         <div class="fw-bold fs-5 text-warning-emphasis">₹ {{ number_format($totalMargin, 2) }}</div>
                                     </div>
                                 </div>
+                                @if(!$isInvestor)
                                 <div class="col-md-3">
                                     <div class="p-2 border rounded bg-light text-center">
                                         <div class="text-muted small">SZ Share (70%)</div>
                                         <div class="fw-bold fs-5 text-primary">₹ {{ number_format($totalSzShare, 2) }}</div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                @endif
+                                <div class="{{ $isInvestor ? 'col-md-4' : 'col-md-3' }}">
                                     <div class="p-2 border rounded bg-light text-center">
-                                        <div class="text-muted small">Investor Share (30%)</div>
+                                        <div class="text-muted small">{{ $isInvestor ? 'Investor Profit Share (30%)' : 'Investor Share (30%)' }}</div>
                                         <div class="fw-bold fs-5 text-success">₹ {{ number_format($totalInvShare, 2) }}</div>
                                     </div>
                                 </div>
@@ -443,9 +448,11 @@
                                             <th>Employee CTC (₹)</th>
                                             <th>Margin %</th>
                                             <th class="table-warning">Margin In Rupees</th>
-                                            <th>Profit Sharing (SZ / Investor)</th>
+                                            <th>{{ $isInvestor ? 'Investor Profit Share' : 'Profit Sharing (SZ / Investor)' }}</th>
                                             <th>Status</th>
-                                            <th>Actions</th>
+                                            @if(!$isInvestor)
+                                                <th>Actions</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -506,11 +513,13 @@
                                                     <small class="text-muted d-block fs-11">Net: ₹ {{ number_format((float)($depMetrics['net_revenue'] ?? ($depMargin - ($depMetrics['tds_amount'] ?? 0))), 2) }}</small>
                                                 </td>
                                                 <td>
+                                                    @if(!$isInvestor)
+                                                        <div class="small">
+                                                            <span class="text-primary fw-semibold">SZ ({{ number_format((float) ($dep->szorzo_share_percentage ?: 70), 0) }}%):</span> ₹ {{ number_format((float) $depSzAmt, 2) }}
+                                                        </div>
+                                                    @endif
                                                     <div class="small">
-                                                        <span class="text-primary fw-semibold">SZ ({{ number_format((float) ($dep->szorzo_share_percentage ?: 70), 0) }}%):</span> ₹ {{ number_format((float) $depSzAmt, 2) }}
-                                                    </div>
-                                                    <div class="small">
-                                                        <span class="text-success fw-semibold">Inv ({{ number_format((float) ($dep->investor_share_percentage ?: 30), 0) }}%):</span> ₹ {{ number_format((float) $depInvAmt, 2) }}
+                                                        <span class="text-success fw-semibold">{{ $isInvestor ? 'Investor Share' : 'Inv' }} ({{ number_format((float) ($dep->investor_share_percentage ?: 30), 0) }}%):</span> ₹ {{ number_format((float) $depInvAmt, 2) }}
                                                     </div>
                                                 </td>
                                                 <td>
@@ -520,13 +529,17 @@
                                                         <span class="badge bg-danger-subtle text-danger">Inactive</span>
                                                     @endif
                                                 </td>
-                                                <td>
-                                                    <a href="{{ route('admin.invester-deployments.edit', $dep->id) }}" class="text-info fs-5 me-2" title="Edit"><i class="bx bxs-edit"></i></a>
-                                                </td>
+                                                @if(!$isInvestor)
+                                                    <td>
+                                                        @can('edit', \App\Models\InvesterDeployment::class)
+                                                            <a href="{{ route('admin.invester-deployments.edit', $dep->id) }}" class="text-info fs-5 me-2" title="Edit"><i class="bx bxs-edit"></i></a>
+                                                        @endcan
+                                                    </td>
+                                                @endif
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="9" class="text-center text-muted py-4">
+                                                <td colspan="{{ $isInvestor ? 8 : 9 }}" class="text-center text-muted py-4">
                                                     No deployment records linked yet. Click "Add Deployment / Invest Module" to link employee employment details.
                                                 </td>
                                             </tr>

@@ -82,7 +82,7 @@ class EmployeeExport implements FromCollection, WithHeadings, WithMapping, Shoul
 
         $dor = $employee->relieving_date
             ? $employee->relieving_date->format('d-m-Y')
-            : ($employee->contract_to_date ? $employee->contract_to_date->format('d-m-Y') : 'Active / Ongoing');
+            : '-';
 
         // CTC
         $ctc = (float) ($candidate?->onboarding_ctc > 0

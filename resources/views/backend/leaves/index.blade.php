@@ -20,7 +20,7 @@
                     </p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    @if(auth()->user()->isSuperAdmin() || auth()->user()->isInternalEmployee() || auth()->user()->can('create', \App\Models\LeaveRequest::class))
+                    @if(!$canApprove && !auth()->user()->isSuperAdmin() && (auth()->user()->isInternalEmployee() || auth()->user()->can('create', \App\Models\LeaveRequest::class)))
                         <a class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold" href="{{ route('admin.leaves.create') }}">
                             <i class="ri-add-line me-1"></i> Apply for Leave
                         </a>

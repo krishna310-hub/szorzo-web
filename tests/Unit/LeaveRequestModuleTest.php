@@ -184,5 +184,32 @@ class LeaveRequestModuleTest extends TestCase
         $this->assertStringContainsString('name="review_remarks"', $indexView);
         $this->assertStringContainsString('required', $indexView);
         $this->assertStringContainsString('id="approveLeaveModal"', $indexView);
+
+        // Apply for leave button is hidden in admin login
+        $this->assertStringContainsString('!$canApprove && !auth()->user()->isSuperAdmin()', $indexView);
+    }
+
+    public function test_leave_types_does_not_contain_other(): void
+    {
+        $this->assertNotContains('Other', LeaveRequest::TYPES);
+        $this->assertEquals(['Casual Leave', 'Sick Leave', 'Earned Leave', 'Unpaid Leave'], LeaveRequest::TYPES);
+    }
+
+    public function test_employee_export_maps_empty_relieving_date_to_dash(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $exportContent = file_get_contents($baseDir . '/app/Exports/EmployeeExport.php');
+
+        $this->assertStringContainsString("\$dor = \$employee->relieving_date\n            ? \$employee->relieving_date->format('d-m-Y')\n            : '-';", $exportContent);
+        $this->assertStringNotContainsString('Active / Ongoing', $exportContent);
+    }
+
+    public function test_investor_profile_view_hides_szorzo_share_for_investor(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $showView = file_get_contents($baseDir . '/resources/views/backend/investers/show.blade.php');
+
+        $this->assertStringContainsString('@if(!$isInvestor)', $showView);
+        $this->assertStringContainsString('SZ Share (70%)', $showView);
     }
 }
