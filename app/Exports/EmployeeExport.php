@@ -98,6 +98,8 @@ class EmployeeExport implements FromCollection, WithHeadings, WithMapping, Shoul
             ? $candidate->onboarding_ctc
             : ($candidate?->current_ctc > 0 ? $candidate->current_ctc : round($salary * 12, 2)));
 
+        \Illuminate\Support\Facades\Log::info("EmployeeExport row #{$this->rowIndex}: [{$employee->employee_name}] DOR=[{$dor}]");
+
         return [
             $this->rowIndex,
             $employee->employee_no ?: ('SZ' . str_pad($employee->id, 3, '0', STR_PAD_LEFT)),
