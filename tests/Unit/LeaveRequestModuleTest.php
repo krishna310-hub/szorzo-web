@@ -212,4 +212,89 @@ class LeaveRequestModuleTest extends TestCase
         $this->assertStringContainsString('@if(!$isInvestor)', $showView);
         $this->assertStringContainsString('SZ Share (70%)', $showView);
     }
+
+    public function test_leave_request_half_day_constants_and_helpers(): void
+    {
+        $this->assertContains('full_day', LeaveRequest::DAY_TYPES);
+        $this->assertContains('half_day', LeaveRequest::DAY_TYPES);
+        $this->assertContains('morning', LeaveRequest::HALF_DAY_TYPES);
+        $this->assertContains('afternoon', LeaveRequest::HALF_DAY_TYPES);
+
+        $fullLeave = new LeaveRequest([
+            'day_type' => 'full_day',
+            'number_of_days' => 1.0,
+        ]);
+        $this->assertFalse($fullLeave->isHalfDay());
+        $this->assertSame('1 Day', $fullLeave->getDurationLabel());
+
+        $halfLeaveMorning = new LeaveRequest([
+            'day_type' => 'half_day',
+            'half_day_type' => 'morning',
+            'number_of_days' => 0.5,
+        ]);
+        $this->assertTrue($halfLeaveMorning->isHalfDay());
+        $this->assertSame('morning', $halfLeaveMorning->half_day_type);
+        $this->assertSame('0.5 Day (Morning)', $halfLeaveMorning->getDurationLabel());
+
+        $halfLeaveAfternoon = new LeaveRequest([
+            'day_type' => 'half_day',
+            'half_day_type' => 'afternoon',
+            'number_of_days' => 0.5,
+        ]);
+        $this->assertTrue($halfLeaveAfternoon->isHalfDay());
+        $this->assertSame('afternoon', $halfLeaveAfternoon->half_day_type);
+        $this->assertSame('0.5 Day (Afternoon)', $halfLeaveAfternoon->getDurationLabel());
+
+        // Fallback session from reason if column was omitted
+        $fallbackLeave = new LeaveRequest([
+            'number_of_days' => 0.5,
+            'reason' => '[Half Day - Morning] Personal appointment',
+        ]);
+        $this->assertTrue($fallbackLeave->isHalfDay());
+        $this->assertSame('morning', $fallbackLeave->half_day_type);
+        $this->assertSame('0.5 Day (Morning)', $fallbackLeave->getDurationLabel());
+    }
+
+    public function test_leave_request_store_request_validation_rules_for_half_day(): void
+    {
+        $formRequest = new StoreLeaveRequest();
+        $rules = $formRequest->rules();
+
+        $this->assertArrayHasKey('day_type', $rules);
+        $this->assertArrayHasKey('half_day_type', $rules);
+
+        $messages = $formRequest->messages();
+        $this->assertArrayHasKey('half_day_type.required_if', $messages);
+    }
+
+    public function test_leave_views_contain_half_day_and_session_options(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $createView = file_get_contents($baseDir . '/resources/views/backend/leaves/create.blade.php');
+        $indexView = file_get_contents($baseDir . '/resources/views/backend/leaves/index.blade.php');
+
+        // Create view has day_type and half_day_type selectors
+        $this->assertStringContainsString('name="day_type"', $createView);
+        $this->assertStringContainsString('value="half_day"', $createView);
+        $this->assertStringContainsString('name="half_day_type"', $createView);
+        $this->assertStringContainsString('value="morning"', $createView);
+        $this->assertStringContainsString('value="afternoon"', $createView);
+        $this->assertStringContainsString('Half Day (Half Leave)', $createView);
+
+        // Index view displays half day badges and modal alert
+        $this->assertStringContainsString('$leave->isHalfDay()', $indexView);
+        $this->assertStringContainsString('$leave->getDurationLabel()', $indexView);
+        $this->assertStringContainsString('approveModalAlertText', $indexView);
+    }
+
+    public function test_leave_controller_approval_marks_half_day_attendance_status(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+        $controllerContent = file_get_contents($baseDir . '/app/Http/Controllers/backend/LeaveController.php');
+
+        $this->assertStringContainsString("\$isHalfDay = \$leave->isHalfDay();", $controllerContent);
+        $this->assertStringContainsString("\$attendanceStatus = \$isHalfDay ? 'half_day' : 'on_leave';", $controllerContent);
+        $this->assertStringContainsString("'status' => \$attendanceStatus,", $controllerContent);
+        $this->assertStringContainsString("Approved Half Day", $controllerContent);
+    }
 }

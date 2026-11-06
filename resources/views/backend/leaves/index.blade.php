@@ -188,13 +188,19 @@
                                             <div class="fw-semibold text-dark">
                                                 <i class="ri-calendar-line text-muted me-1"></i>
                                                 {{ $fromDate->format('d M Y') }}
-                                                @if($fromDate->ne($toDate))
+                                                @if(!$leave->isHalfDay() && $fromDate->ne($toDate))
                                                     <span class="text-muted">&rarr;</span> {{ $toDate->format('d M Y') }}
                                                 @endif
                                             </div>
-                                            <span class="badge bg-light text-dark border px-2 py-0 fs-11 mt-1">
-                                                {{ (float) $leave->number_of_days }} {{ (float) $leave->number_of_days == 1 ? 'Day' : 'Days' }}
-                                            </span>
+                                            @if($leave->isHalfDay())
+                                                <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 fs-11 mt-1 fw-semibold">
+                                                    <i class="ri-contrast-2-line me-1"></i> {{ $leave->getDurationLabel() }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-light text-dark border px-2 py-0 fs-11 mt-1">
+                                                    {{ (float) $leave->number_of_days }} {{ (float) $leave->number_of_days == 1 ? 'Day' : 'Days' }}
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>
                                             <div class="p-2 rounded bg-light border text-break small" style="max-height: 85px; overflow-y: auto;">
@@ -237,7 +243,9 @@
                                                         data-leave-id="{{ $leave->id }}"
                                                         data-employee="{{ $leave->user?->name }}"
                                                         data-type="{{ $leave->leave_type }}"
-                                                        data-days="{{ $leave->number_of_days }}"
+                                                        data-days="{{ $leave->getDurationLabel() }}"
+                                                        data-is-half="{{ $leave->isHalfDay() ? '1' : '0' }}"
+                                                        data-session="{{ $leave->half_day_type ? ucfirst($leave->half_day_type) : '' }}"
                                                         data-action="{{ route('admin.leaves.review', $leave) }}">
                                                         <i class="ri-check-line me-1"></i> Approve
                                                     </button>
@@ -246,7 +254,9 @@
                                                         data-leave-id="{{ $leave->id }}"
                                                         data-employee="{{ $leave->user?->name }}"
                                                         data-type="{{ $leave->leave_type }}"
-                                                        data-days="{{ $leave->number_of_days }}"
+                                                        data-days="{{ $leave->getDurationLabel() }}"
+                                                        data-is-half="{{ $leave->isHalfDay() ? '1' : '0' }}"
+                                                        data-session="{{ $leave->half_day_type ? ucfirst($leave->half_day_type) : '' }}"
                                                         data-action="{{ route('admin.leaves.review', $leave) }}">
                                                         <i class="ri-close-line me-1"></i> Reject
                                                     </button>
@@ -308,7 +318,7 @@
                     <div class="modal-body p-4">
                         <div class="alert alert-success-subtle border border-success-subtle text-success small mb-3">
                             <i class="ri-information-line me-1"></i>
-                            Approving will automatically mark this internal employee as <strong>"On Leave"</strong> in the Attendance Module for the requested dates.
+                            <span id="approveModalAlertText">Approving will automatically mark this internal employee as <strong>"On Leave"</strong> in the Attendance Module for the requested dates.</span>
                         </div>
 
                         <div class="mb-3 p-3 bg-light rounded-3 border">
@@ -387,13 +397,25 @@ document.addEventListener('DOMContentLoaded', function () {
             const action = button.getAttribute('data-action');
             const employee = button.getAttribute('data-employee') || 'Employee';
             const type = button.getAttribute('data-type') || 'Leave';
-            const days = button.getAttribute('data-days') || '1';
+            const days = button.getAttribute('data-days') || '1 Day';
+            const isHalf = button.getAttribute('data-is-half') === '1';
+            const session = button.getAttribute('data-session') || '';
+            const sessionLabel = isHalf && session ? ' (' + session + ')' : '';
 
             const form = document.getElementById('approveLeaveForm');
             form.setAttribute('action', action);
 
             const details = document.getElementById('approveModalDetails');
-            details.textContent = employee + ' • ' + type + ' (' + days + ' days)';
+            details.textContent = employee + ' • ' + type + ' • ' + days;
+
+            const alertText = document.getElementById('approveModalAlertText');
+            if (alertText) {
+                if (isHalf) {
+                    alertText.innerHTML = 'Approving will automatically mark this internal employee as <strong>"Half Day"</strong>' + sessionLabel + ' in the Attendance Module.';
+                } else {
+                    alertText.innerHTML = 'Approving will automatically mark this internal employee as <strong>"On Leave"</strong> in the Attendance Module for the requested dates.';
+                }
+            }
         });
     }
 
@@ -404,13 +426,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const action = button.getAttribute('data-action');
             const employee = button.getAttribute('data-employee') || 'Employee';
             const type = button.getAttribute('data-type') || 'Leave';
-            const days = button.getAttribute('data-days') || '1';
+            const days = button.getAttribute('data-days') || '1 Day';
 
             const form = document.getElementById('rejectLeaveForm');
             form.setAttribute('action', action);
 
             const details = document.getElementById('rejectModalDetails');
-            details.textContent = employee + ' • ' + type + ' (' + days + ' days)';
+            details.textContent = employee + ' • ' + type + ' • ' + days;
         });
     }
 });

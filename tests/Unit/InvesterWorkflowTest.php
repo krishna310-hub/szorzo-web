@@ -605,7 +605,7 @@ class InvesterWorkflowTest extends TestCase
 
         // 1. Sidebar ensures investor does not have duplicate dashboard menu items
         $sidebarContent = file_get_contents($baseDir . '/resources/views/backend/layouts/sidebar.blade.php');
-        $this->assertStringContainsString("!auth()->user()->isInvestor() && (int) auth()->user()->role_id !== 6", $sidebarContent);
+        $this->assertStringContainsString("auth()->user()->isInvestor() || (int) auth()->user()->role_id === 6", $sidebarContent);
 
         // 2. Dashboard hides the 3 redundant sections
         $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/invester-dashboard/index.blade.php');

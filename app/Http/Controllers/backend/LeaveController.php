@@ -89,26 +89,53 @@ class LeaveController extends Controller
         }
 
         $data = $request->validated();
+        $isHalfDay = ($data['day_type'] ?? 'full_day') === 'half_day';
+
+        if ($isHalfDay) {
+            $data['to_date'] = $data['from_date'];
+            $data['day_type'] = 'half_day';
+            $data['half_day_type'] = $data['half_day_type'] ?? 'morning';
+            $data['number_of_days'] = 0.5;
+        } else {
+            $data['day_type'] = 'full_day';
+            $data['half_day_type'] = null;
+        }
+
         $from = CarbonImmutable::parse($data['from_date']);
         $to = CarbonImmutable::parse($data['to_date']);
 
+        if (!$isHalfDay) {
+            $data['number_of_days'] = $from->diffInDays($to) + 1;
+        }
+
         // Check for conflicting requests for the same user
-        $conflict = LeaveRequest::where('user_id', $user->id)
+        $conflictQuery = LeaveRequest::where('user_id', $user->id)
             ->whereIn('status', ['pending', 'approved'])
             ->where('from_date', '<=', $to->toDateString())
-            ->where('to_date', '>=', $from->toDateString())
-            ->first();
+            ->where('to_date', '>=', $from->toDateString());
+
+        if ($isHalfDay) {
+            // A half day only conflicts if there is a full-day request or another half-day request for the same session
+            $conflictQuery->where(function ($q) use ($data) {
+                $q->where('number_of_days', '>', 0.5)
+                  ->orWhereNull('day_type')
+                  ->orWhere('day_type', 'full_day')
+                  ->orWhere('half_day_type', $data['half_day_type']);
+            });
+        }
+
+        $conflict = $conflictQuery->first();
 
         if ($conflict) {
             $cStatus = ucfirst($conflict->status);
             $cFrom = CarbonImmutable::parse($conflict->from_date)->format('d M Y');
             $cTo = CarbonImmutable::parse($conflict->to_date)->format('d M Y');
+            $cSession = $conflict->isHalfDay() && $conflict->half_day_type ? ' (' . ucfirst($conflict->half_day_type) . ')' : '';
             throw ValidationException::withMessages([
-                'from_date' => "You already have a {$cStatus} leave request covering overlapping dates ({$cFrom} to {$cTo})."
+                'from_date' => "You already have a {$cStatus} leave request covering overlapping dates ({$cFrom} to {$cTo}{$cSession})."
             ]);
         }
 
-        $data['number_of_days'] = $from->diffInDays($to) + 1;
         $data['user_id'] = $user->id;
         $data['status'] = 'pending';
 
@@ -116,7 +143,24 @@ class LeaveController extends Controller
             $data['attachment'] = $request->file('attachment')->store('leave-attachments', 'public');
         }
 
-        $leave = LeaveRequest::create($data);
+        // Schema safety check: omit new columns if migration is not yet executed on this database
+        $saveData = $data;
+        $hasDayTypeCol = false;
+        try {
+            $hasDayTypeCol = \Illuminate\Support\Facades\Schema::hasTable('leave_requests')
+                && \Illuminate\Support\Facades\Schema::hasColumn('leave_requests', 'day_type');
+        } catch (\Throwable $e) {
+            $hasDayTypeCol = false;
+        }
+
+        if (!$hasDayTypeCol) {
+            unset($saveData['day_type'], $saveData['half_day_type']);
+            if ($isHalfDay && !str_contains($saveData['reason'], '[Half Day')) {
+                $saveData['reason'] = '[Half Day - ' . ucfirst($data['half_day_type']) . '] ' . $saveData['reason'];
+            }
+        }
+
+        $leave = LeaveRequest::create($saveData);
 
         // Notify Admins & Leave Approvers
         try {
@@ -138,6 +182,7 @@ class LeaveController extends Controller
             $toDateStr = $to->format('d M Y');
             $dateRangeStr = $fromDateStr === $toDateStr ? $fromDateStr : "{$fromDateStr} - {$toDateStr}";
             $reasonSnippet = Str::limit($leave->reason, 100);
+            $durationStr = $isHalfDay ? "0.5 day (" . ucfirst($data['half_day_type']) . ")" : "{$leave->number_of_days} day(s)";
 
             foreach ($approvers as $admin) {
                 if ($admin->id === $user->id) {
@@ -145,7 +190,7 @@ class LeaveController extends Controller
                 }
                 $admin->notify(new LeaveStatusNotification(
                     title: 'New Leave Request Received',
-                    message: "{$user->name} requested {$leave->leave_type} for {$leave->number_of_days} day(s) ({$dateRangeStr}). Reason: {$reasonSnippet}",
+                    message: "{$user->name} requested {$leave->leave_type} for {$durationStr} ({$dateRangeStr}). Reason: {$reasonSnippet}",
                     actionUrl: route('admin.leaves.index', ['status' => 'pending']),
                     status: 'pending',
                     leaveId: $leave->id,
@@ -202,6 +247,13 @@ class LeaveController extends Controller
                 $employee = $leave->user?->linkedEmployee() ?? $leave->user?->getOrCreateEmployee();
                 $employeeId = $employee?->id;
 
+                $isHalfDay = $leave->isHalfDay();
+                $attendanceStatus = $isHalfDay ? 'half_day' : 'on_leave';
+                $sessionSuffix = ($isHalfDay && $leave->half_day_type) ? ' (' . ucfirst($leave->half_day_type) . ')' : '';
+                $remarksPrefix = $isHalfDay
+                    ? "Approved Half Day {$leave->leave_type}{$sessionSuffix}"
+                    : "Approved {$leave->leave_type}";
+
                 for ($date = $from; $date->lte($to); $date = $date->addDay()) {
                     $dateStr = $date->toDateString();
                     $attendance = null;
@@ -220,13 +272,13 @@ class LeaveController extends Controller
                         'employee_id' => $employeeId,
                         'user_id' => $leave->user_id,
                         'attendance_date' => $dateStr,
-                        'status' => 'on_leave',
+                        'status' => $attendanceStatus,
                         'timer_status' => Attendance::TIMER_COMPLETED,
-                        'check_in' => null,
-                        'check_out' => null,
+                        'check_in' => $isHalfDay ? ($attendance?->check_in) : null,
+                        'check_out' => $isHalfDay ? ($attendance?->check_out) : null,
                         'leave_request_id' => $leave->id,
                         'marked_by' => $request->user()->id,
-                        'remarks' => 'Approved ' . $leave->leave_type . ($leave->reason ? ': ' . $leave->reason : ''),
+                        'remarks' => $remarksPrefix . ($leave->reason ? ': ' . $leave->reason : ''),
                     ];
 
                     if ($attendance) {
@@ -239,9 +291,10 @@ class LeaveController extends Controller
                 // Notify Employee of Approval
                 try {
                     $remarksNote = !empty($data['review_remarks']) ? " Note: " . $data['review_remarks'] : '';
+                    $durationDesc = $isHalfDay ? "0.5 day{$sessionSuffix}" : "{$leave->number_of_days} day(s)";
                     $leave->user?->notify(new LeaveStatusNotification(
                         title: 'Leave Request Approved',
-                        message: "Your {$leave->leave_type} request for {$leave->number_of_days} day(s) ({$dateRangeStr}) has been approved.{$remarksNote}",
+                        message: "Your {$leave->leave_type} request for {$durationDesc} ({$dateRangeStr}) has been approved.{$remarksNote}",
                         actionUrl: route('admin.leaves.index'),
                         status: 'approved',
                         leaveId: $leave->id,
@@ -259,9 +312,11 @@ class LeaveController extends Controller
 
                 // Notify Employee of Rejection with required reason
                 try {
+                    $sessionSuffix = ($leave->isHalfDay() && $leave->half_day_type) ? ' (' . ucfirst($leave->half_day_type) . ')' : '';
+                    $durationDesc = $leave->isHalfDay() ? "0.5 day{$sessionSuffix}" : "{$leave->number_of_days} day(s)";
                     $leave->user?->notify(new LeaveStatusNotification(
                         title: 'Leave Request Rejected',
-                        message: "Your {$leave->leave_type} request for {$leave->number_of_days} day(s) ({$dateRangeStr}) was rejected. Reason: " . $data['review_remarks'],
+                        message: "Your {$leave->leave_type} request for {$durationDesc} ({$dateRangeStr}) was rejected. Reason: " . $data['review_remarks'],
                         actionUrl: route('admin.leaves.index'),
                         status: 'rejected',
                         leaveId: $leave->id,
