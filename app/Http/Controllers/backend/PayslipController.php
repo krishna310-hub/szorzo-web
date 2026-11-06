@@ -37,7 +37,11 @@ class PayslipController extends Controller
         if (!$this->isWithinTenure($requestedMonth, $requestedYear, $tenure)) {
             $month = $tenure['default_month'];
             $year = $tenure['default_year'];
-            $tenureNotice = "Requested period ({$requestedMonth}/{$requestedYear}) is outside the employee's active working tenure ({$tenure['tenure_label']}). Displaying latest working period.";
+            if (isset($tenure['has_completed_months']) && !$tenure['has_completed_months']) {
+                $tenureNotice = "No completed working months are available yet for this employee ({$tenure['tenure_label']}). Monthly payslips can be generated once the current month completes.";
+            } else {
+                $tenureNotice = "Requested period ({$requestedMonth}/{$requestedYear}) has not completed yet or is outside completed working tenure ({$tenure['tenure_label']}). Displaying latest completed month.";
+            }
         } else {
             $month = $requestedMonth;
             $year = $requestedYear;
@@ -94,7 +98,7 @@ class PayslipController extends Controller
                 'employee_id' => $target instanceof Employee ? $target->id : null,
                 'month' => $tenure['default_month'],
                 'year' => $tenure['default_year'],
-            ])->with('error', "Payslip cannot be downloaded for {$monthName} {$requestedYear} as it is outside the employee's working tenure ({$tenure['tenure_label']}). Only active working periods are eligible.");
+            ])->with('error', "Payslip cannot be downloaded for {$monthName} {$requestedYear} as this month has not completed yet or is outside working tenure ({$tenure['tenure_label']}). Only completed working months are eligible.");
         }
 
         $month = $requestedMonth;
@@ -123,7 +127,7 @@ class PayslipController extends Controller
 
         if (!$this->isWithinTenure($requestedMonth, $requestedYear, $tenure)) {
             $monthName = date('F', mktime(0, 0, 0, $requestedMonth, 1));
-            abort(422, "Payslip cannot be previewed for {$monthName} {$requestedYear} as it is outside the employee's working tenure ({$tenure['tenure_label']}).");
+            abort(422, "Payslip cannot be previewed for {$monthName} {$requestedYear} as this month has not completed yet or is outside working tenure ({$tenure['tenure_label']}).");
         }
 
         $month = $requestedMonth;
@@ -280,32 +284,35 @@ class PayslipController extends Controller
 
         // 1. Start Date (Joining)
         try {
-            $start = $joinDate ? \Carbon\CarbonImmutable::parse($joinDate)->startOfDay() : $now->startOfYear();
+            $start = $joinDate ? \Carbon\CarbonImmutable::parse($joinDate)->startOfMonth() : $now->startOfYear();
         } catch (\Throwable $e) {
             $start = $now->startOfYear();
         }
 
-        // 2. End Date (Relieving or Current Month)
+        // 2. End Date (Relieving or Latest Completed Month)
+        // A month must be completed to be eligible for payslip generation.
+        // Current ongoing month has not completed yet, so the latest completed month is the previous month end.
+        $latestCompletedMonth = $now->subMonth()->endOfMonth();
+
         $isRelieved = false;
         $relievedCarbon = null;
         if (!empty($relievingDate)) {
             try {
                 $relievedCarbon = \Carbon\CarbonImmutable::parse($relievingDate)->endOfDay();
                 $isRelieved = true;
-                $end = $relievedCarbon;
+                // If relieved, cap at relieving date or latest completed month, whichever is earlier
+                $end = $relievedCarbon->lt($latestCompletedMonth) ? $relievedCarbon->endOfMonth() : $latestCompletedMonth;
             } catch (\Throwable $e) {
-                $end = $now->endOfDay();
+                $end = $latestCompletedMonth;
             }
         } else {
-            $end = $now->endOfDay();
+            // For active ongoing employees, eligible tenure extends up to the latest completed month
+            $end = $latestCompletedMonth;
         }
 
-        // Payslips cannot be generated for future months, so cap at current month end
-        if ($end->gt($now->endOfMonth())) {
-            $end = $now->endOfMonth();
-        }
+        $hasCompletedMonths = $start->lte($latestCompletedMonth);
 
-        // Safeguard: if end is before start, clamp end to start month
+        // Safeguard: if employee joined in current uncompleted month, clamp end to start month
         if ($end->lt($start)) {
             $end = $start->endOfMonth();
         }
@@ -316,48 +323,45 @@ class PayslipController extends Controller
         $endMonth = (int) $end->month;
 
         $availableYears = [];
-        for ($y = $endYear; $y >= $startYear; $y--) {
-            $availableYears[] = $y;
-        }
-
         $availableMonthsByYear = [];
         $allWorkingPeriods = [];
 
-        for ($y = $endYear; $y >= $startYear; $y--) {
-            $mStart = ($y === $startYear) ? $startMonth : 1;
-            $mEnd = ($y === $endYear) ? $endMonth : 12;
-
-            $monthsForYear = [];
-            for ($m = $mEnd; $m >= $mStart; $m--) {
-                $monthsForYear[] = $m;
-                $dateObj = \Carbon\CarbonImmutable::create($y, $m, 1);
-                $allWorkingPeriods[] = [
-                    'year' => $y,
-                    'month' => $m,
-                    'month_name' => $dateObj->format('F'),
-                    'label' => $dateObj->format('F Y'),
-                ];
+        if ($hasCompletedMonths) {
+            for ($y = $endYear; $y >= $startYear; $y--) {
+                $availableYears[] = $y;
             }
-            sort($monthsForYear);
-            $availableMonthsByYear[$y] = $monthsForYear;
+
+            for ($y = $endYear; $y >= $startYear; $y--) {
+                $mStart = ($y === $startYear) ? $startMonth : 1;
+                $mEnd = ($y === $endYear) ? $endMonth : 12;
+
+                $monthsForYear = [];
+                for ($m = $mEnd; $m >= $mStart; $m--) {
+                    $monthsForYear[] = $m;
+                    $dateObj = \Carbon\CarbonImmutable::create($y, $m, 1);
+                    $allWorkingPeriods[] = [
+                        'year' => $y,
+                        'month' => $m,
+                        'month_name' => $dateObj->format('F'),
+                        'label' => $dateObj->format('F Y'),
+                    ];
+                }
+                sort($monthsForYear);
+                $availableMonthsByYear[$y] = $monthsForYear;
+            }
+        } else {
+            // No completed months yet (e.g. employee joined in current ongoing month)
+            $availableYears = [$endYear];
+            $availableMonthsByYear = [$endYear => []];
         }
 
         $dojLabel = $start->format('d-M-Y');
-        $dorLabel = $isRelieved ? $end->format('d-M-Y') : 'Active / Present';
+        $dorLabel = ($isRelieved && $relievedCarbon) ? $relievedCarbon->format('d-M-Y') : 'Active / Present';
         $tenureLabel = "{$dojLabel} to {$dorLabel}";
 
-        // Calculate default month and year (latest working month, or preferred previous month if day < 5)
+        // Default month and year is the latest completed working month
         $defaultMonth = $endMonth;
         $defaultYear = $endYear;
-
-        $preferredDate = $now->day < 5 ? $now->subMonth() : $now;
-        $prefYear = (int) $preferredDate->year;
-        $prefMonth = (int) $preferredDate->month;
-
-        if ($this->isPeriodWithinRange($prefMonth, $prefYear, $startYear, $startMonth, $endYear, $endMonth)) {
-            $defaultMonth = $prefMonth;
-            $defaultYear = $prefYear;
-        }
 
         return [
             'start_date' => $start,
@@ -367,6 +371,7 @@ class PayslipController extends Controller
             'end_year' => $endYear,
             'end_month' => $endMonth,
             'is_relieved' => $isRelieved,
+            'has_completed_months' => $hasCompletedMonths,
             'doj_display' => $dojLabel,
             'dor_display' => $dorLabel,
             'tenure_label' => $tenureLabel,
@@ -383,6 +388,10 @@ class PayslipController extends Controller
      */
     public function isWithinTenure(int $month, int $year, array $tenure): bool
     {
+        if (isset($tenure['has_completed_months']) && !$tenure['has_completed_months']) {
+            return false;
+        }
+
         return $this->isPeriodWithinRange(
             $month,
             $year,
@@ -407,14 +416,14 @@ class PayslipController extends Controller
 
     protected function resolveMonth(Request $request, ?array $tenure = null): int
     {
-        $defaultMonth = $tenure['default_month'] ?? (now()->day < 5 ? now()->subMonth()->month : now()->month);
+        $defaultMonth = $tenure['default_month'] ?? now()->subMonth()->month;
         $inputMonth = (int) $request->input('month', $defaultMonth);
         return ($inputMonth >= 1 && $inputMonth <= 12) ? $inputMonth : $defaultMonth;
     }
 
     protected function resolveYear(Request $request, ?array $tenure = null): int
     {
-        $defaultYear = $tenure['default_year'] ?? (now()->day < 5 ? now()->subMonth()->year : now()->year);
+        $defaultYear = $tenure['default_year'] ?? now()->subMonth()->year;
         $inputYear = (int) $request->input('year', $defaultYear);
         return ($inputYear >= 2000 && $inputYear <= 2100) ? $inputYear : $defaultYear;
     }

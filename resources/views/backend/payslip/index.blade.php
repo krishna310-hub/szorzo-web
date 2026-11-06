@@ -27,6 +27,12 @@
                 </div>
             @endif
 
+            @if(isset($tenure['has_completed_months']) && !$tenure['has_completed_months'])
+                <div class="alert alert-info border-0 shadow-sm rounded-3 mb-4">
+                    <i class="ri-information-line me-2"></i> This employee joined in the current month (<strong>{{ $tenure['doj_display'] ?? '-' }}</strong>). The current month is still ongoing and has not completed yet. Official monthly payslips will be available once the month completes.
+                </div>
+            @endif
+
             @if(!empty($tenure_notice))
                 <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4">
                     <i class="ri-information-line me-2"></i>{{ $tenure_notice }}
@@ -188,13 +194,15 @@
                             </label>
                             <select name="month" id="monthInput" class="form-select">
                                 @php
-                                    $validMonths = $tenure['available_months_by_year'][$year] ?? ($tenure['available_months_by_year'][$tenure['default_year']] ?? [1,2,3,4,5,6,7,8,9,10,11,12]);
+                                    $validMonths = $tenure['available_months_by_year'][$year] ?? ($tenure['available_months_by_year'][$tenure['default_year']] ?? []);
                                 @endphp
-                                @foreach($validMonths as $m)
+                                @forelse($validMonths as $m)
                                     <option value="{{ $m }}" @selected($month == $m)>
                                         {{ date('F', mktime(0, 0, 0, $m, 1)) }}
                                     </option>
-                                @endforeach
+                                @empty
+                                    <option value="{{ $month }}">{{ date('F', mktime(0, 0, 0, $month, 1)) }}</option>
+                                @endforelse
                             </select>
                         </div>
 

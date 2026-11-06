@@ -624,11 +624,14 @@ class PayslipModuleTest extends TestCase
         $this->assertFalse($activeTenure['is_relieved']);
         $this->assertSame(2026, $activeTenure['start_year']);
         $this->assertSame(1, $activeTenure['start_month']);
-        // Capped at current month / now
-        $nowMonth = (int) now()->month;
-        $nowYear = (int) now()->year;
-        $this->assertSame($nowYear, $activeTenure['end_year']);
-        $this->assertSame($nowMonth, $activeTenure['end_month']);
+        // Capped at latest completed month (previous month end)
+        $latestCompleted = now()->subMonth();
+        $this->assertSame((int) $latestCompleted->year, $activeTenure['end_year']);
+        $this->assertSame((int) $latestCompleted->month, $activeTenure['end_month']);
+        $this->assertSame((int) $latestCompleted->month, $activeTenure['default_month']);
+
+        // Current ongoing month has not completed and cannot be accessed
+        $this->assertFalse($controller->isWithinTenure((int) now()->month, (int) now()->year, $activeTenure));
 
         // Future dates beyond current date cannot be accessed
         $this->assertFalse($controller->isWithinTenure(12, 2027, $activeTenure));
