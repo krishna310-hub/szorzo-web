@@ -2,6 +2,18 @@
 @section('title', 'Investor Profile - ' . $invester->name)
 
 @section('content')
+@php
+    $currentUser = auth()->user();
+    $isInvestor = $isInvestor ?? (
+        $currentUser?->isInvestor()
+        || (int)$currentUser?->role_id === 6
+        || ($currentUser && !$currentUser->isSuperAdmin() && (int)$currentUser->id !== 1 && (
+            $currentUser->linkedInvester()?->id === $invester->id
+            || (int)$currentUser->id === (int)$invester->user_id
+            || (bool)$currentUser->linkedInvester()
+        ))
+    );
+@endphp
 <div class="main-content">
     <div class="page-content">
         <div class="container-fluid">
@@ -12,7 +24,7 @@
                         <h4 class="mb-sm-0">Investor Profile</h4>
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
-                                @if(auth()->user()?->isInvestor() || (int)auth()->user()?->role_id === 6)
+                                @if($isInvestor)
                                     <li class="breadcrumb-item"><a href="{{ route('admin.investers.dashboard') }}">Investor Dashboard</a></li>
                                 @else
                                     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
@@ -67,7 +79,7 @@
                                             <i class="bx bxs-edit align-middle me-1"></i> Edit Investor
                                         </a>
                                     @endcan
-                                    @if(auth()->user()?->isInvestor() || (int)auth()->user()?->role_id === 6)
+                                    @if($isInvestor)
                                         <a href="{{ route('admin.investers.dashboard') }}" class="btn btn-secondary">
                                             <i class="ri-arrow-left-line align-middle me-1"></i> Back to Dashboard
                                         </a>
@@ -407,7 +419,6 @@
                                 $totalMargin = (float) $invester->total_margin_generated;
                                 $totalSzShare = (float) $invester->total_szorzo_earnings;
                                 $totalInvShare = (float) $invester->total_investor_earnings;
-                                $isInvestor = auth()->user()?->isInvestor() || (int)auth()->user()?->role_id === 6;
                             @endphp
                             <div class="row g-2 mb-3">
                                 <div class="{{ $isInvestor ? 'col-md-4' : 'col-md-3' }}">

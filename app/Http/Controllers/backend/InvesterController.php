@@ -278,8 +278,8 @@ class InvesterController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $isInvestorUser = $user && ($user->isInvestor() || (int) $user->role_id === 6);
         $isSuperAdmin = $user && ((int) $user->id === 1 || $user->isSuperAdmin());
+        $isInvestorUser = $user && ($user->isInvestor() || (int) $user->role_id === 6 || ($user->linkedInvester() && !$isSuperAdmin));
 
         // For investor users, resolve their own profile
         if ($isInvestorUser && !$isSuperAdmin) {
@@ -302,7 +302,8 @@ class InvesterController extends Controller
                 abort(404, 'Investor profile not found.');
             }
 
-            return view('backend.investers.show', compact('invester'));
+            $isInvestor = true;
+            return view('backend.investers.show', compact('invester', 'isInvestor'));
         }
 
         $this->authorize('read', Invester::class);
@@ -319,7 +320,9 @@ class InvesterController extends Controller
             $q->where('id', $id)->orWhere('invester_id', $id);
         })->firstOrFail();
 
-        return view('backend.investers.show', compact('invester'));
+        $isInvestor = $user && ($user->isInvestor() || (int) $user->role_id === 6 || ($user->linkedInvester()?->id === $invester->id && !$isSuperAdmin));
+
+        return view('backend.investers.show', compact('invester', 'isInvestor'));
     }
 
     public function edit($id)

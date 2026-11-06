@@ -28,8 +28,21 @@ class PayslipController extends Controller
 
         $canManageAll = $this->canManageAll($currentUser);
         $target = $this->resolveTarget($request);
-        $month = $this->resolveMonth($request);
-        $year = $this->resolveYear($request);
+        $tenure = $this->resolveTenure($target);
+
+        $requestedMonth = $this->resolveMonth($request, $tenure);
+        $requestedYear = $this->resolveYear($request, $tenure);
+
+        // Clamp to valid working tenure
+        if (!$this->isWithinTenure($requestedMonth, $requestedYear, $tenure)) {
+            $month = $tenure['default_month'];
+            $year = $tenure['default_year'];
+            $tenureNotice = "Requested period ({$requestedMonth}/{$requestedYear}) is outside the employee's active working tenure ({$tenure['tenure_label']}). Displaying latest working period.";
+        } else {
+            $month = $requestedMonth;
+            $year = $requestedYear;
+            $tenureNotice = null;
+        }
 
         $payslipData = $this->payslipService->getPayslipData($target, $month, $year, $request->all());
 
@@ -53,6 +66,10 @@ class PayslipController extends Controller
             'external_employees' => $externalEmployees,
             'target' => $target,
             'selected_employee_id' => $target instanceof Employee ? $target->id : null,
+            'tenure' => $tenure,
+            'tenure_notice' => $tenureNotice,
+            'month' => $month,
+            'year' => $year,
         ]));
     }
 
@@ -65,9 +82,23 @@ class PayslipController extends Controller
         $this->ensureAccess($currentUser);
 
         $target = $this->resolveTarget($request);
-        $month = $this->resolveMonth($request);
-        $year = $this->resolveYear($request);
+        $tenure = $this->resolveTenure($target);
 
+        $requestedMonth = $this->resolveMonth($request, $tenure);
+        $requestedYear = $this->resolveYear($request, $tenure);
+
+        // Verify that requested period falls within working tenure
+        if (!$this->isWithinTenure($requestedMonth, $requestedYear, $tenure)) {
+            $monthName = date('F', mktime(0, 0, 0, $requestedMonth, 1));
+            return redirect()->route('admin.payslip.index', [
+                'employee_id' => $target instanceof Employee ? $target->id : null,
+                'month' => $tenure['default_month'],
+                'year' => $tenure['default_year'],
+            ])->with('error', "Payslip cannot be downloaded for {$monthName} {$requestedYear} as it is outside the employee's working tenure ({$tenure['tenure_label']}). Only active working periods are eligible.");
+        }
+
+        $month = $requestedMonth;
+        $year = $requestedYear;
         $data = $this->payslipService->getPayslipData($target, $month, $year, $request->all());
 
         $pdf = Pdf::loadView('backend.payslip.pdf', $data)
@@ -85,9 +116,18 @@ class PayslipController extends Controller
         $this->ensureAccess($currentUser);
 
         $target = $this->resolveTarget($request);
-        $month = $this->resolveMonth($request);
-        $year = $this->resolveYear($request);
+        $tenure = $this->resolveTenure($target);
 
+        $requestedMonth = $this->resolveMonth($request, $tenure);
+        $requestedYear = $this->resolveYear($request, $tenure);
+
+        if (!$this->isWithinTenure($requestedMonth, $requestedYear, $tenure)) {
+            $monthName = date('F', mktime(0, 0, 0, $requestedMonth, 1));
+            abort(422, "Payslip cannot be previewed for {$monthName} {$requestedYear} as it is outside the employee's working tenure ({$tenure['tenure_label']}).");
+        }
+
+        $month = $requestedMonth;
+        $year = $requestedYear;
         $data = $this->payslipService->getPayslipData($target, $month, $year, $request->all());
 
         $pdf = Pdf::loadView('backend.payslip.pdf', $data)
@@ -211,16 +251,172 @@ class PayslipController extends Controller
         ]);
     }
 
-    protected function resolveMonth(Request $request): int
+    /**
+     * Resolve the employee's active working tenure (from Join Date to Relieving Date / Current Month).
+     */
+    public function resolveTenure(Employee|Candidate|User $target): array
     {
-        $defaultMonth = now()->day < 5 ? now()->subMonth()->month : now()->month;
-        return (int) $request->input('month', $defaultMonth);
+        $joinDate = null;
+        $relievingDate = null;
+
+        if ($target instanceof Employee) {
+            $joinDate = $target->date_of_joining ?: $target->contract_from_date;
+            $relievingDate = $target->relieving_date;
+            if (!$joinDate) {
+                $joinDate = $target->created_at;
+            }
+        } elseif ($target instanceof Candidate) {
+            $joinDate = $target->contract_from_date ?: $target->created_at;
+            $relievingDate = null;
+        } elseif ($target instanceof User) {
+            $linked = $target->linkedEmployee();
+            if ($linked) {
+                return $this->resolveTenure($linked);
+            }
+            $joinDate = $target->created_at;
+        }
+
+        $now = \Carbon\CarbonImmutable::now();
+
+        // 1. Start Date (Joining)
+        try {
+            $start = $joinDate ? \Carbon\CarbonImmutable::parse($joinDate)->startOfDay() : $now->startOfYear();
+        } catch (\Throwable $e) {
+            $start = $now->startOfYear();
+        }
+
+        // 2. End Date (Relieving or Current Month)
+        $isRelieved = false;
+        $relievedCarbon = null;
+        if (!empty($relievingDate)) {
+            try {
+                $relievedCarbon = \Carbon\CarbonImmutable::parse($relievingDate)->endOfDay();
+                $isRelieved = true;
+                $end = $relievedCarbon;
+            } catch (\Throwable $e) {
+                $end = $now->endOfDay();
+            }
+        } else {
+            $end = $now->endOfDay();
+        }
+
+        // Payslips cannot be generated for future months, so cap at current month end
+        if ($end->gt($now->endOfMonth())) {
+            $end = $now->endOfMonth();
+        }
+
+        // Safeguard: if end is before start, clamp end to start month
+        if ($end->lt($start)) {
+            $end = $start->endOfMonth();
+        }
+
+        $startYear = (int) $start->year;
+        $startMonth = (int) $start->month;
+        $endYear = (int) $end->year;
+        $endMonth = (int) $end->month;
+
+        $availableYears = [];
+        for ($y = $endYear; $y >= $startYear; $y--) {
+            $availableYears[] = $y;
+        }
+
+        $availableMonthsByYear = [];
+        $allWorkingPeriods = [];
+
+        for ($y = $endYear; $y >= $startYear; $y--) {
+            $mStart = ($y === $startYear) ? $startMonth : 1;
+            $mEnd = ($y === $endYear) ? $endMonth : 12;
+
+            $monthsForYear = [];
+            for ($m = $mEnd; $m >= $mStart; $m--) {
+                $monthsForYear[] = $m;
+                $dateObj = \Carbon\CarbonImmutable::create($y, $m, 1);
+                $allWorkingPeriods[] = [
+                    'year' => $y,
+                    'month' => $m,
+                    'month_name' => $dateObj->format('F'),
+                    'label' => $dateObj->format('F Y'),
+                ];
+            }
+            sort($monthsForYear);
+            $availableMonthsByYear[$y] = $monthsForYear;
+        }
+
+        $dojLabel = $start->format('d-M-Y');
+        $dorLabel = $isRelieved ? $end->format('d-M-Y') : 'Active / Present';
+        $tenureLabel = "{$dojLabel} to {$dorLabel}";
+
+        // Calculate default month and year (latest working month, or preferred previous month if day < 5)
+        $defaultMonth = $endMonth;
+        $defaultYear = $endYear;
+
+        $preferredDate = $now->day < 5 ? $now->subMonth() : $now;
+        $prefYear = (int) $preferredDate->year;
+        $prefMonth = (int) $preferredDate->month;
+
+        if ($this->isPeriodWithinRange($prefMonth, $prefYear, $startYear, $startMonth, $endYear, $endMonth)) {
+            $defaultMonth = $prefMonth;
+            $defaultYear = $prefYear;
+        }
+
+        return [
+            'start_date' => $start,
+            'end_date' => $end,
+            'start_year' => $startYear,
+            'start_month' => $startMonth,
+            'end_year' => $endYear,
+            'end_month' => $endMonth,
+            'is_relieved' => $isRelieved,
+            'doj_display' => $dojLabel,
+            'dor_display' => $dorLabel,
+            'tenure_label' => $tenureLabel,
+            'available_years' => $availableYears,
+            'available_months_by_year' => $availableMonthsByYear,
+            'all_working_periods' => $allWorkingPeriods,
+            'default_month' => $defaultMonth,
+            'default_year' => $defaultYear,
+        ];
     }
 
-    protected function resolveYear(Request $request): int
+    /**
+     * Check if a given month & year falls within the employee's working tenure.
+     */
+    public function isWithinTenure(int $month, int $year, array $tenure): bool
     {
-        $defaultYear = now()->day < 5 ? now()->subMonth()->year : now()->year;
-        return (int) $request->input('year', $defaultYear);
+        return $this->isPeriodWithinRange(
+            $month,
+            $year,
+            $tenure['start_year'],
+            $tenure['start_month'],
+            $tenure['end_year'],
+            $tenure['end_month']
+        );
+    }
+
+    /**
+     * Integer range check for (year * 100 + month).
+     */
+    public function isPeriodWithinRange(int $month, int $year, int $startYear, int $startMonth, int $endYear, int $endMonth): bool
+    {
+        $periodVal = ($year * 100) + $month;
+        $startVal = ($startYear * 100) + $startMonth;
+        $endVal = ($endYear * 100) + $endMonth;
+
+        return $periodVal >= $startVal && $periodVal <= $endVal;
+    }
+
+    protected function resolveMonth(Request $request, ?array $tenure = null): int
+    {
+        $defaultMonth = $tenure['default_month'] ?? (now()->day < 5 ? now()->subMonth()->month : now()->month);
+        $inputMonth = (int) $request->input('month', $defaultMonth);
+        return ($inputMonth >= 1 && $inputMonth <= 12) ? $inputMonth : $defaultMonth;
+    }
+
+    protected function resolveYear(Request $request, ?array $tenure = null): int
+    {
+        $defaultYear = $tenure['default_year'] ?? (now()->day < 5 ? now()->subMonth()->year : now()->year);
+        $inputYear = (int) $request->input('year', $defaultYear);
+        return ($inputYear >= 2000 && $inputYear <= 2100) ? $inputYear : $defaultYear;
     }
 
     protected function resolveFilename(array $data): string

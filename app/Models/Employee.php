@@ -1011,7 +1011,7 @@ class Employee extends Model
 
         $relieving = $this->relieving_date
             ? $this->relieving_date->format('d M Y')
-            : ($this->contract_to_date ? $this->contract_to_date->format('d M Y') : 'Active / Ongoing');
+            : '-';
 
         return [
             'id' => $this->id,

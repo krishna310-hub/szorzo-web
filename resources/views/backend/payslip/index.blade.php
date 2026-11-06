@@ -21,6 +21,18 @@
                 </div>
             </div>
 
+            @if(session('error'))
+                <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
+                    <i class="ri-error-warning-line me-2"></i>{{ session('error') }}
+                </div>
+            @endif
+
+            @if(!empty($tenure_notice))
+                <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4">
+                    <i class="ri-information-line me-2"></i>{{ $tenure_notice }}
+                </div>
+            @endif
+
             <!-- Filter & Action Card -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
@@ -31,10 +43,16 @@
                                 {{ !empty($can_manage_all) ? 'Generate Payslip' : 'Download My Payslip' }}
                             </h5>
                             <small class="text-muted">
-                                {{ !empty($can_manage_all) ? 'Select an employee from Employee Module or a system user, with monthly or date-to-date cycle.' : 'Choose month and year to view and download your official salary payslip.' }}
+                                {{ !empty($can_manage_all) ? 'Select an employee from Employee Module or a system user, with monthly or date-to-date cycle.' : 'Choose working month and year to view and download your official salary payslip.' }}
                             </small>
                         </div>
                         <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-light text-dark border border-secondary-subtle px-2 py-1 fs-12 fw-medium">
+                                <i class="ri-calendar-check-line text-success me-1"></i> Joining: <strong>{{ $tenure['doj_display'] ?? '-' }}</strong>
+                            </span>
+                            <span class="badge {{ !empty($tenure['is_relieved']) ? 'bg-danger-subtle text-danger border border-danger' : 'bg-success-subtle text-success border border-success' }} px-2 py-1 fs-12 fw-medium">
+                                <i class="{{ !empty($tenure['is_relieved']) ? 'ri-user-unfollow-line' : 'ri-user-follow-line' }} me-1"></i> Relieving: <strong>{{ $tenure['dor_display'] ?? 'Active / Present' }}</strong>
+                            </span>
                             @if($target instanceof \App\Models\Employee && $target->isExternal())
                                 <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1 fs-12 fw-semibold">
                                     <i class="ri-user-shared-line me-1"></i> External Users - Contract Employees
@@ -144,8 +162,8 @@
                             </div>
                         @else
                             <!-- Employee Self-Service Profile Summary Banner -->
-                            <div class="col-lg-4 col-md-6">
-                                <label class="form-label fw-semibold text-muted small text-uppercase">Employee Information</label>
+                            <div class="col-lg-5 col-md-12">
+                                <label class="form-label fw-semibold text-muted small text-uppercase">Employee Information &amp; Tenure</label>
                                 <div class="p-2 px-3 border rounded bg-light d-flex align-items-center gap-3">
                                     <div class="avatar-xs flex-shrink-0">
                                         <span class="avatar-title rounded-circle bg-primary-subtle text-primary fw-bold">
@@ -163,17 +181,20 @@
                             </div>
                         @endif
 
-                        <!-- Monthly Inputs (Month and Year Selection) -->
+                        <!-- Monthly Inputs (Month and Year Selection) - Restricted to Employee Working Tenure -->
                         <div class="col-lg-2 col-md-3 period-month-container" style="{{ (!empty($can_manage_all) && !$is_full_calendar_month && !empty(request('from_date'))) ? 'display: none;' : '' }}">
                             <label class="form-label fw-semibold">
                                 <i class="ri-calendar-event-line text-primary me-1"></i> Choose Month
                             </label>
                             <select name="month" id="monthInput" class="form-select">
-                                @for($m = 1; $m <= 12; $m++)
+                                @php
+                                    $validMonths = $tenure['available_months_by_year'][$year] ?? ($tenure['available_months_by_year'][$tenure['default_year']] ?? [1,2,3,4,5,6,7,8,9,10,11,12]);
+                                @endphp
+                                @foreach($validMonths as $m)
                                     <option value="{{ $m }}" @selected($month == $m)>
                                         {{ date('F', mktime(0, 0, 0, $m, 1)) }}
                                     </option>
-                                @endfor
+                                @endforeach
                             </select>
                         </div>
 
@@ -182,9 +203,11 @@
                                 <i class="ri-calendar-line text-primary me-1"></i> Choose Year
                             </label>
                             <select name="year" id="yearInput" class="form-select">
-                                @for($y = date('Y') + 1; $y >= 2024; $y--)
+                                @forelse($tenure['available_years'] ?? [$year] as $y)
                                     <option value="{{ $y }}" @selected($year == $y)>{{ $y }}</option>
-                                @endfor
+                                @empty
+                                    <option value="{{ $year }}">{{ $year }}</option>
+                                @endforelse
                             </select>
                         </div>
 
@@ -502,6 +525,36 @@
         const yearInput = document.getElementById('yearInput');
         const btnDownloadPdf = document.getElementById('btnDownloadPdf');
         const btnPrintPreview = document.getElementById('btnPrintPreview');
+        const tenureMonthsByYear = @json($tenure['available_months_by_year'] ?? []);
+        const monthNames = [
+            '', 'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        function populateMonthsForYear(selectedYear, keepMonth = null) {
+            if (!monthInput) return;
+            const months = tenureMonthsByYear[selectedYear] || [];
+            const currentVal = parseInt(keepMonth !== null ? keepMonth : monthInput.value, 10);
+
+            monthInput.innerHTML = '';
+            let selectedAssigned = false;
+            months.forEach(function (m) {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = monthNames[m] || ('Month ' + m);
+                if (m === currentVal) {
+                    opt.selected = true;
+                    selectedAssigned = true;
+                }
+                monthInput.appendChild(opt);
+            });
+
+            if (!selectedAssigned && months.length > 0) {
+                monthInput.value = months[months.length - 1];
+            }
+
+            updateDownloadLinks();
+        }
 
         function updateDownloadLinks() {
             if (!monthInput || !yearInput) return;
@@ -524,8 +577,11 @@
             monthInput.addEventListener('change', updateDownloadLinks);
         }
         if (yearInput) {
-            yearInput.addEventListener('change', updateDownloadLinks);
+            yearInput.addEventListener('change', function () {
+                populateMonthsForYear(this.value);
+            });
         }
+        updateDownloadLinks();
 
         function togglePeriodDisplay(type) {
             if (type === 'range') {

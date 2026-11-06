@@ -535,7 +535,11 @@ class PayslipModuleTest extends TestCase
         $this->assertFalse($controller->canManageAll($regularUser));
 
         // Mock authenticated user as regular employee
-        Auth::shouldReceive('user')->andReturn($regularUser);
+        $container = new \Illuminate\Container\Container();
+        \Illuminate\Support\Facades\Facade::setFacadeApplication($container);
+        $authMock = \Mockery::mock('stdClass');
+        $authMock->shouldReceive('user')->andReturn($regularUser);
+        $container->instance('auth', $authMock);
 
         $linkedEmp = new Employee([
             'employee_name' => 'John Employee',
@@ -574,5 +578,85 @@ class PayslipModuleTest extends TestCase
         $headerView = file_get_contents($baseDir . '/resources/views/backend/layouts/header.blade.php');
         $this->assertStringContainsString('My Payslip', $headerView);
         $this->assertStringContainsString("route('admin.payslip.index')", $headerView);
+    }
+
+    public function test_tenure_resolution_for_active_and_relieved_employees(): void
+    {
+        $controller = new PayslipController(new PayslipService());
+
+        // 1. Relieved Employee: joined March 2026, relieved August 2026
+        $relievedEmp = new Employee();
+        $relievedEmp->setRawAttributes([
+            'employee_name' => 'Relieved Staff',
+            'date_of_joining' => '2026-03-15',
+            'relieving_date' => '2026-08-20',
+        ]);
+
+        $relievedTenure = $controller->resolveTenure($relievedEmp);
+        $this->assertTrue($relievedTenure['is_relieved']);
+        $this->assertSame(2026, $relievedTenure['start_year']);
+        $this->assertSame(3, $relievedTenure['start_month']);
+        $this->assertSame(2026, $relievedTenure['end_year']);
+        $this->assertSame(8, $relievedTenure['end_month']);
+        $this->assertSame([2026], $relievedTenure['available_years']);
+        $this->assertSame([3, 4, 5, 6, 7, 8], $relievedTenure['available_months_by_year'][2026]);
+
+        // Months within tenure: March to August 2026
+        $this->assertTrue($controller->isWithinTenure(3, 2026, $relievedTenure));
+        $this->assertTrue($controller->isWithinTenure(8, 2026, $relievedTenure));
+
+        // Months outside tenure: before March 2026 or after August 2026
+        $this->assertFalse($controller->isWithinTenure(2, 2026, $relievedTenure));
+        $this->assertFalse($controller->isWithinTenure(9, 2026, $relievedTenure));
+        $this->assertFalse($controller->isWithinTenure(1, 2025, $relievedTenure));
+        $this->assertFalse($controller->isWithinTenure(1, 2027, $relievedTenure));
+
+        // 2. Active Employee: joined January 2026, no relieving date
+        $activeEmp = new Employee();
+        $activeEmp->setRawAttributes([
+            'employee_name' => 'Active Staff',
+            'date_of_joining' => '2026-01-10',
+            'relieving_date' => null,
+            'contract_to_date' => '2027-12-31', // Should not be treated as relieving date
+        ]);
+
+        $activeTenure = $controller->resolveTenure($activeEmp);
+        $this->assertFalse($activeTenure['is_relieved']);
+        $this->assertSame(2026, $activeTenure['start_year']);
+        $this->assertSame(1, $activeTenure['start_month']);
+        // Capped at current month / now
+        $nowMonth = (int) now()->month;
+        $nowYear = (int) now()->year;
+        $this->assertSame($nowYear, $activeTenure['end_year']);
+        $this->assertSame($nowMonth, $activeTenure['end_month']);
+
+        // Future dates beyond current date cannot be accessed
+        $this->assertFalse($controller->isWithinTenure(12, 2027, $activeTenure));
+    }
+
+    public function test_employee_model_and_export_produce_dash_when_relieving_date_is_empty(): void
+    {
+        $activeEmp = new Employee();
+        $activeEmp->setRawAttributes([
+            'id' => 999,
+            'employee_name' => 'Active Developer',
+            'date_of_joining' => '2026-01-15',
+            'relieving_date' => null,
+            'contract_to_date' => '2027-04-22',
+            'monthly_gross' => 50000,
+        ]);
+        $activeEmp->setRelation('client', null);
+        $activeEmp->setRelation('candidate', null);
+        $activeEmp->setRelation('mode', null);
+
+        $details = $activeEmp->getInvestorProfileDetails();
+        $this->assertSame('-', $details['relieving_date']);
+
+        $export = new \App\Exports\EmployeeExport(collect([$activeEmp]));
+        $row = $export->map($activeEmp);
+        // Column index 6 is 'Date of Relieving (DOR)'
+        $this->assertSame('-', $row[6]);
+        $this->assertNotSame('Active / Ongoing', $row[6]);
+        $this->assertNotSame('22-04-2027', $row[6]);
     }
 }

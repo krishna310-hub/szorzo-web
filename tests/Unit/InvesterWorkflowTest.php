@@ -745,8 +745,8 @@ class InvesterWorkflowTest extends TestCase
         $this->assertNotEmpty($details['job_location']);
         // 7. DOJ
         $this->assertSame('15 Jan 2026', $details['date_of_joining']);
-        // 8. Relieving date
-        $this->assertSame('Active / Ongoing', $details['relieving_date']);
+        // 8. Relieving date (- when empty)
+        $this->assertSame('-', $details['relieving_date']);
         // 9. Offer letter
         $this->assertSame('kavya_offer_letter.pdf', $details['offer_letter_name']);
         $this->assertNotNull($details['offer_letter_url']);

@@ -143,7 +143,7 @@ class BugsAndUpdatesTest extends TestCase
         $this->assertSame('Rahul Sharma', $mapped[2]); // Name
         $this->assertSame('Software Engineer', $mapped[4]); // Job Role
         $this->assertSame('01-02-2026', $mapped[5]); // DOJ
-        $this->assertSame('Active / Ongoing', $mapped[6]); // DOR
+        $this->assertSame('-', $mapped[6]); // DOR (hyphen when relieving date is empty)
         $this->assertSame('5000.00', $mapped[7]); // TDS
         $this->assertSame('1800.00', $mapped[8]); // PF
         $this->assertSame('Contract', $mapped[10]); // Mode / Employment Type
