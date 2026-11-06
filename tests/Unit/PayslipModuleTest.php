@@ -513,4 +513,66 @@ class PayslipModuleTest extends TestCase
         $this->assertTrue($clientEmp->isExternal());
         $this->assertFalse($clientEmp->isInternal());
     }
+
+    public function test_employee_self_service_access_and_security(): void
+    {
+        $controller = new PayslipController(new PayslipService());
+
+        // Super Admin has management rights
+        $superRole = new Role(['access_level' => 'super_admin']);
+        $admin = new User(['name' => 'Admin User']);
+        $admin->setRelation('role', $superRole);
+        $this->assertTrue($controller->canManageAll($admin));
+
+        // Regular Employee does NOT have management rights
+        $employeeRole = new Role(['access_level' => 'employee']);
+        $regularUser = new User([
+            'name' => 'John Employee',
+            'email' => 'john.emp@example.com',
+            'is_active' => 1,
+        ]);
+        $regularUser->setRelation('role', $employeeRole);
+        $this->assertFalse($controller->canManageAll($regularUser));
+
+        // Mock authenticated user as regular employee
+        Auth::shouldReceive('user')->andReturn($regularUser);
+
+        $linkedEmp = new Employee([
+            'employee_name' => 'John Employee',
+            'employee_no' => 'SZ999',
+            'official_mail' => 'john.emp@example.com',
+            'monthly_gross' => 45000,
+        ]);
+        $regularUser->setRelation('employee', $linkedEmp);
+
+        // Even if requesting another employee_id=123, resolveTarget strictly returns John Employee
+        $request = new Request(['employee_id' => 123, 'month' => 5, 'year' => 2026]);
+        $resolved = (new ReflectionMethod($controller, 'resolveTarget'))->invoke($controller, $request);
+
+        $this->assertSame($linkedEmp, $resolved);
+        $this->assertSame('John Employee', $resolved->employee_name);
+    }
+
+    public function test_views_and_navigation_support_employee_month_year_download(): void
+    {
+        $baseDir = dirname(__DIR__, 2);
+
+        // 1. Payslip Index View
+        $indexView = file_get_contents($baseDir . '/resources/views/backend/payslip/index.blade.php');
+        $this->assertStringContainsString('Choose Month', $indexView);
+        $this->assertStringContainsString('Choose Year', $indexView);
+        $this->assertStringContainsString('Download PDF', $indexView);
+        $this->assertStringContainsString('My Payslip', $indexView);
+        $this->assertStringContainsString('updateDownloadLinks', $indexView);
+
+        // 2. Sidebar Navigation
+        $sidebarView = file_get_contents($baseDir . '/resources/views/backend/layouts/sidebar.blade.php');
+        $this->assertStringContainsString('My Payslip', $sidebarView);
+        $this->assertStringContainsString("route('admin.payslip.index')", $sidebarView);
+
+        // 3. Header Dropdown Navigation
+        $headerView = file_get_contents($baseDir . '/resources/views/backend/layouts/header.blade.php');
+        $this->assertStringContainsString('My Payslip', $headerView);
+        $this->assertStringContainsString("route('admin.payslip.index')", $headerView);
+    }
 }

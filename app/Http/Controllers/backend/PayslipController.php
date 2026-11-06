@@ -18,27 +18,36 @@ class PayslipController extends Controller
     ) {}
 
     /**
-     * Display the payslip view & download page (Admin Only).
+     * Display the payslip view & download page.
+     * Accessible by Administrators (all employees) and Employees (own payslip).
      */
     public function index(Request $request)
     {
-        $this->ensureAdminAccess();
+        $currentUser = Auth::user();
+        $this->ensureAccess($currentUser);
 
+        $canManageAll = $this->canManageAll($currentUser);
         $target = $this->resolveTarget($request);
         $month = $this->resolveMonth($request);
         $year = $this->resolveYear($request);
 
         $payslipData = $this->payslipService->getPayslipData($target, $month, $year, $request->all());
 
-        $allEmployees = Employee::with(['mode', 'client'])
-            ->orderBy('employee_name')
-            ->get();
+        $allEmployees = collect();
+        $internalEmployees = collect();
+        $externalEmployees = collect();
 
-        $internalEmployees = $allEmployees->filter(fn ($emp) => $emp->isInternal())->values();
-        $externalEmployees = $allEmployees->filter(fn ($emp) => $emp->isExternal())->values();
+        if ($canManageAll) {
+            $allEmployees = Employee::with(['mode', 'client'])
+                ->orderBy('employee_name')
+                ->get();
+
+            $internalEmployees = $allEmployees->filter(fn ($emp) => $emp->isInternal())->values();
+            $externalEmployees = $allEmployees->filter(fn ($emp) => $emp->isExternal())->values();
+        }
 
         return view('backend.payslip.index', array_merge($payslipData, [
-            'can_manage_all' => true,
+            'can_manage_all' => $canManageAll,
             'all_employees' => $allEmployees,
             'internal_employees' => $internalEmployees,
             'external_employees' => $externalEmployees,
@@ -52,7 +61,8 @@ class PayslipController extends Controller
      */
     public function download(Request $request)
     {
-        $this->ensureAdminAccess();
+        $currentUser = Auth::user();
+        $this->ensureAccess($currentUser);
 
         $target = $this->resolveTarget($request);
         $month = $this->resolveMonth($request);
@@ -71,7 +81,8 @@ class PayslipController extends Controller
      */
     public function preview(Request $request)
     {
-        $this->ensureAdminAccess();
+        $currentUser = Auth::user();
+        $this->ensureAccess($currentUser);
 
         $target = $this->resolveTarget($request);
         $month = $this->resolveMonth($request);
@@ -86,16 +97,44 @@ class PayslipController extends Controller
     }
 
     /**
-     * Ensure the authenticated user is an administrator.
+     * Check if user has administrative rights to manage and view all employees' payslips.
+     */
+    public function canManageAll(?User $user = null): bool
+    {
+        $user = $user ?? Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        return $user->isSuperAdmin()
+            || (int) $user->id === 1
+            || $user->isAdmin();
+    }
+
+    /**
+     * Ensure the authenticated user has access to view/download payslips.
+     */
+    protected function ensureAccess(?User $user = null): void
+    {
+        $currentUser = $user ?? Auth::user();
+        abort_unless($currentUser, 401, 'Please log in to view payslips.');
+
+        // Investors do not access employee payroll
+        if ($currentUser->isInvestor() || (int) $currentUser->role_id === 6) {
+            abort(403, 'Unauthorized access. Investors do not have access to employee payslips.');
+        }
+
+        if (!$currentUser->is_active) {
+            abort(403, 'Your account is inactive. Please contact administration.');
+        }
+    }
+
+    /**
+     * Backward-compatible check for legacy callers.
      */
     protected function ensureAdminAccess(): void
     {
-        $currentUser = Auth::user();
-        abort_unless(
-            $currentUser && $currentUser->isSuperAdmin(),
-            403,
-            'Unauthorized access. Payslips are restricted to administrators only.'
-        );
+        $this->ensureAccess();
     }
 
     /**
@@ -103,6 +142,28 @@ class PayslipController extends Controller
      */
     protected function resolveTarget(Request $request): Employee|Candidate|User
     {
+        $currentUser = Auth::user();
+        $canManageAll = $this->canManageAll($currentUser);
+
+        // For non-admin employees: enforce viewing strictly their own payslip
+        if (!$canManageAll && $currentUser) {
+            $myEmployee = $currentUser->linkedEmployee();
+            if ($myEmployee) {
+                return $myEmployee;
+            }
+
+            // Check if matching Candidate exists
+            $myCandidate = Candidate::with(['mode', 'client', 'jobRole', 'clientRequirement.billing', 'recruiter'])
+                ->whereRaw('LOWER(email) = ?', [mb_strtolower($currentUser->email)])
+                ->first();
+            if ($myCandidate) {
+                return $myCandidate;
+            }
+
+            return $currentUser;
+        }
+
+        // Admin management resolution:
         if ($request->filled('candidate_id')) {
             $candidate = Candidate::with(['mode', 'client', 'jobRole', 'clientRequirement.billing', 'recruiter'])->find($request->input('candidate_id'));
             if ($candidate) {
@@ -114,6 +175,13 @@ class PayslipController extends Controller
             $employee = Employee::with(['mode', 'client'])->find($request->input('employee_id'));
             if ($employee) {
                 return $employee;
+            }
+        }
+
+        if ($request->filled('user_id')) {
+            $user = User::find($request->input('user_id'));
+            if ($user) {
+                return $user->linkedEmployee() ?? $user;
             }
         }
 
@@ -136,7 +204,7 @@ class PayslipController extends Controller
             return $anyEmployee;
         }
 
-        return new Employee([
+        return $currentUser ?? new Employee([
             'employee_name' => 'No Employees Found',
             'employee_no' => 'EMP000',
             'employment_mode' => 'FTE',

@@ -340,8 +340,11 @@
                         @else
                             <a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
                         @endif
-                        @if(Auth::user()?->isSuperAdmin())
-                        <a class="dropdown-item" href="{{ route('admin.payslip.index') }}"><i class="mdi mdi-file-document-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Payslip</span></a>
+                        @if(Auth::user()?->isSuperAdmin() || Auth::user()?->isInternalEmployee() || Auth::user()?->linkedEmployee() !== null || Auth::user()?->can('read', \App\Models\Employee::class))
+                        <a class="dropdown-item" href="{{ route('admin.payslip.index') }}">
+                            <i class="mdi mdi-file-document-outline text-muted fs-16 align-middle me-1"></i> 
+                            <span class="align-middle">{{ Auth::user()?->isSuperAdmin() || Auth::user()?->can('create', \App\Models\Employee::class) ? 'Payslips' : 'My Payslip' }}</span>
+                        </a>
                         @endif
                         {{-- <a class="dropdown-item" href="apps-chat.html"><i class="mdi mdi-message-text-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Messages</span></a> --}}
                         {{-- <a class="dropdown-item" href="apps-tasks-kanban.html"><i class="mdi mdi-calendar-check-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Taskboard</span></a> --}}

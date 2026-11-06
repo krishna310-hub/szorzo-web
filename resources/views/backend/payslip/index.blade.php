@@ -10,11 +10,11 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0">Employee Payslip</h4>
+                        <h4 class="mb-sm-0">{{ !empty($can_manage_all) ? 'Employee Payslip' : 'My Payslip' }}</h4>
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
                                 <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                                <li class="breadcrumb-item active">Payslip</li>
+                                <li class="breadcrumb-item active">{{ !empty($can_manage_all) ? 'Payslip' : 'My Payslip' }}</li>
                             </ol>
                         </div>
                     </div>
@@ -22,13 +22,17 @@
             </div>
 
             <!-- Filter & Action Card -->
-            <!-- Filter & Action Card -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <div>
-                            <h5 class="card-title mb-0">Generate Payslip</h5>
-                            <small class="text-muted">Select an employee from Employee Module or a system user, with monthly or date-to-date cycle.</small>
+                            <h5 class="card-title mb-0">
+                                <i class="ri-file-text-line text-primary me-1"></i>
+                                {{ !empty($can_manage_all) ? 'Generate Payslip' : 'Download My Payslip' }}
+                            </h5>
+                            <small class="text-muted">
+                                {{ !empty($can_manage_all) ? 'Select an employee from Employee Module or a system user, with monthly or date-to-date cycle.' : 'Choose month and year to view and download your official salary payslip.' }}
+                            </small>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             @if($target instanceof \App\Models\Employee && $target->isExternal())
@@ -53,94 +57,117 @@
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ route('admin.payslip.index') }}" id="payslipFilterForm" class="row g-3 align-items-end">
-                        <input type="hidden" name="employee_id" id="hiddenEmployeeId" value="{{ $selected_employee_id }}">
+                        @if(!empty($can_manage_all))
+                            <input type="hidden" name="employee_id" id="hiddenEmployeeId" value="{{ $selected_employee_id }}">
 
-                        <!-- Employee Selection (Employee Module Only) -->
-                        <!-- Employee Selection (Split: Internal Users vs External Users) -->
-                        <div class="col-lg-4 col-md-6">
-                            <label class="form-label fw-semibold">Select Employee</label>
-                            <select id="targetSelector" name="employee_id" class="form-select">
-                                @if(isset($internal_employees) && $internal_employees->isNotEmpty())
-                                    <optgroup label="Internal Users - Szorzo employees">
-                                        @foreach($internal_employees as $emp)
-                                            @php
-                                                $empMode = $emp->employment_mode ?: ($emp->mode?->mode ?: 'FTE');
-                                                $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
-                                            @endphp
-                                            <option value="{{ $emp->id }}"
-                                                data-type="employee"
-                                                data-id="{{ $emp->id }}"
-                                                data-category="internal"
-                                                data-mode="{{ $empMode }}"
-                                                data-mode-label="{{ $emp->mode?->mode ?: $empMode }}"
-                                                data-is-hourly="0"
-                                                data-hourly-salary="0"
-                                                data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
-                                                data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
-                                                @selected($selected_employee_id == $emp->id)>
-                                                [{{ $empMode }}] {{ $emp->employee_name }} ({{ $empCode }})
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                @endif
+                            <!-- Employee Selection (Employee Module Only) -->
+                            <!-- Employee Selection (Split: Internal Users vs External Users) -->
+                            <div class="col-lg-4 col-md-6">
+                                <label class="form-label fw-semibold">Select Employee</label>
+                                <select id="targetSelector" name="employee_id" class="form-select">
+                                    @if(isset($internal_employees) && $internal_employees->isNotEmpty())
+                                        <optgroup label="Internal Users - Szorzo employees">
+                                            @foreach($internal_employees as $emp)
+                                                @php
+                                                    $empMode = $emp->employment_mode ?: ($emp->mode?->mode ?: 'FTE');
+                                                    $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                                                @endphp
+                                                <option value="{{ $emp->id }}"
+                                                    data-type="employee"
+                                                    data-id="{{ $emp->id }}"
+                                                    data-category="internal"
+                                                    data-mode="{{ $empMode }}"
+                                                    data-mode-label="{{ $emp->mode?->mode ?: $empMode }}"
+                                                    data-is-hourly="0"
+                                                    data-hourly-salary="0"
+                                                    data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
+                                                    data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
+                                                    @selected($selected_employee_id == $emp->id)>
+                                                    [{{ $empMode }}] {{ $emp->employee_name }} ({{ $empCode }})
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
 
-                                @if(isset($external_employees) && $external_employees->isNotEmpty())
-                                    <optgroup label="External Users - Contract Employees">
-                                        @foreach($external_employees as $emp)
-                                            @php
-                                                $empMode = $emp->employment_mode ?: ($emp->mode?->mode ?: 'Contract');
-                                                $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
-                                                $clientStr = $emp->client?->client ? ' (' . $emp->client->client . ')' : '';
-                                            @endphp
-                                            <option value="{{ $emp->id }}"
-                                                data-type="employee"
-                                                data-id="{{ $emp->id }}"
-                                                data-category="external"
-                                                data-mode="{{ $empMode }}"
-                                                data-mode-label="{{ $emp->mode?->mode ?: $empMode }}"
-                                                data-is-hourly="0"
-                                                data-hourly-salary="0"
-                                                data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
-                                                data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
-                                                @selected($selected_employee_id == $emp->id)>
-                                                [{{ $empMode }}] {{ $emp->employee_name }} ({{ $empCode }}){{ $clientStr }}
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                @endif
+                                    @if(isset($external_employees) && $external_employees->isNotEmpty())
+                                        <optgroup label="External Users - Contract Employees">
+                                            @foreach($external_employees as $emp)
+                                                @php
+                                                    $empMode = $emp->employment_mode ?: ($emp->mode?->mode ?: 'Contract');
+                                                    $empCode = $emp->employee_no ?: ('SZ' . str_pad($emp->id, 3, '0', STR_PAD_LEFT));
+                                                    $clientStr = $emp->client?->client ? ' (' . $emp->client->client . ')' : '';
+                                                @endphp
+                                                <option value="{{ $emp->id }}"
+                                                    data-type="employee"
+                                                    data-id="{{ $emp->id }}"
+                                                    data-category="external"
+                                                    data-mode="{{ $empMode }}"
+                                                    data-mode-label="{{ $emp->mode?->mode ?: $empMode }}"
+                                                    data-is-hourly="0"
+                                                    data-hourly-salary="0"
+                                                    data-contract-from="{{ $emp->contract_from_date ? $emp->contract_from_date->format('Y-m-d') : '' }}"
+                                                    data-contract-to="{{ $emp->contract_to_date ? $emp->contract_to_date->format('Y-m-d') : '' }}"
+                                                    @selected($selected_employee_id == $emp->id)>
+                                                    [{{ $empMode }}] {{ $emp->employee_name }} ({{ $empCode }}){{ $clientStr }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
 
-                                @if((!isset($internal_employees) || $internal_employees->isEmpty()) && (!isset($external_employees) || $external_employees->isEmpty()) && (!isset($all_employees) || $all_employees->isEmpty()))
-                                    <option value="">No employees found in Employee Module</option>
-                                @endif
-                            </select>
-                        </div>
-
-                        <!-- Period Type Radio / Switch -->
-                        <div class="col-lg-3 col-md-6">
-                            <label class="form-label fw-semibold d-block">Period Type</label>
-                            <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="period_type" id="periodTypeMonth" value="monthly" @checked($is_full_calendar_month && empty(request('from_date')))>
-                                <label class="btn btn-outline-primary" for="periodTypeMonth"><i class="ri-calendar-line me-1"></i> Monthly (FTE)</label>
-
-                                <input type="radio" class="btn-check" name="period_type" id="periodTypeRange" value="range" @checked(!$is_full_calendar_month || !empty(request('from_date')))>
-                                <label class="btn btn-outline-primary" for="periodTypeRange"><i class="ri-calendar-2-line me-1"></i> Date to Date</label>
+                                    @if((!isset($internal_employees) || $internal_employees->isEmpty()) && (!isset($external_employees) || $external_employees->isEmpty()) && (!isset($all_employees) || $all_employees->isEmpty()))
+                                        <option value="">No employees found in Employee Module</option>
+                                    @endif
+                                </select>
                             </div>
-                        </div>
 
-                        <!-- Date to Date Inputs -->
-                        <div class="col-lg-2 col-md-3 period-range-container" style="{{ ($is_full_calendar_month && empty(request('from_date'))) ? 'display: none;' : '' }}">
-                            <label class="form-label fw-semibold">From Date</label>
-                            <input type="date" name="from_date" id="fromDateInput" class="form-control" value="{{ $from_date }}">
-                        </div>
+                            <!-- Period Type Radio / Switch -->
+                            <div class="col-lg-3 col-md-6">
+                                <label class="form-label fw-semibold d-block">Period Type</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="period_type" id="periodTypeMonth" value="monthly" @checked($is_full_calendar_month && empty(request('from_date')))>
+                                    <label class="btn btn-outline-primary" for="periodTypeMonth"><i class="ri-calendar-line me-1"></i> Monthly (FTE)</label>
 
-                        <div class="col-lg-2 col-md-3 period-range-container" style="{{ ($is_full_calendar_month && empty(request('from_date'))) ? 'display: none;' : '' }}">
-                            <label class="form-label fw-semibold">To Date</label>
-                            <input type="date" name="to_date" id="toDateInput" class="form-control" value="{{ $to_date }}">
-                        </div>
+                                    <input type="radio" class="btn-check" name="period_type" id="periodTypeRange" value="range" @checked(!$is_full_calendar_month || !empty(request('from_date')))>
+                                    <label class="btn btn-outline-primary" for="periodTypeRange"><i class="ri-calendar-2-line me-1"></i> Date to Date</label>
+                                </div>
+                            </div>
 
-                        <!-- Monthly Inputs -->
-                        <div class="col-lg-2 col-md-3 period-month-container" style="{{ (!$is_full_calendar_month && !empty(request('from_date'))) ? 'display: none;' : '' }}">
-                            <label class="form-label fw-semibold">Month</label>
+                            <!-- Date to Date Inputs -->
+                            <div class="col-lg-2 col-md-3 period-range-container" style="{{ ($is_full_calendar_month && empty(request('from_date'))) ? 'display: none;' : '' }}">
+                                <label class="form-label fw-semibold">From Date</label>
+                                <input type="date" name="from_date" id="fromDateInput" class="form-control" value="{{ $from_date }}">
+                            </div>
+
+                            <div class="col-lg-2 col-md-3 period-range-container" style="{{ ($is_full_calendar_month && empty(request('from_date'))) ? 'display: none;' : '' }}">
+                                <label class="form-label fw-semibold">To Date</label>
+                                <input type="date" name="to_date" id="toDateInput" class="form-control" value="{{ $to_date }}">
+                            </div>
+                        @else
+                            <!-- Employee Self-Service Profile Summary Banner -->
+                            <div class="col-lg-4 col-md-6">
+                                <label class="form-label fw-semibold text-muted small text-uppercase">Employee Information</label>
+                                <div class="p-2 px-3 border rounded bg-light d-flex align-items-center gap-3">
+                                    <div class="avatar-xs flex-shrink-0">
+                                        <span class="avatar-title rounded-circle bg-primary-subtle text-primary fw-bold">
+                                            {{ strtoupper(substr($name ?? 'E', 0, 2)) }}
+                                        </span>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <div class="fw-bold text-dark text-truncate">{{ $name }}</div>
+                                        <div class="small text-muted text-truncate">
+                                            <span class="badge bg-secondary-subtle text-secondary px-1 py-0">{{ $employee_no ?: 'SZ Internal' }}</span>
+                                            &bull; {{ $designation ?: 'Staff' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Monthly Inputs (Month and Year Selection) -->
+                        <div class="col-lg-2 col-md-3 period-month-container" style="{{ (!empty($can_manage_all) && !$is_full_calendar_month && !empty(request('from_date'))) ? 'display: none;' : '' }}">
+                            <label class="form-label fw-semibold">
+                                <i class="ri-calendar-event-line text-primary me-1"></i> Choose Month
+                            </label>
                             <select name="month" id="monthInput" class="form-select">
                                 @for($m = 1; $m <= 12; $m++)
                                     <option value="{{ $m }}" @selected($month == $m)>
@@ -150,8 +177,10 @@
                             </select>
                         </div>
 
-                        <div class="col-lg-2 col-md-3 period-month-container" style="{{ (!$is_full_calendar_month && !empty(request('from_date'))) ? 'display: none;' : '' }}">
-                            <label class="form-label fw-semibold">Year</label>
+                        <div class="col-lg-2 col-md-3 period-month-container" style="{{ (!empty($can_manage_all) && !$is_full_calendar_month && !empty(request('from_date'))) ? 'display: none;' : '' }}">
+                            <label class="form-label fw-semibold">
+                                <i class="ri-calendar-line text-primary me-1"></i> Choose Year
+                            </label>
                             <select name="year" id="yearInput" class="form-select">
                                 @for($y = date('Y') + 1; $y >= 2024; $y--)
                                     <option value="{{ $y }}" @selected($year == $y)>{{ $y }}</option>
@@ -159,12 +188,12 @@
                             </select>
                         </div>
 
-                        @if(!empty($is_hourly))
+                        @if(!empty($can_manage_all) && !empty($is_hourly))
                             <div class="col-lg-2 col-md-3">
                                 <label class="form-label fw-semibold">Worked Hours</label>
                                 <input type="number" step="0.25" min="0" name="worked_hours" class="form-control" value="{{ $worked_hours }}" placeholder="e.g. 20.00">
                             </div>
-                        @elseif(!empty($is_contract_like))
+                        @elseif(!empty($can_manage_all) && !empty($is_contract_like))
                             <div class="col-lg-2 col-md-3">
                                 <label class="form-label fw-semibold">Leave Days (LOP)</label>
                                 <input type="number" step="0.5" min="0" max="{{ $days_in_month }}" name="absent_days" class="form-control" value="{{ $absent_days }}" placeholder="e.g. 7">
@@ -173,21 +202,25 @@
 
                         <!-- Action Buttons -->
                         <div class="col-lg-auto col-md-auto d-flex flex-wrap gap-2 ms-auto">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="ri-filter-3-line align-bottom me-1"></i> View Payslip
+                            <button type="submit" class="btn btn-primary" id="btnViewPayslip">
+                                <i class="ri-eye-line align-bottom me-1"></i> View Payslip
                             </button>
 
                             @php
                                 $payslipQueryParams = request()->query();
-                                if ($target instanceof \App\Models\Employee) {
-                                    $payslipQueryParams['employee_id'] = $target->id;
-                                    unset($payslipQueryParams['candidate_id'], $payslipQueryParams['user_id']);
-                                } elseif ($target instanceof \App\Models\Candidate) {
-                                    $payslipQueryParams['candidate_id'] = $target->id;
-                                    unset($payslipQueryParams['employee_id'], $payslipQueryParams['user_id']);
-                                } elseif ($target instanceof \App\Models\User) {
-                                    $payslipQueryParams['user_id'] = $target->id;
-                                    unset($payslipQueryParams['employee_id'], $payslipQueryParams['candidate_id']);
+                                if (!empty($can_manage_all)) {
+                                    if ($target instanceof \App\Models\Employee) {
+                                        $payslipQueryParams['employee_id'] = $target->id;
+                                        unset($payslipQueryParams['candidate_id'], $payslipQueryParams['user_id']);
+                                    } elseif ($target instanceof \App\Models\Candidate) {
+                                        $payslipQueryParams['candidate_id'] = $target->id;
+                                        unset($payslipQueryParams['employee_id'], $payslipQueryParams['user_id']);
+                                    } elseif ($target instanceof \App\Models\User) {
+                                        $payslipQueryParams['user_id'] = $target->id;
+                                        unset($payslipQueryParams['employee_id'], $payslipQueryParams['candidate_id']);
+                                    }
+                                } else {
+                                    unset($payslipQueryParams['employee_id'], $payslipQueryParams['candidate_id'], $payslipQueryParams['user_id']);
                                 }
                                 $payslipQueryParams['month'] = $month;
                                 $payslipQueryParams['year'] = $year;
@@ -464,6 +497,35 @@
         const toDateInput = document.getElementById('toDateInput');
         const rangeContainers = document.querySelectorAll('.period-range-container');
         const monthContainers = document.querySelectorAll('.period-month-container');
+
+        const monthInput = document.getElementById('monthInput');
+        const yearInput = document.getElementById('yearInput');
+        const btnDownloadPdf = document.getElementById('btnDownloadPdf');
+        const btnPrintPreview = document.getElementById('btnPrintPreview');
+
+        function updateDownloadLinks() {
+            if (!monthInput || !yearInput) return;
+            const m = monthInput.value;
+            const y = yearInput.value;
+            if (!m || !y) return;
+
+            [btnDownloadPdf, btnPrintPreview].forEach(btn => {
+                if (!btn) return;
+                try {
+                    const url = new URL(btn.href, window.location.origin);
+                    url.searchParams.set('month', m);
+                    url.searchParams.set('year', y);
+                    btn.href = url.pathname + url.search;
+                } catch (e) {}
+            });
+        }
+
+        if (monthInput) {
+            monthInput.addEventListener('change', updateDownloadLinks);
+        }
+        if (yearInput) {
+            yearInput.addEventListener('change', updateDownloadLinks);
+        }
 
         function togglePeriodDisplay(type) {
             if (type === 'range') {
