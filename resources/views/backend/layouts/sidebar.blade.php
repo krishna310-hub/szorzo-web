@@ -903,7 +903,7 @@
                         <a href="{{ route('admin.petty-cash.index') }}"
                             class="nav-link menu-link {{ request()->is('admin/petty-cash*') ? 'active' : '' }}">
                             <i class="ri-wallet-3-line"></i>
-                            <span>Petition Amount</span>
+                            <span>PC Ledger</span>
                         </a>
                     </li>
                 @endif

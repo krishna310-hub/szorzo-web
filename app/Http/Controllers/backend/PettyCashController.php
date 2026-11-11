@@ -28,7 +28,7 @@ class PettyCashController extends Controller
             $user->isSuperAdmin()
         );
 
-        abort_unless($isAuthorized, 403, 'Unauthorized access. The Petty Cash (Petition Amount) module is restricted to administrators only.');
+        abort_unless($isAuthorized, 403, 'Unauthorized access. The PC Ledger module is restricted to administrators only.');
 
         PettyCash::ensureTableExists();
     }

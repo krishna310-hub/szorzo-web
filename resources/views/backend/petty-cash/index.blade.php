@@ -1,5 +1,5 @@
 @extends('backend.layouts.master')
-@section('title', 'Petition Amount (Petty Cash Ledger)')
+@section('title', 'PC Ledger')
 
 @push('style')
 <style>
@@ -124,7 +124,7 @@
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <div>
                             <h4 class="mb-sm-0 text-dark fw-bold">
-                                <i class="ri-wallet-3-line text-primary me-2"></i>Petition Amount (Petty Cash Ledger)
+                                <i class="ri-wallet-3-line text-primary me-2"></i>PC Ledger
                             </h4>
                             <p class="text-muted small mb-0 mt-1">
                                 Track Cash In (Fund Top-up) and Cash Out (Office Expenses) with automatic balance reduction.
@@ -458,7 +458,7 @@
                 <input type="hidden" name="transaction_type" value="credit">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title fw-bold" id="addFundsModalLabel">
-                        <i class="ri-add-circle-line me-1"></i> Add Funds (Petition Amount Top-up)
+                        <i class="ri-add-circle-line me-1"></i> Add Funds (PC Ledger Top-up)
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>

@@ -2013,7 +2013,7 @@
                 @endif
 
                 @if (!empty($showPettyCashCard) && $showPettyCashCard)
-                    <!-- ================= PETITION AMOUNT / PETTY CASH (ADMIN ONLY) ================= -->
+                    <!-- ================= PC LEDGER / PETTY CASH (ADMIN ONLY) ================= -->
                     <div class="card border-0 shadow-sm mb-4 mt-2" style="border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0 !important;">
                         <div class="card-body p-3 p-lg-4">
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -2023,7 +2023,7 @@
                                     </div>
                                     <div>
                                         <div class="d-flex align-items-center gap-2">
-                                            <h5 class="fw-bold mb-0 text-dark">Petition Amount (Petty Cash Ledger)</h5>
+                                            <h5 class="fw-bold mb-0 text-dark">PC Ledger</h5>
                                             <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0 fs-11 fw-semibold">
                                                 <i class="ri-shield-keyhole-line me-1"></i>Admin Only
                                             </span>
@@ -2227,7 +2227,7 @@
                         <input type="hidden" name="transaction_type" value="credit">
                         <div class="modal-header bg-success text-white">
                             <h5 class="modal-title fw-bold" id="dashAddFundsModalLabel">
-                                <i class="ri-add-circle-line me-1"></i> Add Funds (Petition Amount Top-up)
+                                <i class="ri-add-circle-line me-1"></i> Add Funds (PC Ledger Top-up)
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>

@@ -150,21 +150,21 @@ class LeaveRequestModuleTest extends TestCase
         $this->assertFalse($policy->create($extUser));
     }
 
-    public function test_dashboard_petition_amount_section_at_bottom(): void
+    public function test_dashboard_pc_ledger_section_at_bottom(): void
     {
         $baseDir = dirname(__DIR__, 2);
         $dashboardContent = file_get_contents($baseDir . '/resources/views/backend/index.blade.php');
 
-        // Confirm Petition Amount section is in the dashboard
-        $this->assertStringContainsString('Petition Amount (Petty Cash Ledger)', $dashboardContent);
+        // Confirm PC Ledger section is in the dashboard
+        $this->assertStringContainsString('PC Ledger', $dashboardContent);
 
-        // Verify that Petition Amount appears AFTER the monthlyRevenueBarChart (at bottom of dashboard)
+        // Verify that PC Ledger appears AFTER the monthlyRevenueBarChart (at bottom of dashboard)
         $chartPos = strpos($dashboardContent, 'monthlyRevenueBarChart');
-        $pettyPos = strpos($dashboardContent, 'Petition Amount (Petty Cash Ledger)');
+        $pettyPos = strpos($dashboardContent, 'PC Ledger');
 
         $this->assertNotFalse($chartPos);
         $this->assertNotFalse($pettyPos);
-        $this->assertGreaterThan($chartPos, $pettyPos, 'Petition Amount section should appear after charts at bottom of dashboard');
+        $this->assertGreaterThan($chartPos, $pettyPos, 'PC Ledger section should appear after charts at bottom of dashboard');
     }
 
     public function test_leave_views_contain_required_flows_and_reason_fields(): void
