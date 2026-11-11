@@ -47,11 +47,27 @@ class ClientReportFeatureTest extends TestCase
         $this->assertEquals('onboarded', $result1['type']);
         $this->assertEquals('Onboarded', $result1['stage']);
 
-        // Candidate with onboarding date
+        // Candidate with interview level containing 'Onboarded'
         $candidate2 = new Candidate();
-        $candidate2->setRawAttributes(['level_of_interview_id' => 10, 'onboarding_date' => '2026-08-01']);
+        $level2 = new InterviewLevel();
+        $level2->level = 'Onboarded with Client';
+        $candidate2->setRelation('interviewLevel', $level2);
         $result2 = $refMethod->invoke($controller, $candidate2);
         $this->assertEquals('onboarded', $result2['type']);
+
+        // Candidate with onboarding date but level is NOT 20 (e.g. Offer Released, L1, etc.) must NOT be onboarded
+        $candidate3 = new Candidate();
+        $candidate3->setRawAttributes(['level_of_interview_id' => 35, 'onboarding_date' => '2026-08-01', 'status' => 1]);
+        $result3 = $refMethod->invoke($controller, $candidate3);
+        $this->assertNotEquals('onboarded', $result3['type']);
+        $this->assertEquals('in_progress', $result3['type']);
+
+        // Inactive candidate with level 20 must NOT be onboarded
+        $candidate4 = new Candidate();
+        $candidate4->level_of_interview_id = 20;
+        $candidate4->status = false;
+        $result4 = $refMethod->invoke($controller, $candidate4);
+        $this->assertEquals('rejected', $result4['type']);
     }
 
     public function test_classify_candidate_status_rejections(): void

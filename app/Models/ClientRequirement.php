@@ -145,10 +145,8 @@ class ClientRequirement extends Model
     public function onboardedCandidates(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Candidate::class, 'client_requirement_id')
-            ->where(function ($query) {
-                $query->where('level_of_interview_id', 20)
-                    ->orWhereNotNull('onboarding_date');
-            });
+            ->where('level_of_interview_id', 20)
+            ->where('status', true);
     }
 
     /**

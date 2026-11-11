@@ -565,7 +565,7 @@ class ClientRequirementController extends Controller
             ->visibleTo($user)
             ->selectRaw('client_id,
                 COUNT(*) as total_candidates,
-                SUM(CASE WHEN level_of_interview_id = 20 OR onboarding_date IS NOT NULL THEN 1 ELSE 0 END) as onboarded_count')
+                SUM(CASE WHEN level_of_interview_id = 20 AND status = 1 THEN 1 ELSE 0 END) as onboarded_count')
             ->groupBy('client_id')
             ->get()
             ->keyBy('client_id');
@@ -579,11 +579,9 @@ class ClientRequirementController extends Controller
                     ->orWhere('status', false);
             })
             ->where(function ($q) {
-                $q->where(function ($onboardedCheck) {
-                    $onboardedCheck->whereNull('level_of_interview_id')
-                        ->orWhere('level_of_interview_id', '!=', 20);
-                })
-                ->whereNull('onboarding_date');
+                $q->whereNull('level_of_interview_id')
+                    ->orWhere('level_of_interview_id', '!=', 20)
+                    ->orWhere('status', false);
             })
             ->selectRaw('client_id, COUNT(*) as rejected_count')
             ->groupBy('client_id')
@@ -591,32 +589,54 @@ class ClientRequirementController extends Controller
             ->keyBy('client_id');
 
         // 4. Invoiced revenues aggregated by client
-        $revenueStats = Revenue::query()
-            ->selectRaw('client_id, SUM(COALESCE(service_amount, total_amount, 0)) as total_invoiced')
-            ->groupBy('client_id')
-            ->get()
-            ->keyBy('client_id');
+        $revenues = Revenue::query()->with(['candidate', 'candidates'])->get();
+        $invoicedAmountByClient = [];
+        $invoicedCandidateIdsByClient = [];
+        foreach ($revenues as $rev) {
+            $cid = $rev->client_id;
+            if (! $cid) {
+                continue;
+            }
+            $amount = (float) ($rev->service_amount ?: $rev->total_amount ?: 0);
+            $invoicedAmountByClient[$cid] = ($invoicedAmountByClient[$cid] ?? 0) + $amount;
+
+            if ($rev->candidate_id) {
+                $invoicedCandidateIdsByClient[$cid][] = (int) $rev->candidate_id;
+            }
+            if ($rev->candidates && $rev->candidates->isNotEmpty()) {
+                foreach ($rev->candidates as $cand) {
+                    $invoicedCandidateIdsByClient[$cid][] = (int) $cand->id;
+                }
+            }
+        }
 
         // 5. Calculate placement revenue from onboarded candidates
         $onboardedCandidates = Candidate::query()
             ->visibleTo($user)
-            ->with(['clientRequirement.billing', 'client.billing'])
-            ->where(function ($q) {
-                $q->where('level_of_interview_id', 20)
-                    ->orWhereNotNull('onboarding_date');
-            })
-            ->get(['id', 'client_id', 'client_requirement_id', 'onboarding_ctc', 'expected_ctc']);
+            ->with(['clientRequirement.billing', 'client.billing', 'client'])
+            ->where('level_of_interview_id', 20)
+            ->where('status', true)
+            ->get(['id', 'client_id', 'client_requirement_id', 'mode_id', 'onboarding_ctc', 'expected_ctc']);
 
         $placementRevenueByClient = [];
+        $uninvoicedPlacementByClient = [];
         foreach ($onboardedCandidates as $cand) {
-            $cid = $cand->client_id;
+            $cid = $cand->client_id ?: $cand->clientRequirement?->client_id;
             if (! $cid) {
+                continue;
+            }
+            if (str_contains(mb_strtolower((string) $cand->client?->client), 'szorzo')) {
                 continue;
             }
             $pct = (float) ($cand->clientRequirement?->billing?->value ?? $cand->client?->billing?->value ?? 0);
             $ctc = (float) ($cand->onboarding_ctc ?: $cand->expected_ctc ?: 0);
             $rev = round(($ctc * $pct) / 100, 2);
             $placementRevenueByClient[$cid] = ($placementRevenueByClient[$cid] ?? 0) + $rev;
+
+            $isInvoiced = in_array((int) $cand->id, $invoicedCandidateIdsByClient[$cid] ?? [], true);
+            if (! $isInvoiced) {
+                $uninvoicedPlacementByClient[$cid] = ($uninvoicedPlacementByClient[$cid] ?? 0) + $rev;
+            }
         }
 
         $clientsQuery = Client::query()->with(['location', 'division', 'billing'])->latest();
@@ -668,10 +688,11 @@ class ClientRequirementController extends Controller
                 $rejected = (int) ($rejectedStats->get($client->id)->rejected_count ?? 0);
                 return '<span class="badge bg-danger-subtle text-danger fw-semibold fs-6">'.$rejected.'</span>';
             })
-            ->addColumn('revenue_generated', function ($client) use ($revenueStats, $placementRevenueByClient) {
-                $invoiced = (float) ($revenueStats->get($client->id)->total_invoiced ?? 0);
+            ->addColumn('revenue_generated', function ($client) use ($invoicedAmountByClient, $placementRevenueByClient, $uninvoicedPlacementByClient) {
+                $invoiced = (float) ($invoicedAmountByClient[$client->id] ?? 0);
                 $placement = (float) ($placementRevenueByClient[$client->id] ?? 0);
-                $total = max($invoiced, $placement);
+                $uninvoiced = (float) ($uninvoicedPlacementByClient[$client->id] ?? 0);
+                $total = max($invoiced + $uninvoiced, $placement);
                 return '<span class="fw-bold text-success fs-6">₹'.number_format($total, 2).'</span>';
             })
             ->editColumn('status', function ($client) {
@@ -765,6 +786,8 @@ class ClientRequirementController extends Controller
             ->latest()
             ->get();
 
+        $isSzorzoClient = str_contains(mb_strtolower((string) $client->client), 'szorzo');
+
         foreach ($candidates as $cand) {
             $statusInfo = $this->classifyCandidateStatus($cand);
             $cand->status_type = $statusInfo['type'];
@@ -778,11 +801,14 @@ class ClientRequirementController extends Controller
                 ?? $client->billing?->value
                 ?? 0
             );
-            $ctc = (float) ($cand->onboarding_ctc ?: $cand->expected_ctc ?: 0);
-            $calcRev = round(($ctc * $billingPct) / 100, 2);
-            if ($calcRev <= 0 && $cand->clientRequirement?->revenue_amount) {
-                $calcRev = (float) $cand->clientRequirement->revenue_amount;
+
+            // Revenue is only generated if candidate is genuinely onboarded and not internal szorzo hire
+            $calcRev = 0.0;
+            if ($cand->status_type === 'onboarded' && ! $isSzorzoClient) {
+                $ctc = (float) ($cand->onboarding_ctc ?: $cand->expected_ctc ?: 0);
+                $calcRev = round(($ctc * $billingPct) / 100, 2);
             }
+
             $cand->calculated_revenue = $calcRev;
             $cand->billing_percentage = $billingPct;
         }
@@ -889,10 +915,24 @@ class ClientRequirementController extends Controller
             ? ($candidate->interviewLevel?->level ?? '')
             : '';
         $levelName = mb_strtolower((string) $rawLevelName);
+        $levelId = (int) $candidate->level_of_interview_id;
 
-        $isOnboarded = (int) $candidate->level_of_interview_id === 20
-            || ! empty($candidate->onboarding_date)
-            || str_contains($levelName, 'onboard');
+        // Inactive candidates are classified as dropped / inactive
+        if ($candidate->status === false) {
+            return [
+                'type' => 'rejected',
+                'stage' => 'Inactive',
+                'category' => 'Dropped / Inactive',
+                'badge' => 'bg-dark-subtle text-dark',
+                'reason' => $candidate->reason_for_change ?: ($rawLevelName ?: 'Candidate inactive'),
+            ];
+        }
+
+        // Onboarded check: ONLY when level is specifically Onboarded with Client (ID 20)
+        // or level text explicitly indicates onboarded (and not declined/rejected)
+        $isOnboarded = ($levelId === 20 || str_contains($levelName, 'onboarded'))
+            && ! str_contains($levelName, 'reject')
+            && ! str_contains($levelName, 'decline');
 
         if ($isOnboarded) {
             return [
@@ -904,7 +944,6 @@ class ClientRequirementController extends Controller
             ];
         }
 
-        $levelId = (int) $candidate->level_of_interview_id;
         $hasRejectedSchedule = $candidate->relationLoaded('interviewSchedules')
             ? ($candidate->interviewSchedules?->contains(fn ($s) => strtolower((string) $s->status) === 'rejected') ?? false)
             : false;
