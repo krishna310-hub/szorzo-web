@@ -332,4 +332,99 @@ class AttendanceWorkHoursAndPayslipCompletionTest extends TestCase
         $this->assertSame(0.0, (float) $data['deductions']['pf']['actual']);
         $this->assertStringContainsString('Salary details not updated', $data['remarks']);
     }
+
+    /**
+     * Test 12: Leave dates (status = on_leave or with leave_request_id) do not calculate required hours.
+     * "and dont calculate leave date give correctly check once calculation"
+     */
+    public function test_leave_dates_do_not_calculate_required_hours(): void
+    {
+        // 1 present day (8h), 1 half day (4h), 1 leave day (0h), 1 week off (0h)
+        $emp = new Employee(['id' => 20, 'employee_no' => 'SZ 020', 'employee_name' => 'Leave Staff', 'date_of_joining' => '2026-11-01']);
+        $user = new User(['id' => 20, 'name' => 'Leave Staff', 'email' => 'leave@example.com']);
+        $user->setRelation('employee', $emp);
+
+        $attPresent = new Attendance([
+            'attendance_date' => CarbonImmutable::parse('2026-11-02'),
+            'status' => 'present',
+            'check_in' => '09:00:00',
+            'check_out' => '17:00:00',
+            'total_work_seconds' => 28800,
+        ]);
+        $attLeave = new Attendance([
+            'attendance_date' => CarbonImmutable::parse('2026-11-03'),
+            'status' => 'on_leave',
+            'leave_request_id' => 99,
+            'total_work_seconds' => 0,
+        ]);
+        $attHalfDay = new Attendance([
+            'attendance_date' => CarbonImmutable::parse('2026-11-04'),
+            'status' => 'half_day',
+            'check_in' => '09:00:00',
+            'check_out' => '13:00:00',
+            'total_work_seconds' => 14400,
+        ]);
+        $attWeekOff = new Attendance([
+            'attendance_date' => CarbonImmutable::parse('2026-11-08'),
+            'status' => 'week_off',
+            'total_work_seconds' => 0,
+        ]);
+
+        $user->setRelation('attendances', collect([$attPresent, $attLeave, $attHalfDay, $attWeekOff]));
+        $user->setRelation('employee', $emp);
+
+        $export = new AttendanceMonthlyExport(collect([$user]), [2, 3, 4, 8], 11, 2026);
+        $row = $export->map($user);
+
+        // Worked: 8h + 4h = 12h
+        // Required: 8h (present) + 4h (half day) + 0h (leave) + 0h (week off) = 12h
+        // Leave date is NOT calculated!
+        $this->assertContains('12h / 12h', $row);
+    }
+
+    /**
+     * Test 13: Dates before the employee's first attendance date do not calculate required hours.
+     * "attendance only get start first attendance date to calculate hours"
+     */
+    public function test_dates_before_first_attendance_date_do_not_calculate_required_hours(): void
+    {
+        // Employee joined / first attended on 2026-11-09
+        $emp = new Employee(['id' => 30, 'employee_no' => 'SZ 030', 'employee_name' => 'Late Joiner', 'date_of_joining' => '2026-11-09']);
+        $user = new User(['id' => 30, 'name' => 'Late Joiner', 'email' => 'late@example.com']);
+        $user->setRelation('employee', $emp);
+
+        // Pre-joining uncommenced date marked absent/unmarked before first attendance date
+        $attBefore = new Attendance([
+            'attendance_date' => CarbonImmutable::parse('2026-11-02'),
+            'status' => 'absent',
+            'total_work_seconds' => 0,
+        ]);
+        // First attendance date: Nov 09 (Present, 8h)
+        $attFirst = new Attendance([
+            'attendance_date' => CarbonImmutable::parse('2026-11-09'),
+            'status' => 'present',
+            'check_in' => '09:00:00',
+            'check_out' => '17:00:00',
+            'total_work_seconds' => 28800,
+        ]);
+        // Nov 10 (Present, 8h)
+        $attSecond = new Attendance([
+            'attendance_date' => CarbonImmutable::parse('2026-11-10'),
+            'status' => 'present',
+            'check_in' => '09:00:00',
+            'check_out' => '17:00:00',
+            'total_work_seconds' => 28800,
+        ]);
+
+        $user->setRelation('attendances', collect([$attBefore, $attFirst, $attSecond]));
+        $user->setRelation('employee', $emp);
+
+        $export = new AttendanceMonthlyExport(collect([$user]), [2, 9, 10], 11, 2026);
+        $row = $export->map($user);
+
+        // Worked: 8h + 8h = 16h
+        // Required: 0h (Nov 2 before first attendance) + 8h (Nov 9) + 8h (Nov 10) = 16h
+        // Pre-start date is NOT calculated!
+        $this->assertContains('16h / 16h', $row);
+    }
 }

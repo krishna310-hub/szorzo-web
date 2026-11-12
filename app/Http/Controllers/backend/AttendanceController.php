@@ -200,6 +200,62 @@ class AttendanceController extends Controller
         // Fetch all matching records across filtered dates to calculate accurate totals (not just first 50 paginated rows)
         $allFilteredRecords = (clone $query)->get();
 
+        // Resolve first attendance date per user / employee
+        // Rule: Only calculate required hours starting from the employee's first attendance date!
+        $userFirstDates = [];
+        $employeeFirstDates = [];
+
+        try {
+            $userFirstDates = Attendance::where(function ($q) {
+                    $q->whereIn('status', ['present', 'half_day'])
+                      ->orWhereNotNull('check_in')
+                      ->orWhere('total_work_seconds', '>', 0);
+                })
+                ->whereNotNull('user_id')
+                ->selectRaw('user_id, MIN(attendance_date) as first_date')
+                ->groupBy('user_id')
+                ->pluck('first_date', 'user_id')
+                ->all();
+
+            $employeeFirstDates = Attendance::where(function ($q) {
+                    $q->whereIn('status', ['present', 'half_day'])
+                      ->orWhereNotNull('check_in')
+                      ->orWhere('total_work_seconds', '>', 0);
+                })
+                ->whereNotNull('employee_id')
+                ->selectRaw('employee_id, MIN(attendance_date) as first_date')
+                ->groupBy('employee_id')
+                ->pluck('first_date', 'employee_id')
+                ->all();
+        } catch (\Throwable $e) {}
+
+        $recordsGrouped = $allFilteredRecords->groupBy(fn ($r) => $r->user_id ? 'u_' . $r->user_id : ('e_' . $r->employee_id));
+        $resolvedFirstDates = [];
+
+        foreach ($recordsGrouped as $k => $recs) {
+            $sample = $recs->first();
+            $fDate = null;
+            if ($sample->user_id && isset($userFirstDates[$sample->user_id])) {
+                $fDate = $userFirstDates[$sample->user_id];
+            } elseif ($sample->employee_id && isset($employeeFirstDates[$sample->employee_id])) {
+                $fDate = $employeeFirstDates[$sample->employee_id];
+            }
+
+            $empObj = $sample->employee ?? $sample->user?->linkedEmployee();
+            $joinDate = $empObj?->date_of_joining ? \Carbon\Carbon::parse($empObj->date_of_joining)->toDateString() : null;
+
+            if ($joinDate) {
+                $fDate = $fDate ? min($fDate, $joinDate) : $joinDate;
+            }
+
+            if (!$fDate) {
+                $activeRec = $recs->filter(fn ($r) => !empty($r->check_in) || in_array($r->status, ['present', 'half_day'], true) || $r->current_work_seconds > 0)->sortBy('attendance_date')->first();
+                $fDate = $activeRec?->attendance_date?->toDateString() ?? $recs->sortBy('attendance_date')->first()?->attendance_date?->toDateString();
+            }
+
+            $resolvedFirstDates[$k] = $fDate;
+        }
+
         $totalWorkSeconds = 0;
         $totalRequiredSeconds = 0;
         $totalBreakSeconds = 0;
@@ -212,14 +268,26 @@ class AttendanceController extends Controller
             $totalBreakSeconds += $rec->break_seconds;
             $totalLunchSeconds += $rec->lunch_seconds;
 
-            // Standard daily required work hours: 8 hours (28,800s) for normal days, 4 hours (14,400s) for half day, 0 for off days
+            $empKey = $rec->user_id ? 'u_' . $rec->user_id : ('e_' . $rec->employee_id);
+            $empFirstDate = $resolvedFirstDates[$empKey] ?? null;
+
+            $recDate = $rec->attendance_date instanceof \Carbon\CarbonInterface
+                ? $rec->attendance_date->toDateString()
+                : substr((string) $rec->attendance_date, 0, 10);
+
+            // Calculation Rules:
+            // 1. Only start calculating required hours from the employee's first attendance date
+            // 2. Do NOT calculate required hours for leave dates (status === 'on_leave' or approved leave request)
+            // 3. Do NOT calculate required hours for week offs or holidays
+            $isBeforeFirstDate = $empFirstDate && ($recDate < $empFirstDate);
+            $isLeaveDate = ($rec->status === 'on_leave') || !empty($rec->leave_request_id);
+            $isOffDay = in_array($rec->status, ['week_off', 'holiday'], true);
+
             $dayReqSecs = 0;
-            if (!in_array($rec->status, ['week_off', 'holiday'], true)) {
+            if (!$isBeforeFirstDate && !$isLeaveDate && !$isOffDay) {
                 $dayReqSecs = ($rec->status === 'half_day') ? (4 * 3600) : (8 * 3600);
             }
             $totalRequiredSeconds += $dayReqSecs;
-
-            $empKey = $rec->user_id ? 'u_' . $rec->user_id : ('e_' . $rec->employee_id);
             if (!isset($employeeTotals[$empKey])) {
                 $employeeTotals[$empKey] = [
                     'employee_id' => $rec->employee_id,
