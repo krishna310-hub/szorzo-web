@@ -80,6 +80,11 @@ class AttendanceController extends Controller
 
                 if (!empty($values['check_out'])) {
                     $saveValues['timer_status'] = Attendance::TIMER_COMPLETED;
+                    if (!empty($values['check_in'])) {
+                        $grossSecs = max(0, (int) \Carbon\Carbon::parse($data['attendance_date'] . ' ' . $values['check_in'])->diffInSeconds(\Carbon\Carbon::parse($data['attendance_date'] . ' ' . $values['check_out']), false));
+                        $breakSecs = $attendance ? $attendance->combined_break_seconds : 0;
+                        $saveValues['total_work_seconds'] = max(0, $grossSecs - $breakSecs);
+                    }
                 } elseif (!empty($values['check_in']) && (!$attendance || $attendance->timer_status === Attendance::TIMER_NOT_STARTED)) {
                     $saveValues['timer_status'] = Attendance::TIMER_RUNNING;
                 }
@@ -103,6 +108,13 @@ class AttendanceController extends Controller
 
         if (!empty($data['check_out'])) {
             $data['timer_status'] = Attendance::TIMER_COMPLETED;
+            $inTime = $data['check_in'] ?? $attendance->check_in;
+            if (!empty($inTime)) {
+                $attDate = $attendance->attendance_date?->toDateString() ?? now()->toDateString();
+                $grossSecs = max(0, (int) \Carbon\Carbon::parse($attDate . ' ' . $inTime)->diffInSeconds(\Carbon\Carbon::parse($attDate . ' ' . $data['check_out']), false));
+                $breakSecs = $attendance->combined_break_seconds;
+                $data['total_work_seconds'] = max(0, $grossSecs - $breakSecs);
+            }
         } elseif (!empty($data['check_in']) && $attendance->timer_status === Attendance::TIMER_NOT_STARTED) {
             $data['timer_status'] = Attendance::TIMER_RUNNING;
         }
@@ -165,18 +177,18 @@ class AttendanceController extends Controller
     public function report(Request $request)
     {
         $this->authorize('read', Attendance::class);
-        [$records,$filters,$users,$summary,$timeMetrics]=$this->reportRecords($request,true);
-        return view('backend.attendance.report',compact('records','filters','users','summary','timeMetrics'));
+        [$records,$filters,$users,$summary,$timeMetrics,$employeeTotals]=$this->reportRecords($request,true);
+        return view('backend.attendance.report',compact('records','filters','users','summary','timeMetrics','employeeTotals'));
     }
 
     public function export(Request $request,string $format)
     {
         $this->authorize('export', Attendance::class);
         abort_unless(in_array($format,['csv','xlsx','pdf','print'],true),404);
-        [$records,$filters,$users,$summary,$timeMetrics]=$this->reportRecords($request,false); $name='attendance-report-'.now()->format('Ymd-His');
-        if ($format==='pdf') return Pdf::loadView('backend.attendance.pdf',compact('records','filters','timeMetrics'))->setPaper('a4','landscape')->download($name.'.pdf');
-        if ($format==='print') return view('backend.attendance.pdf',compact('records','filters','timeMetrics')+['print'=>true]);
-        return Excel::download(new AttendanceReportExport($records),$name.'.'.$format, $format==='csv'?\Maatwebsite\Excel\Excel::CSV:\Maatwebsite\Excel\Excel::XLSX);
+        [$records,$filters,$users,$summary,$timeMetrics,$employeeTotals]=$this->reportRecords($request,false); $name='attendance-report-'.now()->format('Ymd-His');
+        if ($format==='pdf') return Pdf::loadView('backend.attendance.pdf',compact('records','filters','timeMetrics','employeeTotals'))->setPaper('a4','landscape')->download($name.'.pdf');
+        if ($format==='print') return view('backend.attendance.pdf',compact('records','filters','timeMetrics','employeeTotals')+['print'=>true]);
+        return Excel::download(new AttendanceReportExport($records,$employeeTotals),$name.'.'.$format, $format==='csv'?\Maatwebsite\Excel\Excel::CSV:\Maatwebsite\Excel\Excel::XLSX);
     }
 
     private function reportRecords(Request $request,bool $paginate): array
@@ -184,17 +196,76 @@ class AttendanceController extends Controller
         $filters=$request->validate(['from_date'=>['nullable','date_format:Y-m-d'],'to_date'=>['nullable','date_format:Y-m-d','after_or_equal:from_date'],'month'=>['nullable','integer','between:1,12'],'year'=>['nullable','integer','between:2000,2100'],'user_id'=>['nullable','integer'],'status'=>['nullable','in:'.implode(',',Attendance::STATUSES)]]);
         $query=Attendance::eligible()->with(['user','employee','leaveRequest'])->when($filters['user_id']??null,fn($q,$v)=>$q->where('user_id',$v))->when($filters['status']??null,fn($q,$v)=>$q->where('status',$v))->when($filters['from_date']??null,fn($q,$v)=>$q->whereDate('attendance_date','>=',$v))->when($filters['to_date']??null,fn($q,$v)=>$q->whereDate('attendance_date','<=',$v))->when($filters['month']??null,fn($q,$v)=>$q->whereMonth('attendance_date',$v))->when($filters['year']??null,fn($q,$v)=>$q->whereYear('attendance_date',$v))->latest('attendance_date')->latest('id');
         $summary=(clone $query)->reorder()->selectRaw('status, COUNT(*) total')->groupBy('status')->pluck('total','status');
-        $records=$paginate?$query->paginate(50)->withQueryString():$query->get();
+
+        // Fetch all matching records across filtered dates to calculate accurate totals (not just first 50 paginated rows)
+        $allFilteredRecords = (clone $query)->get();
 
         $totalWorkSeconds = 0;
         $totalBreakSeconds = 0;
         $totalLunchSeconds = 0;
+        $employeeTotals = [];
 
-        foreach ($records as $rec) {
-            $totalWorkSeconds += $rec->current_work_seconds ?: ($rec->working_minutes * 60);
+        foreach ($allFilteredRecords as $rec) {
+            $workSecs = $rec->current_work_seconds;
+            $totalWorkSeconds += $workSecs;
             $totalBreakSeconds += $rec->break_seconds;
             $totalLunchSeconds += $rec->lunch_seconds;
+
+            $empKey = $rec->user_id ? 'u_' . $rec->user_id : ('e_' . $rec->employee_id);
+            if (!isset($employeeTotals[$empKey])) {
+                $employeeTotals[$empKey] = [
+                    'employee_id' => $rec->employee_id,
+                    'user_id' => $rec->user_id,
+                    'name' => $rec->display_name,
+                    'employee_no' => $rec->employee_no,
+                    'email' => $rec->user?->email ?? $rec->employee?->official_mail ?? '—',
+                    'total_work_seconds' => 0,
+                    'total_break_seconds' => 0,
+                    'total_lunch_seconds' => 0,
+                    'total_combined_seconds' => 0,
+                    'total_records' => 0,
+                    'present_count' => 0,
+                    'half_day_count' => 0,
+                    'absent_count' => 0,
+                    'leave_count' => 0,
+                    'holiday_count' => 0,
+                    'week_off_count' => 0,
+                ];
+            }
+            $employeeTotals[$empKey]['total_work_seconds'] += $workSecs;
+            $employeeTotals[$empKey]['total_break_seconds'] += $rec->break_seconds;
+            $employeeTotals[$empKey]['total_lunch_seconds'] += $rec->lunch_seconds;
+            $employeeTotals[$empKey]['total_combined_seconds'] += $rec->combined_break_seconds;
+            $employeeTotals[$empKey]['total_records']++;
+
+            if ($rec->status === 'present') {
+                $employeeTotals[$empKey]['present_count']++;
+            } elseif ($rec->status === 'half_day') {
+                $employeeTotals[$empKey]['half_day_count']++;
+            } elseif ($rec->status === 'absent') {
+                $employeeTotals[$empKey]['absent_count']++;
+            } elseif ($rec->status === 'on_leave') {
+                $employeeTotals[$empKey]['leave_count']++;
+            } elseif ($rec->status === 'holiday') {
+                $employeeTotals[$empKey]['holiday_count']++;
+            } elseif ($rec->status === 'week_off') {
+                $employeeTotals[$empKey]['week_off_count']++;
+            }
         }
+
+        foreach ($employeeTotals as &$emp) {
+            $emp['formatted_work_time'] = Attendance::formatSecondsToTime($emp['total_work_seconds']);
+            $emp['formatted_work_human'] = Attendance::formatSecondsHuman($emp['total_work_seconds']);
+            $emp['formatted_break_human'] = Attendance::formatSecondsHuman($emp['total_break_seconds']);
+            $emp['formatted_lunch_human'] = Attendance::formatSecondsHuman($emp['total_lunch_seconds']);
+            $emp['formatted_combined_break_human'] = Attendance::formatSecondsHuman($emp['total_combined_seconds']);
+            $workDays = $emp['present_count'] + ($emp['half_day_count'] * 0.5);
+            $emp['avg_daily_work_seconds'] = $workDays > 0 ? (int) round($emp['total_work_seconds'] / $workDays) : 0;
+            $emp['avg_daily_work_formatted'] = Attendance::formatSecondsHuman($emp['avg_daily_work_seconds']);
+        }
+        unset($emp);
+
+        $records = $paginate ? $query->paginate(50)->withQueryString() : $allFilteredRecords;
 
         $timeMetrics = [
             'total_work_seconds' => $totalWorkSeconds,
@@ -207,6 +278,6 @@ class AttendanceController extends Controller
             'total_combined_break_formatted' => Attendance::formatSecondsHuman($totalBreakSeconds + $totalLunchSeconds),
         ];
 
-        return [$records,$filters,User::eligibleForAttendance()->orderBy('name')->get(['id','name']),$summary,$timeMetrics];
+        return [$records,$filters,User::eligibleForAttendance()->orderBy('name')->get(['id','name']),$summary,$timeMetrics,$employeeTotals];
     }
 }

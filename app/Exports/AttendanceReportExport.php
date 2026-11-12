@@ -5,7 +5,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 class AttendanceReportExport implements FromCollection, WithHeadings, WithMapping {
-    public function __construct(private Collection $records) {}
+    public function __construct(private Collection $records, private array $employeeTotals = []) {}
     public function collection(): Collection { return $this->records; }
     public function headings(): array
     {
@@ -19,6 +19,7 @@ class AttendanceReportExport implements FromCollection, WithHeadings, WithMappin
             'Check In',
             'Check Out',
             'Working Hours',
+            'Employee Filtered Total Hours',
             'Break Time (Tea)',
             'Lunch Time',
             'Total Break Time',
@@ -29,6 +30,9 @@ class AttendanceReportExport implements FromCollection, WithHeadings, WithMappin
 
     public function map($row): array
     {
+        $empKey = $row->user_id ? 'u_' . $row->user_id : ('e_' . $row->employee_id);
+        $filteredTotal = isset($this->employeeTotals[$empKey]) ? $this->employeeTotals[$empKey]['formatted_work_time'] : '—';
+
         return [
             $row->attendance_date ? $row->attendance_date->format('Y-m-d') : '',
             $row->employee_no ?? '—',
@@ -39,6 +43,7 @@ class AttendanceReportExport implements FromCollection, WithHeadings, WithMappin
             $row->check_in ? substr((string) $row->check_in, 0, 5) : '—',
             $row->check_out ? substr((string) $row->check_out, 0, 5) : '—',
             $row->formatted_work_time,
+            $filteredTotal,
             $row->formatted_break_time,
             $row->formatted_lunch_time,
             $row->formatted_total_break_time,

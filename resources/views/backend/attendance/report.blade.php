@@ -138,6 +138,89 @@
                 </div>
             </div>
 
+            <!-- Employees Total Hours Summary (Filtered Dates) -->
+            @if(!empty($employeeTotals) && count($employeeTotals) > 0)
+                <div class="card atl-card mb-4 border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="mb-0 text-dark">
+                                <i class="ri-user-star-line text-primary me-1"></i> Employees Total Hours Summary
+                            </h5>
+                            <small class="text-muted">
+                                Total calculated hours strictly for filtered dates only
+                                @if(!empty($filters['from_date']) && !empty($filters['to_date']))
+                                    ({{ \Carbon\Carbon::parse($filters['from_date'])->format('d M Y') }} &ndash; {{ \Carbon\Carbon::parse($filters['to_date'])->format('d M Y') }})
+                                @endif
+                                &bull; {{ count($employeeTotals) }} {{ Str::plural('employee', count($employeeTotals)) }}
+                            </small>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-12 fw-semibold">
+                            Grand Total: {{ $timeMetrics['total_work_formatted'] ?? '0m' }}
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Employee Name</th>
+                                    <th class="text-center">Present / Half Days</th>
+                                    <th>Total Work Hours</th>
+                                    <th>Total Break (Tea)</th>
+                                    <th>Total Lunch</th>
+                                    <th>Combined Break</th>
+                                    <th>Avg Daily Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($employeeTotals as $empKey => $emp)
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-light text-dark border font-monospace">{{ $emp['employee_no'] ?: '—' }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ $emp['name'] }}</div>
+                                            <small class="text-muted">{{ $emp['email'] }}</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success-subtle text-success me-1">{{ $emp['present_count'] }} P</span>
+                                            @if($emp['half_day_count'] > 0)
+                                                <span class="badge bg-warning-subtle text-warning me-1">{{ $emp['half_day_count'] }} HD</span>
+                                            @endif
+                                            @if($emp['absent_count'] > 0)
+                                                <span class="badge bg-danger-subtle text-danger me-1">{{ $emp['absent_count'] }} A</span>
+                                            @endif
+                                            @if($emp['leave_count'] > 0)
+                                                <span class="badge bg-info-subtle text-info">{{ $emp['leave_count'] }} L</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="font-monospace fw-bold fs-14 text-success">{{ $emp['formatted_work_time'] }}</div>
+                                            <small class="badge bg-success-subtle text-success">{{ $emp['formatted_work_human'] }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="font-monospace text-warning fw-semibold">{{ \App\Models\Attendance::formatSecondsToTime($emp['total_break_seconds']) }}</div>
+                                            <small class="text-muted">{{ $emp['formatted_break_human'] }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="font-monospace text-info fw-semibold">{{ \App\Models\Attendance::formatSecondsToTime($emp['total_lunch_seconds']) }}</div>
+                                            <small class="text-muted">{{ $emp['formatted_lunch_human'] }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="font-monospace text-primary fw-semibold">{{ \App\Models\Attendance::formatSecondsToTime($emp['total_combined_seconds']) }}</div>
+                                            <small class="text-muted">{{ $emp['formatted_combined_break_human'] }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border font-monospace">{{ $emp['avg_daily_work_formatted'] }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
             <!-- Detailed Attendance Table -->
             <div class="card atl-card">
                 <div class="card-header bg-transparent border-bottom py-3">
@@ -154,6 +237,7 @@
                                 <th>Check In</th>
                                 <th>Check Out</th>
                                 <th>Work Hours</th>
+                                <th>Emp Total (Filtered)</th>
                                 <th>Break Time</th>
                                 <th>Lunch Time</th>
                                 <th>Total Break</th>
@@ -215,6 +299,20 @@
                                     <td>
                                         <div class="font-monospace fw-semibold text-dark">{{ $a->formatted_work_time }}</div>
                                         <small class="text-muted">{{ \App\Models\Attendance::formatSecondsHuman($a->current_work_seconds ?: ($a->working_minutes * 60)) }}</small>
+                                    </td>
+
+                                    <!-- Employee Total Hours (Filtered Range) -->
+                                    <td>
+                                        @php
+                                            $empKey = $a->user_id ? 'u_' . $a->user_id : ('e_' . $a->employee_id);
+                                            $empTot = $employeeTotals[$empKey] ?? null;
+                                        @endphp
+                                        @if($empTot)
+                                            <div class="font-monospace fw-bold text-primary">{{ $empTot['formatted_work_time'] }}</div>
+                                            <small class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $empTot['formatted_work_human'] }}</small>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
                                     </td>
 
                                     <!-- Break Time (Tea) -->
@@ -304,13 +402,40 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="12" class="text-center py-5 text-muted">
+                                    <td colspan="13" class="text-center py-5 text-muted">
                                         <i class="ri-file-search-line fs-2 d-block mb-2 text-secondary"></i>
                                         No attendance records match the selected filters.
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
+                        @if($records->isNotEmpty())
+                            <tfoot class="table-light border-top border-2">
+                                <tr>
+                                    <th colspan="6" class="text-end fw-bold">Filtered Dates Total:</th>
+                                    <th class="font-monospace text-dark">
+                                        <div>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_work_seconds'] ?? 0) }}</div>
+                                        <small class="badge bg-success-subtle text-success">{{ $timeMetrics['total_work_formatted'] ?? '0m' }}</small>
+                                    </th>
+                                    <th class="font-monospace text-primary">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $timeMetrics['total_work_formatted'] ?? '0m' }}</span>
+                                    </th>
+                                    <th class="font-monospace text-warning">
+                                        <div>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_break_seconds'] ?? 0) }}</div>
+                                        <small class="text-muted">{{ $timeMetrics['total_break_formatted'] ?? '0m' }}</small>
+                                    </th>
+                                    <th class="font-monospace text-info">
+                                        <div>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_lunch_seconds'] ?? 0) }}</div>
+                                        <small class="text-muted">{{ $timeMetrics['total_lunch_formatted'] ?? '0m' }}</small>
+                                    </th>
+                                    <th class="font-monospace text-primary">
+                                        <div>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_combined_seconds'] ?? 0) }}</div>
+                                        <small class="text-muted">{{ $timeMetrics['total_combined_break_formatted'] ?? '0m' }}</small>
+                                    </th>
+                                    <th colspan="2"></th>
+                                </tr>
+                            </tfoot>
+                        @endif
                     </table>
                 </div>
                 @if($records->hasPages())

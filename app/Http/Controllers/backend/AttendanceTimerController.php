@@ -254,6 +254,17 @@ class AttendanceTimerController extends Controller
         $attendance->check_out = now()->format('H:i:s');
         $attendance->timer_started_at = null;
         $attendance->break_started_at = null;
+
+        // Reconcile total_work_seconds with check-in/out net duration to prevent undercounting
+        if ($attendance->check_in && $attendance->check_out) {
+            $attDate = $attendance->attendance_date?->toDateString() ?? $date;
+            $grossSecs = max(0, (int) Carbon::parse($attDate . ' ' . $attendance->check_in)->diffInSeconds(Carbon::parse($attDate . ' ' . $attendance->check_out), false));
+            $netCheckSecs = max(0, $grossSecs - $attendance->combined_break_seconds);
+            if ((int) $attendance->total_work_seconds <= 0 || ($netCheckSecs - (int) $attendance->total_work_seconds) > 1800) {
+                $attendance->total_work_seconds = $netCheckSecs;
+            }
+        }
+
         $attendance->save();
 
         return response()->json([
@@ -421,6 +432,16 @@ class AttendanceTimerController extends Controller
             $attendance->check_out = $request->input('check_out', now()->format('H:i:s'));
             $attendance->timer_started_at = null;
             $attendance->break_started_at = null;
+
+            if ($attendance->check_in && $attendance->check_out) {
+                $attDate = $attendance->attendance_date?->toDateString() ?? $date;
+                $grossSecs = max(0, (int) Carbon::parse($attDate . ' ' . $attendance->check_in)->diffInSeconds(Carbon::parse($attDate . ' ' . $attendance->check_out), false));
+                $netCheckSecs = max(0, $grossSecs - $attendance->combined_break_seconds);
+                if ((int) $attendance->total_work_seconds <= 0 || ($netCheckSecs - (int) $attendance->total_work_seconds) > 1800) {
+                    $attendance->total_work_seconds = $netCheckSecs;
+                }
+            }
+
             $attendance->save();
 
             $msg = "Attendance closed for {$employee->employee_name} ({$employee->employee_no}).";
@@ -446,6 +467,13 @@ class AttendanceTimerController extends Controller
 
             if ($request->has('total_break_minutes')) {
                 $attendance->total_break_seconds = ((int) $request->input('total_break_minutes')) * 60;
+            }
+
+            if ($attendance->check_in && $attendance->check_out) {
+                $attDate = $attendance->attendance_date?->toDateString() ?? $date;
+                $grossSecs = max(0, (int) Carbon::parse($attDate . ' ' . $attendance->check_in)->diffInSeconds(Carbon::parse($attDate . ' ' . $attendance->check_out), false));
+                $netCheckSecs = max(0, $grossSecs - $attendance->combined_break_seconds);
+                $attendance->total_work_seconds = $netCheckSecs;
             }
 
             $attendance->save();

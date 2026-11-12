@@ -66,6 +66,7 @@
                                 <th>WO</th>
                                 <th>UM</th>
                                 <th>Working</th>
+                                <th>Total Hours</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -99,7 +100,8 @@
                                     <td>{{ $totals['holiday'] ?? 0 }}</td>
                                     <td>{{ $totals['week_off'] ?? 0 }}</td>
                                     <td>{{ $unmarked }}</td>
-                                    <td>{{ ($totals['present'] ?? 0) + ($totals['absent'] ?? 0) + ($totals['half_day'] ?? 0) + ($totals['on_leave'] ?? 0) + $unmarked }}</td>
+                                    <td>{{ ($totals['present'] ?? 0) + ($totals['half_day'] ?? 0) * 0.5 }}</td>
+                                    <td class="font-monospace fw-bold text-dark">{{ \App\Models\Attendance::formatSecondsHuman($user->attendances->sum(fn($a) => $a->current_work_seconds)) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

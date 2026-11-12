@@ -62,9 +62,48 @@ class Attendance extends Model
 
     public function getCurrentWorkSecondsAttribute(): int
     {
+        $breakSecs = $this->combined_break_seconds;
+
+        // If both check_in and check_out are present, calculate net elapsed work time
+        if ($this->check_in && $this->check_out) {
+            $datePrefix = '';
+            if ($this->attendance_date instanceof \Carbon\CarbonInterface) {
+                $datePrefix = $this->attendance_date->toDateString() . ' ';
+            } elseif (is_string($this->attendance_date) && !empty($this->attendance_date)) {
+                $datePrefix = substr($this->attendance_date, 0, 10) . ' ';
+            }
+            $inStr = $datePrefix . $this->check_in;
+            $outStr = $datePrefix . $this->check_out;
+
+            $grossSeconds = max(0, (int) \Carbon\Carbon::parse($inStr)->diffInSeconds(\Carbon\Carbon::parse($outStr), false));
+            $netCheckSeconds = max(0, $grossSeconds - $breakSecs);
+
+            $recorded = (int) ($this->total_work_seconds ?? 0);
+            if ($this->timer_status === self::TIMER_RUNNING) {
+                $startedAt = $this->timer_started_at ?: ($this->check_in ? \Carbon\Carbon::parse($inStr) : null);
+                if ($startedAt) {
+                    $recorded += max(0, (int) \Carbon\Carbon::parse($startedAt)->diffInSeconds(now(), false));
+                }
+            }
+
+            // If recorded work seconds is 0, significantly short of netCheckSeconds (>30 mins short, e.g. missed timer session like afternoon restart),
+            // or exceeds gross time span, use netCheckSeconds to accurately reflect actual work hours.
+            if ($recorded <= 0 || ($netCheckSeconds - $recorded) > 1800 || $recorded > $grossSeconds) {
+                return $netCheckSeconds;
+            }
+
+            return $recorded;
+        }
+
         $seconds = (int) ($this->total_work_seconds ?? 0);
         if ($this->timer_status === self::TIMER_RUNNING) {
-            $startedAt = $this->timer_started_at ?: ($this->check_in ? \Carbon\Carbon::parse($this->attendance_date?->toDateString() . ' ' . $this->check_in) : null);
+            $datePrefix = '';
+            if ($this->attendance_date instanceof \Carbon\CarbonInterface) {
+                $datePrefix = $this->attendance_date->toDateString() . ' ';
+            } elseif (is_string($this->attendance_date) && !empty($this->attendance_date)) {
+                $datePrefix = substr($this->attendance_date, 0, 10) . ' ';
+            }
+            $startedAt = $this->timer_started_at ?: ($this->check_in ? \Carbon\Carbon::parse($datePrefix . $this->check_in) : null);
             if ($startedAt) {
                 $seconds += max(0, (int) \Carbon\Carbon::parse($startedAt)->diffInSeconds(now(), false));
             }
@@ -83,11 +122,7 @@ class Attendance extends Model
 
     public function getWorkingMinutesAttribute(): int
     {
-        if ($this->total_work_seconds > 0) {
-            return (int) round($this->current_work_seconds / 60);
-        }
-        if (! $this->check_in || ! $this->check_out) return 0;
-        return max(0, (int) \Carbon\Carbon::parse($this->check_in)->diffInMinutes(\Carbon\Carbon::parse($this->check_out), false));
+        return (int) round($this->current_work_seconds / 60);
     }
 
     public function getDisplayNameAttribute(): string
@@ -213,12 +248,7 @@ class Attendance extends Model
 
     public function getFormattedWorkTimeAttribute(): string
     {
-        $seconds = $this->current_work_seconds;
-        if ($seconds > 0) {
-            return self::formatSecondsToTime($seconds);
-        }
-        $minutes = $this->working_minutes;
-        return sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60);
+        return self::formatSecondsToTime($this->current_work_seconds);
     }
 
     public function getFormattedBreakTimeAttribute(): string

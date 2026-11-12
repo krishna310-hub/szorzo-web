@@ -640,6 +640,103 @@ class PayslipService
             'net_pay' => $netPay,
             'remarks' => $remarks,
             'logo_base64' => $logoBase64,
+            'is_eligible' => true,
+        ];
+    }
+
+    /**
+     * Build an empty payslip data structure for employees ineligible for payslip generation
+     * (e.g. joined this month, or has not completed 28-30 days / 1 full month).
+     */
+    public function getEmptyPayslipData(Employee|User|Candidate $target, ?string $reason = null): array
+    {
+        $employee = null;
+        $user = null;
+        $candidate = null;
+
+        if ($target instanceof Candidate) {
+            $candidate = $target;
+        } elseif ($target instanceof Employee) {
+            $employee = $target;
+            try { $user = $employee->linkedUser(); } catch (\Throwable $e) {}
+        } elseif ($target instanceof User) {
+            $user = $target;
+            try { $employee = $user->linkedEmployee(); } catch (\Throwable $e) {}
+        }
+
+        $employeeName = $candidate?->name ?? ($employee?->employee_name ?? ($user?->name ?? 'Staff'));
+        $employeeNo = $candidate?->candidate_id ?? ($employee?->employee_no ?? ($user?->linkedEmployee()?->employee_no ?? '—'));
+        $mode = $candidate?->mode?->mode ?? ($employee?->employment_mode ?? 'FTE');
+        $modeLabel = $mode === 'FTE' ? 'Full Time' : $mode;
+
+        $now = CarbonImmutable::now();
+
+        return [
+            'target_type' => $target instanceof Candidate ? 'candidate' : ($target instanceof Employee ? 'employee' : 'user'),
+            'target_id' => $target->id,
+            'user' => $user,
+            'employee' => $employee,
+            'candidate' => $candidate,
+            'contract_report' => null,
+            'contract_report_synced' => false,
+            'mode' => $mode,
+            'mode_label' => $modeLabel,
+            'is_contract_like' => false,
+            'is_hourly' => false,
+            'hourly_salary' => 0.0,
+            'worked_hours' => 0.0,
+            'revenue_percentage' => 0.0,
+            'client_name' => $employee?->client?->client ?? null,
+            'from_date' => $now->startOfMonth()->toDateString(),
+            'to_date' => $now->toDateString(),
+            'from_date_display' => $now->startOfMonth()->format('d-M-Y'),
+            'to_date_display' => $now->format('d-M-Y'),
+            'period_days' => $now->day,
+            'is_full_calendar_month' => false,
+            'period_title' => 'Payslip Ineligible (Month Incomplete)',
+            'period_subtitle' => $now->format('F Y'),
+            'month' => $now->month,
+            'year' => $now->year,
+            'month_name' => $now->format('M'),
+            'full_month_name' => $now->format('F'),
+            'days_in_month' => $now->daysInMonth,
+            'attendance_stats' => [
+                'present' => 0,
+                'half_day' => 0,
+                'absent' => 0,
+                'on_leave' => 0,
+                'holiday' => 0,
+                'week_off' => 0,
+                'marked_total' => 0,
+            ],
+            'employee_no' => $employeeNo,
+            'name' => $employeeName,
+            'father_name' => $employee?->father_name ?? '—',
+            'gender' => $employee?->gender ?? '—',
+            'designation' => $employee?->designation ?? 'Employee',
+            'location' => $employee?->location ?? 'Bangalore',
+            'pf_no' => $employee?->pf_no ?? 'N/A',
+            'pf_uan' => $employee?->pf_uan ?? 'N/A',
+            'esi_no' => $employee?->esi_no ?? 'N/A',
+            'ot_hours' => 0,
+            'lop' => 0,
+            'present_days' => 0,
+            'absent_days' => 0,
+            'effective_work_days' => 0,
+            'contract_intake' => 0.0,
+            'contract_revenue' => 0.0,
+            'leave_deduction' => 0.0,
+            'payable_salary' => 0.0,
+            'earnings' => [],
+            'total_earnings_full' => 0.0,
+            'total_earnings_actual' => 0.0,
+            'deductions' => [],
+            'total_deductions_actual' => 0.0,
+            'net_pay' => 0.0,
+            'remarks' => $reason ?? 'Month not completed yet (minimum 28 to 30 days required).',
+            'logo_base64' => null,
+            'is_eligible' => false,
+            'ineligible_reason' => $reason,
         ];
     }
 

@@ -48,6 +48,7 @@ class AttendanceMonthlyExport implements FromCollection, WithHeadings, WithMappi
         $headings[] = 'Week Off (WO)';
         $headings[] = 'Unmarked (UM)';
         $headings[] = 'Total Working Days';
+        $headings[] = 'Total Work Hours';
 
         return $headings;
     }
@@ -90,6 +91,8 @@ class AttendanceMonthlyExport implements FromCollection, WithHeadings, WithMappi
         $row[] = $totals['week_off'] ?? 0;
         $row[] = $totals['unmarked'] ?? 0;
         $row[] = ($totals['present'] ?? 0) + (($totals['half_day'] ?? 0) * 0.5);
+        $totalWorkSecs = $user->attendances->sum(fn ($a) => $a->current_work_seconds);
+        $row[] = Attendance::formatSecondsHuman($totalWorkSecs);
 
         return $row;
     }

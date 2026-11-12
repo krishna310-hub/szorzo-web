@@ -27,13 +27,15 @@
                 </div>
             @endif
 
-            @if(isset($tenure['has_completed_months']) && !$tenure['has_completed_months'])
-                <div class="alert alert-info border-0 shadow-sm rounded-3 mb-4">
-                    <i class="ri-information-line me-2"></i> This employee joined in the current month (<strong>{{ $tenure['doj_display'] ?? '-' }}</strong>). The current month is still ongoing and has not completed yet. Official monthly payslips will be available once the month completes.
+            @if(empty($can_generate))
+                <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center">
+                    <i class="ri-lock-line fs-3 me-3 text-warning"></i>
+                    <div>
+                        <h6 class="mb-1 fw-bold text-dark">Payslip Generation Ineligible</h6>
+                        <div>{{ $tenure_notice ?? 'This employee has not completed a full working month yet (minimum 28 to 30 days or 1 completed month required). Official monthly payslips will be available once the month completes.' }}</div>
+                    </div>
                 </div>
-            @endif
-
-            @if(!empty($tenure_notice))
+            @elseif(!empty($tenure_notice))
                 <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4">
                     <i class="ri-information-line me-2"></i>{{ $tenure_notice }}
                 </div>
@@ -256,18 +258,25 @@
                                 $payslipQueryParams['month'] = $month;
                                 $payslipQueryParams['year'] = $year;
                             @endphp
-                            <a href="{{ route('admin.payslip.download', $payslipQueryParams) }}" id="btnDownloadPdf" class="btn btn-success">
-                                <i class="ri-download-2-line align-bottom me-1"></i> Download PDF
-                            </a>
+                            @if(!empty($can_generate))
+                                <a href="{{ route('admin.payslip.download', $payslipQueryParams) }}" id="btnDownloadPdf" class="btn btn-success">
+                                    <i class="ri-download-2-line align-bottom me-1"></i> Download PDF
+                                </a>
 
-                            <a href="{{ route('admin.payslip.preview', $payslipQueryParams) }}" id="btnPrintPreview" target="_blank" class="btn btn-outline-secondary">
-                                <i class="ri-printer-line align-bottom me-1"></i> Print / Preview
-                            </a>
+                                <a href="{{ route('admin.payslip.preview', $payslipQueryParams) }}" id="btnPrintPreview" target="_blank" class="btn btn-outline-secondary">
+                                    <i class="ri-printer-line align-bottom me-1"></i> Print / Preview
+                                </a>
+                            @else
+                                <button type="button" class="btn btn-secondary" disabled title="Payslip generation is locked until a full month (minimum 28 to 30 days) is completed">
+                                    <i class="ri-lock-line align-bottom me-1"></i> Payslip Locked
+                                </button>
+                            @endif
                         </div>
                     </form>
                 </div>
             </div>
 
+            @if(!empty($can_generate))
             <!-- Attendance & Leave Breakdown Badges -->
             <div class="card border-0 shadow-sm bg-light-subtle mb-4">
                 <div class="card-body">
@@ -511,6 +520,30 @@
                     </div>
                 </div>
             </div>
+            @else
+            <!-- Month Not Completed / Locked Empty State -->
+            <div class="card border-0 shadow-sm text-center py-5 mb-4">
+                <div class="card-body py-5">
+                    <div class="avatar-lg mx-auto mb-3">
+                        <div class="avatar-title bg-warning-subtle text-warning fs-1 rounded-circle" style="width: 72px; height: 72px; line-height: 72px; margin: 0 auto;">
+                            <i class="ri-lock-2-line"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-dark fw-bold mb-2">Payslip Not Available Yet</h4>
+                    <p class="text-muted mx-auto mb-3" style="max-width: 580px;">
+                        {{ $tenure_notice ?? 'This employee has not completed a full working month yet (minimum 28 to 30 days or 1 completed month required). Official monthly payslips will be available once the month completes.' }}
+                    </p>
+                    <div class="d-inline-flex gap-2 flex-wrap justify-content-center">
+                        <span class="badge bg-light text-dark border px-3 py-2 fs-12">
+                            <i class="ri-calendar-check-line text-success me-1"></i> Date of Joining: <strong>{{ $tenure['doj_display'] ?? '-' }}</strong>
+                        </span>
+                        <span class="badge bg-warning-subtle text-dark border border-warning px-3 py-2 fs-12">
+                            <i class="ri-time-line text-warning me-1"></i> Status: <strong>Month Incomplete / In Progress</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            @endif
 
         </div>
     </div>

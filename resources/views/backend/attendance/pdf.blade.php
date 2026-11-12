@@ -150,21 +150,26 @@
         <thead>
             <tr>
                 <th style="width: 8%;">Date</th>
-                <th style="width: 17%;">Employee / User</th>
+                <th style="width: 16%;">Employee / User</th>
                 <th style="width: 7%;">Emp ID</th>
-                <th style="width: 7%;">Status</th>
-                <th style="width: 7%;">Timer</th>
+                <th style="width: 6%;">Status</th>
+                <th style="width: 6%;">Timer</th>
                 <th style="width: 6%;">Check In</th>
                 <th style="width: 6%;">Check Out</th>
-                <th style="width: 9%;">Work Hours</th>
-                <th style="width: 8%;">Break (Tea)</th>
-                <th style="width: 8%;">Lunch Time</th>
-                <th style="width: 8%;">Total Break</th>
-                <th style="width: 9%;">Leave / Remarks</th>
+                <th style="width: 8%;">Work Hours</th>
+                <th style="width: 8%;">Emp Total</th>
+                <th style="width: 7%;">Break (Tea)</th>
+                <th style="width: 7%;">Lunch Time</th>
+                <th style="width: 7%;">Total Break</th>
+                <th style="width: 8%;">Leave / Remarks</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($records as $a)
+                @php
+                    $empKey = $a->user_id ? 'u_' . $a->user_id : ('e_' . $a->employee_id);
+                    $empTot = $employeeTotals[$empKey] ?? null;
+                @endphp
                 <tr>
                     <td>{{ $a->attendance_date?->format('Y-m-d') }}</td>
                     <td>
@@ -184,6 +189,9 @@
                     <td class="mono">{{ $a->check_out ? substr((string)$a->check_out, 0, 5) : '—' }}</td>
                     <td class="mono">
                         <strong>{{ $a->formatted_work_time }}</strong>
+                    </td>
+                    <td class="mono" style="color: #0284c7;">
+                        <strong>{{ $empTot['formatted_work_time'] ?? '—' }}</strong>
                     </td>
                     <td class="mono">
                         {{ $a->formatted_break_time }}
@@ -214,12 +222,25 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="12" style="text-align: center; padding: 15px; color: #64748b;">
+                    <td colspan="13" style="text-align: center; padding: 15px; color: #64748b;">
                         No attendance records match the selected filters.
                     </td>
                 </tr>
             @endforelse
         </tbody>
+        @if(count($records) > 0)
+        <tfoot>
+            <tr style="background: #f1f5f9; font-weight: bold;">
+                <td colspan="7" style="text-align: right;">Filtered Total:</td>
+                <td class="mono"><strong>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_work_seconds'] ?? 0) }}</strong></td>
+                <td class="mono" style="color: #0284c7;"><strong>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_work_seconds'] ?? 0) }}</strong></td>
+                <td class="mono">{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_break_seconds'] ?? 0) }}</td>
+                <td class="mono">{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_lunch_seconds'] ?? 0) }}</td>
+                <td class="mono"><strong>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_combined_seconds'] ?? 0) }}</strong></td>
+                <td></td>
+            </tr>
+        </tfoot>
+        @endif
     </table>
 
     @isset($print)
