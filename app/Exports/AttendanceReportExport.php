@@ -19,7 +19,7 @@ class AttendanceReportExport implements FromCollection, WithHeadings, WithMappin
             'Check In',
             'Check Out',
             'Working Hours',
-            'Employee Filtered Total Hours',
+            'Employee Filtered Total Hours (Worked / Required)',
             'Break Time (Tea)',
             'Lunch Time',
             'Total Break Time',
@@ -31,7 +31,8 @@ class AttendanceReportExport implements FromCollection, WithHeadings, WithMappin
     public function map($row): array
     {
         $empKey = $row->user_id ? 'u_' . $row->user_id : ('e_' . $row->employee_id);
-        $filteredTotal = isset($this->employeeTotals[$empKey]) ? $this->employeeTotals[$empKey]['formatted_work_time'] : '—';
+        $empTot = $this->employeeTotals[$empKey] ?? null;
+        $filteredTotal = $empTot ? ($empTot['worked_vs_required_time'] ?? ($empTot['formatted_work_time'] . ' / ' . ($empTot['formatted_required_time'] ?? '—'))) : '—';
 
         return [
             $row->attendance_date ? $row->attendance_date->format('Y-m-d') : '',

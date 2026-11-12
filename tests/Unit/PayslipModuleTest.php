@@ -215,13 +215,18 @@ class PayslipModuleTest extends TestCase
         $user->setRelation('role', $role);
         $user->id = 1;
 
+        // When salary is not updated, shows 0 on payslip without error
         $data = $service->getPayslipData($user, 7, 2026, ['lop' => 0]);
 
         $this->assertSame('user', $data['target_type']);
         $this->assertSame('System Admin', $data['name']);
         $this->assertSame('HR Manager', $data['designation']);
         $this->assertSame('SZ001', $data['employee_no']);
-        $this->assertGreaterThan(0, $data['net_pay']);
+        $this->assertSame(0.0, (float) $data['net_pay']);
+
+        // When salary is configured, calculates accurately
+        $dataWithSalary = $service->getPayslipData($user, 7, 2026, ['monthly_salary' => 50000.0, 'lop' => 0]);
+        $this->assertGreaterThan(0, $dataWithSalary['net_pay']);
     }
 
     public function test_helpers_format_amount_and_days(): void

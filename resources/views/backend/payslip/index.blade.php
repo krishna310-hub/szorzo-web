@@ -32,7 +32,7 @@
                     <i class="ri-lock-line fs-3 me-3 text-warning"></i>
                     <div>
                         <h6 class="mb-1 fw-bold text-dark">Payslip Generation Ineligible</h6>
-                        <div>{{ $tenure_notice ?? 'This employee has not completed a full working month yet (minimum 28 to 30 days or 1 completed month required). Official monthly payslips will be available once the month completes.' }}</div>
+                        <div>{{ $tenure_notice ?? 'This employee has not completed a working month yet. Official monthly payslips will be available once the month completes.' }}</div>
                     </div>
                 </div>
             @elseif(!empty($tenure_notice))
@@ -267,7 +267,7 @@
                                     <i class="ri-printer-line align-bottom me-1"></i> Print / Preview
                                 </a>
                             @else
-                                <button type="button" class="btn btn-secondary" disabled title="Payslip generation is locked until a full month (minimum 28 to 30 days) is completed">
+                                <button type="button" class="btn btn-secondary" disabled title="Payslip generation is locked until a completed month is available">
                                     <i class="ri-lock-line align-bottom me-1"></i> Payslip Locked
                                 </button>
                             @endif
@@ -531,7 +531,7 @@
                     </div>
                     <h4 class="text-dark fw-bold mb-2">Payslip Not Available Yet</h4>
                     <p class="text-muted mx-auto mb-3" style="max-width: 580px;">
-                        {{ $tenure_notice ?? 'This employee has not completed a full working month yet (minimum 28 to 30 days or 1 completed month required). Official monthly payslips will be available once the month completes.' }}
+                        {{ $tenure_notice ?? 'This employee has not completed a working month yet. Official monthly payslips will be available once the month completes.' }}
                     </p>
                     <div class="d-inline-flex gap-2 flex-wrap justify-content-center">
                         <span class="badge bg-light text-dark border px-3 py-2 fs-12">

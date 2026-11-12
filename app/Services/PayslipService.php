@@ -311,10 +311,12 @@ class PayslipService
             }
         } elseif ($employee && (float) ($employee->monthly_gross ?? 0) > 0) {
             $monthlySalary = (float) $employee->monthly_gross;
+        } elseif ($employee && (float) ($employee->basic_salary ?? 0) > 0) {
+            $monthlySalary = (float) ($employee->basic_salary + ($employee->hra ?? 0) + ($employee->conveyance ?? 0) + ($employee->medical_allowance ?? 0) + ($employee->special_allowance ?? 0));
         }
 
         if ($monthlySalary <= 0 && !$isHourly) {
-            $monthlySalary = 38050.0;
+            $monthlySalary = 0.0;
         }
 
         // 8. EXACT Contract Report Salary Calculation Engine
@@ -353,7 +355,50 @@ class PayslipService
         // 9. Earnings Breakdown & Statutory Deductions
         $isFTE = !$isContractLike && ($mode === 'FTE');
 
-        if ($isContractLike) {
+        // Check if employee salary is updated/configured
+        $hasSalaryUpdated = ($monthlySalary > 0) || ($isHourly && $hourlySalary > 0) || ($employee && (
+            (float) ($employee->basic_salary ?? 0) > 0 ||
+            (float) ($employee->monthly_gross ?? 0) > 0
+        ));
+
+        if (!$hasSalaryUpdated) {
+            // If employee salary is not updated, show only 0 on payslip cleanly without errors
+            $totalEarningsFull = 0.0;
+            $totalEarningsActual = 0.0;
+            $payableSalary = 0.0;
+            $grossIntake = 0.0;
+            $revenueShare = 0.0;
+            $leaveDeduction = 0.0;
+
+            $basicFull = 0.0;
+            $hraFull = 0.0;
+            $conveyanceFull = 0.0;
+            $medicalFull = 0.0;
+            $specialFull = 0.0;
+            $overtimeFull = 0.0;
+            $ltaFull = 0.0;
+            $arrearsFull = 0.0;
+
+            $basicActual = 0.0;
+            $hraActual = 0.0;
+            $conveyanceActual = 0.0;
+            $medicalActual = 0.0;
+            $specialActual = 0.0;
+            $overtimeActual = 0.0;
+            $ltaActual = 0.0;
+            $arrearsActual = 0.0;
+
+            $pfDeduction = 0.0;
+            $esiDeduction = 0.0;
+            $ptDeduction = 0.0;
+            $incomeTax = 0.0;
+            $salaryAdvance = 0.0;
+            $fines = 0.0;
+            $lwf = 0.0;
+            $otherDeductions = 0.0;
+            $totalDeductionsActual = 0.0;
+            $netPay = 0.0;
+        } elseif ($isContractLike) {
             // Contract & C2H candidates/employees reconcile directly to Contract Report Total Salary
             $totalEarningsFull = $isHourly ? $grossIntake : $monthlySalary;
             $totalEarningsActual = $payableSalary;
@@ -473,7 +518,9 @@ class PayslipService
         }
 
         // 10. Remarks and Audit trail
-        if ($isHourly) {
+        if (!$hasSalaryUpdated) {
+            $remarks = $employee?->salary_remarks ?: 'Salary details not updated. Processed with zero (0.00) amounts.';
+        } elseif ($isHourly) {
             $remarks = sprintf(
                 'Hourly Contract Intake: %s hrs @ INR %s/hr = INR %s. Billing/Margin Share (%s%%): INR %s. Net Payable: INR %s.',
                 number_format($workedHours, 2),
@@ -557,7 +604,7 @@ class PayslipService
         } catch (\Throwable $e) {
             $logoBase64 = null;
         }
-        $remarks = $employee->salary_remarks ?? "N/A";
+        $remarks = $employee?->salary_remarks ?: $remarks;
         return [
             'target_type' => $targetType,
             'target_id' => $target->id,
@@ -733,7 +780,7 @@ class PayslipService
             'deductions' => [],
             'total_deductions_actual' => 0.0,
             'net_pay' => 0.0,
-            'remarks' => $reason ?? 'Month not completed yet (minimum 28 to 30 days required).',
+            'remarks' => $reason ?? 'Month not completed yet.',
             'logo_base64' => null,
             'is_eligible' => false,
             'ineligible_reason' => $reason,

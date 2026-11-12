@@ -7,6 +7,7 @@ use App\Exports\AttendanceReportExport;
 use App\Http\Controllers\backend\PayslipController;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Mode;
 use App\Models\User;
 use App\Services\PayslipService;
 use Carbon\CarbonImmutable;
@@ -95,7 +96,7 @@ class AttendanceWorkHoursAndPayslipCompletionTest extends TestCase
     }
 
     /**
-     * Test 4: Attendance Report Export includes Employee Filtered Total Hours column.
+     * Test 4: Attendance Report Export includes Employee Filtered Total Hours (Worked / Required) column.
      */
     public function test_attendance_report_export_includes_employee_filtered_total_hours_column(): void
     {
@@ -120,19 +121,23 @@ class AttendanceWorkHoursAndPayslipCompletionTest extends TestCase
             'u_10' => [
                 'formatted_work_time' => '45:30',
                 'formatted_work_human' => '45h 30m',
+                'formatted_required_time' => '40:00',
+                'formatted_required_human' => '40h',
+                'worked_vs_required_time' => '45:30 / 40:00',
+                'worked_vs_required_human' => '45h 30m / 40h',
             ],
         ];
 
         $export = new AttendanceReportExport(collect([$attendance]), $employeeTotals);
         $headings = $export->headings();
-        $this->assertContains('Employee Filtered Total Hours', $headings);
+        $this->assertContains('Employee Filtered Total Hours (Worked / Required)', $headings);
 
         $row = $export->map($attendance);
-        $this->assertContains('45:30', $row);
+        $this->assertContains('45:30 / 40:00', $row);
     }
 
     /**
-     * Test 5: Monthly Export includes Total Work Hours column.
+     * Test 5: Monthly Export includes Total Work Hours (Worked / Required) column.
      */
     public function test_monthly_export_includes_total_work_hours_column(): void
     {
@@ -151,10 +156,10 @@ class AttendanceWorkHoursAndPayslipCompletionTest extends TestCase
 
         $export = new AttendanceMonthlyExport(collect([$user]), [1, 2, 3, 4, 5], 10, 2026);
         $headings = $export->headings();
-        $this->assertContains('Total Work Hours', $headings);
+        $this->assertContains('Total Work Hours (Worked / Required)', $headings);
 
         $row = $export->map($user);
-        $this->assertContains('8h', $row);
+        $this->assertContains('8h / 8h', $row);
     }
 
     /**
@@ -190,26 +195,32 @@ class AttendanceWorkHoursAndPayslipCompletionTest extends TestCase
     }
 
     /**
-     * Test 7: Payslip is disallowed if employee joined in previous month but completed fewer than 28 days.
+     * Test 7: Payslip allows any completed past month without enforcing 28 to 30 days.
+     * "if show every month completed to generate payslip dont fix 28 to 30 days mothly generate payslip"
      */
-    public function test_payslip_disallows_employee_with_fewer_than_28_days_in_previous_month(): void
+    public function test_payslip_allows_any_completed_month_without_28_days_restriction(): void
     {
         $controller = new PayslipController(new PayslipService());
 
-        // Joined on 28th of previous month (only 3-4 days worked before previous month ended)
+        // Joined in previous month on 25th (worked partial days before that month completed)
         $lateJoiner = new Employee();
         $lateJoiner->setRawAttributes([
             'id' => 889,
-            'employee_name' => 'Late Joiner',
-            'date_of_joining' => now()->subMonth()->endOfMonth()->subDays(5)->toDateString(),
+            'employee_name' => 'Mid Month Joiner',
+            'date_of_joining' => now()->subMonth()->startOfMonth()->addDays(24)->toDateString(),
             'relieving_date' => null,
         ]);
 
         $tenure = $controller->resolveTenure($lateJoiner);
 
-        // Has not completed at least 28-30 days / a full month
-        $this->assertFalse($tenure['has_completed_months']);
-        $this->assertEmpty($tenure['available_years']);
+        // Month is completed: payslip CAN be generated for that completed month!
+        $this->assertTrue($tenure['has_completed_months']);
+        $this->assertNotEmpty($tenure['available_years']);
+        $prevMonth = now()->subMonth();
+        $this->assertTrue($controller->isWithinTenure((int) $prevMonth->month, (int) $prevMonth->year, $tenure));
+
+        // But current ongoing month is NOT within tenure
+        $this->assertFalse($controller->isWithinTenure((int) now()->month, (int) now()->year, $tenure));
     }
 
     /**
@@ -265,7 +276,7 @@ class AttendanceWorkHoursAndPayslipCompletionTest extends TestCase
     }
 
     /**
-     * Test 10: Blade view templates contain the required markup for the 3 features.
+     * Test 10: Blade view templates contain the required markup for the features.
      */
     public function test_blade_view_templates_markup(): void
     {
@@ -274,10 +285,11 @@ class AttendanceWorkHoursAndPayslipCompletionTest extends TestCase
         $this->assertStringContainsString('Employees Total Hours Summary', $reportView);
         $this->assertStringContainsString('Emp Total (Filtered)', $reportView);
         $this->assertStringContainsString('Filtered Dates Total:', $reportView);
+        $this->assertStringContainsString('Total Work Hours (Worked / Required)', $reportView);
 
-        // 2. Monthly Attendance view has Total Hours column
+        // 2. Monthly Attendance view has Total Hours (Worked / Req) column
         $monthlyView = file_get_contents(resource_path('views/backend/attendance/monthly.blade.php'));
-        $this->assertStringContainsString('<th>Total Hours</th>', $monthlyView);
+        $this->assertStringContainsString('<th>Total Hours (Worked / Req)</th>', $monthlyView);
         $this->assertStringContainsString('formatSecondsHuman', $monthlyView);
 
         // 3. Payslip index view has Locked and Ineligible states
@@ -285,5 +297,39 @@ class AttendanceWorkHoursAndPayslipCompletionTest extends TestCase
         $this->assertStringContainsString('Payslip Generation Ineligible', $payslipView);
         $this->assertStringContainsString('Payslip Locked', $payslipView);
         $this->assertStringContainsString('Payslip Not Available Yet', $payslipView);
+    }
+
+    /**
+     * Test 11: Employee with unupdated/unconfigured salary shows only 0 on payslip without error.
+     * "- if the employee salary not update to show only 0 on payslip okay make without error"
+     */
+    public function test_employee_without_updated_salary_shows_zero_amounts_cleanly(): void
+    {
+        $service = new PayslipService();
+
+        $unconfiguredEmp = new Employee([
+            'id' => 777,
+            'employee_name' => 'Pending Salary Employee',
+            'employee_no' => 'SZ 777',
+            'employment_mode' => 'FTE',
+            'monthly_gross' => null,
+            'basic_salary' => null,
+            'hra' => null,
+        ]);
+        $unconfiguredEmp->setRelation('mode', new Mode(['mode' => 'Full Time']));
+        $unconfiguredEmp->setRelation('client', null);
+
+        $data = $service->getPayslipData($unconfiguredEmp, 10, 2026);
+
+        $this->assertTrue($data['is_eligible']);
+        $this->assertSame(0.0, (float) $data['net_pay']);
+        $this->assertSame(0.0, (float) $data['payable_salary']);
+        $this->assertSame(0.0, (float) $data['total_earnings_full']);
+        $this->assertSame(0.0, (float) $data['total_earnings_actual']);
+        $this->assertSame(0.0, (float) $data['total_deductions_actual']);
+        $this->assertSame(0.0, (float) $data['earnings']['basic']['actual']);
+        $this->assertSame(0.0, (float) $data['earnings']['hra']['actual']);
+        $this->assertSame(0.0, (float) $data['deductions']['pf']['actual']);
+        $this->assertStringContainsString('Salary details not updated', $data['remarks']);
     }
 }

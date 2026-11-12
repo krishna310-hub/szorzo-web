@@ -201,6 +201,7 @@ class AttendanceController extends Controller
         $allFilteredRecords = (clone $query)->get();
 
         $totalWorkSeconds = 0;
+        $totalRequiredSeconds = 0;
         $totalBreakSeconds = 0;
         $totalLunchSeconds = 0;
         $employeeTotals = [];
@@ -211,6 +212,13 @@ class AttendanceController extends Controller
             $totalBreakSeconds += $rec->break_seconds;
             $totalLunchSeconds += $rec->lunch_seconds;
 
+            // Standard daily required work hours: 8 hours (28,800s) for normal days, 4 hours (14,400s) for half day, 0 for off days
+            $dayReqSecs = 0;
+            if (!in_array($rec->status, ['week_off', 'holiday'], true)) {
+                $dayReqSecs = ($rec->status === 'half_day') ? (4 * 3600) : (8 * 3600);
+            }
+            $totalRequiredSeconds += $dayReqSecs;
+
             $empKey = $rec->user_id ? 'u_' . $rec->user_id : ('e_' . $rec->employee_id);
             if (!isset($employeeTotals[$empKey])) {
                 $employeeTotals[$empKey] = [
@@ -220,6 +228,7 @@ class AttendanceController extends Controller
                     'employee_no' => $rec->employee_no,
                     'email' => $rec->user?->email ?? $rec->employee?->official_mail ?? '—',
                     'total_work_seconds' => 0,
+                    'total_required_seconds' => 0,
                     'total_break_seconds' => 0,
                     'total_lunch_seconds' => 0,
                     'total_combined_seconds' => 0,
@@ -233,6 +242,7 @@ class AttendanceController extends Controller
                 ];
             }
             $employeeTotals[$empKey]['total_work_seconds'] += $workSecs;
+            $employeeTotals[$empKey]['total_required_seconds'] += $dayReqSecs;
             $employeeTotals[$empKey]['total_break_seconds'] += $rec->break_seconds;
             $employeeTotals[$empKey]['total_lunch_seconds'] += $rec->lunch_seconds;
             $employeeTotals[$empKey]['total_combined_seconds'] += $rec->combined_break_seconds;
@@ -256,6 +266,10 @@ class AttendanceController extends Controller
         foreach ($employeeTotals as &$emp) {
             $emp['formatted_work_time'] = Attendance::formatSecondsToTime($emp['total_work_seconds']);
             $emp['formatted_work_human'] = Attendance::formatSecondsHuman($emp['total_work_seconds']);
+            $emp['formatted_required_time'] = Attendance::formatSecondsToTime($emp['total_required_seconds']);
+            $emp['formatted_required_human'] = Attendance::formatSecondsHuman($emp['total_required_seconds']);
+            $emp['worked_vs_required_time'] = $emp['formatted_work_time'] . ' / ' . $emp['formatted_required_time'];
+            $emp['worked_vs_required_human'] = $emp['formatted_work_human'] . ' / ' . $emp['formatted_required_human'];
             $emp['formatted_break_human'] = Attendance::formatSecondsHuman($emp['total_break_seconds']);
             $emp['formatted_lunch_human'] = Attendance::formatSecondsHuman($emp['total_lunch_seconds']);
             $emp['formatted_combined_break_human'] = Attendance::formatSecondsHuman($emp['total_combined_seconds']);
@@ -269,10 +283,14 @@ class AttendanceController extends Controller
 
         $timeMetrics = [
             'total_work_seconds' => $totalWorkSeconds,
+            'total_required_seconds' => $totalRequiredSeconds,
+            'total_work_time' => Attendance::formatSecondsToTime($totalWorkSeconds),
+            'total_required_time' => Attendance::formatSecondsToTime($totalRequiredSeconds),
+            'total_work_formatted' => Attendance::formatSecondsHuman($totalWorkSeconds),
+            'total_required_formatted' => Attendance::formatSecondsHuman($totalRequiredSeconds),
             'total_break_seconds' => $totalBreakSeconds,
             'total_lunch_seconds' => $totalLunchSeconds,
             'total_combined_seconds' => $totalBreakSeconds + $totalLunchSeconds,
-            'total_work_formatted' => Attendance::formatSecondsHuman($totalWorkSeconds),
             'total_break_formatted' => Attendance::formatSecondsHuman($totalBreakSeconds),
             'total_lunch_formatted' => Attendance::formatSecondsHuman($totalLunchSeconds),
             'total_combined_break_formatted' => Attendance::formatSecondsHuman($totalBreakSeconds + $totalLunchSeconds),

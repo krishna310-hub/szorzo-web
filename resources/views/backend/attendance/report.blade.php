@@ -165,7 +165,7 @@
                                     <th>Employee ID</th>
                                     <th>Employee Name</th>
                                     <th class="text-center">Present / Half Days</th>
-                                    <th>Total Work Hours</th>
+                                    <th>Total Work Hours (Worked / Required)</th>
                                     <th>Total Break (Tea)</th>
                                     <th>Total Lunch</th>
                                     <th>Combined Break</th>
@@ -195,8 +195,12 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="font-monospace fw-bold fs-14 text-success">{{ $emp['formatted_work_time'] }}</div>
-                                            <small class="badge bg-success-subtle text-success">{{ $emp['formatted_work_human'] }}</small>
+                                            <div class="font-monospace fw-bold fs-14 text-dark">
+                                                <span class="text-success">{{ $emp['formatted_work_time'] }}</span>
+                                                <span class="text-muted fw-normal">/</span>
+                                                <span class="text-secondary">{{ $emp['formatted_required_time'] }}</span>
+                                            </div>
+                                            <small class="badge bg-success-subtle text-success">{{ $emp['formatted_work_human'] }} / {{ $emp['formatted_required_human'] }}</small>
                                         </td>
                                         <td>
                                             <div class="font-monospace text-warning fw-semibold">{{ \App\Models\Attendance::formatSecondsToTime($emp['total_break_seconds']) }}</div>
@@ -308,8 +312,10 @@
                                             $empTot = $employeeTotals[$empKey] ?? null;
                                         @endphp
                                         @if($empTot)
-                                            <div class="font-monospace fw-bold text-primary">{{ $empTot['formatted_work_time'] }}</div>
-                                            <small class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $empTot['formatted_work_human'] }}</small>
+                                            <div class="font-monospace fw-bold text-primary">
+                                                {{ $empTot['formatted_work_time'] }} <span class="text-muted fw-normal">/</span> {{ $empTot['formatted_required_time'] }}
+                                            </div>
+                                            <small class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $empTot['formatted_work_human'] }} / {{ $empTot['formatted_required_human'] }}</small>
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif
@@ -418,7 +424,8 @@
                                         <small class="badge bg-success-subtle text-success">{{ $timeMetrics['total_work_formatted'] ?? '0m' }}</small>
                                     </th>
                                     <th class="font-monospace text-primary">
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $timeMetrics['total_work_formatted'] ?? '0m' }}</span>
+                                        <div>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_work_seconds'] ?? 0) }} / {{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_required_seconds'] ?? 0) }}</div>
+                                        <small class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $timeMetrics['total_work_formatted'] ?? '0m' }} / {{ $timeMetrics['total_required_formatted'] ?? '0m' }}</small>
                                     </th>
                                     <th class="font-monospace text-warning">
                                         <div>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_break_seconds'] ?? 0) }}</div>

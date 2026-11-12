@@ -66,7 +66,7 @@
                                 <th>WO</th>
                                 <th>UM</th>
                                 <th>Working</th>
-                                <th>Total Hours</th>
+                                <th>Total Hours (Worked / Req)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -101,7 +101,13 @@
                                     <td>{{ $totals['week_off'] ?? 0 }}</td>
                                     <td>{{ $unmarked }}</td>
                                     <td>{{ ($totals['present'] ?? 0) + ($totals['half_day'] ?? 0) * 0.5 }}</td>
-                                    <td class="font-monospace fw-bold text-dark">{{ \App\Models\Attendance::formatSecondsHuman($user->attendances->sum(fn($a) => $a->current_work_seconds)) }}</td>
+                                    <td class="font-monospace fw-bold text-dark">
+                                        @php
+                                            $mWork = $user->attendances->sum(fn($a) => $a->current_work_seconds);
+                                            $mReq = $user->attendances->sum(fn($a) => in_array($a->status, ['week_off', 'holiday'], true) ? 0 : ($a->status === 'half_day' ? 14400 : 28800));
+                                        @endphp
+                                        {{ \App\Models\Attendance::formatSecondsHuman($mWork) }} / {{ \App\Models\Attendance::formatSecondsHuman($mReq) }}
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

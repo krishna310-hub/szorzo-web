@@ -59,12 +59,7 @@ class PayslipController extends Controller
                 try {
                     $fromDate = \Carbon\CarbonImmutable::parse($request->input('from_date'))->startOfDay();
                     $toDate = \Carbon\CarbonImmutable::parse($request->input('to_date'))->endOfDay();
-                    $periodDays = (int) $fromDate->diffInDays($toDate) + 1;
-                    if ($periodDays < 28) {
-                        $canGenerate = false;
-                        $tenureNotice = "Cannot generate payslip: Payslips require a minimum period of 28 to 30 days or one completed month. The selected period is only {$periodDays} days.";
-                        $payslipData = $this->payslipService->getEmptyPayslipData($target, $tenureNotice);
-                    } elseif ($toDate->greaterThan(now())) {
+                    if ($toDate->greaterThan(now())) {
                         $canGenerate = false;
                         $tenureNotice = "Cannot generate payslip: The selected period extends into the future or current incomplete month. Payslips can only be generated for completed periods.";
                         $payslipData = $this->payslipService->getEmptyPayslipData($target, $tenureNotice);
@@ -121,18 +116,17 @@ class PayslipController extends Controller
         if (empty($tenure['has_completed_months'])) {
             return redirect()->route('admin.payslip.index', [
                 'employee_id' => $target instanceof Employee ? $target->id : null,
-            ])->with('error', "Cannot generate payslip: Employee joined on {$tenure['doj_display']} and has not completed a full working month yet (minimum 28 to 30 days or 1 completed month required). Official monthly payslips will be available once the month completes.");
+            ])->with('error', "Cannot generate payslip: Employee joined on {$tenure['doj_display']} and has not completed a full working month yet. Official monthly payslips will be available once the month completes.");
         }
 
         if ($request->input('period_type') === 'range' && $request->filled('from_date') && $request->filled('to_date')) {
             try {
                 $from = \Carbon\CarbonImmutable::parse($request->input('from_date'))->startOfDay();
                 $to = \Carbon\CarbonImmutable::parse($request->input('to_date'))->endOfDay();
-                $periodDays = (int) $from->diffInDays($to) + 1;
-                if ($periodDays < 28 || $to->greaterThan(now())) {
+                if ($to->greaterThan(now())) {
                     return redirect()->route('admin.payslip.index', [
                         'employee_id' => $target instanceof Employee ? $target->id : null,
-                    ])->with('error', "Cannot generate payslip: Payslips require a completed period of at least 28 to 30 days or one completed month.");
+                    ])->with('error', "Cannot generate payslip: Payslips can only be generated for completed periods.");
                 }
             } catch (\Throwable $e) {}
         }
@@ -172,16 +166,15 @@ class PayslipController extends Controller
         $tenure = $this->resolveTenure($target);
 
         if (empty($tenure['has_completed_months'])) {
-            abort(422, "Cannot preview payslip: Employee joined on {$tenure['doj_display']} and has not completed a full working month yet (minimum 28 to 30 days or 1 completed month required). Official monthly payslips will be available once the month completes.");
+            abort(422, "Cannot preview payslip: Employee joined on {$tenure['doj_display']} and has not completed a full working month yet. Official monthly payslips will be available once the month completes.");
         }
 
         if ($request->input('period_type') === 'range' && $request->filled('from_date') && $request->filled('to_date')) {
             try {
                 $from = \Carbon\CarbonImmutable::parse($request->input('from_date'))->startOfDay();
                 $to = \Carbon\CarbonImmutable::parse($request->input('to_date'))->endOfDay();
-                $periodDays = (int) $from->diffInDays($to) + 1;
-                if ($periodDays < 28 || $to->greaterThan(now())) {
-                    abort(422, "Cannot preview payslip: Payslips require a completed period of at least 28 to 30 days or one completed month.");
+                if ($to->greaterThan(now())) {
+                    abort(422, "Cannot preview payslip: Payslips can only be generated for completed periods.");
                 }
             } catch (\Throwable $e) {}
         }
@@ -377,23 +370,13 @@ class PayslipController extends Controller
             $end = $latestCompletedMonth;
         }
 
-        // Determine if employee has completed at least 28-30 days or one full month:
-        // Rule 1: Joined in current ongoing month -> month is NOT completed yet!
+        // Determine if employee has completed months:
+        // Rule: If employee joined in current ongoing or future month, that month is NOT completed yet!
         $joinedInCurrentOrFutureMonth = $actualJoinDate ? $actualJoinDate->greaterThan($latestCompletedMonth) : false;
 
-        // Rule 2: Relieved before completing at least 28 days
-        $relievedTooEarly = ($isRelieved && $relievedCarbon && $actualJoinDate && $actualJoinDate->diffInDays($relievedCarbon) < 28);
-
-        // Rule 3: Joined in previous month with fewer than 28 days in that month, and no other month completed
-        $joinedInPrevMonthWithTooFewDays = false;
-        if ($actualJoinDate && $actualJoinDate->isSameMonth($latestCompletedMonth)) {
-            $daysInPrevMonth = (int) $actualJoinDate->diffInDays($latestCompletedMonth) + 1;
-            if ($daysInPrevMonth < 28) {
-                $joinedInPrevMonthWithTooFewDays = true;
-            }
-        }
-
-        $hasCompletedMonths = !$joinedInCurrentOrFutureMonth && !$relievedTooEarly && !$joinedInPrevMonthWithTooFewDays && $start->lte($end);
+        // Employees who joined on or before latest completed month end have completed months.
+        // No strict 28-30 days restriction: every completed month is eligible for monthly payslip generation.
+        $hasCompletedMonths = !$joinedInCurrentOrFutureMonth && $start->lte($end);
 
         // Safeguard: if employee joined in current uncompleted month, clamp end to start month
         if ($end->lt($start)) {

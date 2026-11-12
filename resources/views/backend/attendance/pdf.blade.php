@@ -157,7 +157,7 @@
                 <th style="width: 6%;">Check In</th>
                 <th style="width: 6%;">Check Out</th>
                 <th style="width: 8%;">Work Hours</th>
-                <th style="width: 8%;">Emp Total</th>
+                <th style="width: 10%;">Emp Total (Worked / Req)</th>
                 <th style="width: 7%;">Break (Tea)</th>
                 <th style="width: 7%;">Lunch Time</th>
                 <th style="width: 7%;">Total Break</th>
@@ -191,7 +191,7 @@
                         <strong>{{ $a->formatted_work_time }}</strong>
                     </td>
                     <td class="mono" style="color: #0284c7;">
-                        <strong>{{ $empTot['formatted_work_time'] ?? '—' }}</strong>
+                        <strong>{{ $empTot ? ($empTot['formatted_work_time'] . ' / ' . $empTot['formatted_required_time']) : '—' }}</strong>
                     </td>
                     <td class="mono">
                         {{ $a->formatted_break_time }}
@@ -233,7 +233,7 @@
             <tr style="background: #f1f5f9; font-weight: bold;">
                 <td colspan="7" style="text-align: right;">Filtered Total:</td>
                 <td class="mono"><strong>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_work_seconds'] ?? 0) }}</strong></td>
-                <td class="mono" style="color: #0284c7;"><strong>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_work_seconds'] ?? 0) }}</strong></td>
+                <td class="mono" style="color: #0284c7;"><strong>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_work_seconds'] ?? 0) }} / {{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_required_seconds'] ?? 0) }}</strong></td>
                 <td class="mono">{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_break_seconds'] ?? 0) }}</td>
                 <td class="mono">{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_lunch_seconds'] ?? 0) }}</td>
                 <td class="mono"><strong>{{ \App\Models\Attendance::formatSecondsToTime($timeMetrics['total_combined_seconds'] ?? 0) }}</strong></td>
