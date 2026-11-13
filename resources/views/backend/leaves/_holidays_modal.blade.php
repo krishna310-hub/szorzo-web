@@ -1,7 +1,7 @@
 <!-- Employee Holidays List Modal -->
-<div class="modal fade" id="employeeHolidaysModal" tabindex="-1" aria-labelledby="employeeHolidaysModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+<div class="modal fade atl-modal" id="employeeHolidaysModal" tabindex="-1" aria-labelledby="employeeHolidaysModalLabel" aria-hidden="true" style="z-index: 1080 !important;">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" style="z-index: 1085 !important; position: relative !important;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important; box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important;">
             <!-- Modal Header -->
             <div class="modal-header bg-light border-bottom px-4 py-3">
                 <div class="d-flex align-items-center gap-3">
@@ -142,7 +142,28 @@
 </div>
 
 <script>
+function ensureEmployeeHolidaysModalInBody() {
+    var el = document.getElementById('employeeHolidaysModal');
+    if (el && el.parentElement !== document.body) {
+        document.body.appendChild(el);
+    }
+}
+ensureEmployeeHolidaysModalInBody();
+
 document.addEventListener('DOMContentLoaded', function () {
+    ensureEmployeeHolidaysModalInBody();
+
+    var modalEl = document.getElementById('employeeHolidaysModal');
+    if (modalEl) {
+        modalEl.addEventListener('show.bs.modal', ensureEmployeeHolidaysModalInBody);
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        });
+    }
+
     const yearSelect = document.getElementById('modalHolidaysYearSelect');
     const searchInput = document.getElementById('modalHolidaysSearchInput');
     const container = document.getElementById('modalHolidaysContainer');

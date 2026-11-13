@@ -125,14 +125,14 @@
 
         /* Auto & High z-index for Admin Employee Attendance Modal */
         #adminEmpAttendanceModal {
-            z-index: 1065 !important;
+            z-index: 1080 !important;
         }
         #adminEmpAttendanceModal .modal-dialog {
-            z-index: 1070 !important;
+            z-index: 1085 !important;
             margin-top: 50px;
         }
         .modal-backdrop {
-            z-index: 1055 !important;
+            z-index: 1050 !important;
         }
     </style>
 

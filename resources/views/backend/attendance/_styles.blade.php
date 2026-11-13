@@ -16,4 +16,8 @@
 .card-footer .page-link:hover{color:#111827;background-color:#f3f4f6}
 .card-footer svg{max-width:1.25rem;max-height:1.25rem;vertical-align:middle}
 @media(max-width:767px){.atl-hero{border-radius:14px}.atl-card{border-radius:12px}.attendance-table{font-size:.8rem}}
+.modal.atl-modal, .atl-shell .modal { z-index: 1080 !important; }
+.modal.atl-modal .modal-dialog, .atl-shell .modal-dialog { z-index: 1085 !important; position: relative !important; }
+.modal.atl-modal .modal-content, .atl-shell .modal-content { background-color: #ffffff !important; position: relative !important; z-index: 1090 !important; box-shadow: 0 16px 48px rgba(0,0,0,.35) !important; }
+.modal-backdrop { z-index: 1050 !important; }
 </style>

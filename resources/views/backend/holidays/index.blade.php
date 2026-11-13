@@ -272,9 +272,9 @@
 
 <!-- Add Holiday Modal -->
 @can('create', \App\Models\Holiday::class)
-<div class="modal fade" id="addHolidayModal" tabindex="-1" aria-labelledby="addHolidayModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+<div class="modal fade atl-modal" id="addHolidayModal" tabindex="-1" aria-labelledby="addHolidayModalLabel" aria-hidden="true" style="z-index: 1080 !important;">
+    <div class="modal-dialog modal-dialog-centered" style="z-index: 1085 !important; position: relative !important;">
+        <div class="modal-content border-0 shadow-lg" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important; box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important;">
             <form method="POST" action="{{ route('admin.holidays.store') }}">
                 @csrf
                 <div class="modal-header border-bottom">
@@ -328,9 +328,9 @@
 
 <!-- Edit Holiday Modal -->
 @can('edit', \App\Models\Holiday::class)
-<div class="modal fade" id="editHolidayModal" tabindex="-1" aria-labelledby="editHolidayModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+<div class="modal fade atl-modal" id="editHolidayModal" tabindex="-1" aria-labelledby="editHolidayModalLabel" aria-hidden="true" style="z-index: 1080 !important;">
+    <div class="modal-dialog modal-dialog-centered" style="z-index: 1085 !important; position: relative !important;">
+        <div class="modal-content border-0 shadow-lg" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important; box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important;">
             <form method="POST" action="" id="editHolidayForm">
                 @csrf
                 @method('PUT')
@@ -385,9 +385,9 @@
 
 <!-- Delete Holiday Modal -->
 @can('delete', \App\Models\Holiday::class)
-<div class="modal fade" id="deleteHolidayModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
+<div class="modal fade atl-modal" id="deleteHolidayModal" tabindex="-1" aria-hidden="true" style="z-index: 1080 !important;">
+    <div class="modal-dialog modal-dialog-centered modal-sm" style="z-index: 1085 !important; position: relative !important;">
+        <div class="modal-content border-0 shadow-lg" style="background-color: #ffffff !important; position: relative !important; z-index: 1090 !important; box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important;">
             <form method="POST" action="" id="deleteHolidayForm">
                 @csrf
                 @method('DELETE')
@@ -415,7 +415,32 @@
 
 @section('script')
 <script>
+function ensureHolidayModalsInBody() {
+    ['addHolidayModal', 'editHolidayModal', 'deleteHolidayModal'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el && el.parentElement !== document.body) {
+            document.body.appendChild(el);
+        }
+    });
+}
+ensureHolidayModalsInBody();
+
 document.addEventListener('DOMContentLoaded', function () {
+    ensureHolidayModalsInBody();
+
+    ['addHolidayModal', 'editHolidayModal', 'deleteHolidayModal'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('show.bs.modal', ensureHolidayModalsInBody);
+            el.addEventListener('hidden.bs.modal', function () {
+                document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            });
+        }
+    });
+
     const editModalEl = document.getElementById('editHolidayModal');
     const editModal = editModalEl ? new bootstrap.Modal(editModalEl) : null;
     const editForm = document.getElementById('editHolidayForm');
