@@ -33,9 +33,10 @@ class AttendanceController extends Controller
         $this->authorize('read', Attendance::class);
         $filters = $request->validate(['date'=>['nullable','date_format:Y-m-d'],'user_id'=>['nullable','integer'],'resource_type'=>['nullable','string','max:100'],'status'=>['nullable','in:'.implode(',',Attendance::STATUSES)]]);
         $date = $filters['date'] ?? now()->toDateString();
+        $isHoliday = \App\Models\Holiday::whereDate('date', $date)->first();
         $users = User::employedOn($date)->with(['attendances'=>fn($q)=>$q->whereDate('attendance_date',$date)])->when($filters['user_id']??null,fn($q,$id)=>$q->whereKey($id))->when($filters['resource_type']??null,fn($q,$v)=>$q->where('resource_type',$v))->orderBy('name')->paginate(50)->withQueryString();
         $recent = Attendance::eligible()->with('user')->when($filters['status']??null,fn($q,$v)=>$q->where('status',$v))->when($filters['user_id']??null,fn($q,$id)=>$q->where('user_id',$id))->latest('attendance_date')->latest('id')->paginate(20,['*'],'recent_page')->withQueryString();
-        return view('backend.attendance.index',['users'=>$users,'recent'=>$recent,'date'=>$date,'filters'=>$filters,'allUsers'=>User::employedOn($date)->orderBy('name')->get(['id','name']),'resourceTypes'=>User::employedOn($date)->whereNotNull('resource_type')->distinct()->orderBy('resource_type')->pluck('resource_type')]);
+        return view('backend.attendance.index',['users'=>$users,'recent'=>$recent,'date'=>$date,'isHoliday'=>$isHoliday,'filters'=>$filters,'allUsers'=>User::employedOn($date)->orderBy('name')->get(['id','name']),'resourceTypes'=>User::employedOn($date)->whereNotNull('resource_type')->distinct()->orderBy('resource_type')->pluck('resource_type')]);
     }
 
     public function store(StoreAttendanceRequest $request)
@@ -140,7 +141,8 @@ class AttendanceController extends Controller
         $month=(int)($validated['month']??now()->month); $year=(int)($validated['year']??now()->year);
         $start=CarbonImmutable::create($year,$month,1); $days=range(1,$start->daysInMonth);
         $users=User::eligibleForAttendance()->when($validated['user_id']??null,fn($q,$id)=>$q->whereKey($id))->with(['attendances'=>fn($q)=>$q->whereBetween('attendance_date',[$start,$start->endOfMonth()])])->orderBy('name')->paginate(25)->withQueryString();
-        return view('backend.attendance.monthly',compact('users','days','month','year')+['allUsers'=>User::eligibleForAttendance()->orderBy('name')->get(['id','name'])]);
+        $holidaysMap = \App\Models\Holiday::whereYear('date', $year)->whereMonth('date', $month)->get()->keyBy(fn ($h) => (int) $h->date->day);
+        return view('backend.attendance.monthly',compact('users','days','month','year','holidaysMap')+['allUsers'=>User::eligibleForAttendance()->orderBy('name')->get(['id','name'])]);
     }
 
     public function monthlyExport(Request $request, string $format = 'xlsx')
@@ -166,9 +168,10 @@ class AttendanceController extends Controller
 
         $monthName = date('F', mktime(0, 0, 0, $month, 1));
         $name = 'monthly-attendance-' . strtolower($monthName) . '-' . $year . '-' . now()->format('Ymd-His');
+        $holidaysMap = \App\Models\Holiday::whereYear('date', $year)->whereMonth('date', $month)->get()->keyBy(fn ($h) => (int) $h->date->day);
 
         return Excel::download(
-            new \App\Exports\AttendanceMonthlyExport($users, $days, $month, $year),
+            new \App\Exports\AttendanceMonthlyExport($users, $days, $month, $year, $holidaysMap),
             $name . '.' . $format,
             $format === 'csv' ? \Maatwebsite\Excel\Excel::CSV : \Maatwebsite\Excel\Excel::XLSX
         );

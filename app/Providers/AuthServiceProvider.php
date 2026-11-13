@@ -96,6 +96,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\InvesterTeamManagement::class => \App\Policies\InvesterTeamManagementPolicy::class,
         \App\Models\InvesterLegalCompliance::class => \App\Policies\InvesterLegalCompliancePolicy::class,
         \App\Models\InvesterDeployment::class => \App\Policies\InvesterDeploymentPolicy::class,
+        \App\Models\Holiday::class => \App\Policies\HolidayPolicy::class,
     ];
 
     /**

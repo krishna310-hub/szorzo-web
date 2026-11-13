@@ -53,7 +53,17 @@
         $initialBadgeText = 'Lunch (' . $formatSecs($initialBreakSecs) . ')';
     } elseif ($initialTimerStatus === 'completed') {
         $initialBadgeClass = 'bg-info-subtle text-info border border-info';
-        $initialBadgeText = 'Day Closed';
+        $initialBadgeText = ($todayAtt?->status === 'holiday') ? 'Holiday' : 'Day Closed';
+    }
+
+    $todayHoliday = null;
+    try {
+        $todayHoliday = \App\Models\Holiday::whereDate('date', now()->toDateString())->first();
+    } catch (\Throwable) {}
+
+    if ($todayHoliday && $initialTimerStatus === 'not_started') {
+        $initialBadgeText = 'Holiday: ' . $todayHoliday->title;
+        $initialBadgeClass = 'bg-info-subtle text-info border border-info';
     }
 @endphp
 

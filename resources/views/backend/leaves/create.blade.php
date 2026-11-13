@@ -19,9 +19,14 @@
                             </h3>
                             <p class="text-muted mb-0 small">Internal employees can submit full-day or half-day leave requests for admin approval.</p>
                         </div>
-                        <a href="{{ route('admin.leaves.index') }}" class="btn btn-outline-dark rounded-pill px-3 fw-semibold">
-                            <i class="ri-arrow-left-line me-1"></i> Back to Leave History
-                        </a>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-outline-info rounded-pill px-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#employeeHolidaysModal">
+                                <i class="ri-calendar-2-line me-1"></i> View Holidays
+                            </button>
+                            <a href="{{ route('admin.leaves.index') }}" class="btn btn-outline-dark rounded-pill px-3 fw-semibold">
+                                <i class="ri-arrow-left-line me-1"></i> Back to Leave History
+                            </a>
+                        </div>
                     </div>
 
                     @if(session('error'))
@@ -209,6 +214,8 @@
         </div>
     </div>
 </div>
+
+@include('backend.leaves._holidays_modal')
 
 @endsection
 

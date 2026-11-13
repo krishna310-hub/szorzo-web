@@ -858,6 +858,14 @@
                         </a>
                     </li>
                     @endif
+                    @can('read', \App\Models\Holiday::class)
+                    <li class="nav-item">
+                        <a class="nav-link menu-link {{ request()->is('admin/holidays*') ? 'active' : '' }}" href="{{ route('admin.holidays.index') }}">
+                            <i class="ri-calendar-2-line"></i>
+                            <span>Holidays</span>
+                        </a>
+                    </li>
+                    @endcan
                     @if(auth()->user()->isSuperAdmin() || auth()->user()->isInternalEmployee() || auth()->user()->linkedEmployee() !== null || auth()->user()->can('read', \App\Models\Employee::class))
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/payslip*') ? 'active' : '' }}" href="{{ route('admin.payslip.index') }}">

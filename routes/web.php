@@ -30,6 +30,7 @@ use App\Http\Controllers\backend\TargetController;
 use App\Http\Controllers\backend\AttendanceController;
 use App\Http\Controllers\backend\AttendanceTimerController;
 use App\Http\Controllers\backend\LeaveController;
+use App\Http\Controllers\backend\HolidayController;
 use App\Http\Controllers\backend\PettyCashController;
 use App\Http\Controllers\backend\NotificationController;
 use App\Http\Controllers\backend\PayslipController;
@@ -148,6 +149,15 @@ Route::middleware(['admin','maintenance'])->name('admin.')->prefix('admin')->gro
         Route::put('/{leave}/review', 'review')->name('review');
         Route::delete('/{leave}/cancel', 'cancel')->name('cancel');
         Route::get('/{leave}/attachment', 'attachment')->name('attachment');
+    });
+
+    // Holidays Module (Admin Only)
+    Route::prefix('holidays')->name('holidays.')->controller(HolidayController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{holiday}', 'update')->name('update');
+        Route::delete('/{holiday}', 'destroy')->name('destroy');
+        Route::get('/list-json', 'listJson')->name('list-json');
     });
     // Maintenance Mode
     Route::get('/lock-screen', [AdminController::class, 'lock'])->name('lock.screen');

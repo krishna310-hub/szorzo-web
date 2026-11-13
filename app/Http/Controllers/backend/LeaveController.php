@@ -65,7 +65,19 @@ class LeaveController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('backend.leaves.index', compact('leaves', 'canApprove', 'filters', 'stats'));
+        $currentYear = (int) $request->input('holiday_year', now()->year);
+        $holidays = collect();
+        $holidayYears = [now()->year];
+        try {
+            $holidays = \App\Models\Holiday::forYear($currentYear)->orderBy('date', 'asc')->get();
+            $dbYears = \App\Models\Holiday::selectRaw('DISTINCT year')->orderByDesc('year')->pluck('year')->all();
+            if (!empty($dbYears)) {
+                $holidayYears = array_values(array_unique(array_merge([now()->year], $dbYears)));
+                sort($holidayYears);
+            }
+        } catch (\Throwable) {}
+
+        return view('backend.leaves.index', compact('leaves', 'canApprove', 'filters', 'stats', 'holidays', 'holidayYears', 'currentYear'));
     }
 
     public function create(Request $request)
@@ -77,7 +89,19 @@ class LeaveController extends Controller
             return redirect()->route('admin.leaves.index')->with('error', 'Leave requests are restricted to internal employees only.');
         }
 
-        return view('backend.leaves.create');
+        $currentYear = now()->year;
+        $holidays = collect();
+        $holidayYears = [$currentYear];
+        try {
+            $holidays = \App\Models\Holiday::forYear($currentYear)->orderBy('date', 'asc')->get();
+            $dbYears = \App\Models\Holiday::selectRaw('DISTINCT year')->orderByDesc('year')->pluck('year')->all();
+            if (!empty($dbYears)) {
+                $holidayYears = array_values(array_unique(array_merge([$currentYear], $dbYears)));
+                sort($holidayYears);
+            }
+        } catch (\Throwable) {}
+
+        return view('backend.leaves.create', compact('holidays', 'holidayYears', 'currentYear'));
     }
 
     public function store(StoreLeaveRequest $request)

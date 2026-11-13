@@ -19,8 +19,20 @@ class AttendanceMonthlyExport implements FromCollection, WithHeadings, WithMappi
         private Collection $users,
         private array $days,
         private int $month,
-        private int $year
-    ) {}
+        private int $year,
+        private mixed $holidaysMap = null
+    ) {
+        if ($this->holidaysMap === null) {
+            try {
+                $this->holidaysMap = \App\Models\Holiday::whereYear('date', $year)
+                    ->whereMonth('date', $month)
+                    ->get()
+                    ->keyBy(fn ($h) => (int) $h->date->day);
+            } catch (\Throwable) {
+                $this->holidaysMap = collect();
+            }
+        }
+    }
 
     public function collection(): Collection
     {
@@ -78,7 +90,11 @@ class AttendanceMonthlyExport implements FromCollection, WithHeadings, WithMappi
 
         foreach ($this->days as $day) {
             $att = $map->get($day);
-            $st = $att?->status ?? 'unmarked';
+            $st = $att?->status;
+            if (!$st || $st === 'unmarked') {
+                $isHolidayDay = isset($this->holidaysMap[$day]);
+                $st = $isHolidayDay ? 'holiday' : 'unmarked';
+            }
             $totals[$st] = ($totals[$st] ?? 0) + 1;
             $row[] = $statusCodeMap[$st] ?? '—';
         }

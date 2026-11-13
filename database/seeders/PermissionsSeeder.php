@@ -183,6 +183,11 @@ class PermissionsSeeder extends Seeder
             ['name' => 'Create',    'page' => 'invester_legal_compliance'],
             ['name' => 'Edit',      'page' => 'invester_legal_compliance'],
             ['name' => 'Delete',    'page' => 'invester_legal_compliance'],
+
+            ['name' => 'Read',      'page' => 'holiday'],
+            ['name' => 'Create',    'page' => 'holiday'],
+            ['name' => 'Edit',      'page' => 'holiday'],
+            ['name' => 'Delete',    'page' => 'holiday'],
         ];
 
         foreach ($permissions as $permission) {

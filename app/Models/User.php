@@ -304,24 +304,28 @@ class User extends Authenticatable
             return null;
         }
 
-        if (!static::getConnectionResolver()) {
-            return null;
-        }
+        try {
+            if (!static::getConnectionResolver()) {
+                return null;
+            }
 
-        $employee = Employee::where(function ($query) {
-            $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($this->email)])
-                ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($this->email)]);
-        })->first();
+            $employee = Employee::where(function ($query) {
+                $query->whereRaw('LOWER(official_mail) = ?', [mb_strtolower($this->email)])
+                    ->orWhereRaw('LOWER(personal_mail) = ?', [mb_strtolower($this->email)]);
+            })->first();
 
-        if ($employee) {
-            return $employee;
-        }
-
-        if (!empty($this->ref)) {
-            $employee = Employee::where('employee_no', $this->ref)->first();
             if ($employee) {
                 return $employee;
             }
+
+            if (!empty($this->ref)) {
+                $employee = Employee::where('employee_no', $this->ref)->first();
+                if ($employee) {
+                    return $employee;
+                }
+            }
+        } catch (\Throwable) {
+            return null;
         }
 
         return Employee::whereRaw('LOWER(employee_name) = ?', [mb_strtolower($this->name)])->first();

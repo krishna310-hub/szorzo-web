@@ -20,6 +20,9 @@
                     </p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-outline-info rounded-pill px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#employeeHolidaysModal">
+                        <i class="ri-calendar-2-line me-1"></i> Holidays
+                    </button>
                     @if(!$canApprove && !auth()->user()->isSuperAdmin() && (auth()->user()->isInternalEmployee() || auth()->user()->can('create', \App\Models\LeaveRequest::class)))
                         <a class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold" href="{{ route('admin.leaves.create') }}">
                             <i class="ri-add-line me-1"></i> Apply for Leave
@@ -384,6 +387,8 @@
         </div>
     </div>
 @endif
+
+@include('backend.leaves._holidays_modal')
 
 @endsection
 

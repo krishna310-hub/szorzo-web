@@ -60,10 +60,14 @@ class LeaveRequestPolicy
 
     private function allowed(User $user, string $name): bool
     {
-        if (!Permission::getConnectionResolver()) {
+        try {
+            if (!Permission::getConnectionResolver()) {
+                return false;
+            }
+            $id = Permission::where('page', 'leave')->where('name', $name)->value('id');
+            return (bool) ($id && $user->role?->permissions->contains('id', $id));
+        } catch (\Throwable) {
             return false;
         }
-        $id = Permission::where('page', 'leave')->where('name', $name)->value('id');
-        return (bool) ($id && $user->role?->permissions->contains('id', $id));
     }
 }

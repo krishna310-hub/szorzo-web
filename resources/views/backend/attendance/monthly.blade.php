@@ -56,7 +56,8 @@
                             <tr>
                                 <th>User</th>
                                 @foreach($days as $day)
-                                    <th class="calendar-cell">{{ $day }}</th>
+                                    @php($hHead = $holidaysMap[$day] ?? null)
+                                    <th class="calendar-cell {{ $hHead ? 'table-warning text-dark fw-bold' : '' }}" title="{{ $hHead ? 'Holiday: '.$hHead->title : '' }}">{{ $day }}</th>
                                 @endforeach
                                 <th>P</th>
                                 <th>A</th>
@@ -80,15 +81,21 @@
                                     <td><strong>{{ $user->name }}</strong></td>
                                     @foreach($days as $day)
                                         @php
-                                            $status = $map->get($day)?->status ?? 'unmarked';
+                                            $att = $map->get($day);
+                                            $hInfo = $holidaysMap[$day] ?? null;
+                                            $status = $att?->status;
+                                            if (!$status || $status === 'unmarked') {
+                                                $status = $hInfo ? 'holiday' : 'unmarked';
+                                            }
                                             if ($status === 'unmarked') {
                                                 $unmarked++;
                                             } else {
                                                 $totals[$status] = ($totals[$status] ?? 0) + 1;
                                             }
+                                            $titleText = $hInfo ? ('Holiday: ' . $hInfo->title) : ucwords(str_replace('_', ' ', $status));
                                         @endphp
                                         <td class="calendar-cell">
-                                            <span class="calendar-dot s-{{ $status }}" title="{{ ucwords(str_replace('_', ' ', $status)) }}">
+                                            <span class="calendar-dot s-{{ $status }}" title="{{ $titleText }}">
                                                 {{ ['present' => 'P', 'absent' => 'A', 'half_day' => '½', 'on_leave' => 'L', 'holiday' => 'H', 'week_off' => 'W', 'unmarked' => '—'][$status] ?? '—' }}
                                             </span>
                                         </td>
