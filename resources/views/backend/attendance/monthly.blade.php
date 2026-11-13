@@ -56,7 +56,9 @@
                             <tr>
                                 <th>User</th>
                                 @foreach($days as $day)
-                                    @php($hHead = $holidaysMap[$day] ?? null)
+                                    @php
+                                        $hHead = $holidaysMap[$day] ?? null;
+                                    @endphp
                                     <th class="calendar-cell {{ $hHead ? 'table-warning text-dark fw-bold' : '' }}" title="{{ $hHead ? 'Holiday: '.$hHead->title : '' }}">{{ $day }}</th>
                                 @endforeach
                                 <th>P</th>

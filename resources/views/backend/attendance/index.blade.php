@@ -13,7 +13,45 @@
     </div>
 </div>
 @endif
-@can('create',\App\Models\Attendance::class)<form method="POST" action="{{route('admin.attendance.store')}}">@csrf<input type="hidden" name="attendance_date" value="{{$date}}"><div class="card atl-card"><div class="card-header d-flex flex-wrap justify-content-between gap-2"><h5 class="mb-0">Users for {{\Carbon\Carbon::parse($date)->format('d F Y')}}</h5><div class="d-flex gap-2"><select id="bulk-status" class="form-select form-select-sm"><option value="">Bulk status…</option>@foreach(\App\Models\Attendance::STATUSES as $s)<option value="{{$s}}" @selected(!empty($isHoliday) && $s==='holiday')>{{ucwords(str_replace('_',' ',$s))}}</option>@endforeach</select><button class="btn btn-success btn-sm" type="submit">Save Attendance</button></div></div><div class="table-responsive"><table class="table attendance-table mb-0"><thead><tr><th>Employee / User</th><th>Resource Type</th><th>Status</th><th>Timer / Time</th><th>Check In</th><th>Check Out</th><th>Remarks</th></tr></thead><tbody>@forelse($users as $user)@php($a=$user->attendances->first())@php($statusVal=$a?$a->status:(!empty($isHoliday)?'holiday':'present'))@php($remarksVal=$a?$a->remarks:(!empty($isHoliday)?'Holiday: '.$isHoliday->title:''))<tr class="{{$a?'':'table-danger'}}"><td><strong>{{$user->name}}</strong> <span class="badge bg-secondary-subtle text-secondary fs-11">{{ $user->linkedEmployee()?->employee_no ?? '—' }}</span><br><small class="text-muted">{{$user->email}}</small><input type="hidden" name="records[{{$loop->index}}][user_id]" value="{{$user->id}}"></td><td>{{$user->resource_type?:'—'}}</td><td><select class="form-select status-select" name="records[{{$loop->index}}][status]" required>@foreach(\App\Models\Attendance::STATUSES as $s)<option value="{{$s}}" @selected($statusVal===$s)>{{ucwords(str_replace('_',' ',$s))}}</option>@endforeach</select></td><td>@if($a)<span class="badge bg-light text-dark border">{{ ucwords(str_replace('_',' ',$a->timer_status ?? 'not_started')) }}</span>@if($a->working_minutes > 0)<br><small class="text-muted">{{ sprintf('%02dh %02dm', intdiv($a->working_minutes, 60), $a->working_minutes % 60) }}</small>@endif @else <span class="text-muted">—</span> @endif</td><td><input type="time" class="form-control" name="records[{{$loop->index}}][check_in]" value="{{substr((string)$a?->check_in,0,5)}}"></td><td><input type="time" class="form-control" name="records[{{$loop->index}}][check_out]" value="{{substr((string)$a?->check_out,0,5)}}"></td><td><input class="form-control" name="records[{{$loop->index}}][remarks]" value="{{$remarksVal}}" maxlength="1000"></td></tr>@empty<tr><td colspan="7" class="text-center p-4">No eligible users found.</td></tr>@endforelse</tbody></table></div><div class="card-footer">{{$users->links('pagination::bootstrap-5')}}</div></div></form>@endcan
+@can('create',\App\Models\Attendance::class)<form method="POST" action="{{route('admin.attendance.store')}}">@csrf<input type="hidden" name="attendance_date" value="{{$date}}"><div class="card atl-card"><div class="card-header d-flex flex-wrap justify-content-between gap-2"><h5 class="mb-0">Users for {{\Carbon\Carbon::parse($date)->format('d F Y')}}</h5><div class="d-flex gap-2"><select id="bulk-status" class="form-select form-select-sm"><option value="">Bulk status…</option>@foreach(\App\Models\Attendance::STATUSES as $s)<option value="{{$s}}" @selected(!empty($isHoliday) && $s==='holiday')>{{ucwords(str_replace('_',' ',$s))}}</option>@endforeach</select><button class="btn btn-success btn-sm" type="submit">Save Attendance</button></div></div><div class="table-responsive"><table class="table attendance-table mb-0"><thead><tr><th>Employee / User</th><th>Resource Type</th><th>Status</th><th>Timer / Time</th><th>Check In</th><th>Check Out</th><th>Remarks</th></tr></thead><tbody>
+@forelse($users as $user)
+    @php
+        $a = $user->attendances->first();
+        $statusVal = $a ? $a->status : (!empty($isHoliday) ? 'holiday' : 'present');
+        $remarksVal = $a ? $a->remarks : (!empty($isHoliday) ? ('Holiday: ' . $isHoliday->title) : '');
+    @endphp
+    <tr class="{{$a?'':'table-danger'}}">
+        <td>
+            <strong>{{$user->name}}</strong> <span class="badge bg-secondary-subtle text-secondary fs-11">{{ $user->linkedEmployee()?->employee_no ?? '—' }}</span><br>
+            <small class="text-muted">{{$user->email}}</small>
+            <input type="hidden" name="records[{{$loop->index}}][user_id]" value="{{$user->id}}">
+        </td>
+        <td>{{$user->resource_type?:'—'}}</td>
+        <td>
+            <select class="form-select status-select" name="records[{{$loop->index}}][status]" required>
+                @foreach(\App\Models\Attendance::STATUSES as $s)
+                    <option value="{{$s}}" @selected($statusVal===$s)>{{ucwords(str_replace('_',' ',$s))}}</option>
+                @endforeach
+            </select>
+        </td>
+        <td>
+            @if($a)
+                <span class="badge bg-light text-dark border">{{ ucwords(str_replace('_',' ',$a->timer_status ?? 'not_started')) }}</span>
+                @if($a->working_minutes > 0)
+                    <br><small class="text-muted">{{ sprintf('%02dh %02dm', intdiv($a->working_minutes, 60), $a->working_minutes % 60) }}</small>
+                @endif
+            @else
+                <span class="text-muted">—</span>
+            @endif
+        </td>
+        <td><input type="time" class="form-control" name="records[{{$loop->index}}][check_in]" value="{{substr((string)$a?->check_in,0,5)}}"></td>
+        <td><input type="time" class="form-control" name="records[{{$loop->index}}][check_out]" value="{{substr((string)$a?->check_out,0,5)}}"></td>
+        <td><input class="form-control" name="records[{{$loop->index}}][remarks]" value="{{$remarksVal}}" maxlength="1000"></td>
+    </tr>
+@empty
+    <tr><td colspan="7" class="text-center p-4">No eligible users found.</td></tr>
+@endforelse
+</tbody></table></div><div class="card-footer">{{$users->links('pagination::bootstrap-5')}}</div></div></form>@endcan
 <div class="card atl-card mt-4"><div class="card-header"><h5 class="mb-0">Latest Records</h5></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Date</th><th>Employee / User</th><th>Status</th><th>Timer</th><th>Times</th><th>Remarks</th></tr></thead><tbody>@foreach($recent as $a)<tr><td>{{$a->attendance_date->format('d M Y')}}</td><td><strong>{{$a->display_name}}</strong> <small class="text-muted">({{$a->employee_no}})</small></td><td><span class="status-badge s-{{$a->status}}">{{ucwords(str_replace('_',' ',$a->status))}}</span></td><td><span class="badge bg-light text-dark border">{{ ucwords(str_replace('_',' ',$a->timer_status ?? 'not_started')) }}</span></td><td>{{$a->check_in?:'—'}} – {{$a->check_out?:'—'}}</td><td>{{$a->remarks?:'—'}}</td></tr>@endforeach</tbody></table></div><div class="card-footer">{{$recent->links('pagination::bootstrap-5')}}</div></div>
 </div></div></div>
 @endsection
