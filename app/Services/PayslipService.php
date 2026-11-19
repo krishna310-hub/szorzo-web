@@ -87,6 +87,17 @@ class PayslipService
             } catch (\Throwable $e) {
                 $candidate = null;
             }
+
+            if (!$candidate && method_exists($employee, 'getMatchingCandidate')) {
+                try {
+                    $candidate = $employee->getMatchingCandidate();
+                    if ($candidate) {
+                        $candidate->loadMissing(['mode', 'client', 'jobRole', 'clientRequirement.billing', 'recruiter']);
+                    }
+                } catch (\Throwable $e) {
+                    $candidate = null;
+                }
+            }
         } elseif ($target instanceof User) {
             try {
                 $user = $target->loadMissing('role');
@@ -400,10 +411,10 @@ class PayslipService
             $netPay = 0.0;
         } elseif ($isContractLike) {
             // Contract & C2H candidates/employees reconcile directly to Contract Report Total Salary
-            $totalEarningsFull = $isHourly ? $grossIntake : $monthlySalary;
+            $totalEarningsFull = $isHourly ? 0.0 : $monthlySalary;
             $totalEarningsActual = $payableSalary;
 
-            $hasExplicitStructure = $employee && (float) ($employee->basic_salary ?? 0) > 0;
+            $hasExplicitStructure = !$isHourly && $employee && (float) ($employee->basic_salary ?? 0) > 0;
             if ($hasExplicitStructure) {
                 $basicFull = (float) $employee->basic_salary;
                 $hraFull = (float) ($employee->hra ?? 0);
@@ -440,11 +451,11 @@ class PayslipService
                 $basicRatio = 0.50;
                 $hraRatio = 0.20;
 
-                $basicFull = round($totalEarningsFull * $basicRatio, 2);
-                $hraFull = round($totalEarningsFull * $hraRatio, 2);
+                $basicFull = $isHourly ? 0.0 : round($totalEarningsFull * $basicRatio, 2);
+                $hraFull = $isHourly ? 0.0 : round($totalEarningsFull * $hraRatio, 2);
                 $conveyanceFull = 0.0;
                 $medicalFull = 0.0;
-                $specialFull = round($totalEarningsFull - $basicFull - $hraFull, 2);
+                $specialFull = $isHourly ? 0.0 : round($totalEarningsFull - $basicFull - $hraFull, 2);
                 $overtimeFull = 0.0;
                 $ltaFull = 0.0;
                 $arrearsFull = 0.0;
@@ -473,6 +484,20 @@ class PayslipService
                     $incomeTax = (float) ($employee->income_tax ?? 0);
                     $otherDeductions = (float) ($employee->other_deductions ?? 0);
                 }
+            }
+
+            if ($isHourly) {
+                // For hour-based external employees, there is no fixed monthly full entitlement.
+                // The Full column must not show values; all cells in Full must be 0 (rendered as 00).
+                $totalEarningsFull = 0.0;
+                $basicFull = 0.0;
+                $hraFull = 0.0;
+                $conveyanceFull = 0.0;
+                $medicalFull = 0.0;
+                $specialFull = 0.0;
+                $overtimeFull = 0.0;
+                $ltaFull = 0.0;
+                $arrearsFull = 0.0;
             }
 
             $totalDeductionsActual = $pfDeduction + $esiDeduction + $ptDeduction + $incomeTax + $salaryAdvance + $fines + $lwf + $otherDeductions;
@@ -515,6 +540,19 @@ class PayslipService
 
             $totalDeductionsActual = $pfDeduction + $esiDeduction + $ptDeduction + $incomeTax + $salaryAdvance + $fines + $lwf + $otherDeductions;
             $netPay = max(0.0, round($totalEarningsActual - $totalDeductionsActual, 2));
+        }
+
+        // For hour-based external employees, guarantee all cells under Full are strictly 0.0
+        if ($isHourly) {
+            $totalEarningsFull = 0.0;
+            $basicFull = 0.0;
+            $hraFull = 0.0;
+            $conveyanceFull = 0.0;
+            $medicalFull = 0.0;
+            $specialFull = 0.0;
+            $overtimeFull = 0.0;
+            $ltaFull = 0.0;
+            $arrearsFull = 0.0;
         }
 
         // 10. Remarks and Audit trail

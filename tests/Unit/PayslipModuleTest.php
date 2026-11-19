@@ -378,6 +378,67 @@ class PayslipModuleTest extends TestCase
         // EXACT matching Contract Report screenshot: ₹5,200.00
         $this->assertSame(5200.0, (float) $data['payable_salary']);
         $this->assertSame(5200.0, (float) $data['net_pay']);
+
+        // Check that for hour-based external employee, all cells in 'Full' column are strictly 0.0 ('00')
+        $this->assertSame(0.0, (float) $data['total_earnings_full']);
+        $this->assertSame('00', PayslipService::formatAmount($data['total_earnings_full']));
+        foreach ($data['earnings'] as $key => $earn) {
+            $this->assertSame(0.0, (float) $earn['full'], "Full value for {$key} should be 0.0");
+            $this->assertSame('00', PayslipService::formatAmount($earn['full']), "Formatted Full value for {$key} should be '00'");
+        }
+        $this->assertSame(2600.0, (float) $data['earnings']['basic']['actual']);
+        $this->assertSame(1040.0, (float) $data['earnings']['hra']['actual']);
+        $this->assertSame(1560.0, (float) $data['earnings']['special']['actual']);
+    }
+
+    public function test_hour_based_external_employee_payslip_all_full_cells_are_zero(): void
+    {
+        $service = new PayslipService();
+
+        $contractMode = new Mode(['mode' => 'Contract']);
+        $client = new Client(['client' => 'Affluent Technology']);
+        $jobRole = new JobRole(['job_role' => 'Software Engineer']);
+        $billing = new Billing(['value' => 35.00]);
+        $requirement = new ClientRequirement();
+        $requirement->setRelation('billing', $billing);
+
+        $candidate = new Candidate([
+            'candidate_name' => 'Hourly External Staff',
+            'email' => 'hourly.staff@szorzo.com',
+            'is_hourly' => true,
+            'hourly_salary' => 200.00,
+        ]);
+        $candidate->id = 55;
+        $candidate->setRelation('mode', $contractMode);
+        $candidate->setRelation('client', $client);
+        $candidate->setRelation('jobRole', $jobRole);
+        $candidate->setRelation('clientRequirement', $requirement);
+
+        // 276 hours worked @ ₹200/hr = ₹55,200 intake. 35% margin = ₹19,320. Payable Actual = ₹35,880
+        $data = $service->getPayslipData($candidate, 8, 2026, [
+            'worked_hours' => 276.00,
+        ]);
+
+        $this->assertTrue($data['is_hourly']);
+        $this->assertSame(55200.0, (float) $data['contract_intake']);
+        $this->assertSame(19320.0, (float) $data['contract_revenue']);
+        $this->assertSame(35880.0, (float) $data['payable_salary']);
+        $this->assertSame(35880.0, (float) $data['total_earnings_actual']);
+        $this->assertSame(35880.0, (float) $data['net_pay']);
+
+        // Check Actual breakdown matches user screenshot: Basic: 17940, HRA: 7176, Hourly Intake Share: 10764
+        $this->assertSame(17940.0, (float) $data['earnings']['basic']['actual']);
+        $this->assertSame(7176.0, (float) $data['earnings']['hra']['actual']);
+        $this->assertSame('Hourly Intake Share', $data['earnings']['special']['label']);
+        $this->assertSame(10764.0, (float) $data['earnings']['special']['actual']);
+
+        // Verify that in Full, all cells are strictly 0 / '00' without error
+        $this->assertSame(0.0, (float) $data['total_earnings_full']);
+        $this->assertSame('00', PayslipService::formatAmount($data['total_earnings_full']));
+        foreach ($data['earnings'] as $key => $earn) {
+            $this->assertSame(0.0, (float) $earn['full'], "Earnings full for {$key} must be 0.0");
+            $this->assertSame('00', PayslipService::formatAmount($earn['full']), "Formatted earnings full for {$key} must be '00'");
+        }
     }
 
     public function test_exact_contract_hourly_salary_vignesh(): void
