@@ -728,4 +728,86 @@ class PayslipModuleTest extends TestCase
         $this->assertNotSame('Active / Ongoing', $row[6]);
         $this->assertNotSame('22-04-2027', $row[6]);
     }
+
+    public function test_employee_with_pf_salary_slip_calculates_twelve_percent_pf(): void
+    {
+        $service = new PayslipService();
+        $fteMode = new Mode(['mode' => 'Full Time']);
+
+        // 1. Employee with salary_slip = 'PF' and explicit basic = 20,000 -> PF = 12% = 2,400
+        $empWithExplicitBasic = new Employee([
+            'id' => 601,
+            'employee_name' => 'John Doe',
+            'employee_no' => 'SZ601',
+            'salary_slip' => 'PF',
+            'monthly_gross' => 40000.0,
+            'basic_salary' => 20000.0,
+            'hra' => 10000.0,
+            'medical_allowance' => 10000.0,
+        ]);
+        $empWithExplicitBasic->setRelation('mode', $fteMode);
+        $empWithExplicitBasic->setRelation('client', null);
+
+        $data1 = $service->getPayslipData($empWithExplicitBasic, 10, 2026, ['lop' => 0]);
+        $this->assertSame(20000.0, (float) $data1['earnings']['basic']['actual']);
+        $this->assertSame(2400.0, (float) $data1['deductions']['pf']['actual']); // 12% of 20,000
+
+        // 2. Employee SZ006 with salary_slip = 'PF', PF No, and blank salary (uses standard default 38,050 gross, 19,025 basic -> PF = 12% = 2,283)
+        $shenbagaEmp = new Employee([
+            'id' => 6,
+            'employee_name' => 'Shenbagaseetharaman M',
+            'employee_no' => 'SZ006',
+            'designation' => 'Recruiter DL',
+            'employment_type' => 'Internal',
+            'salary_slip' => 'PF',
+            'bank_uan_pf_number' => '100999013974',
+            'monthly_gross' => null, // Left blank
+            'basic_salary' => null,  // Left blank
+        ]);
+        $shenbagaEmp->setRelation('mode', $fteMode);
+        $shenbagaEmp->setRelation('client', null);
+
+        $data2 = $service->getPayslipData($shenbagaEmp, 10, 2026, ['lop' => 0]);
+        $this->assertSame('SZ006', $data2['employee_no']);
+        $this->assertSame('100999013974', $data2['pf_no']);
+        $this->assertSame(38050.0, (float) $data2['total_earnings_full']);
+        $this->assertSame(38050.0, (float) $data2['total_earnings_actual']);
+        $this->assertSame(19025.0, (float) $data2['earnings']['basic']['actual']);
+        $this->assertSame(2283.0, (float) $data2['deductions']['pf']['actual']); // Exact 12% of 19,025
+        $this->assertSame(200.0, (float) $data2['deductions']['pt']['actual']);
+        $this->assertSame(2483.0, (float) $data2['total_deductions_actual']);
+        $this->assertSame(35567.0, (float) $data2['net_pay']);
+
+        // 3. Employee with salary_slip = 'TDS' has 0.00 PF deduction
+        $tdsEmp = new Employee([
+            'id' => 603,
+            'employee_name' => 'Consultant A',
+            'employee_no' => 'SZ603',
+            'salary_slip' => 'TDS',
+            'monthly_gross' => 50000.0,
+            'basic_salary' => 25000.0,
+        ]);
+        $tdsEmp->setRelation('mode', $fteMode);
+        $tdsEmp->setRelation('client', null);
+
+        $data3 = $service->getPayslipData($tdsEmp, 10, 2026, ['lop' => 0]);
+        $this->assertSame(0.0, (float) $data3['deductions']['pf']['actual']);
+        $this->assertSame('00', PayslipService::formatAmount($data3['deductions']['pf']['actual']));
+
+        // 4. Employee with PF number mentioned in bank_uan_pf_number gets 12% PF
+        $empWithPfNumber = new Employee([
+            'id' => 604,
+            'employee_name' => 'Staff Member',
+            'employee_no' => 'SZ604',
+            'bank_uan_pf_number' => '101234567890',
+            'monthly_gross' => 30000.0,
+            'basic_salary' => 15000.0,
+        ]);
+        $empWithPfNumber->setRelation('mode', $fteMode);
+        $empWithPfNumber->setRelation('client', null);
+
+        $data4 = $service->getPayslipData($empWithPfNumber, 10, 2026, ['lop' => 0]);
+        $this->assertSame(15000.0, (float) $data4['earnings']['basic']['actual']);
+        $this->assertSame(1800.0, (float) $data4['deductions']['pf']['actual']); // 12% of 15,000
+    }
 }

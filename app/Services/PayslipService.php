@@ -324,6 +324,13 @@ class PayslipService
             $monthlySalary = (float) $employee->monthly_gross;
         } elseif ($employee && (float) ($employee->basic_salary ?? 0) > 0) {
             $monthlySalary = (float) ($employee->basic_salary + ($employee->hra ?? 0) + ($employee->conveyance ?? 0) + ($employee->medical_allowance ?? 0) + ($employee->special_allowance ?? 0));
+        } elseif ($employee && !$isHourly && (
+            !empty($employee->salary_slip) ||
+            (!empty($employee->bank_uan_pf_number) && strtoupper((string)$employee->bank_uan_pf_number) !== 'NA') ||
+            (!empty($employee->employee_uan_pf_number) && strtoupper((string)$employee->employee_uan_pf_number) !== 'NA')
+        )) {
+            // If employee has salary slip configured (PF or TDS) or PF number but monthly_gross was left blank to use standard default breakdown
+            $monthlySalary = 38050.0;
         }
 
         if ($monthlySalary <= 0 && !$isHourly) {
@@ -365,6 +372,26 @@ class PayslipService
 
         // 9. Earnings Breakdown & Statutory Deductions
         $isFTE = !$isContractLike && ($mode === 'FTE');
+
+        // PF mention and statutory deduction resolution
+        $salarySlip = strtoupper(trim((string) ($employee?->salary_slip ?? '')));
+        $empPfNumber = trim((string) (
+            $employee?->bank_uan_pf_number
+            ?: ($employee?->employee_uan_pf_number
+            ?: ($candidate?->pf_no
+            ?: ($candidate?->uan_no ?: '')))
+        ));
+        $hasPfNumber = !empty($empPfNumber) && strtoupper($empPfNumber) !== 'NA';
+        $hasExplicitPfDeduction = $employee && isset($employee->pf_deduction) && is_numeric($employee->pf_deduction) && (float) $employee->pf_deduction > 0;
+
+        $hasPfMentioned = false;
+        if ($salarySlip === 'PF') {
+            $hasPfMentioned = true;
+        } elseif ($salarySlip === 'TDS') {
+            $hasPfMentioned = false;
+        } else {
+            $hasPfMentioned = $hasPfNumber || $hasExplicitPfDeduction;
+        }
 
         // Check if employee salary is updated/configured
         $hasSalaryUpdated = ($monthlySalary > 0) || ($isHourly && $hourlySalary > 0) || ($employee && (
@@ -439,7 +466,22 @@ class PayslipService
                 
                 $totalEarningsActual = $basicActual + $hraActual + $conveyanceActual + $medicalActual + $specialActual + $overtimeActual + $ltaActual + $arrearsActual;
                 
-                $pfDeduction = (float) ($employee->pf_deduction ?? 0);
+                $twelvePercentPf = $basicActual > 0
+                    ? round($basicActual * 0.12, 2)
+                    : ($basicFull > 0 ? round($basicFull * 0.12, 2) : 0.0);
+
+                if ($hasPfMentioned) {
+                    if ($salarySlip === 'PF') {
+                        $pfDeduction = $twelvePercentPf;
+                    } elseif ($hasExplicitPfDeduction) {
+                        $pfDeduction = (float) $employee->pf_deduction;
+                    } else {
+                        $pfDeduction = $twelvePercentPf;
+                    }
+                } else {
+                    $pfDeduction = 0.0;
+                }
+
                 $esiDeduction = (float) ($employee->esi_deduction ?? 0);
                 $ptDeduction = (float) ($employee->pt_deduction ?? 0);
                 $incomeTax = (float) ($employee->income_tax ?? 0);
@@ -469,7 +511,22 @@ class PayslipService
                 $ltaActual = 0.0;
                 $arrearsActual = 0.0;
 
-                $pfDeduction = 0.0;
+                $twelvePercentPf = $basicActual > 0
+                    ? round($basicActual * 0.12, 2)
+                    : ($basicFull > 0 ? round($basicFull * 0.12, 2) : 0.0);
+
+                if ($hasPfMentioned) {
+                    if ($salarySlip === 'PF') {
+                        $pfDeduction = $twelvePercentPf;
+                    } elseif ($hasExplicitPfDeduction) {
+                        $pfDeduction = (float) $employee->pf_deduction;
+                    } else {
+                        $pfDeduction = $twelvePercentPf;
+                    }
+                } else {
+                    $pfDeduction = 0.0;
+                }
+
                 $esiDeduction = 0.0;
                 $ptDeduction = 0.0;
                 $incomeTax = 0.0;
@@ -529,7 +586,22 @@ class PayslipService
 
             $totalEarningsActual = $basicActual + $hraActual + $conveyanceActual + $medicalActual + $specialActual + $overtimeActual + $ltaActual + $arrearsActual;
 
-            $pfDeduction = (float) ($employee?->pf_deduction ?? 1800);
+            $twelvePercentPf = $basicActual > 0
+                ? round($basicActual * 0.12, 2)
+                : ($basicFull > 0 ? round($basicFull * 0.12, 2) : 0.0);
+
+            if ($hasPfMentioned) {
+                if ($salarySlip === 'PF') {
+                    $pfDeduction = $twelvePercentPf;
+                } elseif ($hasExplicitPfDeduction) {
+                    $pfDeduction = (float) $employee->pf_deduction;
+                } else {
+                    $pfDeduction = $twelvePercentPf;
+                }
+            } else {
+                $pfDeduction = 0.0;
+            }
+
             $esiDeduction = (float) ($employee?->esi_deduction ?? 0);
             $ptDeduction = (float) ($employee?->pt_deduction ?? ($totalEarningsFull > 15000 ? 200 : 0));
             $incomeTax = (float) ($employee?->income_tax ?? 0);

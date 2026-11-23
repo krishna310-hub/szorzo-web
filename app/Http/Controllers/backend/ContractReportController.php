@@ -313,7 +313,7 @@ class ContractReportController extends Controller
                 : $this->payableSalary(
                     (float) ($report->monthly_take_home ?? 0),
                     (int) ($report->absent_days ?? 0),
-                    max(1, $report->salary_month->daysInMonth)
+                    max(1, $report->salary_month?->daysInMonth ?? 30)
                 );
             $revenuePerHour = $report->is_hourly
                 ? round(((float) $report->hourly_salary * $revenuePercentage) / 100, 2)
