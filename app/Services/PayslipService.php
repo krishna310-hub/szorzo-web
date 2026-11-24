@@ -540,7 +540,7 @@ class PayslipService
                 } elseif ($hasExplicitPfDeduction && empty($employee?->salary_slip) && empty($empPfNumber)) {
                     $pfDeduction = (float) $employee->pf_deduction;
                 } else {
-                    $pfDeduction = round($basicActual * 0.12, 2);
+                    $pfDeduction = min(1800.0, round($totalEarningsActual * 0.12, 2));
                 }
             } else {
                 $pfDeduction = 0.0;
@@ -550,12 +550,14 @@ class PayslipService
 
             if (isset($overrides['pt_deduction']) && is_numeric($overrides['pt_deduction'])) {
                 $ptDeduction = (float) $overrides['pt_deduction'];
-            } elseif ($employee && isset($employee->pt_deduction) && is_numeric($employee->pt_deduction)) {
-                $ptDeduction = (float) $employee->pt_deduction;
             } elseif ($salarySlip === 'TDS') {
                 $ptDeduction = 0.0;
+            } elseif ($totalEarningsActual <= 15000) {
+                $ptDeduction = 0.0;
+            } elseif ($employee && isset($employee->pt_deduction) && is_numeric($employee->pt_deduction)) {
+                $ptDeduction = (float) $employee->pt_deduction;
             } elseif ($hasPfMentioned) {
-                $ptDeduction = $totalEarningsActual > 15000 ? 200.0 : 0.0;
+                $ptDeduction = 200.0;
             } else {
                 $ptDeduction = 0.0;
             }
@@ -607,7 +609,7 @@ class PayslipService
                 } elseif ($hasExplicitPfDeduction && empty($employee?->salary_slip) && empty($empPfNumber)) {
                     $pfDeduction = (float) $employee->pf_deduction;
                 } else {
-                    $pfDeduction = round($basicActual * 0.12, 2);
+                    $pfDeduction = min(1800.0, round($totalEarningsActual * 0.12, 2));
                 }
             } else {
                 $pfDeduction = 0.0;
@@ -617,12 +619,14 @@ class PayslipService
 
             if (isset($overrides['pt_deduction']) && is_numeric($overrides['pt_deduction'])) {
                 $ptDeduction = (float) $overrides['pt_deduction'];
-            } elseif ($employee && isset($employee->pt_deduction) && is_numeric($employee->pt_deduction)) {
-                $ptDeduction = (float) $employee->pt_deduction;
             } elseif ($salarySlip === 'TDS') {
                 $ptDeduction = 0.0;
+            } elseif ($totalEarningsActual <= 15000) {
+                $ptDeduction = 0.0;
+            } elseif ($employee && isset($employee->pt_deduction) && is_numeric($employee->pt_deduction)) {
+                $ptDeduction = (float) $employee->pt_deduction;
             } elseif ($hasPfMentioned) {
-                $ptDeduction = $totalEarningsActual > 15000 ? 200.0 : 0.0;
+                $ptDeduction = 200.0;
             } else {
                 $ptDeduction = 0.0;
             }
