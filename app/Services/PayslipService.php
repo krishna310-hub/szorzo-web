@@ -535,8 +535,10 @@ class PayslipService
 
             // Statutory Deductions
             if ($hasPfMentioned) {
-                if ($hasExplicitPfDeduction) {
-                    $pfDeduction = (float) ($overrides['pf_deduction'] ?? $employee->pf_deduction);
+                if (isset($overrides['pf_deduction']) && is_numeric($overrides['pf_deduction'])) {
+                    $pfDeduction = (float) $overrides['pf_deduction'];
+                } elseif ($hasExplicitPfDeduction && empty($employee?->salary_slip) && empty($empPfNumber)) {
+                    $pfDeduction = (float) $employee->pf_deduction;
                 } else {
                     $pfDeduction = round($basicActual * 0.12, 2);
                 }
@@ -600,8 +602,10 @@ class PayslipService
 
             // Statutory Deductions
             if ($hasPfMentioned) {
-                if ($hasExplicitPfDeduction) {
-                    $pfDeduction = (float) ($overrides['pf_deduction'] ?? $employee->pf_deduction);
+                if (isset($overrides['pf_deduction']) && is_numeric($overrides['pf_deduction'])) {
+                    $pfDeduction = (float) $overrides['pf_deduction'];
+                } elseif ($hasExplicitPfDeduction && empty($employee?->salary_slip) && empty($empPfNumber)) {
+                    $pfDeduction = (float) $employee->pf_deduction;
                 } else {
                     $pfDeduction = round($basicActual * 0.12, 2);
                 }

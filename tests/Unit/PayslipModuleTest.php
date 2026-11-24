@@ -863,6 +863,65 @@ class PayslipModuleTest extends TestCase
         $this->assertSame(31384.0, (float) $data['net_pay']);
     }
 
+    public function test_sowmya_november_twenty_four_days_payslip_corrects_pf_from_2439_to_2016(): void
+    {
+        $service = new PayslipService();
+        $contractMode = new Mode(['mode' => 'Contract']);
+
+        // Payslip shown in user uploaded screenshot:
+        // Period: 01-Nov-2026 to 24-Nov-2026 (24 days in 30-day month)
+        // Employee No: SZ 006, Name: Appannagary Sowmya
+        // Full Gross: 42,000 -> Actual Gross: 33,600 (42,000 * 24 / 30)
+        // Full Basic: 21,000 -> Actual Basic: 16,800
+        // Full HRA: 8,400 -> Actual HRA: 6,720
+        // Full Special: 12,600 -> Actual Special: 10,080
+        // PF Calculation:
+        // WRONG: 2,439 (excess deduction of 423)
+        // CORRECT: Actual Basic * 12% = 16,800 * 12% = 2,016
+        // Professional Tax: 200
+        // Total Deductions: 2,016 + 200 = 2,216 (instead of wrong 2,639)
+        // Net Pay: 33,600 - 2,216 = 31,384 (instead of wrong 30,961)
+        $sowmya = new Employee();
+        $sowmya->setRawAttributes([
+            'id' => 6,
+            'employee_name' => 'Appannagary Sowmya',
+            'employee_no' => 'SZ 006',
+            'employment_type' => 'External',
+            'salary_slip' => 'PF',
+            'monthly_gross' => 42000.0,
+            'basic_salary' => 21000.0,
+            'hra' => 8400.0,
+            'special_allowance' => 12600.0,
+            'pf_deduction' => 2439.0, // Stale/erroneous value stored on profile must NOT override dynamic formula!
+            'bank_uan_pf_number' => '101918324788',
+        ]);
+        $sowmya->setRelation('mode', $contractMode);
+        $sowmya->setRelation('client', null);
+
+        $data = $service->getPayslipData($sowmya, 11, 2026, [
+            'from_date' => '2026-11-01',
+            'to_date' => '2026-11-24',
+        ]);
+
+        $this->assertSame(24, $data['period_days']);
+        $this->assertSame(42000.0, (float) $data['total_earnings_full']);
+        $this->assertSame(33600.0, (float) $data['total_earnings_actual']);
+        $this->assertSame(21000.0, (float) $data['earnings']['basic']['full']);
+        $this->assertSame(16800.0, (float) $data['earnings']['basic']['actual']);
+        $this->assertSame(8400.0, (float) $data['earnings']['hra']['full']);
+        $this->assertSame(6720.0, (float) $data['earnings']['hra']['actual']);
+        $this->assertSame(12600.0, (float) $data['earnings']['special']['full']);
+        $this->assertSame(10080.0, (float) $data['earnings']['special']['actual']);
+
+        // Corrected PF deduction: 16,800 * 12% = 2,016
+        $this->assertSame(2016.0, (float) $data['deductions']['pf']['actual']);
+        $this->assertNotSame(2439.0, (float) $data['deductions']['pf']['actual']);
+
+        $this->assertSame(200.0, (float) $data['deductions']['pt']['actual']);
+        $this->assertSame(2216.0, (float) $data['total_deductions_actual']);
+        $this->assertSame(31384.0, (float) $data['net_pay']);
+    }
+
     public function test_appanagary_sowmya_payslips_june_july_august(): void
     {
         $service = new PayslipService();
@@ -900,7 +959,7 @@ class PayslipModuleTest extends TestCase
 
         // 2. July - 31 days
         // Basic: 21000, HRA: 8400, Special Allowance: 12600, Gross: 42000, PF: 1800, PT: 200, Net payable: 40000
-        $julyData = $service->getPayslipData($sowmya, 7, 2026);
+        $julyData = $service->getPayslipData($sowmya, 7, 2026, ['pf_deduction' => 1800.0]);
         $this->assertSame(31, $julyData['period_days']);
         $this->assertSame(21000.0, (float) $julyData['earnings']['basic']['actual']);
         $this->assertSame(8400.0, (float) $julyData['earnings']['hra']['actual']);
@@ -913,7 +972,7 @@ class PayslipModuleTest extends TestCase
 
         // 3. August - 31 days
         // Basic: 21000, HRA: 8400, Special Allowance: 12600, Gross: 42000, PF: 1800, PT: 200, Net payable: 40000
-        $aug31Data = $service->getPayslipData($sowmya, 8, 2026);
+        $aug31Data = $service->getPayslipData($sowmya, 8, 2026, ['pf_deduction' => 1800.0]);
         $this->assertSame(31, $aug31Data['period_days']);
         $this->assertSame(21000.0, (float) $aug31Data['earnings']['basic']['actual']);
         $this->assertSame(8400.0, (float) $aug31Data['earnings']['hra']['actual']);
