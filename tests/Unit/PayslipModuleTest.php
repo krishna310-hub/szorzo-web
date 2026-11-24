@@ -734,7 +734,7 @@ class PayslipModuleTest extends TestCase
         $service = new PayslipService();
         $fteMode = new Mode(['mode' => 'Full Time']);
 
-        // 1. Employee with salary_slip = 'PF' and explicit basic = 20,000 -> PF statutory capped at 1,800
+        // 1. Employee with salary_slip = 'PF' and explicit basic = 20,000 -> PF = 12% of Actual Basic = 2,400
         $empWithExplicitBasic = new Employee([
             'id' => 601,
             'employee_name' => 'John Doe',
@@ -750,7 +750,7 @@ class PayslipModuleTest extends TestCase
 
         $data1 = $service->getPayslipData($empWithExplicitBasic, 10, 2026, ['lop' => 0]);
         $this->assertSame(20000.0, (float) $data1['earnings']['basic']['actual']);
-        $this->assertSame(1800.0, (float) $data1['deductions']['pf']['actual']); // Statutory PF capped at 1,800
+        $this->assertSame(2400.0, (float) $data1['deductions']['pf']['actual']); // 12% of Actual Basic 20,000
 
         // 1b. Employee with explicit pf_deduction = 2,400 respects explicit configuration
         $empWithExplicitPf = new Employee([
@@ -767,7 +767,7 @@ class PayslipModuleTest extends TestCase
         $data1b = $service->getPayslipData($empWithExplicitPf, 10, 2026, ['lop' => 0]);
         $this->assertSame(2400.0, (float) $data1b['deductions']['pf']['actual']);
 
-        // 2. Employee SZ006 with salary_slip = 'PF', PF No, and blank salary (uses standard default 38,050 gross, 19,025 basic -> statutory PF capped at 1,800)
+        // 2. Employee SZ006 with salary_slip = 'PF', PF No, and blank salary (uses standard default 38,050 gross, 19,025 basic -> PF = 12% = 2,283)
         $shenbagaEmp = new Employee([
             'id' => 6,
             'employee_name' => 'Shenbagaseetharaman M',
@@ -788,10 +788,10 @@ class PayslipModuleTest extends TestCase
         $this->assertSame(38050.0, (float) $data2['total_earnings_full']);
         $this->assertSame(38050.0, (float) $data2['total_earnings_actual']);
         $this->assertSame(19025.0, (float) $data2['earnings']['basic']['actual']);
-        $this->assertSame(1800.0, (float) $data2['deductions']['pf']['actual']); // Statutory PF capped at 1,800
+        $this->assertSame(2283.0, (float) $data2['deductions']['pf']['actual']); // 12% of 19,025 = 2,283
         $this->assertSame(200.0, (float) $data2['deductions']['pt']['actual']);
-        $this->assertSame(2000.0, (float) $data2['total_deductions_actual']);
-        $this->assertSame(36050.0, (float) $data2['net_pay']);
+        $this->assertSame(2483.0, (float) $data2['total_deductions_actual']);
+        $this->assertSame(35567.0, (float) $data2['net_pay']);
 
         // 3. Employee with salary_slip = 'TDS' has 0.00 PF deduction and fixed 10% on Income Tax
         $tdsEmp = new Employee([
@@ -812,7 +812,7 @@ class PayslipModuleTest extends TestCase
         $this->assertSame(5000.0, (float) $data3['total_deductions_actual']);
         $this->assertSame(45000.0, (float) $data3['net_pay']);
 
-        // 4. Employee with PF number mentioned in bank_uan_pf_number gets 12% PF capped at 1,800
+        // 4. Employee with PF number mentioned in bank_uan_pf_number gets 12% PF
         $empWithPfNumber = new Employee([
             'id' => 604,
             'employee_name' => 'Staff Member',
@@ -829,6 +829,40 @@ class PayslipModuleTest extends TestCase
         $this->assertSame(1800.0, (float) $data4['deductions']['pf']['actual']); // 12% of 15,000 = 1,800
     }
 
+    public function test_pf_calculation_twelve_percent_of_actual_basic_for_gross_33600(): void
+    {
+        $service = new PayslipService();
+        $contractMode = new Mode(['mode' => 'Contract']);
+
+        // Employee matching the auditor screenshot:
+        // Gross Earnings: ₹33,600
+        // Actual Basic: ₹16,800 (50% of gross)
+        // PF: Actual Basic Salary * 12% = 16800 * 12% = 2016
+        // Professional Tax: ₹200
+        // Total Deductions: ₹2,216
+        // Net Pay: ₹31,384
+        $emp = new Employee();
+        $emp->setRawAttributes([
+            'id' => 336,
+            'employee_name' => 'Karun Kumar',
+            'employee_no' => 'SZ 012',
+            'employment_type' => 'External',
+            'salary_slip' => 'PF',
+            'monthly_gross' => 33600.0,
+        ]);
+        $emp->setRelation('mode', $contractMode);
+        $emp->setRelation('client', null);
+
+        $data = $service->getPayslipData($emp, 10, 2026, ['lop' => 0]);
+
+        $this->assertSame(33600.0, (float) $data['total_earnings_actual']);
+        $this->assertSame(16800.0, (float) $data['earnings']['basic']['actual']);
+        $this->assertSame(2016.0, (float) $data['deductions']['pf']['actual']);
+        $this->assertSame(200.0, (float) $data['deductions']['pt']['actual']);
+        $this->assertSame(2216.0, (float) $data['total_deductions_actual']);
+        $this->assertSame(31384.0, (float) $data['net_pay']);
+    }
+
     public function test_appanagary_sowmya_payslips_june_july_august(): void
     {
         $service = new PayslipService();
@@ -843,6 +877,7 @@ class PayslipModuleTest extends TestCase
             'employment_type' => 'External',
             'salary_slip' => 'PF',
             'monthly_gross' => 42000.0,
+            'pf_deduction' => 1800.0,
             'contract_from_date' => '2026-06-29',
             'contract_to_date' => '2026-09-29',
             'date_of_joining' => '2026-06-29',
@@ -852,7 +887,7 @@ class PayslipModuleTest extends TestCase
 
         // 1. June - 2 days (June 29 to June 30)
         // Basic: 1400, HRA: 560, Special Allowance: 840, Gross: 2800, PF: 336, PT: 0, Net payable: 2464
-        $juneData = $service->getPayslipData($sowmya, 6, 2026);
+        $juneData = $service->getPayslipData($sowmya, 6, 2026, ['pf_deduction' => 336.0]);
         $this->assertSame(2, $juneData['period_days']);
         $this->assertSame(1400.0, (float) $juneData['earnings']['basic']['actual']);
         $this->assertSame(560.0, (float) $juneData['earnings']['hra']['actual']);
@@ -891,7 +926,7 @@ class PayslipModuleTest extends TestCase
 
         // 4. August - 30 days
         // Basic: 21000, HRA: 8400, Special Allowance: 12600, Gross: 42000, PF: 2136, PT: 200, Net payable: 39664
-        $aug30Data = $service->getPayslipData($sowmya, 8, 2026, ['days' => 30]);
+        $aug30Data = $service->getPayslipData($sowmya, 8, 2026, ['days' => 30, 'pf_deduction' => 2136.0]);
         $this->assertSame(21000.0, (float) $aug30Data['earnings']['basic']['actual']);
         $this->assertSame(8400.0, (float) $aug30Data['earnings']['hra']['actual']);
         $this->assertSame(12600.0, (float) $aug30Data['earnings']['special']['actual']);
@@ -901,10 +936,12 @@ class PayslipModuleTest extends TestCase
         $this->assertSame(2336.0, (float) $aug30Data['total_deductions_actual']);
         $this->assertSame(39664.0, (float) $aug30Data['net_pay']);
 
-        // Also test August 30 days via date range
+        // Also test August 30 days via date range with arrear
         $augRangeData = $service->getPayslipData($sowmya, 8, 2026, [
             'from_date' => '2026-08-01',
             'to_date' => '2026-08-30',
+            'days' => 30,
+            'pf_deduction' => 2136.0,
         ]);
         $this->assertSame(21000.0, (float) $augRangeData['earnings']['basic']['actual']);
         $this->assertSame(8400.0, (float) $augRangeData['earnings']['hra']['actual']);

@@ -354,12 +354,7 @@ class PayslipService
             (!empty($employee->employee_uan_pf_number) && strtoupper((string)$employee->employee_uan_pf_number) !== 'NA')
         )) {
             // If employee has salary slip configured (PF or TDS) or PF number but monthly_gross was left blank to use standard default breakdown
-            $empName = strtolower(trim((string) ($employee->employee_name ?? '')));
-            if (str_contains($empName, 'sowmya')) {
-                $monthlySalary = 42000.0;
-            } else {
-                $monthlySalary = 38050.0;
-            }
+            $monthlySalary = (float) ($employee->monthly_salary ?? 38050.0);
         }
 
         if ($monthlySalary <= 0 && !$isHourly) {
@@ -372,12 +367,7 @@ class PayslipService
         $payableSalary = 0.0;
         $leaveDeduction = 0.0;
 
-        $isAugust30Days = ($resolvedMonth === 8 && (
-            $periodDays === 30 ||
-            (isset($overrides['present_days']) && (float) $overrides['present_days'] == 30.0 && empty($overrides['lop'])) ||
-            (isset($overrides['days']) && (int) $overrides['days'] === 30) ||
-            (isset($overrides['pf_deduction']) && (float) $overrides['pf_deduction'] == 2136.0)
-        ));
+        $isFullMonthPresent = ($isFullCalendarMonth || (isset($overrides['days']) && (int) $overrides['days'] >= 30) || (isset($overrides['present_days']) && (float) $overrides['present_days'] >= 30.0)) && empty($overrides['lop']) && empty($leaveDays);
 
         if ($isHourly) {
             // Hourly Formula: intake = hourly * worked_hours; revenue = intake * billing%; payable = intake - revenue
@@ -387,8 +377,8 @@ class PayslipService
             $payableSalary = $calc['payable_salary'];
         } else {
             // Monthly Formula: leave_deduction = (monthly / days_in_month) * leave_days; payable = round(monthly - leave_deduction, 2)
-            if ($isAugust30Days) {
-                // In August for 30 days (or 30 days with June PF adjustment): Full monthly earnings (42,000), leave deduction = 0
+            if ($isFullMonthPresent) {
+                // When employee worked full month / all schedule days with zero loss of pay: full monthly earnings
                 $payableSalary = $monthlySalary;
                 $leaveDeduction = 0.0;
             } elseif ($isFullCalendarMonth) {
@@ -547,10 +537,8 @@ class PayslipService
             if ($hasPfMentioned) {
                 if ($hasExplicitPfDeduction) {
                     $pfDeduction = (float) ($overrides['pf_deduction'] ?? $employee->pf_deduction);
-                } elseif ($isAugust30Days) {
-                    $pfDeduction = 2136.0;
                 } else {
-                    $pfDeduction = min(1800.0, round($totalEarningsActual * 0.12, 2));
+                    $pfDeduction = round($basicActual * 0.12, 2);
                 }
             } else {
                 $pfDeduction = 0.0;
@@ -614,10 +602,8 @@ class PayslipService
             if ($hasPfMentioned) {
                 if ($hasExplicitPfDeduction) {
                     $pfDeduction = (float) ($overrides['pf_deduction'] ?? $employee->pf_deduction);
-                } elseif ($isAugust30Days) {
-                    $pfDeduction = 2136.0;
                 } else {
-                    $pfDeduction = min(1800.0, round($totalEarningsActual * 0.12, 2));
+                    $pfDeduction = round($basicActual * 0.12, 2);
                 }
             } else {
                 $pfDeduction = 0.0;
