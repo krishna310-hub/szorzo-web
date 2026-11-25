@@ -269,14 +269,33 @@ class PayslipService
 
         // 6. Attendance & Leave (Loss of Pay) Integration
         $attendances = collect();
-        if ($user) {
-            try {
-                $attendances = Attendance::where('user_id', $user->id)
-                    ->whereBetween('attendance_date', [$fromDate->toDateString(), $toDate->toDateString()])
-                    ->get();
-            } catch (\Throwable $e) {
-                $attendances = collect();
+        try {
+            if (static::getConnectionResolver()) {
+                $attQuery = Attendance::query()
+                    ->whereBetween('attendance_date', [$fromDate->toDateString(), $toDate->toDateString()]);
+
+                $empId = $employee?->id;
+                $usrId = $user?->id;
+
+                if ($empId && $usrId) {
+                    $attQuery->where(function ($q) use ($empId, $usrId) {
+                        $q->where('employee_id', $empId)
+                          ->orWhere('user_id', $usrId);
+                    });
+                } elseif ($empId) {
+                    $attQuery->where('employee_id', $empId);
+                } elseif ($usrId) {
+                    $attQuery->where('user_id', $usrId);
+                } else {
+                    $attQuery = null;
+                }
+
+                if ($attQuery) {
+                    $attendances = $attQuery->get();
+                }
             }
+        } catch (\Throwable $e) {
+            $attendances = collect();
         }
 
         $presentCount = $attendances->where('status', 'present')->count();
@@ -286,19 +305,46 @@ class PayslipService
         $holidayCount = $attendances->where('status', 'holiday')->count();
         $weekOffCount = $attendances->where('status', 'week_off')->count();
 
-        $unpaidLeaveCount = 0;
-        $leaveRequestIds = $attendances->where('status', 'on_leave')->pluck('leave_request_id')->filter()->unique();
-        if ($leaveRequestIds->isNotEmpty()) {
-            try {
-                $unpaidLeaveCount = LeaveRequest::whereIn('id', $leaveRequestIds)
-                    ->where('leave_type', 'Unpaid Leave')
-                    ->count();
-            } catch (\Throwable $e) {
-                $unpaidLeaveCount = 0;
+        // Also resolve approved LeaveRequests for the employee/user during this period
+        $approvedLeaveDays = 0.0;
+        try {
+            if (static::getConnectionResolver()) {
+                $userIds = array_values(array_filter(array_unique([
+                    $user?->id,
+                    $employee?->linkedUser()?->id,
+                ])));
+
+                if (!empty($userIds)) {
+                    $approvedLeaves = LeaveRequest::whereIn('user_id', $userIds)
+                        ->where('status', 'approved')
+                        ->where(function ($q) use ($fromDate, $toDate) {
+                            $q->whereBetween('from_date', [$fromDate->toDateString(), $toDate->toDateString()])
+                              ->orWhereBetween('to_date', [$fromDate->toDateString(), $toDate->toDateString()])
+                              ->orWhere(function ($sub) use ($fromDate, $toDate) {
+                                  $sub->where('from_date', '<=', $fromDate->toDateString())
+                                      ->where('to_date', '>=', $toDate->toDateString());
+                              });
+                        })
+                        ->get();
+
+                    foreach ($approvedLeaves as $lv) {
+                        $lvFrom = CarbonImmutable::parse($lv->from_date)->max($fromDate);
+                        $lvTo = CarbonImmutable::parse($lv->to_date)->min($toDate);
+                        if ($lvTo->gte($lvFrom)) {
+                            if ($lv->isHalfDay()) {
+                                $approvedLeaveDays += 0.5;
+                            } else {
+                                $approvedLeaveDays += (float) ($lvFrom->diffInDays($lvTo) + 1);
+                            }
+                        }
+                    }
+                }
             }
+        } catch (\Throwable $e) {
+            $approvedLeaveDays = 0.0;
         }
 
-        $autoLop = $absentCount + ($halfDayCount * 0.5) + $unpaidLeaveCount;
+        $autoLop = ($absentCount + ($halfDayCount * 0.5)) + max((float) $onLeaveCount, (float) $approvedLeaveDays);
 
         // Determine Leave Days (Absent Days)
         if (isset($overrides['absent_days']) && is_numeric($overrides['absent_days'])) {
@@ -307,7 +353,9 @@ class PayslipService
             $leaveDays = (float) $overrides['lop'];
         } elseif ($contractReport) {
             $leaveDays = (float) $contractReport->absent_days;
-        } elseif ($attendances->isEmpty()) {
+        } elseif ($autoLop > 0) {
+            $leaveDays = (float) $autoLop;
+        } elseif ($attendances->isEmpty() && $approvedLeaveDays <= 0) {
             $leaveDays = 0.0;
         } else {
             $leaveDays = (float) $autoLop;

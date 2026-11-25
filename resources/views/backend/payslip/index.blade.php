@@ -226,7 +226,7 @@
                                 <label class="form-label fw-semibold">Worked Hours</label>
                                 <input type="number" step="0.25" min="0" name="worked_hours" class="form-control" value="{{ $worked_hours }}" placeholder="e.g. 20.00">
                             </div>
-                        @elseif(!empty($can_manage_all) && !empty($is_contract_like))
+                        @elseif(!empty($can_manage_all))
                             <div class="col-lg-2 col-md-3">
                                 <label class="form-label fw-semibold">Leave Days (LOP)</label>
                                 <input type="number" step="0.5" min="0" max="{{ $days_in_month }}" name="absent_days" class="form-control" value="{{ $absent_days }}" placeholder="e.g. 7">
