@@ -351,6 +351,10 @@ class PayslipService
             $leaveDays = (float) $overrides['absent_days'];
         } elseif (isset($overrides['lop']) && is_numeric($overrides['lop'])) {
             $leaveDays = (float) $overrides['lop'];
+        } elseif (isset($overrides['effective_work_days']) && is_numeric($overrides['effective_work_days'])) {
+            $leaveDays = max(0.0, (float) ($periodDays - (float) $overrides['effective_work_days']));
+        } elseif (isset($overrides['days_payable']) && is_numeric($overrides['days_payable'])) {
+            $leaveDays = max(0.0, (float) ($periodDays - (float) $overrides['days_payable']));
         } elseif ($contractReport) {
             $leaveDays = (float) $contractReport->absent_days;
         } elseif ($autoLop > 0) {
@@ -364,6 +368,10 @@ class PayslipService
         // Determine Present Days
         if (isset($overrides['present_days']) && is_numeric($overrides['present_days'])) {
             $presentDays = (float) $overrides['present_days'];
+        } elseif (isset($overrides['effective_work_days']) && is_numeric($overrides['effective_work_days'])) {
+            $presentDays = (float) $overrides['effective_work_days'];
+        } elseif (isset($overrides['days_payable']) && is_numeric($overrides['days_payable'])) {
+            $presentDays = (float) $overrides['days_payable'];
         } elseif ($contractReport) {
             $presentDays = (float) $contractReport->present_days;
         } else {
@@ -373,6 +381,8 @@ class PayslipService
         $effectiveWorkDays = $presentDays;
         if (isset($overrides['effective_work_days']) && is_numeric($overrides['effective_work_days'])) {
             $effectiveWorkDays = (float) $overrides['effective_work_days'];
+        } elseif (isset($overrides['days_payable']) && is_numeric($overrides['days_payable'])) {
+            $effectiveWorkDays = (float) $overrides['days_payable'];
         }
 
         $otHours = isset($overrides['ot_hours']) && is_numeric($overrides['ot_hours'])
@@ -628,11 +638,20 @@ class PayslipService
             $totalEarningsFull = $monthlySalary;
             $totalEarningsActual = $payableSalary;
 
-            $basicFull = (float) ($employee?->basic_salary ?? round($totalEarningsFull * 0.50));
-            $hraFull = (float) ($employee?->hra ?? round($totalEarningsFull * 0.20));
-            $conveyanceFull = (float) ($employee?->conveyance ?? 0);
-            $medicalFull = (float) ($employee?->medical_allowance ?? 0);
-            $specialFull = (float) ($employee?->special_allowance ?? max(0, $totalEarningsFull - $basicFull - $hraFull - $conveyanceFull - $medicalFull));
+            $hasExplicitStructure = $employee && (float) ($employee->basic_salary ?? 0) > 0;
+            if ($hasExplicitStructure) {
+                $basicFull = (float) $employee->basic_salary;
+                $hraFull = (float) ($employee->hra ?? 0);
+                $conveyanceFull = (float) ($employee->conveyance ?? 0);
+                $medicalFull = (float) ($employee->medical_allowance ?? 0);
+                $specialFull = (float) ($employee->special_allowance ?? max(0, $totalEarningsFull - $basicFull - $hraFull - $conveyanceFull - $medicalFull));
+            } else {
+                $basicFull = (float) ($employee?->basic_salary ?? round($totalEarningsFull * 0.50));
+                $hraFull = (float) ($employee?->hra ?? round($totalEarningsFull * 0.20));
+                $conveyanceFull = (float) ($employee?->conveyance ?? 0);
+                $medicalFull = (float) ($employee?->medical_allowance ?? 0);
+                $specialFull = (float) ($employee?->special_allowance ?? max(0, $totalEarningsFull - $basicFull - $hraFull - $conveyanceFull - $medicalFull));
+            }
             $overtimeFull = (float) ($employee?->overtime_amount ?? ($otHours > 0 ? round($otHours * 150) : 0));
             $ltaFull = (float) ($employee?->lta ?? 0);
             $arrearsFull = (float) ($employee?->arrears ?? 0);
@@ -650,14 +669,15 @@ class PayslipService
 
             $totalEarningsActual = $basicActual + $hraActual + $conveyanceActual + $medicalActual + $specialActual + $overtimeActual + $ltaActual + $arrearsActual;
 
-            // Statutory Deductions
+            // Statutory Deductions (For FTE: 12% of Basic (+ DA), capped at statutory Rs. 1,800)
             if ($hasPfMentioned) {
                 if (isset($overrides['pf_deduction']) && is_numeric($overrides['pf_deduction'])) {
                     $pfDeduction = (float) $overrides['pf_deduction'];
                 } elseif ($hasExplicitPfDeduction && empty($employee?->salary_slip) && empty($empPfNumber)) {
                     $pfDeduction = (float) $employee->pf_deduction;
                 } else {
-                    $pfDeduction = min(1800.0, round($totalEarningsActual * 0.12, 2));
+                    $pfBase = ($basicActual > 0) ? $basicActual : round($totalEarningsActual * 0.50, 2);
+                    $pfDeduction = min(1800.0, round($pfBase * 0.12, 2));
                 }
             } else {
                 $pfDeduction = 0.0;

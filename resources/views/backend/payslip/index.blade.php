@@ -229,7 +229,8 @@
                         @elseif(!empty($can_manage_all))
                             <div class="col-lg-2 col-md-3">
                                 <label class="form-label fw-semibold">Leave Days (LOP)</label>
-                                <input type="number" step="0.5" min="0" max="{{ $days_in_month }}" name="absent_days" class="form-control" value="{{ $absent_days }}" placeholder="e.g. 7">
+                                <input type="number" step="0.5" min="0" max="{{ $days_in_month }}" name="absent_days" id="absentDaysInput" class="form-control" value="{{ $absent_days }}" placeholder="e.g. 15.5">
+                                <small class="text-muted d-block mt-1">Days Payable: <strong id="daysPayablePreview" class="text-primary">{{ \App\Services\PayslipService::formatDays($effective_work_days) }}</strong> / {{ $days_in_month }}</small>
                             </div>
                         @endif
 
@@ -673,6 +674,21 @@
                 // Submit form to refresh payslip for selected employee
                 if (this.form) {
                     this.form.submit();
+                }
+            });
+        }
+
+        const absentDaysInput = document.getElementById('absentDaysInput');
+        const daysPayablePreview = document.getElementById('daysPayablePreview');
+        if (absentDaysInput && daysPayablePreview) {
+            absentDaysInput.addEventListener('input', function() {
+                const periodDays = {{ (float) ($period_days ?? 30) }};
+                const lop = parseFloat(this.value);
+                if (!isNaN(lop) && lop >= 0) {
+                    const payable = Math.max(0, periodDays - lop);
+                    daysPayablePreview.textContent = (payable % 1 === 0) ? payable.toFixed(0) : payable.toFixed(1);
+                } else {
+                    daysPayablePreview.textContent = '{{ \App\Services\PayslipService::formatDays($effective_work_days) }}';
                 }
             });
         }

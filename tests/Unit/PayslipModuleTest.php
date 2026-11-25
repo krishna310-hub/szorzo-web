@@ -1040,4 +1040,99 @@ class PayslipModuleTest extends TestCase
         $this->assertSame(4500.0, (float) $data['total_deductions_actual']);
         $this->assertSame(40500.0, (float) $data['net_pay']);
     }
+
+    /**
+     * Verify Kavita S Ichalal's August 2026 payslip matches row 5 of "szorzo - Salary Sheet - Aug 2026.xlsx" exactly:
+     * - Days in month: 31
+     * - Days Payable: 15.5
+     * - Basic + DA: 10,000 (from 20,000 full)
+     * - Med Allnce: 1,100 (from 2,200 full)
+     * - Gross Salary: 11,100 (from 22,200 full)
+     * - PF 12%: 1,200 (12% of Basic 10,000)
+     * - PT: 0 (Gross <= 15,000)
+     * - Total Deductions: 1,200
+     * - Net Salary Payable: 9,900
+     */
+    public function test_kavita_s_ichalal_august_2026_payslip_matches_salary_sheet_exactly(): void
+    {
+        $service = new PayslipService();
+        $fteMode = new Mode(['mode' => 'Full Time']);
+
+        $kavita = new Employee([
+            'id' => 3,
+            'employee_name' => 'Kavita S Ichalal',
+            'employee_no' => 'SZ 005',
+            'father_name' => 'Sanganna Ichalal',
+            'designation' => 'Recruiter',
+            'location' => 'Bangalore',
+            'bank_uan_pf_number' => 'BGMRD36445920000010004',
+            'employee_uan_pf_number' => '101778447580',
+            'salary_slip' => 'PF',
+            'monthly_gross' => 22200.00,
+            'basic_salary' => 20000.00,
+            'medical_allowance' => 2200.00,
+        ]);
+        $kavita->setRelation('mode', $fteMode);
+        $kavita->setRelation('client', null);
+
+        // 1. With absent_days = 15.5 (31 days in month, Days Payable = 15.5)
+        $data = $service->getPayslipData($kavita, 8, 2026, [
+            'absent_days' => 15.5,
+        ]);
+
+        $this->assertSame(31, $data['period_days']);
+        $this->assertSame(15.5, (float) $data['lop']);
+        $this->assertSame(15.5, (float) $data['effective_work_days']);
+        $this->assertSame(20000.0, (float) $data['earnings']['basic']['full']);
+        $this->assertSame(10000.0, (float) $data['earnings']['basic']['actual']);
+        $this->assertSame(2200.0, (float) $data['earnings']['medical']['full']);
+        $this->assertSame(1100.0, (float) $data['earnings']['medical']['actual']);
+        $this->assertSame(22200.0, (float) $data['total_earnings_full']);
+        $this->assertSame(11100.0, (float) $data['total_earnings_actual']);
+
+        // Statutory Deductions: PF is 12% of Basic (10,000 * 0.12 = 1,200), not gross
+        $this->assertSame(1200.0, (float) $data['deductions']['pf']['actual']);
+        $this->assertSame(0.0, (float) $data['deductions']['pt']['actual']);
+        $this->assertSame(1200.0, (float) $data['total_deductions_actual']);
+
+        // Net Salary Payable
+        $this->assertSame(9900.0, (float) $data['net_pay']);
+
+        // 2. Direct Days Payable override: days_payable = 15.5
+        $dataPayable = $service->getPayslipData($kavita, 8, 2026, [
+            'days_payable' => 15.5,
+        ]);
+        $this->assertSame(15.5, (float) $dataPayable['effective_work_days']);
+        $this->assertSame(15.5, (float) $dataPayable['lop']);
+        $this->assertSame(10000.0, (float) $dataPayable['earnings']['basic']['actual']);
+        $this->assertSame(1100.0, (float) $dataPayable['earnings']['medical']['actual']);
+        $this->assertSame(11100.0, (float) $dataPayable['total_earnings_actual']);
+        $this->assertSame(1200.0, (float) $dataPayable['deductions']['pf']['actual']);
+        $this->assertSame(9900.0, (float) $dataPayable['net_pay']);
+
+        // 3. Date-to-Date range (01-Aug-2026 to 31-Aug-2026 with absent_days = 15.5)
+        $dataRange = $service->getPayslipData($kavita, 8, 2026, [
+            'from_date' => '2026-08-01',
+            'to_date' => '2026-08-31',
+            'absent_days' => 15.5,
+        ]);
+        $this->assertSame(15.5, (float) $dataRange['effective_work_days']);
+        $this->assertSame(15.5, (float) $dataRange['lop']);
+        $this->assertSame(10000.0, (float) $dataRange['earnings']['basic']['actual']);
+        $this->assertSame(1100.0, (float) $dataRange['earnings']['medical']['actual']);
+        $this->assertSame(11100.0, (float) $dataRange['total_earnings_actual']);
+        $this->assertSame(1200.0, (float) $dataRange['deductions']['pf']['actual']);
+        $this->assertSame(9900.0, (float) $dataRange['net_pay']);
+
+        // 4. Full month verification (31 days, 0 LOP)
+        $fullMonth = $service->getPayslipData($kavita, 8, 2026, ['lop' => 0]);
+        $this->assertSame(31.0, (float) $fullMonth['effective_work_days']);
+        $this->assertSame(20000.0, (float) $fullMonth['earnings']['basic']['actual']);
+        $this->assertSame(2200.0, (float) $fullMonth['earnings']['medical']['actual']);
+        $this->assertSame(22200.0, (float) $fullMonth['total_earnings_actual']);
+        $this->assertSame(1800.0, (float) $fullMonth['deductions']['pf']['actual']); // Statutory capped at 1,800
+        $this->assertSame(200.0, (float) $fullMonth['deductions']['pt']['actual']);   // Gross > 15,000 => 200
+        $this->assertSame(2000.0, (float) $fullMonth['total_deductions_actual']);
+        $this->assertSame(20200.0, (float) $fullMonth['net_pay']);
+    }
 }
