@@ -54,12 +54,29 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        if ($this->role) {
-            $level = str_replace('_', '-', strtolower((string) $this->role->access_level));
-            if (in_array($level, ['super-admin', 'admin'], true)) {
-                return true;
-            }
+        if ($this->resource_type === 'super_admin') {
+            return true;
         }
+
+        try {
+            if ($this->relationLoaded('role')) {
+                $role = $this->getRelation('role');
+                if ($role) {
+                    $level = str_replace('_', '-', strtolower((string) $role->access_level));
+                    if (in_array($level, ['super-admin', 'admin'], true)) {
+                        return true;
+                    }
+                }
+            } elseif ($this->getConnectionResolver() && $this->role) {
+                $level = str_replace('_', '-', strtolower((string) $this->role->access_level));
+                if (in_array($level, ['super-admin', 'admin'], true)) {
+                    return true;
+                }
+            }
+        } catch (\Throwable) {
+            return false;
+        }
+
         return false;
     }
 
@@ -122,11 +139,16 @@ class User extends Authenticatable
             return true;
         }
 
-        $accessLevel = str_replace(['_', ' '], '-', strtolower(trim((string) ($this->role?->access_level ?? ''))));
-        $roleName = str_replace(['_', ' '], '-', strtolower(trim((string) ($this->role?->name ?? ''))));
+        try {
+            $role = $this->relationLoaded('role') ? $this->getRelation('role') : ($this->getConnectionResolver() ? $this->role : null);
+            $accessLevel = str_replace(['_', ' '], '-', strtolower(trim((string) ($role?->access_level ?? ''))));
+            $roleName = str_replace(['_', ' '], '-', strtolower(trim((string) ($role?->name ?? ''))));
 
-        return str_contains($accessLevel, 'invest')
-            || str_contains($roleName, 'invest');
+            return str_contains($accessLevel, 'invest')
+                || str_contains($roleName, 'invest');
+        } catch (\Throwable) {
+            return (int) $this->role_id === 6;
+        }
     }
 
     /**

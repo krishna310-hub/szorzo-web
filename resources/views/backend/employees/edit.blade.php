@@ -12,9 +12,11 @@
                         <div class="card-header align-items-center d-flex">
                             <h4 class="card-title mb-0 flex-grow-1">Edit Employee</h4>
                             <div class="d-flex align-items-center gap-2">
+                                @can('read', \App\Models\Payslip::class)
                                 <a href="{{ route('admin.payslip.index', ['employee_id' => $employee->id]) }}" class="btn btn-sm btn-outline-success">
                                     <i class="bx bx-receipt me-1"></i>Payslip
                                 </a>
+                                @endcan
                                 <a href="{{ route('admin.employees.index') }}" class="btn btn-sm btn-light">Back</a>
                             </div>
                         </div>

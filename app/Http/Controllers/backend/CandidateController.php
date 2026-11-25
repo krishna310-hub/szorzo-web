@@ -508,8 +508,19 @@ class CandidateController extends Controller
                         ->when($candidate?->client_requirement_id, fn ($query, $requirementId) => $query
                             ->orWhere('id', $requirementId));
                 })
+                ->when($isRecruiter && $linkedRecruiter, function ($query) use ($linkedRecruiter, $candidate) {
+                    $recruiterId = (int) $linkedRecruiter->id;
+                    $query->where(function ($ownerQuery) use ($recruiterId, $candidate) {
+                        $ownerQuery->whereJsonContains('project_owner_ids', $recruiterId)
+                            ->orWhere(function ($legacyQuery) use ($recruiterId) {
+                                $legacyQuery->whereNull('project_owner_ids')
+                                    ->where('project_owner', $recruiterId);
+                            })
+                            ->when($candidate?->client_requirement_id, fn ($q, $reqId) => $q->orWhere('id', $reqId));
+                    });
+                })
                 ->orderBy('id')
-                ->get(['id', 'client_id', 'job_role_id', 'billing_id', 'mode_id', 'mode_ids', 'position_level', 'status']),
+                ->get(['id', 'client_id', 'job_role_id', 'billing_id', 'mode_id', 'mode_ids', 'position_level', 'status', 'project_owner', 'project_owner_ids']),
             'jobRoles' => JobRole::where('status', true)->orderBy('job_role')->get(),
             'modes' => Mode::where('status', true)->orderBy('mode')->get(),
             'clientJobRoleMap' => ClientJobRole::where('status', true)
@@ -645,10 +656,20 @@ class CandidateController extends Controller
                             ->where('mode_id', $data['mode_id']);
                     });
             })
+            ->where(function ($query) use ($data, $candidate) {
+                $recruiterId = (int) $data['recruiter_id'];
+                $query->where(function ($ownerQuery) use ($recruiterId) {
+                    $ownerQuery->whereJsonContains('project_owner_ids', $recruiterId)
+                        ->orWhere(function ($legacyQuery) use ($recruiterId) {
+                            $legacyQuery->whereNull('project_owner_ids')
+                                ->where('project_owner', $recruiterId);
+                        });
+                })->when($candidate?->client_requirement_id, fn ($q, $reqId) => $q->orWhere('id', $reqId));
+            })
             ->exists();
         if (! $requirementMatchesCandidate) {
             throw ValidationException::withMessages([
-                'client_requirement_id' => 'Select an active requirement matching the chosen client and job role.',
+                'client_requirement_id' => 'Select an active requirement matching the chosen client, job role, and tagged recruiter.',
             ]);
         }
 

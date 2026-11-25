@@ -139,7 +139,7 @@ class EmployeeController extends Controller
                     if (! $row->status && $this->canManagePublicOnboarding()) {
                         $buttons .= '<button type="button" data-route="'.route('admin.employees.activate', $row->id).'" class="btn btn-sm btn-success me-2 activate-record">Activate</button>';
                     }
-                    if (auth()->user()->isSuperAdmin()) {
+                    if (auth()->user()->isSuperAdmin() || auth()->user()->can('read', \App\Models\Payslip::class)) {
                         $buttons .= '<a href="'.route('admin.payslip.index', ['employee_id' => $row->id]).'" class="text-success fs-4 me-1" title="Generate Payslip"><i class="bx bx-receipt"></i></a>';
                     }
                     if (auth()->user()->can('edit', Employee::class) || auth()->user()->isSuperAdmin()) {

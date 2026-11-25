@@ -866,14 +866,14 @@
                         </a>
                     </li>
                     @endcan
-                    @if(auth()->user()->isSuperAdmin() || auth()->user()->isInternalEmployee() || auth()->user()->linkedEmployee() !== null || auth()->user()->can('read', \App\Models\Employee::class))
+                    @can('read', \App\Models\Payslip::class)
                     <li class="nav-item">
                         <a class="nav-link menu-link {{ request()->is('admin/payslip*') ? 'active' : '' }}" href="{{ route('admin.payslip.index') }}">
                             <i class="ri-file-text-line"></i>
                             <span>{{ auth()->user()->isSuperAdmin() || auth()->user()->can('create', \App\Models\Employee::class) ? 'Payslips' : 'My Payslip' }}</span>
                         </a>
                     </li>
-                    @endif
+                    @endcan
                 @endif
 
                 @can('read', \App\Models\Report::class)

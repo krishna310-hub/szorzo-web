@@ -51,6 +51,8 @@ use App\Policies\ClientProfilePolicy;
 use App\Policies\LeadGenerationPolicy;
 use App\Policies\BusinessIntelligencePolicy;
 use App\Policies\ServiceOfferedPolicy;
+use App\Models\Payslip;
+use App\Policies\PayslipPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -97,6 +99,8 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\InvesterLegalCompliance::class => \App\Policies\InvesterLegalCompliancePolicy::class,
         \App\Models\InvesterDeployment::class => \App\Policies\InvesterDeploymentPolicy::class,
         \App\Models\Holiday::class => \App\Policies\HolidayPolicy::class,
+        Payslip::class => PayslipPolicy::class,
+        'App\Models\Payslip' => PayslipPolicy::class,
     ];
 
     /**
@@ -127,5 +131,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::Resource('LeadGeneration', 'App\Policies\LeadGenerationPolicy');
         Gate::Resource('BusinessIntelligence', 'App\Policies\BusinessIntelligencePolicy');
         Gate::Resource('ServiceOffered', 'App\Policies\ServiceOfferedPolicy');
+        Gate::Resource('Payslip', 'App\Policies\PayslipPolicy');
     }
 }

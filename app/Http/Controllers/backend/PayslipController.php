@@ -228,6 +228,12 @@ class PayslipController extends Controller
         if (!$currentUser->is_active) {
             abort(403, 'Your account is inactive. Please contact administration.');
         }
+
+        if (!$currentUser->isSuperAdmin() && (int) $currentUser->id !== 1 && !$currentUser->isAdmin()) {
+            if (!$currentUser->can('read', \App\Models\Payslip::class)) {
+                abort(403, 'Unauthorized access. You do not have permission to view payslips.');
+            }
+        }
     }
 
     /**

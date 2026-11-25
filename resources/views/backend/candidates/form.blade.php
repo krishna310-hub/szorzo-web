@@ -64,9 +64,15 @@
         <select class="form-select" id="client_requirement_id" name="client_requirement_id" required>
             <option value="">Select client requirement</option>
             @foreach ($clientRequirements as $requirement)
+                @php
+                    $taggedOwners = array_values(array_unique(array_filter(
+                        array_map('intval', (array) ($requirement->project_owner_ids ?: array_filter([$requirement->project_owner])))
+                    )));
+                @endphp
                 <option value="{{ $requirement->id }}"
                     data-client="{{ $requirement->client_id }}" data-role="{{ $requirement->job_role_id }}"
                     data-modes='@json($requirement->mode_ids ?: array_filter([$requirement->mode_id]))'
+                    data-recruiters='@json($taggedOwners)'
                     @selected((string) old('client_requirement_id', $candidate->client_requirement_id ?? '') === (string) $requirement->id)>
                     #{{ $requirement->id }} · {{ $requirement->jobRole?->job_role ?? 'No role' }} · Billing {{ $requirement->billing?->value ?? 0 }}%{{ $requirement->position_level ? ' · '.$requirement->position_level : '' }}{{ ! $requirement->status ? ' · Inactive' : '' }}
                 </option>
@@ -364,6 +370,7 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const recruiter = document.getElementById('recruiter_id');
     const client = document.getElementById('client_id');
     const role = document.getElementById('job_role_id');
     const requirement = document.getElementById('client_requirement_id');
@@ -378,20 +385,37 @@ document.addEventListener('DOMContentLoaded', function () {
         client: option.dataset.client || '',
         role: option.dataset.role || '',
         modes: JSON.parse(option.dataset.modes || '[]').map(String),
+        recruiters: JSON.parse(option.dataset.recruiters || '[]').map(String),
         selected: option.selected
     }));
+
+    function getSelectedRecruiterId() {
+        if (recruiter && recruiter.value) {
+            return String(recruiter.value);
+        }
+        const hiddenRecruiter = document.querySelector('input[name="recruiter_id"][type="hidden"]');
+        return hiddenRecruiter ? String(hiddenRecruiter.value) : '';
+    }
+
     function filterRequirements() {
         const selected = requirement.value;
+        const selectedRecruiter = getSelectedRecruiterId();
         requirement.innerHTML = '';
         originalRequirements.forEach(item => {
-            if (!item.value || (item.client === String(client.value) && item.role === String(role.value) && item.modes.includes(String(mode.value)))) {
+            const matchesRecruiter = selectedRecruiter ? item.recruiters.includes(selectedRecruiter) : false;
+            if (!item.value || (matchesRecruiter && item.client === String(client.value) && item.role === String(role.value) && item.modes.includes(String(mode.value)))) {
                 const option = new Option(item.text, item.value, false, String(item.value) === String(selected));
                 option.dataset.client = item.client;
                 option.dataset.role = item.role;
+                option.dataset.modes = JSON.stringify(item.modes);
+                option.dataset.recruiters = JSON.stringify(item.recruiters);
                 requirement.add(option);
             }
         });
-        requirement.disabled = !client.value || !role.value || !mode.value;
+        if (selected && !Array.from(requirement.options).some(opt => String(opt.value) === String(selected))) {
+            requirement.value = '';
+        }
+        requirement.disabled = !selectedRecruiter || !client.value || !role.value || !mode.value;
     }
     function filterRoles() {
         const selected = role.value;
@@ -405,6 +429,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (selected && !allowed.includes(String(selected))) role.value = '';
         role.disabled = !client.value;
         filterRequirements();
+    }
+    if (recruiter) {
+        recruiter.addEventListener('change', filterRequirements);
     }
     client.addEventListener('change', filterRoles);
     role.addEventListener('change', filterRequirements);
